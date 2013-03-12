@@ -1,0 +1,420 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="nodes\Node.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\NodeTransformation.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\SpriteNode.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\TextNode.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="pipeline\PAKReader.cpp">
+      <Filter>pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="pipeline\PAKWriter.cpp">
+      <Filter>pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\FileUtils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\GameMath.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Log.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\MemoryPool.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\mtrand.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\PlainTextReader.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Profiler.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\StringUtils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\StopWatch.cpp">
+      <Filter>addons</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\TextCounter.cpp">
+      <Filter>addons</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Camera.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\DebugRenderer.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\GraphicsDevice.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Renderer.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\VertexDeclaration.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Viewport.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\ScreenOverlayNode.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\SkyNode.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioBuffer.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioManager.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="base\BaseApp.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\Input.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="collision\CharBuffer.cpp">
+      <Filter>collision</Filter>
+    </ClCompile>
+    <ClCompile Include="collision\CollisionDetector.cpp">
+      <Filter>collision</Filter>
+    </ClCompile>
+    <ClCompile Include="cvar\TVar.cpp">
+      <Filter>cvar</Filter>
+    </ClCompile>
+    <ClCompile Include="pipeline\TVarParser.cpp">
+      <Filter>pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Mat.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\TransformationMatrix.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\QuadMeshNode.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\QuadBuffer.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\SimpleQuadBuffer.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\SimpleQuadNode.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="base\WindowsBase.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\addons\HudNode.cpp">
+      <Filter>nodes\addons</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\DrawCounter.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="content\TextureAtlas.cpp">
+      <Filter>content</Filter>
+    </ClCompile>
+    <ClCompile Include="dialogs\GUIDialog.cpp">
+      <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="base\Game.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\Sound.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleAffector.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleBuffer.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleEmitter.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleEmitterNode.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="dialogs\DialogManager.cpp">
+      <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\Mesh2DNode.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\PostProcessor.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\buffer_types.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Color.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\TexGen.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="addons\BaseHUD.cpp">
+      <Filter>addons</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dxstdafx.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="nodes\Node.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\NodeTransformation.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\ScreenOverlayNode.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\SpriteNode.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\TextNode.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="pipeline\PAKReader.h">
+      <Filter>pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="pipeline\PAKWriter.h">
+      <Filter>pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\FileUtils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\GameMath.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Log.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\MemoryPool.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\mtrand.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\PlainTextReader.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Profiler.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Quad.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\StringUtils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\StopWatch.h">
+      <Filter>addons</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\TextCounter.h">
+      <Filter>addons</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Camera.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\DebugRenderer.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\GraphicsDevice.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\IndexVertexBuffer.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Renderer.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\VertexDeclaration.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Viewport.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\SkyNode.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioManager.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioBuffer.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="base\BaseApp.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\Input.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\Settings.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\container\GridArray.h">
+      <Filter>lib\container</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\container\List.h">
+      <Filter>lib\container</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\container\String.h">
+      <Filter>lib\container</Filter>
+    </ClInclude>
+    <ClInclude Include="collision\CollisionDetector.h">
+      <Filter>collision</Filter>
+    </ClInclude>
+    <ClInclude Include="collision\CharBuffer.h">
+      <Filter>collision</Filter>
+    </ClInclude>
+    <ClInclude Include="cvar\TVar.h">
+      <Filter>cvar</Filter>
+    </ClInclude>
+    <ClInclude Include="pipeline\TVarParser.h">
+      <Filter>pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Mat.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\TransformationMatrix.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\QuadMeshNode.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Color.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\QuadBuffer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\SimpleQuadBuffer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\render_types.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\SimpleQuadNode.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\addons\HudNode.h">
+      <Filter>nodes\addons</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\DrawCounter.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="content\TextureAtlas.h">
+      <Filter>content</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\vertex_types.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="dialogs\GUIDialog.h">
+      <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="base\Game.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\Sound.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\Particle.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleAffector.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleBuffer.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleEmitter.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleEmitterNode.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="dialogs\DialogManager.h">
+      <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\Mesh2DNode.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\PostProcessor.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\buffer_types.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\TexGen.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="addons\BaseHUD.h">
+      <Filter>addons</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DXUT\Optional\directx.ico" />
+    <None Include="TODO.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="nodes">
+      <UniqueIdentifier>{dab35962-c882-4f60-af86-b9abb96afe59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="nodes\addons">
+      <UniqueIdentifier>{bf26daa3-883f-4295-abe3-9e0966bc46df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pipeline">
+      <UniqueIdentifier>{7ce8bb76-9ae9-4870-a394-41304dffeabb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="content">
+      <UniqueIdentifier>{22735f7b-8a26-4d82-aa42-aed9617096ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons">
+      <UniqueIdentifier>{aec1a36f-a83d-4289-bf93-602001bb0522}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{814ebfef-ec5e-4da4-aafd-e45a6b8858f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer">
+      <UniqueIdentifier>{75a75e51-1730-4714-a213-8e696000dcb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="audio">
+      <UniqueIdentifier>{2ac09f75-d6dd-4064-836f-8b3f76f200f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base">
+      <UniqueIdentifier>{7fc4fc7c-df17-4331-9246-f1354d5cf34c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{80da9192-27d0-4e36-b560-50768dbeea60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\container">
+      <UniqueIdentifier>{bb121fc2-ac2f-4180-af32-0e3069191923}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="collision">
+      <UniqueIdentifier>{3d7af84c-b50c-4744-9eaf-4b55f7b51340}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cvar">
+      <UniqueIdentifier>{9332e686-3be5-41e7-b984-97b7dbf3dbe7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dialogs">
+      <UniqueIdentifier>{e5471b25-6034-4697-bf0c-5d3f5ca195f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="particles">
+      <UniqueIdentifier>{86130fce-dcee-4298-b65f-91dfdc1a6e93}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
