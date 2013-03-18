@@ -1,50 +1,6 @@
 #include "GameMath.h"
 #include "..\renderer\Camera.h"
 
-namespace ds {
-
-Vec2 const Vec2::ZERO  = Vec2(0.0f,0.0f);
-Vec2 const Vec2::RIGHT = Vec2(1.0f,0.0f);
-Vec2 const Vec2::LEFT  = Vec2(0.0f,-1.0f);
-Vec2 const Vec2::UP    = Vec2(0.0f,1.0f);
-Vec2 const Vec2::DOWN  = Vec2(0.0f,-1.0f);
-
-Vec2 operator + (const Vec2& v1,const Vec2& v2) {
-	return Vec2(v1.x + v2.x,v1.y + v2.y);
-}
-Vec2 operator + (const Vec2 &v, const float s) {
-	return Vec2(v.x + s,v.y + s);
-}
-Vec2 operator + (const float s, const Vec2 &v) {
-	return Vec2(v.x + s,v.y + s);
-}
-
-Vec2 operator - (const Vec2& v1,const Vec2& v2) {
-	return Vec2(v1.x - v2.x,v1.y - v2.y);
-}
-Vec2 operator - (const Vec2 &v, const float s) {
-	return Vec2(v.x -s,v.y-s);
-}
-Vec2 operator - (const float s, const Vec2 &v) {
-	return Vec2(v.x -s,v.y-s);
-}
-
-Vec2 operator * (const Vec2& v,float s) {
-	return Vec2(v.x*s,v.y*s);
-}
-Vec2 operator * (float s,const Vec2& v) {
-	return Vec2(v.x*s,v.y*s);
-}
-
-bool operator == (const Vec2 &u, const Vec2 &v) {
-	return (u.x == v.x && u.y == v.y);
-}
-bool operator != (const Vec2 &u, const Vec2 &v) {
-	return (u.x != v.x || u.y != v.y);
-}
-Vec3 const Vec3::ZERO   = Vec3(0.0f);
-};
-
 // ---------------------------------------------
 //
 // ---------------------------------------------
@@ -191,6 +147,7 @@ float almostIdentity( float x, float m, float n ) {
 // [in] velocity - the velocity
 // [out] Vec2 - a 2D vector containing the velocity
 // -------------------------------------------------------
+
 Vec2 getRadialVelocity(float angle,float velocity) {
 	float vx = (float)cos(DEGTORAD(angle))*velocity;
 	float vy = (float)sin(DEGTORAD(angle))*velocity;
@@ -206,9 +163,9 @@ float getAngle(float x1,float y1,float x2,float y2) {
 
 float getAngle(const Vec2& v1,const Vec2& v2) {	
 	if ( v1 != v2 ) {
-		Vec2 vn1 = v1.unit();
-		Vec2 vn2 = v2.unit();
-		float dot = vn1.Dot(vn2);		
+		Vec2 vn1 = vector::normalize(v1);
+		Vec2 vn2 = vector::normalize(v2);
+		float dot = vector::dot(vn1,vn2);		
 		if ( dot < -1.0f ) {
 			dot = -1.0f;
 		}
@@ -220,17 +177,7 @@ float getAngle(const Vec2& v1,const Vec2& v2) {
 		if ( cross < 0.0f ) {
 			tmp = 2.0f * D3DX_PI - tmp;
 		}
-		return tmp;
-		/*
-		Vec2 vc = vn1.Cross(vn2);
-		float mag = vc.Length();
-
-		float ab = atan2(mag,dot);
-		if ( dot < 0.0f ) {
-			ab = 2.0f * D3DX_PI - ab;
-		}
-		return ab;
-		*/
+		return tmp;		
 	}
 	else {
 		return 0.0f;
@@ -239,7 +186,7 @@ float getAngle(const Vec2& v1,const Vec2& v2) {
 
 float getTargetAngle(const Vec2& v1,const Vec2& v2) {	
 	Vec2 diff = v1 - v2;
-	return getAngle(Vec2::RIGHT,diff) + D3DX_PI;
+	return getAngle(V2_RIGHT,diff) + D3DX_PI;
 }
 
 Vec2 getDistantPosition(const Vec2& initialPosition,float angle,float radius) {
@@ -247,7 +194,7 @@ Vec2 getDistantPosition(const Vec2& initialPosition,float angle,float radius) {
 }
 
 Vec2 getDistantPosition(float x,float y,float angle,float radius) {
-	ds::Vec2 ret;
+	Vec2 ret;
 	ret.x = x + cos(angle) * radius;
 	ret.y = y + sin(angle) * radius;
 	return ret;
@@ -256,13 +203,13 @@ Vec2 getDistantPosition(float x,float y,float angle,float radius) {
 void follow(const Vec2& targetPos,Vec2& newPos,float* angle,float distance,float add) {
 	Vec2 p = newPos;
 	Vec2 diff = targetPos - p;
-	*angle = 2.0f * D3DX_PI - getAngle(diff,Vec2::RIGHT);
+	*angle = 2.0f * D3DX_PI - getAngle(diff,V2_RIGHT);
 	if ( *angle < 0.0f ) {
 		*angle += 2.0f * D3DX_PI;
 	}
-	float dist = targetPos.distance(p);
+	float dist = vector::distance(targetPos,p);
 	if ( dist > distance ) {				
-		newPos.addScale(diff,add);
+		vector::addScaled(newPos,diff,add);
 	}
 }
 

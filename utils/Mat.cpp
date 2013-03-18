@@ -1,5 +1,5 @@
 #include "Mat.h"
-
+/*
 namespace ds {
 // ---------------------------------------------
 // Mat2 methods
@@ -114,3 +114,4 @@ Mat3 transformationMatrix(float scaleX,float scaleY,float rotation,const Vec2& p
 }
 
 }
+*/

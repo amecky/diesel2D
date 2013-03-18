@@ -1,6 +1,7 @@
 #include "CollisionDetector.h"
 #include "..\utils\Log.h"
 #include "..\renderer\DebugRenderer.h"
+#include "..\math\vector.h"
 
 const uint32 MAX_OBJECTS = 2048;
 
@@ -379,8 +380,8 @@ bool CollisionDetector::checkBoxCircle(const Vec2& p1,float w,float h,const Vec2
 bool CollisionDetector::checkLineCircle(const Vec2& location, float radius,const Vec2& lineFrom,const Vec2& lineTo) const {
 	Vec2 ac = location - lineFrom;
 	Vec2 ab = lineTo - lineFrom;
-	float ab2 = ab.Dot(ab);
-	float acab = ac.Dot(ab);
+	float ab2 = vector::dot(ab,ab);
+	float acab = vector::dot(ac,ab);
 	float t = acab / ab2;
 
 	if (t < 0)
@@ -389,7 +390,7 @@ bool CollisionDetector::checkLineCircle(const Vec2& location, float radius,const
 		t = 1;
 
 	Vec2 h = ((ab * t) + lineFrom) - location;
-	float h2 = h.Dot(h);
+	float h2 = vector::dot(h,h);
 
 	return (h2 <= (radius * radius));
 }
@@ -401,7 +402,7 @@ bool CollisionDetector::checkCircle(const Vec2& p1, const Vec2& o1, float r1, co
 	Vec2 fp = p1 + o1;
 	Vec2 sp = p2 + o2;
 	Vec2 diff = fp - sp;
-	if ( diff.SqrLength() <= (( r1+r2) * (r1+r2)) ) {
+	if ( vector::sqrLength(diff) <= (( r1+r2) * (r1+r2)) ) {
 		return true;
 	}
 	return false;

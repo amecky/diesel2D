@@ -1,6 +1,6 @@
 #pragma once
 #include "..\dxstdafx.h"
-#include "..\utils\GameMath.h"
+#include "..\math\math_types.h"
 
 namespace ds {
 
@@ -35,6 +35,7 @@ public:
 	void update(float elapsedTime,const Vec2& mousePosition,bool buttonPressed);
 	void buildView();
 private:	
+	D3DXVECTOR3 convert(const Vec3& v);
 	Vec2 m_LastMousePosition;
 
     D3DXMATRIX m_View;

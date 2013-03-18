@@ -1,6 +1,6 @@
 #pragma once
 #include "GameMath.h"
-
+/*
 namespace ds {
 // ---------------------------------------------
 // Mat2 methods
@@ -47,3 +47,4 @@ Mat3 transformationMatrix(float scaleX,float scaleY,float rotation,const Vec2& p
 Mat3 operator * (const Mat3 &m, const Mat3 &n);
 
 }
+*/

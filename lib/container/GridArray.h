@@ -1,6 +1,6 @@
 #pragma once
-#include "dxstdafx.h"
-#include "utils\Log.h"
+#include "..\..\dxstdafx.h"
+#include "..\..\utils\Log.h"
 
 namespace ds {
 

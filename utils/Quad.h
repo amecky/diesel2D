@@ -1,6 +1,8 @@
 #pragma once
 #include "..\dxstdafx.h"
-#include "GameMath.h"
+#include "..\math\math_types.h"
+#include "..\utils\GameMath.h"
+#include "..\math\vector.h"
 #include "Color.h"
 
 namespace ds {
@@ -124,10 +126,10 @@ public:
 			p4.y = 2.0f * hdy;	
 		}
 		if ( m_Rotation != 0 ) {
-			p1.rotate(m_Rotation);
-			p2.rotate(m_Rotation);
-			p3.rotate(m_Rotation);
-			p4.rotate(m_Rotation);
+			vector::rotate(p1,m_Rotation);
+			vector::rotate(p2,m_Rotation);
+			vector::rotate(p3,m_Rotation);
+			vector::rotate(p4,m_Rotation);
 		}
 		p1 += m_Position;
 		p2 += m_Position;

@@ -1,7 +1,7 @@
 #pragma once
 #include "CharBuffer.h"
 #include <vector>
-#include "..\utils\GameMath.h"
+#include "..\math\math_types.h"
 
 namespace ds {
 

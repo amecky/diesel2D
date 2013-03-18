@@ -30,7 +30,7 @@ public:
 private:
 	void setVertex(int idx,int offset,float x,float y,float tu,float tv,const Color& color);
 	void prepareBuffer();
-	ds::Renderer* m_Renderer;
+	Renderer* m_Renderer;
 	int m_Handle;
 	int m_Mtrl;
 	uint32 m_MaxVertices;

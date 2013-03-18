@@ -1,5 +1,6 @@
 #include "Camera.h"
-
+#include <d3dx9math.h>
+#include "..\math\vector.h"
 
 namespace ds {
 /*
@@ -47,7 +48,8 @@ Camera::Camera(int width,int height) {
 	//D3DXMatrixOrthoOffCenterLH(&m_OrthoProj,0.0f,w,0.0f,h,0.0f,100.0f);
 	D3DXMatrixOrthoLH(&m_OrthoProj, w, h, 0.1f, 100.0f);
 	//D3DXMatrixIdentity(&m_OrthoView);
-	D3DXMatrixLookAtLH(&m_OrthoView,&m_ViewPos,&m_LookAt,&m_UpVec);
+	D3DXVECTOR3 vp = convert(m_ViewPos);
+	D3DXMatrixLookAtLH(&m_OrthoView,&vp,&convert(m_LookAt),&convert(m_UpVec));
 	m_Ortho = false;
 	buildView();
 }
@@ -73,15 +75,18 @@ void Camera::lookAt(const Vec3& lookAt) {
 void Camera::lookAt(Vec3 pos,Vec3 target,Vec3 up) {
 
 	Vec3 L = target - pos;
-	D3DXVec3Normalize(&L, &L);
+	L = vector::normalize(L);
+	//D3DXVec3Normalize(&L, &L);
 
-	Vec3 R;
-	D3DXVec3Cross(&R, &up, &L);
-	D3DXVec3Normalize(&R, &R);
+	Vec3 R = vector::cross(up,L);
+	//D3DXVec3Cross(&R, &up, &L);
+	//D3DXVec3Normalize(&R, &R);
+	R = vector::normalize(R);
 
-	Vec3 U;
-	D3DXVec3Cross(&U, &L, &R);
-	D3DXVec3Normalize(&U, &U);
+	Vec3 U = vector::cross(L,R);
+	//D3DXVec3Cross(&U, &L, &R);
+	//D3DXVec3Normalize(&U, &U);
+	U = vector::normalize(U);
 	m_ViewPos = pos;
 	m_RightVec = R;
 	m_UpVec = U;
@@ -92,12 +97,14 @@ void Camera::lookAt(Vec3 pos,Vec3 target,Vec3 up) {
 void Camera::move(float unit) {
 	//Vec3 dir;
 	//D3DXVec3Normalize(&dir,&(m_LookAt - m_ViewPos));
-	m_ViewPos += m_LookAt * unit;
+	Vec3 tmp = m_LookAt * unit;
+	m_ViewPos = m_ViewPos + tmp;
 	buildView();
 }
 
 void Camera::strafe(float unit) {
-	m_ViewPos += unit*m_RightVec;
+	Vec3 tmp = m_RightVec * unit;
+	m_ViewPos = m_ViewPos + tmp;
 		/*
 	Vec3 dir(0.0f, 0.0f, 0.0f);
 	float step = unit;
@@ -125,9 +132,12 @@ void Camera::restore() {
 
 void Camera::setPitch(float angle) {
 	D3DXMATRIX R;
-	D3DXMatrixRotationAxis(&R, &m_RightVec, angle);
-	D3DXVec3TransformCoord(&m_LookAt, &m_LookAt, &R);
-	D3DXVec3TransformCoord(&m_UpVec, &m_UpVec, &R);
+	D3DXVECTOR3 rv = convert(m_RightVec);
+	D3DXMatrixRotationAxis(&R, &rv, angle);
+	D3DXVECTOR3 la = convert(m_LookAt);
+	D3DXVec3TransformCoord(&la, &la, &R);
+	D3DXVECTOR3 uv = convert(m_UpVec);
+	D3DXVec3TransformCoord(&la, &uv, &R);
 	buildView();
 }
 
@@ -135,9 +145,12 @@ void Camera::setYAngle(float angle) {
 	// Rotate camera's look and up vectors around the camera's right vector.
 	D3DXMATRIX R;
 	D3DXMatrixRotationY(&R, angle);
-	D3DXVec3TransformCoord(&m_RightVec, &m_RightVec, &R);
-	D3DXVec3TransformCoord(&m_UpVec, &m_UpVec, &R);
-	D3DXVec3TransformCoord(&m_LookAt, &m_LookAt, &R);
+	D3DXVECTOR3 rv = convert(m_RightVec);
+	D3DXVec3TransformCoord(&rv, &rv, &R);
+	D3DXVECTOR3 uv = convert(m_UpVec);
+	D3DXVec3TransformCoord(&uv, &uv, &R);
+	D3DXVECTOR3 la = convert(m_LookAt);
+	D3DXVec3TransformCoord(&la, &la, &R);
 	buildView();
 }
 
@@ -191,14 +204,16 @@ void Camera::update(float elapsedTime,const Vec2& mousePosition,bool buttonPress
 void Camera::buildView() {
 
 	// Keep camera's axes orthogonal to each other and of unit length.
-	Vec3 L;
-	D3DXVec3Normalize(&L, &m_LookAt);
-	Vec3 U;
-	D3DXVec3Cross(&U, &m_LookAt, &m_RightVec);
-	D3DXVec3Normalize(&U, &U);
-	Vec3 R;
-	D3DXVec3Cross(&R, &U, &L);
-	D3DXVec3Normalize(&R, &R);
+	Vec3 L = vector::normalize(m_LookAt);
+	//D3DXVec3Normalize(&L, &m_LookAt);
+	Vec3 U = vector::cross(m_LookAt,m_RightVec);
+	//D3DXVec3Cross(&U, &m_LookAt, &m_RightVec);
+	//D3DXVec3Normalize(&U, &U);
+	U = vector::normalize(U);
+	Vec3 R = vector::cross(U,L);
+	//D3DXVec3Cross(&R, &U, &L);
+	//D3DXVec3Normalize(&R, &R);
+	R = vector::normalize(R);
 	//Vec3 la = Vec3(0,0,0);
 	//D3DXMatrixLookAtLH(&m_View,&m_ViewPos,&m_LookAt,&m_UpVec);
 	// Fill in the view matrix entries.
@@ -207,9 +222,9 @@ void Camera::buildView() {
 	m_RightVec = R;
 	m_UpVec = U;
 
-	float x = -D3DXVec3Dot(&m_ViewPos, &R);
-	float y = -D3DXVec3Dot(&m_ViewPos, &U);
-	float z = -D3DXVec3Dot(&m_ViewPos, &L);
+	float x = -vector::dot(m_ViewPos,R);//-D3DXVec3Dot(&m_ViewPos, &R);
+	float y = -vector::dot(m_ViewPos,U);//D3DXVec3Dot(&m_ViewPos, &U);
+	float z = -vector::dot(m_ViewPos,L);//D3DXVec3Dot(&m_ViewPos, &L);
 
 	m_View(0,0) = m_RightVec.x; 
 	m_View(1,0) = m_RightVec.y; 
@@ -232,6 +247,14 @@ void Camera::buildView() {
 	m_View(3,3) = 1.0f;
 	
 	mViewProj = m_View * m_Proj;
+}
+
+D3DXVECTOR3 Camera::convert(const Vec3& v) {
+	D3DXVECTOR3 tmp;
+	tmp.x = v.x;
+	tmp.y = v.y;
+	tmp.z = v.z;
+	return tmp;
 }
 
 };

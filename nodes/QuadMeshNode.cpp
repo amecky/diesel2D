@@ -315,10 +315,10 @@ void QuadMeshNode::update(uint32 index,float scaleX,float scaleY,float rotation,
 	p4.y = hdy;	
 
 	if ( rotation != 0 ) {
-		p1.rotate(rotation);
-		p2.rotate(rotation);
-		p3.rotate(rotation);
-		p4.rotate(rotation);
+		vector::rotate(p1,rotation);
+		vector::rotate(p2,rotation);
+		vector::rotate(p3,rotation);
+		vector::rotate(p4,rotation);
 	}
 	p1 += pos;
 	p2 += pos;
