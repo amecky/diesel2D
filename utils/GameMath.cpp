@@ -203,7 +203,8 @@ Vec2 getDistantPosition(float x,float y,float angle,float radius) {
 void follow(const Vec2& targetPos,Vec2& newPos,float* angle,float distance,float add) {
 	Vec2 p = newPos;
 	Vec2 diff = targetPos - p;
-	*angle = 2.0f * D3DX_PI - getAngle(diff,V2_RIGHT);
+	//*angle = 2.0f * D3DX_PI - getAngle(diff,V2_RIGHT);
+	*angle = getAngle(diff,V2_RIGHT);
 	if ( *angle < 0.0f ) {
 		*angle += 2.0f * D3DX_PI;
 	}

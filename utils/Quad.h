@@ -3,6 +3,7 @@
 #include "..\math\math_types.h"
 #include "..\utils\GameMath.h"
 #include "..\math\vector.h"
+#include "..\math\matrix.h"
 #include "Color.h"
 
 namespace ds {
@@ -19,10 +20,10 @@ enum QuadAlignment {
 class Quad {
 
 public:
-	Vec2 p1;
-	Vec2 p2;
-	Vec2 p3;
-	Vec2 p4;
+	Vec2 p[4];
+	//Vec2 p2;
+	//Vec2 p3;
+	//Vec2 p4;
 
 	Quad() {
 		m_DimX = 20.0f;
@@ -69,9 +70,24 @@ public:
 		m_Position += pos;		
 	}
 	void update() {
-		float hdx = m_DimX * m_ScaleX * 0.5f;
-		float hdy = m_DimY * m_ScaleY * 0.5f;
+		float ARRAY[] = {
+			// QA Centered
+			-0.5f,-0.5f,0.5f,-0.5f,0.5f,0.5f,-0.5f,0.5f
+		};
+		mat3 srt = matrix::srt(m_ScaleX,m_ScaleY,m_Rotation,0.0f,0.0f);
+		//float hdx = m_DimX * m_ScaleX * 0.5f;
+		//float hdy = m_DimY * m_ScaleY * 0.5f;
+		int offset = 0;
 		if ( m_Alignment == QA_CENTERED ) {
+			offset = 0;
+		}
+		for ( int i = 0; i < 4; ++i ) {
+			p[i].x = ARRAY[offset + i * 2] * m_DimX;
+			p[i].y = ARRAY[offset + i * 2 + 1] * m_DimY;
+			p[i] = matrix::mul(srt,p[i]);
+			p[i] = p[i] + m_Position;
+		}
+			/*
 			p1.x = - hdx;
 			p1.y = - hdy;
 			p2.x = hdx;
@@ -80,7 +96,9 @@ public:
 			p3.y = hdy;
 			p4.x = - hdx;
 			p4.y = hdy;	
-		}
+			*/
+		//}
+		/*
 		else if ( m_Alignment == QA_TOP_LEFT ) {
 			p1.x = 0.0f;
 			p1.y = 0.0f;
@@ -125,17 +143,27 @@ public:
 			p4.x = - hdx;
 			p4.y = 2.0f * hdy;	
 		}
+		*/
+		/*
 		if ( m_Rotation != 0 ) {
 			vector::rotate(p1,m_Rotation);
 			vector::rotate(p2,m_Rotation);
 			vector::rotate(p3,m_Rotation);
 			vector::rotate(p4,m_Rotation);
 		}
-		p1 += m_Position;
-		p2 += m_Position;
-		p3 += m_Position;
-		p4 += m_Position;
+		*/
+	/*
+		for ( int i = 0; i < 4; ++i ) {
+			p[i] = matrix::mul(srt,p[i]);
+			p[i] = p[i] + m_Position;
+		}
+		*/
+		//p1 += m_Position;
+		//p2 += m_Position;
+		//p3 += m_Position;
+		//p4 += m_Position;
 	}
+
 	void update(float scaleX,float scaleY,float rotation,const Vec2& pos) {
 		m_ScaleX = scaleX;
 		m_ScaleY = scaleY;

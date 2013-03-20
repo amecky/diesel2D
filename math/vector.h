@@ -26,6 +26,13 @@ inline ds::Vec2 operator * (const ds::Vec2& u,float s) {
 	return tmp;
 }
 
+inline ds::Vec2 operator / (const ds::Vec2& u,float s) {
+	ds::Vec2 tmp;
+	tmp.x = u.x / s;
+	tmp.y = u.y / s;
+	return tmp;
+}
+
 inline ds::Vec2 operator * (float s,const ds::Vec2& u) {
 	ds::Vec2 tmp;
 	tmp.x = u.x * s;

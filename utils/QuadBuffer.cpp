@@ -5,6 +5,10 @@ namespace ds {
 const uint32 QUAD_SIZE = 188;
 const uint32 INDEX_SIZE = 4;
 const uint32 TTVC_SIZE = 40;
+
+const float VP_ARRAY[] = {
+	-0.5f,0.5f, 0.5f,0.5f, 0.5f,-0.5f, -0.5f,-0.5f
+};
 // ------------------------------------------------------------
 //
 // ------------------------------------------------------------
@@ -111,39 +115,17 @@ void QuadBuffer::update(uint32 index,float scaleX,float scaleY,float rotation,co
 	float dimX = (*(Plane*)buffer).dimX;
 	float dimY = (*(Plane*)buffer).dimY;
 
-	float hdx = dimX * scaleX * 0.5f;
-	float hdy = dimY * scaleY * 0.5f;
-
-	Vec2 p1,p2,p3,p4;
-
-	p1.x = - hdx;
-	p1.y = - hdy;
-	p2.x = hdx;
-	p2.y = - hdy;
-	p3.x = hdx;
-	p3.y = hdy;
-	p4.x = - hdx;
-	p4.y = hdy;	
-
-	if ( rotation != 0 ) {
-		vector::rotate(p1,rotation);
-		vector::rotate(p2,rotation);
-		vector::rotate(p3,rotation);
-		vector::rotate(p4,rotation);
-	}
-	p1 += pos;
-	p2 += pos;
-	p3 += pos;
-	p4 += pos;
-
-	(*(Plane*)buffer).v1.x = p1.x;
-	(*(Plane*)buffer).v1.y = p1.y;
-	(*(Plane*)buffer).v2.x = p2.x;
-	(*(Plane*)buffer).v2.y = p2.y;
-	(*(Plane*)buffer).v3.x = p3.x;
-	(*(Plane*)buffer).v3.y = p3.y;
-	(*(Plane*)buffer).v4.x = p4.x;
-	(*(Plane*)buffer).v4.y = p4.y;
+	Vec2 p;
+	mat3 srt = matrix::srt(scaleX,scaleY,rotation,0.0f,0.0f);
+	for ( int i = 0; i < 4; ++i ) {
+		p.x = VP_ARRAY[i * 2] * dimX;
+		p.y = VP_ARRAY[i * 2 + 1] * dimY;
+		p = matrix::mul(srt,p);		
+		p = p + pos;
+		(*(Plane*)buffer).v1.x = p.x;
+		(*(Plane*)buffer).v1.y = p.y;
+		buffer += TTVC_SIZE;
+	}	
 }
 
 // -------------------------------------------------------
@@ -155,36 +137,7 @@ void QuadBuffer::update(uint32 index,const Vec2& pos) {
 	float scaleY = (*(Plane*)buffer).scaleY;
 	float rotation = (*(Plane*)buffer).rotation;
 
-	(*(Plane*)buffer).x = pos.x;
-	(*(Plane*)buffer).y = pos.y;
-
-	float m00 = scaleX * cos(rotation);
-	float m01 = scaleX * -sin(rotation);
-	float m10 = scaleY * sin(rotation);
-	float m11 = scaleY * cos(rotation);
-
-	float dx = (*(Plane*)buffer).dimX * 0.5f;
-	float dy = (*(Plane*)buffer).dimY * 0.5f;
-
-	float x = -dx * m00 - dy * m01 + pos.x;
-	float y = -dx * m10 - dy * m11 + pos.y;
-	(*(Plane*)buffer).v1.x = x;
-	(*(Plane*)buffer).v1.y = y;
-
-	x = dx * m00 - dy * m01 + pos.x;
-	y = dx * m10 - dy * m11 + pos.y;
-	(*(Plane*)buffer).v2.x = x;
-	(*(Plane*)buffer).v2.y = y;
-
-	x = dx * m00 + dy * m01 + pos.x;
-	y = dx * m10 + dy * m11 + pos.y;
-	(*(Plane*)buffer).v3.x = x;
-	(*(Plane*)buffer).v3.y = y;
-
-	x = -dx * m00 + dy * m01 + pos.x;
-	y = -dx * m10 + dy * m11 + pos.y;
-	(*(Plane*)buffer).v4.x = x;
-	(*(Plane*)buffer).v4.y = y;
+	update(index,scaleX,scaleY,rotation,pos);
 }
 
 // -------------------------------------------------------

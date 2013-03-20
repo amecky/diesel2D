@@ -60,6 +60,7 @@ struct GeoBufferHandle {
 namespace buffer {
 
 	void createQuad(TTCVertex* vb,WORD* ib,float dimX,float dimY,const Vec2& pos,const Rect& rect,float textureSize,int idxOffset,const Color& color = Color::WHITE,QuadAlignment align = QA_CENTERED);
+	void createQuad(TTCVertex* vb,WORD* ib,float dimX,float dimY,float rotation,const Vec2& pos,const Rect& rect,float textureSize,int idxOffset,const Color& color = Color::WHITE,QuadAlignment align = QA_CENTERED);
 
 }
 
