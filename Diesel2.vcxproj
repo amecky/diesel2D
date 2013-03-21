@@ -231,6 +231,7 @@
     <ClCompile Include="cvar\TVar.cpp" />
     <ClCompile Include="dialogs\DialogManager.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
+    <ClCompile Include="math\GameMath.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\vector.cpp" />
     <ClCompile Include="nodes\addons\HudNode.cpp" />
@@ -260,11 +261,8 @@
     <ClCompile Include="renderer\Viewport.cpp" />
     <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\FileUtils.cpp" />
-    <ClCompile Include="utils\GameMath.cpp" />
     <ClCompile Include="base\Input.cpp" />
     <ClCompile Include="utils\Log.cpp" />
-    <ClCompile Include="utils\Mat.cpp" />
-    <ClCompile Include="utils\MemoryPool.cpp" />
     <ClCompile Include="utils\mtrand.cpp" />
     <ClCompile Include="nodes\Node.cpp" />
     <ClCompile Include="nodes\NodeTransformation.cpp" />
@@ -272,7 +270,6 @@
     <ClCompile Include="utils\Profiler.cpp" />
     <ClCompile Include="utils\PlainTextReader.cpp" />
     <ClCompile Include="utils\QuadBuffer.cpp" />
-    <ClCompile Include="utils\SimpleQuadBuffer.cpp" />
     <ClCompile Include="utils\StringUtils.cpp" />
     <ClCompile Include="base\BaseApp.cpp" />
   </ItemGroup>
@@ -292,6 +289,7 @@
     <ClInclude Include="lib\container\GridArray.h" />
     <ClInclude Include="lib\container\List.h" />
     <ClInclude Include="lib\container\String.h" />
+    <ClInclude Include="math\GameMath.h" />
     <ClInclude Include="math\math_types.h" />
     <ClInclude Include="math\matrix.h" />
     <ClInclude Include="math\vector.h" />
@@ -330,8 +328,6 @@
     <ClInclude Include="utils\Color.h" />
     <ClInclude Include="utils\FileUtils.h" />
     <ClInclude Include="utils\Log.h" />
-    <ClInclude Include="utils\Mat.h" />
-    <ClInclude Include="utils\MemoryPool.h" />
     <ClInclude Include="utils\mtrand.h" />
     <ClInclude Include="nodes\Node.h" />
     <ClInclude Include="nodes\NodeTransformation.h" />
@@ -341,9 +337,7 @@
     <ClInclude Include="utils\PlainTextReader.h" />
     <ClInclude Include="utils\Quad.h" />
     <ClInclude Include="utils\QuadBuffer.h" />
-    <ClInclude Include="utils\SimpleQuadBuffer.h" />
     <ClInclude Include="utils\StringUtils.h" />
-    <ClInclude Include="utils\GameMath.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

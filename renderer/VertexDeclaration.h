@@ -1,10 +1,10 @@
 #pragma once
 
-//#include "..\renderer\VertexDeclaration.h"
 #include <vector>
 #include "..\utils\Color.h"
 #include "GraphicsDevice.h"
-#include "..\utils\GameMath.h"
+#include "..\math\math_types.h"
+
 
 namespace ds {
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "..\utils\Color.h"
-#include "..\utils\GameMath.h"
+#include "..\math\math_types.h"
 
 namespace ds {
 

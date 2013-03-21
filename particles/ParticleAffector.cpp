@@ -1,4 +1,5 @@
 #include "ParticleAffector.h"
+#include "..\math\GameMath.h"
 
 namespace ds {
 // -------------------------------------------------------

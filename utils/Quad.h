@@ -1,10 +1,10 @@
 #pragma once
 #include "..\dxstdafx.h"
 #include "..\math\math_types.h"
-#include "..\utils\GameMath.h"
 #include "..\math\vector.h"
 #include "..\math\matrix.h"
 #include "Color.h"
+#include "..\math\GameMath.h"
 
 namespace ds {
 

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
-#include "GameMath.h"
+#include "..\math\math_types.h"
 #include "StringUtils.h"
 #include "Color.h"
 

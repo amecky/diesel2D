@@ -1,7 +1,7 @@
 #ifndef NODE_TRANSFORMATION_H
 #define NODE_TRANSFORMATION_H
 #include "..\dxstdafx.h"
-#include "..\utils\GameMath.h"
+#include "..\math\math_types.h"
 
 namespace ds {
 

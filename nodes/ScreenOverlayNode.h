@@ -1,6 +1,4 @@
 #pragma once
-#include "..\utils\GameMath.h"
-#include <vector>
 #include "..\nodes\Node.h"
 #include "..\renderer\IndexVertexBuffer.h"
 #include "..\renderer\render_types.h"

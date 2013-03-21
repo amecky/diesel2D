@@ -1,5 +1,5 @@
 #pragma once
-#include "..\utils\GameMath.h"
+#include "..\math\math_types.h"
 
 namespace ds {
 

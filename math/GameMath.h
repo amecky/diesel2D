@@ -1,8 +1,8 @@
 #pragma once
 #include "..\dxstdafx.h"
-#include "Color.h"
-#include "..\math\math_types.h"
-#include "..\math\vector.h"
+#include "..\utils\Color.h"
+#include "math_types.h"
+#include "vector.h"
 
 namespace ds {
 

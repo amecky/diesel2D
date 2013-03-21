@@ -1,5 +1,4 @@
 #pragma once
-#include "..\utils\GameMath.h"
 #include "NodeTransformation.h"
 #include "..\renderer\render_types.h"
 

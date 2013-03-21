@@ -19,13 +19,7 @@
     <ClCompile Include="utils\FileUtils.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="utils\GameMath.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="utils\Log.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\MemoryPool.cpp">
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="utils\mtrand.cpp">
@@ -94,16 +88,10 @@
     <ClCompile Include="pipeline\TVarParser.cpp">
       <Filter>pipeline</Filter>
     </ClCompile>
-    <ClCompile Include="utils\Mat.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="nodes\QuadMeshNode.cpp">
       <Filter>nodes</Filter>
     </ClCompile>
     <ClCompile Include="utils\QuadBuffer.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\SimpleQuadBuffer.cpp">
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="nodes\SimpleQuadNode.cpp">
@@ -169,6 +157,9 @@
     <ClCompile Include="math\vector.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="math\GameMath.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
@@ -194,13 +185,7 @@
     <ClInclude Include="utils\FileUtils.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="utils\GameMath.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="utils\Log.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\MemoryPool.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="utils\mtrand.h">
@@ -284,9 +269,6 @@
     <ClInclude Include="pipeline\TVarParser.h">
       <Filter>pipeline</Filter>
     </ClInclude>
-    <ClInclude Include="utils\Mat.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="nodes\QuadMeshNode.h">
       <Filter>nodes</Filter>
     </ClInclude>
@@ -294,9 +276,6 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="utils\QuadBuffer.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\SimpleQuadBuffer.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="renderer\render_types.h">
@@ -369,6 +348,9 @@
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="math\vector.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\GameMath.h">
       <Filter>math</Filter>
     </ClInclude>
   </ItemGroup>

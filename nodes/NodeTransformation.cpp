@@ -28,7 +28,6 @@ void NodeTransformation::translateAbs( float x, float y, float z ) {
 
 void NodeTransformation::translateRel( float x, float y, float z ) {
     m_translate._41 += x;
-	//m_translate._42 += y;	
 	m_Y += y;
     m_translate._43 += z;
 	dirty = true;

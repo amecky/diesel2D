@@ -1,6 +1,7 @@
 #pragma once
-#include "..\utils\GameMath.h"
+#include "..\math\math_types.h"
 #include <vector>
+#include "..\dxstdafx.h"
 
 namespace ds {
 // -------------------------------------------------------

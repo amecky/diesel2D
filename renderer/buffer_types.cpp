@@ -1,7 +1,6 @@
 #include "buffer_types.h"
 #include "vertex_types.h"
-#include "..\utils\GameMath.h"
-#include "..\utils\Log.h"
+#include "..\math\math_types.h"
 
 namespace ds {
 

@@ -1,6 +1,7 @@
 #include "QuadMeshNode.h"
 #include "..\content\TextureAtlas.h"
 #include "..\renderer\vertex_types.h"
+#include "..\math\GameMath.h"
 
 namespace ds {
 

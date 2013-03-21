@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "..\utils\Color.h"
-#include "..\utils\GameMath.h"
+#include "..\math\math_types.h"
 #include "..\lib\container\List.h"
 
 namespace ds {

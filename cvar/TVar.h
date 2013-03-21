@@ -1,7 +1,7 @@
 #pragma once
 #include "..\dxstdafx.h"
 #include "..\lib\container\List.h"
-#include "..\utils\GameMath.h"
+#include "..\math\math_types.h"
 #include "..\pipeline\PAKWriter.h"
 #include "..\pipeline\PAKReader.h"
 #include <map>
