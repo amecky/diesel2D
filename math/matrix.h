@@ -9,6 +9,8 @@ ds::Vec4 operator * (const ds::mat4& m,const ds::Vec4& v);
 
 ds::Vec3 operator * (const ds::mat4& m,const ds::Vec3& v);
 
+ds::mat4 operator * (const ds::mat4& m1,const ds::mat4& m2);
+
 namespace ds {
 
 	namespace matrix {

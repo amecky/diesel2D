@@ -38,6 +38,24 @@ ds::Vec3 operator * (const ds::mat4& m,const ds::Vec3& v) {
 	return ds::Vec3(tmp.x,tmp.y,tmp.z);
 }
 
+ds::mat4 operator * (const ds::mat4& m1,const ds::mat4& m2) {
+	ds::mat4 tmp;
+	tmp.a.x = m1.a.x * m2.a.x + m1.a.y * m2.b.x + m1.a.z * m2.c.x + m1.a.w * m2.a.w;
+	tmp.a.y = m1.a.x * m2.a.y + m1.a.y * m2.b.y + m1.a.z * m2.c.y + m1.a.w * m2.b.w;
+	tmp.a.z = m1.a.x * m2.a.z + m1.a.y * m2.b.z + m1.a.z * m2.c.z + m1.a.w * m2.c.w;
+	tmp.a.w = m1.a.x * m2.a.w + m1.a.y * m2.b.w + m1.a.z * m2.c.w + m1.a.w * m2.d.w;
+	tmp.b.x = m1.b.x * m2.a.x + m1.b.y * m2.b.x + m1.b.z * m2.c.x + m1.b.w * m2.a.w;
+	tmp.b.y = m1.b.x * m2.a.y + m1.b.y * m2.b.y + m1.b.z * m2.c.y + m1.b.w * m2.b.w;
+	tmp.b.z = m1.b.x * m2.a.z + m1.b.y * m2.b.z + m1.b.z * m2.c.z + m1.b.w * m2.c.w;
+	tmp.b.w = m1.b.x * m2.a.w + m1.b.y * m2.b.w + m1.b.z * m2.c.w + m1.b.w * m2.d.w;
+
+	tmp.c.x = m1.c.x * m2.a.x + m1.c.y * m2.b.x + m1.c.z * m2.c.x + m1.c.w * m2.a.w;
+	tmp.c.y = m1.c.x * m2.a.y + m1.c.y * m2.b.y + m1.c.z * m2.c.y + m1.c.w * m2.b.w;
+	tmp.c.z = m1.c.x * m2.a.z + m1.c.y * m2.b.z + m1.c.z * m2.c.z + m1.c.w * m2.c.w;
+	tmp.c.w = m1.c.x * m2.a.w + m1.c.y * m2.b.w + m1.c.z * m2.c.w + m1.c.w * m2.d.w;
+	return tmp;
+}
+
 namespace ds {
 
 namespace matrix {
