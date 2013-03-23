@@ -1,5 +1,5 @@
 #include "Viewport.h"
-#include "..\..\Diesel\utils\Log.h"
+#include "..\utils\Log.h"
 
 namespace ds {
 
