@@ -83,18 +83,8 @@ namespace ds {
 	// -------------------------------------------------------
 	struct Surface {
 
-		Vec3 v1;
-		Vec3 v2;
-		Vec3 v3;
-		Vec3 v4;
-		Vec2 uv1;
-		Vec2 uv2;
-		Vec2 uv3;
-		Vec2 uv4;
-		float tu1;
-		float tv1;
-		float tu2;
-		float tv2;
+		Vec3 v[4];		
+		Vec2 uv[4];		
 		Vec3 n;
 		Vec3 t;
 		Vec3 b;
@@ -104,28 +94,28 @@ namespace ds {
 		}
 
 		Surface(const Vec3& cv1,const Vec3& cv2,const Vec3& cv3,const Vec3& cv4,const Vec3& nn,const Vec3& tt,const Vec3& bb,float ttu1,float ttv1,float ttu2,float ttv2) {
-			v1 = cv1;
-			v2 = cv2;
-			v3 = cv3;
-			v4 = cv4;
-			tu1 = ttu1;
-			tv1 = ttv1;
-			tu2 = ttu2;
-			tv2 = ttv2;
+			v[0] = cv1;
+			v[1] = cv2;
+			v[2] = cv3;
+			v[3] = cv4;
+			//tu1 = ttu1;
+			//tv1 = ttv1;
+			//tu2 = ttu2;
+			//tv2 = ttv2;
 			n = nn;
 			t = tt;
 			b = bb;
 		}
 
 		Surface(const Vec3& cv1,const Vec3& cv2,const Vec3& cv3,const Vec3& cv4,const Vec3& nn,const Vec3& tt,const Vec3& bb,const Vec2& _uv1,const Vec2& _uv2,const Vec2& _uv3,const Vec2& _uv4) {
-			v1 = cv1;
-			v2 = cv2;
-			v3 = cv3;
-			v4 = cv4;
-			uv1 = _uv1;
-			uv2 = _uv2;
-			uv3 = _uv3;
-			uv4 = _uv4;
+			v[0] = cv1;
+			v[1] = cv2;
+			v[2] = cv3;
+			v[3] = cv4;
+			uv[0] = _uv1;
+			uv[1] = _uv2;
+			uv[2] = _uv3;
+			uv[3] = _uv4;
 			n = nn;
 			t = tt;
 			b = bb;
