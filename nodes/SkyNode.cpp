@@ -21,8 +21,8 @@ SkyNode::SkyNode(Renderer* renderer,int material,const std::string& envmapFilena
 	mhEnvMap = mFX->GetParameterByName(0, "gEnvMap");
 
 	// Set effect parameters that do not vary.
-	HR(mFX->SetTechnique(mhTech));
-	HR(mFX->SetTexture(mhEnvMap, mEnvMap));
+	mFX->SetTechnique(mhTech);
+	mFX->SetTexture(mhEnvMap, mEnvMap);
 }
 
 void SkyNode::createShader() {
@@ -93,11 +93,11 @@ float SkyNode::getRadius() {
 }
 
 void SkyNode::onLostDevice() {
-	HR(mFX->OnLostDevice());
+	mFX->OnLostDevice();
 }
 
 void SkyNode::onResetDevice() {
-	HR(mFX->OnResetDevice());
+	mFX->OnResetDevice();
 }
 
 void SkyNode::draw() {
@@ -117,8 +117,8 @@ void SkyNode::draw() {
 	//gEngine->getDrawCounter()->addDrawCall();
 	//gEngine->getDrawCounter()->addPrimitives(getNumVertices());
 #endif
-	HR(mFX->EndPass());
-	HR(mFX->End());
+	mFX->EndPass();
+	mFX->End();
 }
 
 }

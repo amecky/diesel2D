@@ -2,6 +2,9 @@
 #include "Color.h"
 #include "Quad.h"
 #include "..\renderer\Renderer.h"
+#include "..\renderer\buffer_types.h"
+#include "..\content\TextureAtlas.h"
+#include "..\math\math_types.h"
 
 namespace ds {
 
@@ -9,10 +12,14 @@ template <class T>
 class BufferHelper {
 
 public:
-	BufferHelper(Renderer*renderer) : m_Renderer(renderer) , m_IdxOffset(0) {}
+	BufferHelper(Renderer*renderer,float textureSize = 1024.0f,const Color& color = Color::WHITE,QuadAlignment align = ds::QA_CENTERED) 
+		: m_Renderer(renderer) , m_TextureSize(1024.0f) , m_Color(color) , m_Alignment(align) , m_IdxOffset(0) {}
 	~BufferHelper() {}
 	void lock(int handle,int vertexCount,int indexCount);
 	void unlock();
+	void addQuad(const Vec2& pos,const TAtlas& atlas,const char* name);
+	void addQuad(float dimX,float dimY,const Vec2& pos,const Rect& rect);
+	void addQuad(float dimX,float dimY,const Vec2& pos,const TAtlas& atlas,const char* name);
 	void addQuad(float dimX,float dimY,const Vec2& pos,const Rect& rect,float textureSize,const Color& color = Color::WHITE,QuadAlignment align = QA_CENTERED);
 	void addQuad(float dimX,float dimY,float rotation,const Vec2& pos,const Rect& rect,float textureSize,const Color& color = Color::WHITE,QuadAlignment align = QA_CENTERED);
 private:
@@ -21,6 +28,9 @@ private:
 	int m_IdxOffset;
 	Renderer* m_Renderer;
 	int m_Handle;
+	float m_TextureSize;
+	Color m_Color;
+	QuadAlignment m_Alignment;
 };
 
 template <class T>
@@ -35,8 +45,32 @@ void BufferHelper<T>::unlock() {
 }
 
 template<class T>
+void BufferHelper<T>::addQuad(const Vec2& pos,const TAtlas& atlas,const char* name) {
+	buffer::createQuad(m_VB,m_IB,pos,atlas,name,m_IdxOffset,m_Color,m_Alignment);
+	m_VB += 4;
+	m_IB += 6;
+	m_IdxOffset += 4;
+}
+
+template<class T>
+void BufferHelper<T>::addQuad(float dimX,float dimY,const Vec2& pos,const TAtlas& atlas,const char* name) {
+	buffer::createQuad(m_VB,m_IB,dimX,dimY,pos,atlas,name,m_IdxOffset,m_Color,m_Alignment);
+	m_VB += 4;
+	m_IB += 6;
+	m_IdxOffset += 4;
+}
+
+template<class T>
+void BufferHelper<T>::addQuad(float dimX,float dimY,const Vec2& pos,const Rect& rect) {
+	buffer::createQuad(m_VB,m_IB,dimX,dimY,pos,rect,m_TextureSize,m_IdxOffset,m_Color,m_Alignment);
+	m_VB += 4;
+	m_IB += 6;
+	m_IdxOffset += 4;
+}
+
+template<class T>
 void BufferHelper<T>::addQuad(float dimX,float dimY,const Vec2& pos,const Rect& rect,float textureSize,const Color& color,QuadAlignment align) {
-	ds::buffer::createQuad(m_VB,m_IB,dimX,dimY,pos,rect,textureSize,m_IdxOffset,color,align);
+	buffer::createQuad(m_VB,m_IB,dimX,dimY,pos,rect,textureSize,m_IdxOffset,color,align);
 	m_VB += 4;
 	m_IB += 6;
 	m_IdxOffset += 4;
@@ -44,7 +78,7 @@ void BufferHelper<T>::addQuad(float dimX,float dimY,const Vec2& pos,const Rect& 
 
 template<class T>
 void BufferHelper<T>::addQuad(float dimX,float dimY,float rotation,const Vec2& pos,const Rect& rect,float textureSize,const Color& color,QuadAlignment align) {
-	ds::buffer::createQuad(m_VB,m_IB,dimX,dimY,rotation,pos,rect,textureSize,m_IdxOffset,color,align);
+	buffer::createQuad(m_VB,m_IB,dimX,dimY,rotation,pos,rect,textureSize,m_IdxOffset,color,align);
 	m_VB += 4;
 	m_IB += 6;
 	m_IdxOffset += 4;

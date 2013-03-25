@@ -8,7 +8,7 @@ namespace ds {
 DebugRenderer::DebugRenderer(Renderer* renderer) : m_Renderer(renderer) {
 	m_Font = renderer->loadSystemFont("Verdana_12","Verdana",10,false);
 	IDirect3DDevice9 * pDevice = renderer->getDevice();
-	HR(D3DXCreateSprite( pDevice, &m_Sprite ));
+	D3DXCreateSprite( pDevice, &m_Sprite );
 }
 
 

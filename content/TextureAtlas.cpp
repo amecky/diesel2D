@@ -4,6 +4,58 @@
 
 namespace ds {
 
+namespace atlas {
+
+	// -------------------------------------------------------
+	// Add entry to texture atlas
+	// -------------------------------------------------------
+	void add(TAtlas& atlas,const char* name,Rect textureRect,bool useHalfTexel) {
+		AtlasEntry ae;
+		ae.hash = string::murmur_hash(name);
+		ae.rect = textureRect;
+		float texSize = atlas.textureSize;
+		if ( useHalfTexel ) {
+			float halfTexel = 0.5f;
+
+			float kUOffset = halfTexel / texSize;
+			float kVOffset = halfTexel / texSize;
+
+			ae.uv[0] = static_cast<float>(textureRect.left) / texSize + kUOffset;
+			ae.uv[1] = static_cast<float>(textureRect.top) / texSize + kVOffset;  
+
+			ae.uv[2] = ae.uv[0] + static_cast<float>(textureRect.width()) / texSize - 2.0f*kUOffset;
+			ae.uv[3] = ae.uv[1] + static_cast<float>(textureRect.height()) / texSize  - 2.0f*kVOffset;			
+
+		}
+		else {
+			ae.uv[0] = static_cast<float>(textureRect.left) / texSize;
+			ae.uv[2] = static_cast<float>(textureRect.right) / texSize;
+			ae.uv[1] = static_cast<float>(textureRect.top) / texSize;
+			ae.uv[3] = static_cast<float>(textureRect.bottom) / texSize;
+		}				
+		atlas.entries.append(ae);
+	}
+
+	// -------------------------------------------------------
+	// Find entry in texture atlas
+	// -------------------------------------------------------
+	bool findEntry(const TAtlas& atlas,const char* name,AtlasEntry* entry) {
+		IdString hash = string::murmur_hash(name);
+		for ( uint32 i = 0; i < atlas.entries.num(); ++i ) {
+			if ( atlas.entries[i].hash == hash ) {				
+				entry->hash = atlas.entries[i].hash;
+				entry->rect = atlas.entries[i].rect;				
+				for ( int j = 0; j < 4; ++j ) {
+					entry->uv[j] = atlas.entries[i].uv[j];
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+}
+
 TextureAtlas::TextureAtlas(int gridSize,int textureSize) 
 	: m_GridSize(gridSize) , m_TextureSize(textureSize) , m_UseHalfTexel(true) {
 }

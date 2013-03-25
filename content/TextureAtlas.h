@@ -2,8 +2,31 @@
 #include "..\math\math_types.h"
 #include <vector>
 #include "..\dxstdafx.h"
+#include "..\lib\container\List.h"
 
 namespace ds {
+
+struct AtlasEntry {
+	IdString hash;
+	Rect rect;
+	float uv[4];
+};
+
+struct TAtlas {
+		
+	float textureSize;
+	List<AtlasEntry> entries;
+
+	TAtlas() : textureSize(1024.0f) {}
+	TAtlas(float texSize) : textureSize(texSize) {}
+};
+
+namespace atlas {
+
+	void add(TAtlas& atlas,const char* name,Rect textureRect,bool useHalfTexel = true);
+
+	bool findEntry(const TAtlas& atlas,const char* name, AtlasEntry* entry);
+}
 // -------------------------------------------------------
 // TextureAtlas
 //
