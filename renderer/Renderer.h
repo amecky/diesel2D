@@ -66,10 +66,19 @@ public:
 	void endRendering();	
 	bool Windowed;
 	bool rendering;
-	const D3DXMATRIX& getWVPMatrix() const { return matWorldViewProj; }
-	const D3DXMATRIX& getWorldMatrix() const { return m_World; }
-	const D3DXMATRIX getViewMatrix() const { return m_Camera->getViewMatrix(); }
-	const D3DXMATRIX& getProjectionMatrix() const { return m_Camera->getProjectionMatrix();}
+	void setWorldMatrix(const mat4& world);
+	const mat4& getWVPMatrix() const { 
+		return matWorldViewProj; 
+	}
+	const mat4& getWorldMatrix() const { 
+		return m_World; 
+	}
+	const mat4& getViewMatrix() const { 
+		return m_Camera->getViewMatrix(); 
+	}
+	const mat4& getProjectionMatrix() const { 
+		return m_Camera->getProjectionMatrix();
+	}
 	Camera* getCamera();	
 	void set2DCameraOn();
 	void set2DCameraOff();
@@ -96,6 +105,7 @@ public:
 	}
 	// Shader
 	int loadShader(const char* fxName,const char* techName);
+	Shader& getShader(int id);
 	int createShaderFromText(const char* buffer,const char* techName);
 	void setTexture(int shaderID,const char* handleName,int textureID);
 	void setCurrentShader(int shaderID);
@@ -166,6 +176,7 @@ public:
 	const int getHeight() const {
 		return m_Height;
 	}
+	void applyShader(Shader* shader);
 private:	
 	bool isFillColor(const Color& fillColor,const Color& currentColor);
 	void setTransformations();
@@ -177,7 +188,7 @@ private:
 	int findFreeMaterialSlot();
 	int findFreeShaderSlot();
 	TextureAtlas* getTextureAtlas(int materialID);
-	void applyShader(Shader* shader);
+	
 	void initializeShader(int id,const char* techName);
 	int allocateBuffer(GeoBufferType type,int vertexDefinition,int size,int& start,bool dynamic);
 	void resetDynamicBuffers();
@@ -185,8 +196,8 @@ private:
 	RenderMode m_RenderMode;	
 	D3DCAPS9 m_DeviceCaps;	
 	Camera* m_Camera;	
-	D3DXMATRIX matWorldViewProj;
-	D3DXMATRIX m_World;
+	mat4 matWorldViewProj;
+	mat4 m_World;
 	GraphicsDevice *device;
 	RenderStates m_RenderStates;
 	Color m_ClearColor;

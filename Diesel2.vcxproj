@@ -87,9 +87,9 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</EmbedManifest>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(LibraryPath)</LibraryPath>
-    <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;$(ReferencePath)</ReferencePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(LibraryPath)</LibraryPath>
+    <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(ReferencePath)</ReferencePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\devtools\DirectX_SDK\Include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(LibraryPath)</LibraryPath>
     <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(ReferencePath)</ReferencePath>
@@ -97,7 +97,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>DXUT\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>
@@ -256,6 +256,7 @@
     <ClCompile Include="renderer\DrawCounter.cpp" />
     <ClCompile Include="renderer\GraphicsDevice.cpp" />
     <ClCompile Include="renderer\PostProcessor.cpp" />
+    <ClCompile Include="renderer\shader.cpp" />
     <ClCompile Include="renderer\TexGen.cpp" />
     <ClCompile Include="renderer\VertexDeclaration.cpp" />
     <ClCompile Include="renderer\Viewport.cpp" />
@@ -265,7 +266,6 @@
     <ClCompile Include="utils\Log.cpp" />
     <ClCompile Include="utils\mtrand.cpp" />
     <ClCompile Include="nodes\Node.cpp" />
-    <ClCompile Include="nodes\NodeTransformation.cpp" />
     <ClCompile Include="renderer\Renderer.cpp" />
     <ClCompile Include="utils\Profiler.cpp" />
     <ClCompile Include="utils\PlainTextReader.cpp" />
@@ -319,6 +319,7 @@
     <ClInclude Include="renderer\IndexVertexBuffer.h" />
     <ClInclude Include="renderer\PostProcessor.h" />
     <ClInclude Include="renderer\render_types.h" />
+    <ClInclude Include="renderer\shader.h" />
     <ClInclude Include="renderer\TexGen.h" />
     <ClInclude Include="renderer\VertexDeclaration.h" />
     <ClInclude Include="renderer\vertex_types.h" />
@@ -330,7 +331,6 @@
     <ClInclude Include="utils\Log.h" />
     <ClInclude Include="utils\mtrand.h" />
     <ClInclude Include="nodes\Node.h" />
-    <ClInclude Include="nodes\NodeTransformation.h" />
     <ClInclude Include="renderer\Renderer.h" />
     <ClInclude Include="dxstdafx.h" />
     <ClInclude Include="utils\Profiler.h" />

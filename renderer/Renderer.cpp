@@ -63,8 +63,9 @@ Renderer::Renderer(HWND hWnd,const Settings& settings) : m_Hwnd(hWnd) {
     float aspect = (float)settings.width / (float)settings.height;
 	m_Camera = new Camera(settings.width,settings.height);
 	m_Camera->setLens(D3DX_PI * 0.25f, aspect, 0.1f, 1000.0f);
-	device->get()->SetTransform( D3DTS_PROJECTION, &m_Camera->getProjectionMatrix());	
+	device->get()->SetTransform( D3DTS_PROJECTION, &matrix::convert(m_Camera->getProjectionMatrix()));	
 	m_ClearColor = Color(0.0f,0.0f,0.0f,1.0f);
+	m_World = matrix::m4identity();
 	setRenderState(D3DRS_LIGHTING,FALSE);
 	setRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 	setRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
@@ -136,6 +137,10 @@ bool Renderer::beginRendering(const Color& clearColor) {
 	setRenderState( D3DRS_LIGHTING,false);	
 	setRenderState(D3DRS_ZENABLE, TRUE);
 	setRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+	//D3DXMatrixIdentity(&m_World);
+	m_World = matrix::m4identity();
+	//device->get()->SetTransform(D3DTS_WORLD,&m_World);		
+	
 	m_UsedRTs = 0;
 	m_CurrentIB = -1;
 	m_CurrentVB = -1;
@@ -179,9 +184,9 @@ void Renderer::endRendering() {
 }
 
 void Renderer::setTransformations() {
-	HR(device->get()->SetTransform( D3DTS_WORLD, &m_World ));  
-	HR(device->get()->SetTransform( D3DTS_VIEW, &m_Camera->getViewMatrix()));
-	HR(device->get()->SetTransform( D3DTS_PROJECTION, &m_Camera->getProjectionMatrix() ));
+	HR(device->get()->SetTransform( D3DTS_WORLD, &matrix::convert(m_World )));  
+	HR(device->get()->SetTransform( D3DTS_VIEW, &matrix::convert(m_Camera->getViewMatrix())));
+	HR(device->get()->SetTransform( D3DTS_PROJECTION, &matrix::convert(m_Camera->getProjectionMatrix() )));
 	matWorldViewProj = m_World * m_Camera->getViewMatrix() * m_Camera->getProjectionMatrix();
 	m_Camera->buildView();
 }
@@ -191,7 +196,8 @@ void Renderer::setTransformations() {
 //-----------------------------------------------------------------------------
 VOID Renderer::setupMatrices() {  
 	m_RenderMode = RM_3D;
-	D3DXMatrixIdentity(&m_World);    
+	//D3DXMatrixIdentity(&m_World);    
+	m_World = matrix::m4identity();
 	setTransformations();
 	setRenderState(D3DRS_ZENABLE, TRUE);
 }
@@ -252,6 +258,16 @@ void Renderer::restoreBackBuffer() {
 		m_UsedRTs = 0;
 	}
 }
+
+void Renderer::setWorldMatrix(const mat4& world) {
+	for ( int x = 0; x < 4; ++x ) {
+		for ( int y = 0; y < 4; ++y ) {
+			m_World.m[x][y] = world.m[x][y];
+		}
+	}	
+	//device->get()->SetTransform(D3DTS_WORLD,&m_World);
+	matWorldViewProj = m_World * m_Camera->getViewMatrix() * m_Camera->getProjectionMatrix();
+}
 //-----------------------------------------------------------------------------
 // Set the world matrix based on the node transformation
 // and updates the WorldViewProjection matrix ready to use
@@ -259,8 +275,8 @@ void Renderer::restoreBackBuffer() {
 // [in] Node* the actual node that is currently rendered
 //-----------------------------------------------------------------------------
 void Renderer::applyTransformation(Node* node) {
-	node->getTransformation(&m_World);	
-	device->get()->SetTransform(D3DTS_WORLD,&m_World);		
+	//node->getTransformation(&m_World);	
+	//device->get()->SetTransform(D3DTS_WORLD,&m_World);		
 	matWorldViewProj = m_World * m_Camera->getViewMatrix() * m_Camera->getProjectionMatrix();
 }
 
@@ -989,24 +1005,36 @@ void Renderer::applyShader(Shader* shader) {
 	HR(shader->m_FX->SetTechnique(shader->m_hTech));	
 	D3DXHANDLE hndl = shader->m_FX->GetParameterByName(0,"gWVP");
 	if ( hndl != NULL ) {
-		shader->m_FX->SetMatrix(hndl,&(getWVPMatrix()));
+		shader->m_FX->SetValue(hndl,&getWVPMatrix(),sizeof(mat4));
 	}
 	hndl = shader->m_FX->GetParameterByName(0,"gWorld");
 	if ( hndl != NULL ) {
-		shader->m_FX->SetMatrix(hndl,&(getWorldMatrix()));
+		shader->m_FX->SetValue(hndl,&getWorldMatrix(),sizeof(mat4));
 	}
 	hndl = shader->m_FX->GetParameterByName(0,"gWorldInverseTranspose");
 	if ( hndl != NULL ) {
 		D3DXMATRIX worldInverseTranspose;
-		D3DXMatrixInverse(&worldInverseTranspose,0,&(getWorldMatrix()));
+		D3DXMatrixInverse(&worldInverseTranspose,0,&matrix::convert(getWorldMatrix()));
 		D3DXMatrixTranspose(&worldInverseTranspose,&worldInverseTranspose);
 		shader->m_FX->SetMatrix(hndl,&worldInverseTranspose);
 	}
 	hndl = shader->m_FX->GetParameterByName(0,"gWorldInverse");
 	if ( hndl != NULL ) {
 		D3DXMATRIX worldInverse;
-		D3DXMatrixInverse(&worldInverse,0,&(getWorldMatrix()));
-		shader->m_FX->SetMatrix(hndl,&worldInverse);
+		D3DXMatrixInverse(&worldInverse,0,&matrix::convert(getWorldMatrix()));
+		shader->m_FX->SetValue(hndl,&worldInverse,sizeof(mat4));
+	}
+	hndl = shader->m_FX->GetParameterByName(0,"gWorld");
+	if ( hndl != NULL ) {
+		shader->m_FX->SetValue(hndl,&getWorldMatrix(),sizeof(mat4));
+	}
+	hndl = shader->m_FX->GetParameterByName(0,"gView");
+	if ( hndl != NULL ) {
+		shader->m_FX->SetValue(hndl,&getViewMatrix(),sizeof(mat4));
+	}
+	hndl = shader->m_FX->GetParameterByName(0,"gProjection");
+	if ( hndl != NULL ) {
+		shader->m_FX->SetValue(hndl,&getProjectionMatrix(),sizeof(mat4));
 	}
 }
 // -------------------------------------------------------
@@ -1100,6 +1128,10 @@ int Renderer::createShaderFromText(const char* buffer,const char* techName) {
 		initializeShader(id,techName);
 	}
 	return id;
+}
+
+Shader& Renderer::getShader(int id) {
+	return m_Shaders[id];
 }
 // -------------------------------------------------------
 // Load shader
@@ -1463,6 +1495,7 @@ int Renderer::drawBuffer(int handleID) {
 		Shader* shader = &m_Shaders[m_CurrentShader];
 		m_DrawCounter->addShader();
 		applyShader(shader);
+		shader->m_FX->CommitChanges();
 		// update parameters
 		UINT numPasses = 0;
 		HR(shader->m_FX->Begin(&numPasses,0));

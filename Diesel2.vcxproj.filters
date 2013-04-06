@@ -4,9 +4,6 @@
     <ClCompile Include="nodes\Node.cpp">
       <Filter>nodes</Filter>
     </ClCompile>
-    <ClCompile Include="nodes\NodeTransformation.cpp">
-      <Filter>nodes</Filter>
-    </ClCompile>
     <ClCompile Include="nodes\TextNode.cpp">
       <Filter>nodes</Filter>
     </ClCompile>
@@ -160,14 +157,14 @@
     <ClCompile Include="math\GameMath.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="renderer\shader.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="nodes\Node.h">
-      <Filter>nodes</Filter>
-    </ClInclude>
-    <ClInclude Include="nodes\NodeTransformation.h">
       <Filter>nodes</Filter>
     </ClInclude>
     <ClInclude Include="nodes\ScreenOverlayNode.h">
@@ -352,6 +349,9 @@
     </ClInclude>
     <ClInclude Include="math\GameMath.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\shader.h">
+      <Filter>renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

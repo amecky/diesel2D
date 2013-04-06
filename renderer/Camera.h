@@ -11,9 +11,9 @@ public:
 	Camera(int width,int height);
 	~Camera(void);
 	void setLens(float fov, float aspect, float nearZ, float farZ);
-	const D3DXMATRIX& getViewMatrix() const;
-	const D3DXMATRIX& getProjectionMatrix() const;
-	const D3DXMATRIX& getViewProjectionMatrix() const;
+	const mat4& getViewMatrix() const;
+	const mat4& getProjectionMatrix() const;
+	const mat4& getViewProjectionMatrix() const;
 	void setOrthogonal();
 	void restore();
 	Vec3 getPosition() { return m_ViewPos;}
@@ -35,25 +35,19 @@ public:
 	void update(float elapsedTime,const Vec2& mousePosition,bool buttonPressed);
 	void buildView();
 private:	
-	D3DXVECTOR3 convert(const Vec3& v);
 	Vec2 m_LastMousePosition;
+    mat4 m_View;
+	mat4 m_Proj;
+	mat4 mViewProj;
 
-    D3DXMATRIX m_View;
-	D3DXMATRIX m_Proj;
-	D3DXMATRIX mViewProj;
-
-	D3DXMATRIX m_OrthoView;
-	D3DXMATRIX m_OrthoProj;
+	mat4 m_OrthoView;
+	mat4 m_OrthoProj;
 
 	Vec3 m_ViewPos;
 	Vec3 m_UpVec;
 	Vec3 m_LookAt;
 	Vec3 m_RightVec;
-	// all vectors
-	//Vec3 worldPosition;
-	//Vec3 worldRightPosition;
-	//Vec3 worldUpPosition;
-	//Vec3 wLookVec;
+
 
 	float m_Speed;
 	bool m_Ortho;

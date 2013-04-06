@@ -6,9 +6,10 @@
 namespace ds {
 
 Camera::Camera(int width,int height) {		
-	D3DXMatrixIdentity(&m_View);
-	D3DXMatrixIdentity(&m_Proj);
-	D3DXMatrixIdentity(&mViewProj);
+	m_View = matrix::m4identity();
+	m_Proj = matrix::m4identity();
+	mViewProj = matrix::m4identity();
+
 	m_Speed = 10.0f;
 	m_LastMousePosition = Vec2(0,0);
 	m_ViewPos = Vec3(0,0,0);
@@ -19,14 +20,9 @@ Camera::Camera(int width,int height) {
 
 	float w = width;
 	float h = height;
-
 	setLens(0.25f*PI, 1.0f, 1.0f, 1000.0f);
-
-	//D3DXMatrixOrthoOffCenterLH(&m_OrthoProj,0.0f,w,0.0f,h,0.0f,100.0f);
-	D3DXMatrixOrthoLH(&m_OrthoProj, w, h, 0.1f, 100.0f);
-	//D3DXMatrixIdentity(&m_OrthoView);
-	D3DXVECTOR3 vp = convert(m_ViewPos);
-	D3DXMatrixLookAtLH(&m_OrthoView,&vp,&convert(m_LookAt),&convert(m_UpVec));
+	m_OrthoProj = matrix::mat4OrthoLH(w,h,1.0f,100.0f);	// checked
+	m_OrthoView = matrix::mat4LookAtLH(m_ViewPos,m_LookAt,m_UpVec);
 	m_Ortho = false;
 	buildView();
 }
@@ -35,7 +31,7 @@ Camera::~Camera(void) {
 }
 
 void Camera::setLens(float fov, float aspect, float nearZ, float farZ) {
-	D3DXMatrixPerspectiveFovLH(&m_Proj, fov, aspect, nearZ, farZ);	
+	m_Proj = matrix::mat4PerspectiveFovLH(fov, aspect, nearZ, farZ); // checked
 	buildView();
 }
 
@@ -100,21 +96,21 @@ void Camera::setYAngle(float angle) {
 	buildView();
 }
 
-const D3DXMATRIX& Camera::getViewMatrix() const {
+const mat4& Camera::getViewMatrix() const {
 	if ( m_Ortho ) {
 		return m_OrthoView;
 	}
     return m_View;
 }
 
-const D3DXMATRIX& Camera::getProjectionMatrix() const {
+const mat4& Camera::getProjectionMatrix() const {
 	if ( m_Ortho ) {
 		return m_OrthoProj;
 	}
 	return m_Proj;
 }
 
-const D3DXMATRIX& Camera::getViewProjectionMatrix() const {
+const mat4& Camera::getViewProjectionMatrix() const {
     return mViewProj;
 }
 
@@ -165,35 +161,27 @@ void Camera::buildView() {
 	float y = -vector::dot(m_ViewPos,U);
 	float z = -vector::dot(m_ViewPos,L);
 
-	m_View(0,0) = m_RightVec.x; 
-	m_View(1,0) = m_RightVec.y; 
-	m_View(2,0) = m_RightVec.z; 
-	m_View(3,0) = x;   
+	m_View._11 = m_RightVec.x; 
+	m_View._21 = m_RightVec.y; 
+	m_View._31 = m_RightVec.z; 
+	m_View._41 = x;   
 
-	m_View(0,1) = m_UpVec.x;
-	m_View(1,1) = m_UpVec.y;
-	m_View(2,1) = m_UpVec.z;
-	m_View(3,1) = y;  
+	m_View._12 = m_UpVec.x;
+	m_View._22 = m_UpVec.y;
+	m_View._32 = m_UpVec.z;
+	m_View._42 = y;  
 
-	m_View(0,2) = m_LookAt.x; 
-	m_View(1,2) = m_LookAt.y; 
-	m_View(2,2) = m_LookAt.z; 
-	m_View(3,2) = z;   
+	m_View._13 = m_LookAt.x; 
+	m_View._23 = m_LookAt.y; 
+	m_View._33 = m_LookAt.z; 
+	m_View._43 = z;   
 
-	m_View(0,3) = 0.0f;
-	m_View(1,3) = 0.0f;
-	m_View(2,3) = 0.0f;
-	m_View(3,3) = 1.0f;
+	m_View._14 = 0.0f;
+	m_View._24 = 0.0f;
+	m_View._34 = 0.0f;
+	m_View._44 = 1.0f;
 	
 	mViewProj = m_View * m_Proj;
-}
-
-D3DXVECTOR3 Camera::convert(const Vec3& v) {
-	D3DXVECTOR3 tmp;
-	tmp.x = v.x;
-	tmp.y = v.y;
-	tmp.z = v.z;
-	return tmp;
 }
 
 };

@@ -2,7 +2,7 @@
 #include "..\renderer\vertex_types.h"
 namespace ds {
 
-const uint32 QUAD_SIZE = 188;
+const uint32 QUAD_SIZE = 196;
 const uint32 INDEX_SIZE = 4;
 const uint32 TTVC_SIZE = 40;
 
@@ -12,7 +12,7 @@ const float VP_ARRAY[] = {
 // ------------------------------------------------------------
 //
 // ------------------------------------------------------------
-QuadBuffer::QuadBuffer(Renderer* renderer,uint32 maxQuads) : m_Renderer(renderer) , m_Mtrl(-1) , m_VertexCounter(0) , m_Index(0) {
+QuadBuffer::QuadBuffer(Renderer* renderer,uint32 maxQuads,float textureSize) : m_Renderer(renderer) , m_TextureSize(textureSize) , m_Mtrl(-1) , m_VertexCounter(0) , m_Index(0) {
 	m_MaxVertices = 4 * maxQuads;
 	m_MaxIndices = 6 * maxQuads;
 	m_BufferSize = QUAD_SIZE * m_MaxVertices + INDEX_SIZE * m_MaxIndices;
@@ -48,6 +48,26 @@ QuadBuffer::~QuadBuffer() {
 // -------------------------------------------------------
 // Create new quad by texture rect
 // -------------------------------------------------------
+uint32 QuadBuffer::create(const Vec2& pos,const Rect& rect,const Color& color) {
+	float u1,v1,u2,v2;
+	float dimX = rect.width();
+	float dimY = rect.height();
+	ds::math::getTextureCoordinates(rect,m_TextureSize,&u1,&v1,&u2,&v2);
+	return create(dimX,dimY,0.0f,pos,u1,v1,u2,v2,color);	
+}
+
+// -------------------------------------------------------
+// Create new quad by texture rect
+// -------------------------------------------------------
+uint32 QuadBuffer::create(float dimX,float dimY,const Vec2& pos,const Rect& rect,const Color& color) {
+	float u1,v1,u2,v2;
+	ds::math::getTextureCoordinates(rect,m_TextureSize,&u1,&v1,&u2,&v2);
+	return create(dimX,dimY,0.0f,pos,u1,v1,u2,v2,color);	
+}
+
+// -------------------------------------------------------
+// Create new quad by texture rect
+// -------------------------------------------------------
 uint32 QuadBuffer::create(float dimX,float dimY,float rotation,const Vec2& pos,const Rect& rect,float textureSize,const Color& color) {
 	float u1,v1,u2,v2;
 	ds::math::getTextureCoordinates(rect,textureSize,&u1,&v1,&u2,&v2);
@@ -76,6 +96,7 @@ uint32 QuadBuffer::create(float dimX,float dimY,float rotation,const Vec2& pos,f
 	(*(Plane*)buffer).dimY = dimY;
 	(*(Plane*)buffer).x = pos.x;
 	(*(Plane*)buffer).y = pos.y;
+	(*(Plane*)buffer).center = Vec2(0,0);
 
 	setVertex(idx,0,-dx,-dy,u1,v1,color);
 	setVertex(idx,1,dx,-dy,u2,v1,color);
@@ -115,13 +136,17 @@ void QuadBuffer::update(uint32 index,float scaleX,float scaleY,float rotation,co
 	float dimX = (*(Plane*)buffer).dimX;
 	float dimY = (*(Plane*)buffer).dimY;
 
+	Vec2 center = (*(Plane*)buffer).center;
+
 	Vec2 p;
-	mat3 srt = matrix::srt(scaleX,scaleY,rotation,0.0f,0.0f);
+	Vec2 mp = pos + center;
+	mat3 srt = matrix::srt(scaleX,scaleY,rotation,pos.x,pos.y);
 	for ( int i = 0; i < 4; ++i ) {
 		p.x = VP_ARRAY[i * 2] * dimX;
 		p.y = VP_ARRAY[i * 2 + 1] * dimY;
+		p = p - center;
 		p = matrix::mul(srt,p);		
-		p = p + pos;
+		//p = p + pos;
 		(*(Plane*)buffer).v1.x = p.x;
 		(*(Plane*)buffer).v1.y = p.y;
 		buffer += TTVC_SIZE;
@@ -210,7 +235,13 @@ void QuadBuffer::setTextureRect(uint32 idx,const Rect& textureRect,float texture
 	(*(Plane*)buffer).v4.tu = u1;
 	(*(Plane*)buffer).v4.tv = v2;
 }
-
+// --------------------------------------------------
+// Set center
+// --------------------------------------------------
+void QuadBuffer::setCenter(uint32 idx,const Vec2& v) {
+	char* buffer = m_DataBuffer + QUAD_SIZE * idx;
+	(*(Plane*)buffer).center = v;
+}
 // --------------------------------------------------
 // Set color
 // --------------------------------------------------

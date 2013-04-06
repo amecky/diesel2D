@@ -127,6 +127,16 @@ namespace vector {
 		return Vec3(x,y,z);
 	}
 
+	// -------------------------------------------------------
+	// Compute normal vector for 3 given vertices
+	// -------------------------------------------------------
+	Vec3 computeNormal(const Vec3& v1,const Vec3& v2,const Vec3& v3) {
+		Vec3 u = v2 - v1;
+		Vec3 v = v3 - v1;
+		Vec3 ret = cross(u,v);
+		return normalize(ret);
+	}
+
 }
 
 }

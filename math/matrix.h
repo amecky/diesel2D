@@ -1,5 +1,6 @@
 #pragma once
 #include "math_types.h"
+#include <d3dx9math.h>
 
 ds::mat3 operator * (const ds::mat3& m1,const ds::mat3& m2);
 
@@ -10,6 +11,8 @@ ds::Vec4 operator * (const ds::mat4& m,const ds::Vec4& v);
 ds::Vec3 operator * (const ds::mat4& m,const ds::Vec3& v);
 
 ds::mat4 operator * (const ds::mat4& m1,const ds::mat4& m2);
+
+ds::mat4 operator * (const ds::mat4& m,float v);
 
 namespace ds {
 
@@ -33,7 +36,27 @@ namespace ds {
 
 		mat3 mat3RotationZ(float angle);
 
+		mat4 mat4Scale(float scaleX,float scaleY,float scaleZ);
+
+		mat4 mat4Transform(const Vec3& pos);
+
 		mat4 mat4Rotation(const Vec3& v,float angle);
+
+		mat4 mat4RotationZ(float angle);
+
+		mat4 mat4RotateZXY(float angleX,float angleY,float angleZ);
+
+		mat4 mat4PerspectiveFovLH(float fovy,float aspect,float zn,float zf);
+
+		mat4 mat4LookAtLH(const Vec3& eye,const Vec3& lookAt,const Vec3& up);	
+				
+		mat4 mat4OrthoLH(float w,float h,float zn,float zf);
+
+		mat4 mat4Transpose(const mat4& m);
+
+		mat4 mat4Inverse(const mat4& m);
+
+		D3DXMATRIX convert(const mat4& m);
 	}
 
 }

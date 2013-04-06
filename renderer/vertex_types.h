@@ -72,6 +72,7 @@ namespace ds {
 		float rotation;
 		float dimX;
 		float dimY;
+		Vec2 center;
 		TTCVertex v1;
 		TTCVertex v2;
 		TTCVertex v3;

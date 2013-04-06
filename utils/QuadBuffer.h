@@ -13,9 +13,11 @@ class QuadBuffer {
 typedef std::vector<uint32> FreeList;
 
 public:
-	QuadBuffer(Renderer* renderer,uint32 maxQuads);
+	QuadBuffer(Renderer* renderer,uint32 maxQuads,float textureSize = 1024.0f);
 	virtual ~QuadBuffer(void);
 	void draw();
+	uint32 create(const Vec2& pos,const Rect& rect,const Color& color = Color::WHITE);
+	uint32 create(float dimX,float dimY,const Vec2& pos,const Rect& rect,const Color& color = Color::WHITE);
 	uint32 create(float dimX,float dimY,float rotation,const Vec2& pos,const Rect& rect,float textureSize,const Color& color = Color::WHITE);
 	uint32 create(float dimX,float dimY,float rotation,const Vec2& pos,float u1,float v1,float u2,float v2,const Color& color = Color::WHITE);
 	void update(uint32 index,float scaleX,float scaleY,float rotation,const Vec2& pos);
@@ -25,6 +27,7 @@ public:
 	void setPosition(uint32 idx,uint32 offset,const Vec2& v);
 	void getPosition(uint32 idx,Vec2* outVec);
 	void setPosition(uint32 idx,const Vec2& v);	
+	void setCenter(uint32 idx,const Vec2& v);	
 	void setColor(uint32 idx,const Color& color);
 	void setTextureRect(uint32 idx,const Rect& textureRect,float textureSize);
 private:
@@ -41,6 +44,7 @@ private:
 	char* m_DataBuffer;
 	uint32 m_BufferSize;
 	uint32 m_StartIndices;
+	float m_TextureSize;
 };
 
 }

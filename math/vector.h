@@ -153,5 +153,7 @@ namespace ds {
 
 		Vec3 cross(const Vec3& v1,const Vec3& v2);
 
+		Vec3 computeNormal(const Vec3& v1,const Vec3& v2,const Vec3& v3);
+
 	}
 }

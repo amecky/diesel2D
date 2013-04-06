@@ -21,6 +21,12 @@ namespace ds {
 
 	namespace buffer {
 
+		void createQuad(TTCVertex* vb,WORD* ib,const Vec2& pos,const Rect& rect,float textureSize,int idxOffset,const Color& color,QuadAlignment align) {
+			float dimX = rect.width();
+			float dimY = rect.height();
+			createQuad(vb,ib,dimX,dimY,0.0f,pos,rect,textureSize,idxOffset,color,align);	
+		}
+
 		// -------------------------------------------------------
 		// Create quad
 		// -------------------------------------------------------

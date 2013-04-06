@@ -9,7 +9,7 @@ const float INPUT_PADDING = 8.0f;
 // Constructor
 // -------------------------------------------------------
 GUIDialog::GUIDialog(const char* name,Renderer* renderer,int material,int bitmapFont) : Node("GUIDialog",renderer,material) , m_Active(false) {
-	m_MeshNode = new SimpleQuadNode("GUIQuadNode",renderer,material,800);
+	m_MeshNode = new SimpleQuadNode("GUIQuadNode",renderer,material,100);
 	m_TextNode = new TextNode("GUITextNode",renderer,material,bitmapFont);
 	m_HashName = string::murmur_hash(name);
 	m_SupportHover = false;

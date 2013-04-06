@@ -18,6 +18,7 @@ namespace ds {
 		void clamp(float* value,float min,float max);
 		float clamp(float value,float min = 0.0f,float max = 1.0f);
 		Vec2 getRadialVelocity(float angle,float vel);
+		Vec2 getTargetVelocity(const Vec2& targetPosition,const Vec2& currentPosition,float* angle,float vel);
 		float getAngle(float x1,float y1,float x2,float y2);
 		float getAngle(const Vec2& v1,const Vec2& v2);
 		float getTargetAngle(const Vec2& v1,const Vec2& v2);
@@ -29,11 +30,28 @@ namespace ds {
 		void transformMousePosToWorld(Vec3* vPickRayDir,Vec3* vPickRayOrig);
 		void getTextureCoordinates(const Rect& textureRect,int textureSize,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel = true);
 		void follow(const Vec2& targetPos,Vec2& newPos,float* angle,float distance,float add);
+		void followRelative(const Vec2& targetPos,Vec2& newPos,float* angle,float distance,float percentage);
 		void clipToRect(Vec2& newPos,const Rect& rect);
 		bool isOutside(Vec2& pos,const Rect& rect);
 		float reflect(float angle);
 		void interpolateColor(const Color& firstCol,const Color& secondColor,float t,Color* outColor);
 		bool outside(float value,float min,float max);
+		// -------------------------------------------------------
+		// Get random float between min and max
+		// -------------------------------------------------------
+		float random(float min,float max);
+		// -------------------------------------------------------
+		// Get random int between min and max
+		// -------------------------------------------------------
+		int random(int min,int max);
+		// -------------------------------------------------------
+		// Check if two circles overlap
+		// -------------------------------------------------------
+		bool checkCircleIntersection(const Vec2& p1,float r1,const Vec2& p2,float r2);
+		// ------------------------------------------------------------------------------------------
+		// Check if two circles overlap also calculating penetration distance and penetration vector
+		// ------------------------------------------------------------------------------------------
+		bool checkCircleIntersection(const Vec2& p1,float r1,const Vec2& p2,float r2,float* dist,Vec2& penVec);
 
 		struct TexCoord {
 

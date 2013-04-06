@@ -1,12 +1,11 @@
 #pragma once
-#include "NodeTransformation.h"
 #include "..\renderer\render_types.h"
 
 namespace ds {
 
 class Renderer;
 
-class Node : public NodeTransformation {
+class Node {
 
 public:
 	Node(const char* nodeName,Renderer* renderer,int materialID);
