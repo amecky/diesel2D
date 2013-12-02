@@ -4,23 +4,29 @@
 
 ds::mat3 operator * (const ds::mat3& m1,const ds::mat3& m2) {
 	ds::mat3 tmp;
-	tmp.a.x = m1.a.x * m2.a.x + m1.a.y * m2.b.x + m1.a.z * m2.c.x;
-	tmp.a.y = m1.a.x * m2.a.y + m1.a.y * m2.b.y + m1.a.z * m2.c.y;
-	tmp.a.z = m1.a.x * m2.a.z + m1.a.y * m2.b.z + m1.a.z * m2.c.z;
-	tmp.b.x = m1.b.x * m2.a.x + m1.b.y * m2.b.x + m1.b.z * m2.c.x;
-	tmp.b.y = m1.b.x * m2.a.y + m1.b.y * m2.b.y + m1.b.z * m2.c.y;
-	tmp.b.z = m1.b.x * m2.a.z + m1.b.y * m2.b.z + m1.b.z * m2.c.z;
-	tmp.c.x = m1.c.x * m2.a.x + m1.c.y * m2.b.x + m1.c.z * m2.c.x;
-	tmp.c.y = m1.c.x * m2.a.y + m1.c.y * m2.b.y + m1.c.z * m2.c.y;
-	tmp.c.z = m1.c.x * m2.a.z + m1.c.y * m2.b.z + m1.c.z * m2.c.z;
+	tmp._11 = m1._11 * m2._11 + m1._12 * m2._21 + m1._13 * m2._31;
+	tmp._12 = m1._11 * m2._12 + m1._12 * m2._22 + m1._13 * m2._32;
+	tmp._13 = m1._11 * m2._13 + m1._12 * m2._23 + m1._13 * m2._33;
+	tmp._21 = m1._21 * m2._11 + m1._22 * m2._21 + m1._23 * m2._31;
+	tmp._22 = m1._21 * m2._12 + m1._22 * m2._22 + m1._23 * m2._32;
+	tmp._23 = m1._21 * m2._13 + m1._22 * m2._23 + m1._23 * m2._33;
+	tmp._31 = m1._31 * m2._11 + m1._32 * m2._21 + m1._33 * m2._31;
+	tmp._32 = m1._31 * m2._12 + m1._32 * m2._22 + m1._33 * m2._32;
+	tmp._33 = m1._31 * m2._13 + m1._32 * m2._23 + m1._33 * m2._33;
 	return tmp;
+}
+
+ds::Vec2 operator * (const ds::mat3& m,const ds::Vec2& v) {
+	ds::Vec3 in(v.x,v.y,1.0f);
+	ds::Vec3 out = m * in;
+	return ds::Vec2(out.x,out.y);
 }
 
 ds::Vec3 operator * (const ds::mat3& m,const ds::Vec3& v) {
 	ds::Vec3 tmp;
-	tmp.x = m.a.x * v.x + m.a.y * v.y + m.a.z * v.z;
-	tmp.y = m.b.x * v.x + m.b.y * v.y + m.b.z * v.z;
-	tmp.z = m.c.x * v.x + m.c.y * v.y + m.c.z * v.z;
+	tmp.x = m._11 * v.x + m._12 * v.y + m._13 * v.z;
+	tmp.y = m._21 * v.x + m._22 * v.y + m._23 * v.z;
+	tmp.z = m._31 * v.x + m._32 * v.y + m._33 * v.z;
 	return tmp;
 }
 
@@ -80,63 +86,109 @@ namespace matrix {
 
 	mat3 identity() {
 		mat3 m;
-		m.a.x = 1.0f;
-		m.b.y = 1.0f;
-		m.c.z = 1.0f;
+		m._11 = 1.0f;
+		m._22 = 1.0f;
+		m._33 = 1.0f;
 		return m;
 	}
 
-	mat3 srt(float scale,float rotation,float x,float y) {
+	mat3 srt(float scale,float rotation,float x,float y) {		
 		float ca = cos(rotation);
 		float sa = sin(rotation);
 		mat3 m = identity();
-		m.a = Vec3( scale * ca, scale * sa, x);
-		m.b = Vec3(scale * -sa, scale * ca, y);
+		m._11 = scale * ca;
+		m._12 = scale * sa;
+		m._13 = x;
+		m._21 = scale * -sa;
+		m._22 = scale * ca;
+		m._23 = y;
 		return m;
 	}
 
+	mat3 mat3Scale(const Vec2& pos) {
+		mat3 tm (
+			pos.x,  0.0f, 0.0f,
+			 0.0f, pos.y, 0.0f,
+			 0.0f, 0.0f , 1.0f
+			);
+		return tm;
+	}
+	// -------------------------------------------------------
+	// Translation matrix
+	// -------------------------------------------------------
+	mat3 mat3Transform(const Vec2& pos) {
+		/*
+		mat3 tm (
+			1.0f,  0.0f,  0.0f,
+			0.0f,  1.0f,  0.0f,
+			pos.x, pos.y, 0.0f
+			);
+		*/
+		mat3 tm (
+			1.0f, 0.0f, pos.x,
+			0.0f, 1.0f, pos.y,
+			0.0f, 0.0f, 1.0f
+			);
+		return tm;
+	}
+
+	mat3 mat3Translation(float x,float y) {
+		mat3 tm (
+			1.0f, 0.0f, x,
+			0.0f, 1.0f, y,
+			0.0f, 0.0f, 1.0f
+			);
+		return tm;
+	}
+
 	mat3 srt(float scaleX,float scaleY,float rotation,float x,float y) {
+		mat3 sm(
+			scaleX ,   0.0f, 0.0f,
+			   0.0f, scaleY, 0.0f,
+			   0.0f,   0.0f, 1.0f
+		);
 		float ca = cos(rotation);
 		float sa = sin(rotation);
-		mat3 ret (
-			  scaleX * ca, scaleX * sa, x,
-			scaleY * - sa, scaleY * ca, y,
-			         0.0f,        0.0f, 1.0f
-			);
-		return ret;
+		mat3 rm (
+			  ca,   sa, 0.0f,
+			 -sa,   ca, 0.0f,
+			0.0f, 0.0f, 1.0f
+		);
+
+		return sm * rm;
 	}
 
 	mat3 mat3RotationY(float angle) {
 		mat3 tmp = identity();
-		tmp.a.x = cos(angle);
-		tmp.a.z = sin(angle);
-		tmp.c.x = -sin(angle);
-		tmp.c.z = cos(angle);		
+		tmp._11 = cos(angle);
+		tmp._13 = sin(angle);
+		tmp._31 = -sin(angle);
+		tmp._33 = cos(angle);		
 		return tmp;
 	}
 
 	mat3 mat3RotationX(float angle) {
 		mat3 tmp = identity();
-		tmp.b.y = cos(angle);
-		tmp.b.z = -sin(angle);
-		tmp.c.y = sin(angle);
-		tmp.c.z = cos(angle);
+		tmp._22 = cos(angle);
+		tmp._23 = -sin(angle);
+		tmp._32 = sin(angle);
+		tmp._33 = cos(angle);
 		return tmp;
 	}
 
 	mat3 mat3RotationZ(float angle) {
 		mat3 tmp = identity();
-		tmp.a.x = cos(angle);
-		tmp.a.y = -sin(angle);
-		tmp.b.x = sin(angle);
-		tmp.b.y = cos(angle);
+		tmp._11 = cos(angle);
+		tmp._12 = -sin(angle);
+		tmp._21 = sin(angle);
+		tmp._22 = cos(angle);
 		return tmp;
 	}
 
 	Vec3 mul(const mat3& m,const Vec3& v) {
-		float m0 = m.a.x * v.x + m.a.y * v.y + m.a.z * v.z;
-		float m1 = m.b.x * v.x + m.b.y * v.y + m.b.z * v.z;
-		float m2 = m.c.x * v.x + m.c.y * v.y + m.c.z * v.z;
+		float m0 = m._11 * v.x + m._12 * v.y + m._13 * v.z;
+		float m1 = m._21 * v.x + m._22 * v.y + m._23 * v.z;
+		float m2 = m._31 * v.x + m._32 * v.y + m._33 * v.z;
 		return Vec3(m0,m1,m2);
 	}
 
@@ -390,6 +442,29 @@ namespace matrix {
 			}
 		}
 		return tmp;
+	}
+
+	mat3 rotationAlign(const Vec2& d) {
+		return rotation(Vec3(d.x,d.y,0.0f),Vec3(1,0,0));
+	}
+
+	mat3 rotationAlign(const Vec3& d) {
+		return rotation(d,Vec3(1,0,0));
+	}
+
+	mat3 rotation(const Vec3& d,const Vec3& z) {
+		Vec3 dn = vector::normalize(d);
+		Vec3 axi = vector::cross( z, dn );
+		float si  = vector::length( axi );
+		float co  = vector::dot( z, dn );
+		return rotationAxisCosSin( axi/si, co, si );
+	}
+
+	mat3 rotationAxisCosSin(const Vec3& v,float co,float si ) {
+		float ic = 1.0f - co;
+		return mat3( v.x*v.x*ic + co,       v.y*v.x*ic - si*v.z,    v.z*v.x*ic + si*v.y,
+			v.x*v.y*ic + si*v.z,   v.y*v.y*ic + co,        v.z*v.y*ic - si*v.x,
+			v.x*v.z*ic - si*v.y,   v.y*v.z*ic + si*v.x,    v.z*v.z*ic + co );
 	}
 }
 

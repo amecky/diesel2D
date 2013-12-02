@@ -30,6 +30,56 @@ namespace file {
 		return false;
 	}
 
+	void getFileTime(const char* fileName,FILETIME& time) {
+		WORD ret = -1;
+		HANDLE hFile = CreateFile(fileName, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,OPEN_EXISTING, 0, NULL);
+		if( hFile != INVALID_HANDLE_VALUE) {		
+			// Retrieve the file times for the file.
+			GetFileTime(hFile, NULL, NULL, &time);
+			CloseHandle(hFile);    
+		}            
+	}
+
+	void listDirectory(const char* dir,std::vector<std::string>& files) {
+		std::string directory = dir;
+		WIN32_FIND_DATAA ffd;
+		//LARGE_INTEGER filesize;
+		//TCHAR szDir[MAX_PATH];
+		//size_t length_of_arg;
+		HANDLE hFind = INVALID_HANDLE_VALUE;
+		//DWORD dwError = 0;
+
+		if ( directory.find_last_of("\\") != directory.length() ) {
+			directory.append("\\");
+		}		
+		hFind = FindFirstFileA((directory+"*").c_str(), &ffd);		
+		if ( INVALID_HANDLE_VALUE != hFind ) {      
+			do {
+				if ( !(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ) {         
+					files.push_back(ffd.cFileName);				
+				}
+			}
+			while (FindNextFileA(hFind, &ffd) != 0);
+			FindClose(hFind);
+		}
+		else {
+			LOG(logERROR) << "cannot find directory " << dir;
+		}
+	}
+
+	// -------------------------------------------------------
+	// Checks if the file has changed
+	// -------------------------------------------------------
+	bool compareFileTime(const char* fileName,const FILETIME& time) {
+		FILETIME now;
+		getFileTime(fileName,now);
+		int t = CompareFileTime(&time,&now);		
+		if ( t == -1 ) {
+			return true;
+		}
+		return false;
+	}
+
 }
 
 void FileUtils::listDirectory(const std::string& dir,std::vector<std::string>& files,bool appendWildcard) {

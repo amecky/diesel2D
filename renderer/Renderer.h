@@ -6,14 +6,14 @@
 #include "..\base\Settings.h"
 #include <map>
 #include "Camera.h"
-#include "..\nodes\Node.h"
 #include <vector>
 #include "..\utils\Color.h"
 #include "render_types.h"
 #include "DrawCounter.h"
-#include "..\content\TextureAtlas.h"
+
 
 namespace ds {
+
 
 // -------------------------------------------------------
 // Constants
@@ -23,7 +23,6 @@ const int MAX_TEXTURES       = 256;
 const int MAX_MATERIALS      = 256;
 const int MAX_ATLAS          = 10;
 const int MAX_SHADERS        = 128;
-const int MAX_BM_FONTS       = 16;
 const int MAX_SYSTEM_FONTS   = 6;
 const int MAX_BLENDSTATES    = 10;
 const int MAX_BUFFERS        = 256;
@@ -33,11 +32,13 @@ const int MAX_BUFFER_HANDLES = 256;
 // -------------------------------------------------------
 const int VD_TTC   = 0;
 const int VD_PTNBT = 1;
+const int VD_PTC   = 2;
 
 class ScreenOverlayNode;
 class SkyNode;
 class DebugRenderer;
 class VertexDeclaration;
+class PostProcessor;
 
 enum RenderMode {
 	RM_2D, RM_3D
@@ -53,6 +54,7 @@ class Renderer {
 typedef std::map<D3DRENDERSTATETYPE,DWORD> RenderStates;
 typedef List<RenderTarget*> RenderTargets;
 typedef List<RasterizerState*> RasterizerStates;
+typedef List<DebugMessage> DebugMessages;
 
 public:
 	Renderer(HWND hWnd,const Settings& settings);
@@ -89,12 +91,6 @@ public:
 	DWORD getRenderState(D3DRENDERSTATETYPE rs);
 	RenderMode getRenderMode() { return m_RenderMode; }
 	void setupMatrices();
-	void applyTransformation(Node* node);
-	
-	//
-	
-	void setSkyNode(SkyNode* skyNode);
-	//
 	
 	void debug();
 	// vertex declarations
@@ -112,43 +108,45 @@ public:
 	// Textures
 	int createTexture(int width,int height);
 	int loadTexture(const char* name);
+	int getTextureId(const char* name);
 	int loadTextureWithColorKey(const char* name,const Color& color);
 	void setTexture(int id,int index = 0);
 	LPDIRECT3DTEXTURE9 getDirectTexture(int textureID);
 	D3DLOCKED_RECT lockTexture(int id);
 	void unlockTexture(int id);
+	void fillTexture(int id,const Vec2& pos,int sizeX,int sizeY,Color* colors);
+	Vec2 getTextureSize(int idx);
 	// Materials
 	int createMaterial(const char* name,int textureID = -1);
 	void applyMaterial(int mtrlID);
 	bool hasShader(int mtrlID);
 	void setShader(int materialID,int shaderID);
 	void setTextureAtlas(int materialID,int textureAtlasID);
-
-	void drawNode(Node* node);
 	// System fonts
 	int loadSystemFont(const char* name,const char* fontName,int size,bool bold);
 	ID3DXFont* getInternalSystemFont(int fontID);
-	// Texture atlas
-	int loadTextureAtlas(const char* name);
-	bool getTextureCoordinates(int materialID,const char* itemName,float *u1,float* v1,float* u2,float* v2);
-	int getAtlasItemWidth(int materialID,const char* itemName);
-	int getAtlasItemHeight(int materialID,const char* itemName);
-
+	
 	RasterizerState* createRasterizerState(const char* name,int cullMode,int fillMode,bool multiSample = true,bool scissor = true);
 	void changeRasterizerState(RasterizerState* rasterizerState);
 	void setRasterizerState(RasterizerState* rasterizerState);
 	// Bitmap Font
-	int createBitmapFont(const BitmapFont& bitmapFont,int textureID,const Color& fillColor);
-	int loadBitmapFont(const char* name,int textureID,Color& fillColor);
-	const CharDef& getCharDef(int fontID,char c) const;
-	int getCharHeight(int fontID);
+	void initializeBitmapFont(BitmapFont& bitmapFont,int textureID,const Color& fillColor);
 	// render target
 	int createRenderTarget(const char* name);
+	int createRenderTarget(const char* name,float width,float height);
+	void setRenderTarget(const char* name);
+	void restoreBackBuffer(const char* name);
 	// blend states
 	int createBlendState(int srcAlpha,int dstAlpha,bool alphaEnabled);
 	int createBlendState(int srcRGB,int srcAlpha,int dstRGB,int dstAlpha,bool alphaEnabled = true,bool separateAlpha = false);
 	void changeBlendState(int id);
 	void setBlendState(int id);
+	const int getCurrentBlendState() const {
+		return m_CurrentBS;
+	}
+	const int getDefaultBlendState() const {
+		return m_DefaultBS;
+	}
 	// buffers
 	int createVertexBuffer(PrimitiveType primitiveType,int vertexDefinition,int size,bool dynamic = false);
 	int createIndexBuffer(int size,bool dynamic = false);
@@ -156,7 +154,11 @@ public:
 	int createBufferHandle(PrimitiveType primType,int vertexDefinition,GeoBufferType bufferType,bool dynamic = false);
 	void lockBuffer(int handleID,int vertexCount,int indexCount,float** vertexBuffer,void** indexBuffer);
 	void unlockBuffer(int handleID);	
-	int drawBuffer(int handleID);
+	int drawBuffer(int handleID,int textureID);
+	void resetBufferHandle() {
+		m_CurrentIB = -1;
+		m_CurrentVB = -1;
+	}
 
 	DrawCounter& getDrawCounter() {
 		return *m_DrawCounter;
@@ -168,15 +170,31 @@ public:
 		return m_Hwnd;
 	}
 
-	void setRenderTarget(const char* name);
-	void restoreBackBuffer();
+	
 	const int getWidth() const {
 		return m_Width;
 	}
 	const int getHeight() const {
 		return m_Height;
 	}
-	void applyShader(Shader* shader);
+
+	uint32 startShader(Shader* shader);
+	void setShaderParameter(Shader* shader,int textureID = -1);
+	void endShader(Shader* shader);
+
+	// debug messages
+	void clearDebugMessages() {
+		m_DebugMessages.clear();
+	}
+	void drawDebugMessages();
+	void debug(int x,int y,const char* text);
+	void debug(int x,int y,char* format,...);
+	void debug(int x,int y,char* format,va_list args);
+	void debug(int x,int y,const Color& color,char* format,...);
+	void debug(int x,int y,const Color& color,char* format,va_list args);	
+	void showProfiler(int x,int y);
+	void showDrawCounter(int x,int y);
+
 private:	
 	bool isFillColor(const Color& fillColor,const Color& currentColor);
 	void setTransformations();
@@ -187,7 +205,6 @@ private:
 	int findFreeTextureSlot();
 	int findFreeMaterialSlot();
 	int findFreeShaderSlot();
-	TextureAtlas* getTextureAtlas(int materialID);
 	
 	void initializeShader(int id,const char* techName);
 	int allocateBuffer(GeoBufferType type,int vertexDefinition,int size,int& start,bool dynamic);
@@ -220,9 +237,7 @@ private:
 	VDStruct m_VDStructs[MAX_VERDECLS];
 	Texture m_Textures[MAX_TEXTURES];
 	Material m_Materials[MAX_MATERIALS];
-	TextureAtlas m_TextureAtlas[MAX_ATLAS];
 	Shader m_Shaders[MAX_SHADERS];
-	BitmapFont m_BitmapFonts[MAX_BM_FONTS];
 	int m_AtlasCounter;
 	int m_BMCounter;
 	SystemFont m_Fonts[MAX_SYSTEM_FONTS];
@@ -235,6 +250,10 @@ private:
 	int m_CurrentTextures[5];
 	int m_CurrentShader;
 	int m_CurrentBS;
+	// debug
+	DebugMessages m_DebugMessages;
+	LPD3DXSPRITE m_DebugSprite;
+	int m_DebugFont;
 };
 
 };

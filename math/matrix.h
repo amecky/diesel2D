@@ -6,6 +6,8 @@ ds::mat3 operator * (const ds::mat3& m1,const ds::mat3& m2);
 
 ds::Vec3 operator * (const ds::mat3& m,const ds::Vec3& v);
 
+ds::Vec2 operator * (const ds::mat3& m,const ds::Vec2& v);
+
 ds::Vec4 operator * (const ds::mat4& m,const ds::Vec4& v);
 
 ds::Vec3 operator * (const ds::mat4& m,const ds::Vec3& v);
@@ -29,6 +31,12 @@ namespace ds {
 		Vec2 mul(const mat3& m,const Vec2& v);
 
 		mat4 m4identity();
+
+		mat3 mat3Transform(const Vec2& pos);
+
+		mat3 mat3Translation(float x,float y);
+
+		mat3 mat3Scale(const Vec2& pos);
 
 		mat3 mat3RotationY(float angle);
 
@@ -57,6 +65,14 @@ namespace ds {
 		mat4 mat4Inverse(const mat4& m);
 
 		D3DXMATRIX convert(const mat4& m);
+
+		mat3 rotationAlign(const Vec2& d);
+
+		mat3 rotationAlign(const Vec3& d);
+
+		mat3 rotation(const Vec3& d,const Vec3& z);
+
+		mat3 rotationAxisCosSin(const Vec3& v,float co,float si );
 	}
 
 }

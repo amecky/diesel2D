@@ -175,7 +175,7 @@ void NewProfiler::print() {
 	}
 }
 
-void NewProfiler::show(const ds::Vec2& pos,ds::DebugRenderer* debugRenderer) {
+void NewProfiler::show(int x,int y,ds::Renderer* renderer) {
 	float total = 1.0f;
 	for ( uint32 i = 0; i < m_History.num(); ++i ) {
 		ProfileHistory* ph = &m_History[i];
@@ -183,15 +183,16 @@ void NewProfiler::show(const ds::Vec2& pos,ds::DebugRenderer* debugRenderer) {
 			total = ph->average;
 		}
 	}
-	ds::Vec2 textPos = pos;
+	int tx = x;
+	int ty = y;
 	for ( uint32 i = 0; i < m_History.num(); ++i ) {
 		ProfileHistory* ph = &m_History[i];
 		float percentage = ph->average / total * 100.0f;	
-		textPos.x = pos.x;		
-		debugRenderer->addText(textPos,ds::Color(1.0f,1.0f,1.0f,1.0f),"%s",formatDuration(ph->average).c_str());
-		textPos.x = pos.x +70.0f + ph->level * 5.0f;
-		debugRenderer->addText(textPos,ph->name);
-		textPos.y += 20.0f;
+		tx = x;		
+		renderer->debug(tx,ty,ds::Color(1.0f,1.0f,1.0f,1.0f),"%s",formatDuration(ph->average).c_str());
+		tx = tx +70.0f + ph->level * 5.0f;
+		renderer->debug(tx,ty,ph->name);
+		ty += 20.0f;
 		//LOGC(logINFO,"NewProfiler") << formatPercentage(percentage) << "% | " << formatDuration(ph->average) << " | " << formatDuration(ph->min) << " | " << formatDuration(ph->max) << " | " << ph->name;			
 	}
 }

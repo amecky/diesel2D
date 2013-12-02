@@ -90,6 +90,7 @@ GraphicsDevice::GraphicsDevice(HWND hWnd,const Settings& settings) {
 
 
 GraphicsDevice::~GraphicsDevice() {
+	LOG(logINFO) << "Releasing GraphicsDevice";
 	if( pd3dDevice != NULL ) {
         pd3dDevice->Release();
 	}

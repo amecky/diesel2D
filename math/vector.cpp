@@ -1,15 +1,34 @@
 #include "vector.h"
 #include <math.h>
+#include "GameMath.h"
 
 namespace ds {
 
 namespace vector {
 
 	void rotate(Vec2& v,float angle) {
-		float xt = (v.x * cosf(angle)) - (v.y * sinf(angle));
-		float yt = (v.y * cosf(angle)) + (v.x * sinf(angle));
+		float xt = (v.x * cosf(angle)) + (v.y * sinf(angle));
+		float yt = (v.y * cosf(angle)) - (v.x * sinf(angle));
 		v.x = xt;
 		v.y = yt;
+	}
+
+	Vec2 srt(const Vec2& v,const Vec2& u,float scaleX,float scaleY,float rotation) {
+		float sx = u.x * scaleX;
+		float sy = u.y * scaleY;
+
+		// rotation clock wise
+		float xt = cosf(rotation) * sx + sinf(rotation) * sy;
+		float yt = -sinf(rotation) * sx + cosf(rotation) * sy;
+
+		// rotation counter clock wise
+		//float xt = cosf(rotation) * sx - sinf(rotation) * sy;
+		//float yt = sinf(rotation) * sx + cosf(rotation) * sy;
+
+		xt += v.x;
+		yt += v.y;
+
+		return Vec2(xt,yt);
 	}
 
 	void scale(Vec2& v,float s) {
@@ -26,10 +45,8 @@ namespace vector {
 		return v.x * v.x + v.y * v.y;
 	}
 
-	Vec2 cross(const Vec2& v1,const Vec2& v2) {
-		float x = v1.x * v2.x;
-		float y = v1.y * v2.y;
-		return Vec2(x,y);
+	float cross(const Vec2& v1,const Vec2& v2) {
+		return v1.x * v2.y - v2.x * v1.y;		
 	}
 
 	float dot(const Vec2& v1,const Vec2& v2) {
@@ -54,6 +71,14 @@ namespace vector {
 	void addRadial(Vec2& v,float radius,float angle) {
 		v.x += radius * cos(angle);
 		v.y += radius * sin(angle);
+	}
+
+	Vec2 calucateRadial(const Vec2& v,float radius,float angle) {
+		Vec2 ret;
+		float ra = math::reflect(angle);
+		ret.x = v.x + radius * cos(ra);
+		ret.y = v.y + radius * sin(ra);
+		return ret;
 	}
 
 	float getAngle(const Vec2& v1,const Vec2& v2)  {	

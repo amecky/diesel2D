@@ -29,6 +29,7 @@ namespace ds {
 		float almostIdentity( float x, float m, float n );
 		void transformMousePosToWorld(Vec3* vPickRayDir,Vec3* vPickRayOrig);
 		void getTextureCoordinates(const Rect& textureRect,int textureSize,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel = true);
+		void getTextureCoordinates(const Rect& textureRect,int textureWidth,float textureHeight,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel);
 		void follow(const Vec2& targetPos,Vec2& newPos,float* angle,float distance,float add);
 		void followRelative(const Vec2& targetPos,Vec2& newPos,float* angle,float distance,float percentage);
 		void clipToRect(Vec2& newPos,const Rect& rect);
@@ -36,6 +37,12 @@ namespace ds {
 		float reflect(float angle);
 		void interpolateColor(const Color& firstCol,const Color& secondColor,float t,Color* outColor);
 		bool outside(float value,float min,float max);
+
+		void clamp(Vec2& v,float minX,float maxX,float minY,float maxY);
+		// -------------------------------------------------------
+		// 
+		// -------------------------------------------------------
+		bool checkLineCircle(const Vec2& center, float radius,const Vec2& lineFrom,const Vec2& lineTo);
 		// -------------------------------------------------------
 		// Get random float between min and max
 		// -------------------------------------------------------
@@ -52,6 +59,12 @@ namespace ds {
 		// Check if two circles overlap also calculating penetration distance and penetration vector
 		// ------------------------------------------------------------------------------------------
 		bool checkCircleIntersection(const Vec2& p1,float r1,const Vec2& p2,float r2,float* dist,Vec2& penVec);
+
+		Vec2 getShiftVector(const Vec2& p1,float r1,const Vec2& p2,float r2);
+
+		bool solveQuadraticFormula(const float a,const float b,const float c,float* r1,float* r2);
+
+		bool circleSweepTest(const Vec2& a0,const Vec2& a1,float ra,const Vec2& b0,const Vec2& b1,float rb,float* u0,float* u1);			
 
 		struct TexCoord {
 

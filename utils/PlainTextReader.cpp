@@ -2,6 +2,7 @@
 #include <stack>
 #include "StringUtils.h"
 #include "Log.h"
+#include "StringUtils.h"
 
 PlainTextReader::PlainTextReader() : m_Root(0) {
 }
@@ -223,3 +224,44 @@ void SettingsReader::getNames(std::vector<std::string>& names) {
 std::string& SettingsReader::getValue(const std::string& name) {
 	return m_Settings[name];
 }
+
+// -------------------------------------------------------
+// NewSettingsReader
+// -------------------------------------------------------
+bool NewSettingsReader::parse(const char* fileName) {
+	LOGC(logINFO,"NewSettingsReader") << "parsing file: " << fileName;
+	std::string line;
+	std::ifstream infile(fileName, std::ios_base::in);
+	if ( infile) {
+		std::vector<std::string> entries;
+		while (getline(infile, line, '\n')) {
+			if (line.find('#') == std::string::npos) {
+				entries.clear();
+				ds::string::split(line,entries,'=');
+				if ( entries.size() == 2 ) {
+					std::string name = entries[0];
+					ds::string::trim(name);
+					std::string value = entries[1];
+					ds::string::trim(value);
+					Setting set;
+					// FIXME: make sure name is only 20 chars
+					strcpy(set.name,name.c_str());
+					set.hash = ds::string::murmur_hash(name.c_str());
+					set.value = value;
+					m_Settings.push_back(set);
+				}
+				else {
+					LOGC(logINFO,"NewSettingsReader") << "NewSplit returned wrong number of entries: " << line;
+				}
+			}
+		}
+		infile.close();
+		return true;
+	}
+	else {
+		LOGC(logINFO,"NewSettingsReader") << "Cannot find file: " << fileName;
+		return false;
+	}
+}
+
+

@@ -1,5 +1,6 @@
 #pragma once
 #include "..\dxstdafx.h"
+#include <iostream>
 
 namespace ds {
 
@@ -68,10 +69,32 @@ inline Color::Color(float rc,float gc,float bc,float ac) {
 	a = ac;
 }
 
+inline std::ostream& operator << (std::ostream& os, const Color& c) {
+	os << c.r;
+	os << c.g;
+	os << c.b;
+	os << c.a;
+	return os;
+}
+
+inline std::istream& operator >> (std::istream& input, Color& c) {
+	input >> c.r;
+	//c.r /= 255.0f;
+	input >> c.g;
+	//c.g /= 255.0f;
+	input >> c.b;
+	//c.b /= 255.0f;
+	input >> c.a;
+	//c.a /= 255.0f;
+	return input;
+}
+
 
 namespace color {
 
 	Color lerp(const Color& lhs,const Color& rhs,float t);
+
+	Color hsvToColor(float h,float s,float v);
 
 }
 

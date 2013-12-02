@@ -73,3 +73,15 @@ typedef unsigned long ulong;
 #define BIT( num ) ( 1 << ( num ) )
 #endif
 
+#ifndef DBG_V2
+#define DBG_V2(v) "x: " << v.x << " y: " << v.y
+#endif
+
+#ifndef DBG_V3
+#define DBG_V3(v) "x: " << v.x << " y: " << v.y << " z: " << v.z
+#endif
+
+#ifndef DBG_RECT
+#define DBG_RECT(v) "top: " << v.top << " left: " << v.left << " width: " << v.width() << " height: " << v.height()
+#endif
+

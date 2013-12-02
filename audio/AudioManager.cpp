@@ -125,6 +125,7 @@ bool AudioManager::createAudioBuffer(Sound* sound) {
 	as.hash = string::murmur_hash(sound->getName());
 	strncpy(as.name,sound->getName(),32);
 	m_AudioBuffers.append(as);
+	LOGC(logINFO,"AudioManager") << "adding audio sound with hash " << as.hash;
 	//audioBuffers[soundName] = audioBuffer;	
 	return true;
 }
@@ -134,6 +135,7 @@ bool AudioManager::createAudioBuffer(Sound* sound) {
 // -------------------------------------------------------
 bool AudioManager::play(const char* soundName,int volume, bool looping) {
 	AudioBuffer* buffer = findByName(soundName);
+	assert(buffer != 0);
 	if ( buffer != 0 ) {
 		if ( buffer->isPlaying() ) {
 			buffer->stop();
@@ -188,6 +190,9 @@ void AudioManager::loadSound(const char* name) {
 	int ret = s->loadWavFile(fileName);
 	if ( ret > 0 ) {		
 		createAudioBuffer(s);		
+	}
+	else {
+		LOGC(logERROR,"AudioManager") << "Unable to load wav file";
 	}
 	delete s;
 }

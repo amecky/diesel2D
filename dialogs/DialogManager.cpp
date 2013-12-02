@@ -1,25 +1,38 @@
 #include "DialogManager.h"
 #include "..\utils\StringUtils.h"
+#include "..\utils\font.h"
 
 namespace ds {
 
 // -------------------------------------------------------
 // Constructor
 // -------------------------------------------------------
-DialogManager::DialogManager(void) {
+DialogManager::DialogManager(void) : m_Index(0) , m_Initialized(false) {
 }
 
 // -------------------------------------------------------
 // Destructor - delete all dialogs
 // -------------------------------------------------------
-DialogManager::~DialogManager(void) {
-	Dialogs::iterator it = m_Dialogs.begin();
-	while ( it != m_Dialogs.end() ) {
-		delete (*it);
-		it = m_Dialogs.erase(it);
-	}
+DialogManager::~DialogManager(void) {	
 }
 
+// -------------------------------------------------------
+// Init
+// -------------------------------------------------------
+void DialogManager::init(SpriteBatch* spriteBatch,Renderer* renderer,const char* fontName,int textureID) {
+	m_SpriteBatch = spriteBatch;
+	font::load(fontName,renderer,textureID,m_Font);
+	m_Initialized = true;
+}
+
+// -------------------------------------------------------
+// Create dialog
+// -------------------------------------------------------
+void DialogManager::createDialog(const char* name,GUIDialog* dialog) {
+	dialog->init(name,m_Index,m_SpriteBatch,m_Font);
+	++m_Index;
+	m_Dialogs.push_back(dialog);
+}
 // -------------------------------------------------------
 // Add dialog to internal list
 // -------------------------------------------------------
@@ -72,11 +85,15 @@ void DialogManager::setActiveFlag(const char* name,bool active) {
 // Render all active dialogs
 // -------------------------------------------------------
 void DialogManager::render() {
-	for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
-		GUIDialog* dlg = m_Dialogs[i];
-		if ( dlg->isActive() ) {
-			dlg->render();
+	if ( m_Initialized && !m_Dialogs.empty() ) {
+		m_SpriteBatch->begin();
+		for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
+			GUIDialog* dlg = m_Dialogs[i];
+			if ( dlg->isActive() ) {
+				dlg->render();
+			}
 		}
+		m_SpriteBatch->end();
 	}
 }
 
@@ -112,13 +129,13 @@ bool DialogManager::onButtonDown(int button,int x,int y,DialogID* dlgId,int* sel
 void DialogManager::addToggleAction(const char* oldDialogName,const char* newDialogName,int buttonId) {
 	GUIDialog* oldDlg = findByName(oldDialogName);
 	GUIDialog* newDlg = findByName(newDialogName);
-	if ( oldDlg != 0 && newDlg != 0 ) {
-		ToggleAction ta;
-		ta.oldDialog = oldDlg;
-		ta.newDialog = newDlg;
-		ta.buttonId = buttonId;
-		m_ToggleActions.push_back(ta);
-	}
+	assert(oldDlg != 0);
+	assert(newDlg != 0);
+	ToggleAction ta;
+	ta.oldDialog = oldDlg;
+	ta.newDialog = newDlg;
+	ta.buttonId = buttonId;
+	m_ToggleActions.push_back(ta);	
 }
 
 // -------------------------------------------------------

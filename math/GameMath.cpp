@@ -1,6 +1,7 @@
 #include "GameMath.h"
 #include "..\renderer\Camera.h"
 #include "..\utils\mtrand.h"
+#include "..\utils\Log.h"
 
 // ---------------------------------------------
 //
@@ -59,6 +60,29 @@ namespace ds {
 			*u2 = static_cast<float>(textureRect.right)/size;
 			*v1 = static_cast<float>(textureRect.top)/size;
 			*v2 = static_cast<float>(textureRect.bottom)/size;
+		}
+	}
+
+	void getTextureCoordinates(const Rect& textureRect,int textureWidth,float textureHeight,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel) {
+		if ( useHalfTexel ) {
+			float halfTexel = 0.5f;
+			float const width   = textureWidth;
+			float const height  = textureHeight;
+
+			float kUOffset = halfTexel/width;
+			float kVOffset = halfTexel/height;
+
+			*u1 = static_cast<float>(textureRect.left)/width  + kUOffset;
+			*v1 = static_cast<float>(textureRect.top)/height + kVOffset;  
+
+			*u2 = *u1 + static_cast<float>(textureRect.width()) /width   - 2.0f*kUOffset;
+			*v2 = *v1 + static_cast<float>(textureRect.height())/height  - 2.0f*kVOffset;
+		}
+		else {
+			*u1 = static_cast<float>(textureRect.left)/textureWidth;
+			*u2 = static_cast<float>(textureRect.right)/textureWidth;
+			*v1 = static_cast<float>(textureRect.top)/textureHeight;
+			*v2 = static_cast<float>(textureRect.bottom)/textureHeight;
 		}
 	}
 
@@ -166,7 +190,9 @@ namespace ds {
 		if ( v1 != v2 ) {
 			Vec2 vn1 = vector::normalize(v1);
 			Vec2 vn2 = vector::normalize(v2);
+			//LOG(logINFO) << "vn1 " << DBG_V2(vn1) << " vn2 " << DBG_V2(vn2);
 			float dot = vector::dot(vn1,vn2);		
+			//LOG(logINFO) << "dot " << dot;
 			if ( dot < -1.0f ) {
 				dot = -1.0f;
 			}
@@ -174,10 +200,13 @@ namespace ds {
 				dot = 1.0f;
 			}
 			float tmp = acos(dot);
-			float cross = (vn1.x * vn2.y) - (vn2.x * vn1.y);
+			//LOG(logINFO) << "acos " << RADTODEG(tmp);
+			float cross = vector::cross(vn1,vn2);
+			//LOG(logINFO) << "cross " << cross;
 			if ( cross < 0.0f ) {
-				tmp = 2.0f * D3DX_PI - tmp;
+				tmp = TWO_PI - tmp;
 			}
+			//LOG(logINFO) << "new acos " << RADTODEG(tmp);
 			return tmp;		
 		}
 		else {
@@ -186,8 +215,13 @@ namespace ds {
 	}
 
 	float getTargetAngle(const Vec2& v1,const Vec2& v2) {	
-		Vec2 diff = v1 - v2;
-		return getAngle(V2_RIGHT,diff) + D3DX_PI;
+		Vec2 diff = v2 - v1;
+		//LOG(logINFO) << "diff " << DBG_V2(diff);
+		float angle = getAngle(diff,V2_RIGHT);// + PI;// + D3DX_PI;
+		if ( angle >= TWO_PI ) {
+			angle -= TWO_PI;
+		}
+		return angle;
 	}
 
 	Vec2 getDistantPosition(const Vec2& initialPosition,float angle,float radius) {
@@ -321,6 +355,26 @@ namespace ds {
 		}
 
 		// -------------------------------------------------------
+		// 
+		// -------------------------------------------------------
+		bool checkLineCircle(const Vec2& center, float radius,const Vec2& lineFrom,const Vec2& lineTo) {
+			Vec2 ac = center - lineFrom;
+			Vec2 ab = lineTo - lineFrom;
+			float ab2 = vector::dot(ab,ab);
+			float acab = vector::dot(ac,ab);
+			float t = acab / ab2;
+
+			if (t < 0)
+				t = 0;
+			else if (t > 1)
+				t = 1;
+
+			Vec2 h = ((ab * t) + lineFrom) - center;
+			float h2 = vector::dot(h,h);
+
+			return (h2 <= (radius * radius));
+		}
+		// -------------------------------------------------------
 		// random int
 		// -------------------------------------------------------
 		int random(int min,int max) {
@@ -331,6 +385,21 @@ namespace ds {
 			return static_cast<int>(r);
 		}
 
+
+		bool solveQuadraticFormula(const float a,const float b,const float c,float* r1,float* r2) {
+			const float q = b * b - 4.0f * a * c; 
+			if( q >= 0 ) {
+				const float sq = sqrt(q);
+				const float d = 1.0f / (2.0f * a);
+				*r1 = ( -b + sq ) * d;
+				*r2 = ( -b - sq ) * d;
+				return true;//real roots
+			}
+			else {
+				return false;//complex roots
+
+			}
+		}
 		// -------------------------------------------------------
 		// Check if two circles overlap
 		// -------------------------------------------------------
@@ -360,6 +429,81 @@ namespace ds {
 			return false;
 		}
 
+		Vec2 getShiftVector(const Vec2& p1,float r1,const Vec2& p2,float r2) {
+			Vec2 diff = p1 - p2;
+			float maxSquareDistance = r1 + r2;
+			maxSquareDistance *= maxSquareDistance;
+			float squareDistance = vector::dot(diff, diff);
+			if (squareDistance > maxSquareDistance) {
+				return ds::Vec2(0, 0);
+			}
+			float distance = sqrtf(squareDistance);
+			if (distance > 0.0f ){
+				diff.x /= distance;
+				diff.y /= distance;
+			}
+			else{
+				diff = ds::Vec2(1, 0);
+			}
+
+			float scaleFactor = r1 + r2 - distance;
+
+			diff.x *= scaleFactor;
+			diff.y *= scaleFactor;
+
+			return diff;        
+		}
+
+
+		void clamp(Vec2& v,float minX,float maxX,float minY,float maxY) {
+			if ( v.x < minX ) {
+				v.x = minX;
+			}
+			if ( v.x > maxX ) {
+				v.x = maxX;
+			}
+			if ( v.y < minY ) {
+				v.y = minY;
+			}
+			if ( v.y > maxY ) {
+				v.y = maxY;
+			}
+		}
+
+		bool circleSweepTest(const Vec2& a0,const Vec2& a1,float ra,const Vec2& b0,const Vec2& b1,float rb,float* u0,float* u1) {
+			Vec2 va = a1 - a0;
+			//vector from A0 to A1
+			Vec2 vb = b1 - b0;
+			//vector from B0 to B1
+			Vec2 AB = b0 - a0;
+			//vector from A0 to B0
+			Vec2 vab = vb - va;
+			//relative velocity (in normalized time)
+			float rab = ra + rb;
+			float a = vector::dot(vab,vab);
+			//u*u coefficient
+			float b = 2.0f * vector::dot(vab,AB);
+			//u coefficient
+			float c = vector::dot(AB,AB) - rab*rab;
+			//constant term
+			//check if they're currently overlapping
+			if( vector::dot(AB,AB) <= rab*rab )	{
+				*u0 = 0;
+				*u1 = 0;
+				return true;
+			}
+			//check if they hit each other 
+			// during the frame
+			if( solveQuadraticFormula( a, b, c, u0, u1 ) ) {
+				if( u0 > u1 ) {
+					float tmp = *u0;
+					*u0 = *u1;
+					*u1 = tmp;
+				}
+				return true;
+			}
+			return false;
+		}
 	}
 
 }

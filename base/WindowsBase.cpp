@@ -1,8 +1,11 @@
 #include "..\dxstdafx.h"
 #include "BaseApp.h"
 #include "..\utils\Log.h"
-
-
+/*
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+*/
 extern ds::BaseApp *app;
 
 #define GETX(l) (int(l & 0xFFFF))
@@ -110,23 +113,24 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam){
 		}
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
-
+/*
 #ifdef _DEBUG
 #include <crtdbg.h>
 #endif
-
+*/
 #include <stdio.h>
 
 int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, int nCmdShow){
-	/*
+	
 #ifdef _DEBUG
 	int flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG); // Get current flag
 	flag |= _CRTDBG_LEAK_CHECK_DF; // Turn on leak-checking bit
 	flag |= _CRTDBG_CHECK_ALWAYS_DF; // Turn on CrtCheckMemory
-	flag |= _CRTDBG_DELAY_FREE_MEM_DF;
+	//flag |= _CRTDBG_DELAY_FREE_MEM_DF;
 	_CrtSetDbgFlag(flag); // Set flag to the new value
 #endif
-	*/
+	
+	//_CrtSetBreakAlloc(101);
 	//initCPU();
 
 	// Make sure we're running in the exe's path
@@ -182,25 +186,8 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 			app->buildFrame();        
         } 
     }
-	/*
-	if (app->init()){
-		app->resetCamera();
-
-		do {
-			app->loadConfig();
-
-			if (!app->initCaps()) break;
-			if (!app->initAPI()) break;
-
-			if (!app->load()){
-				app->closeWindow(true, false);
-			}
-			*/
-		/*
-		app->exit();
-	}
-	*/
+	
 	delete app;
-
+	//_CrtDumpMemoryLeaks();
 	return (int) msg.wParam;
 }

@@ -3,6 +3,7 @@
 #include "..\utils\Color.h"
 #include "..\math\math_types.h"
 #include "..\lib\container\List.h"
+#include <d3dx9core.h>
 
 namespace ds {
 
@@ -120,9 +121,6 @@ namespace ds {
 		bool scissor;
 	};
 	
-
-	class TextureAtlas;
-
 	// -------------------------------------------------------
 	// Character definition
 	// -------------------------------------------------------
@@ -135,6 +133,7 @@ namespace ds {
 		float u2;
 		float v1;
 		float v2;
+		Rect texureRect;
 	};
 	
 	// -------------------------------------------------------
@@ -150,7 +149,7 @@ namespace ds {
 		uint32 charHeight;
 		uint32 startX;
 		uint32 startY;
-		uint32 gridHeight;
+		uint32 gridHeight;		
 		List<CharDef> definitions;
 
 		void addChar(uint32 ascii,int startX,int startY,int width) {
@@ -163,6 +162,7 @@ namespace ds {
 			cd.v1 = (float)cd.startY/textureSize;
 			cd.u2 = cd.u1 + (float)cd.width/(textureSize);
 			cd.v2 = cd.v1 + ((float)charHeight)/(textureSize);
+			cd.texureRect = Rect(static_cast<float>(startY),static_cast<float>(startX),static_cast<float>(width),static_cast<float>(charHeight));
 			definitions.append(cd);
 		}
 		const CharDef& getCharDef(char c) const {
@@ -248,6 +248,37 @@ namespace ds {
 		IdString name;		
 		LPDIRECT3DTEXTURE9 texture;
 		LPDIRECT3DSURFACE9 surface;
+		LPD3DXRENDERTOSURFACE rts;
+	};
+
+	// -------------------------------------------------------
+	// Sprite
+	// -------------------------------------------------------
+	struct Sprite {
+
+		Vec2 position;
+		float rotation;
+		Vec2 center;
+		float scaleX;
+		float scaleY;
+		Color color;
+		Rect textureRect;
+
+		Sprite() : position(0,0) , rotation(0.0f) , center(0,0) , scaleX(1.0f) , scaleY(1.0f) , color(Color::WHITE) , textureRect(0,0,32,32) {}
+		Sprite(int x,int y,const Rect tr,float rot = 0.0f, float sx = 1.0f,float sy = 1.0f,const Color& clr = Color::WHITE, const Vec2& cntr = Vec2(0,0)) 
+			: position(Vec2(x,y)) , textureRect(tr) , rotation(rot) , scaleX(sx) , scaleY(sy) , center(cntr) , color(clr) {}
+		Sprite(const Vec2& pos,const Rect tr) : position(pos) , textureRect(tr) , rotation(0.0f) , scaleX(1.0f) , scaleY(1.0f) , center(0,0) , color(Color::WHITE) {}
+	};
+
+	// -------------------------------------------------------
+	// Debug message
+	// -------------------------------------------------------
+	struct DebugMessage {
+		std::string message;
+		int x;
+		int y;
+		Color color;
+		DebugMessage() : message("") , x(0) , y(0) , color(1.0f,1.0f,1.0f,1.0f) {}
 	};
 
 }

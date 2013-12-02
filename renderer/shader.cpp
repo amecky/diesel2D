@@ -70,8 +70,8 @@ namespace ds {
 				"MinFilter = LINEAR;\r\n"
 				"MagFilter = LINEAR;\r\n"
 				"MipFilter = LINEAR;\r\n"
-				"AddressU  = WRAP;\r\n"
-				"AddressV  = WRAP;\r\n"
+				"AddressU  = CLAMP;\r\n"
+				"AddressV  = CLAMP;\r\n"
 				"};\r\n"
 				"struct OutputVS {\r\n"
 				"float4 posH   : POSITION0;\r\n"
@@ -98,6 +98,200 @@ namespace ds {
 			int ret = renderer->createShaderFromText(g_strBuffer,"TTCVTech");
 			Shader sh = renderer->getShader(ret);
 			shader::setTexture(sh,"gTex",renderer,textureId);
+			return ret;
+		}
+
+		// -------------------------------------------------------
+		// Create a position texture color shader
+		// -------------------------------------------------------
+		int createPTCShader(Renderer* renderer,int textureId) {
+			const char* g_strBuffer = 
+				"uniform extern float4x4 gWVP;\r\n"
+				"uniform extern texture gTex;\r\n"
+				"sampler TexS = sampler_state {\r\n"
+				"	Texture = <gTex>;\r\n"
+				"	MinFilter = LINEAR;\r\n"
+				"	MagFilter = LINEAR;\r\n"
+				"	MipFilter = LINEAR;\r\n"
+				"	AddressU  = CLAMP;\r\n"
+				"	AddressV  = CLAMP;\r\n"
+				"};\r\n"
+				"struct OutputVS {\r\n"
+				"	float4 posH   : POSITION0;\r\n"
+				"	float2 tex0   : TEXCOORD0;\r\n"
+				"	float4 color0 : COLOR0;\r\n"
+				"};\r\n"
+				"OutputVS BasicVS(float3 posL : POSITION0,float2 tex0 : TEXCOORD0 , float4 color : COLOR0) {\r\n"
+				"	OutputVS outVS = (OutputVS)0;	\r\n"
+				"	outVS.posH = mul(float4(posL, 1.0f), gWVP);		\r\n"
+				"	outVS.tex0 = tex0;\r\n"
+				"	outVS.color0 = color;\r\n"
+				"	return outVS;\r\n"
+				"}\r\n"
+				"float4 BasicPS(OutputVS input) : COLOR {\r\n"
+				"	float4 clr = tex2D(TexS, input.tex0);\r\n"
+				"	return clr * input.color0;\r\n"
+				"}\r\n"
+				"technique PTCTech {\r\n"
+				"	pass P0 {\r\n"
+				"		vertexShader = compile vs_2_0 BasicVS();\r\n"
+				"		pixelShader  = compile ps_2_0 BasicPS();\r\n"
+				"	}\r\n"
+				"}\r\n";
+			int ret = renderer->createShaderFromText(g_strBuffer,"PTCTech");
+			Shader sh = renderer->getShader(ret);
+			shader::setTexture(sh,"gTex",renderer,textureId);
+			return ret;
+		}
+
+		int createBloomShader(Renderer* renderer,int textureID,float threshold) {
+			const char* g_strBuffer = 
+			"uniform extern float4x4 gWVP;\r\n"
+			"uniform extern texture gTex;\r\n"
+			"float Threshold = 0.25;\r\n"
+			"sampler TexS = sampler_state {\r\n"
+			"	Texture = <gTex>;\r\n"
+			"	MinFilter = LINEAR;\r\n"
+			"	MagFilter = LINEAR;\r\n"
+			"	MipFilter = LINEAR;\r\n"
+			"	//AddressU  = CLAMP;\r\n"
+			"	//AddressV  = CLAMP;\r\n"
+			"};\r\n"
+			"struct OutputVS {\r\n"
+			"	float4 posH   : POSITION0;\r\n"
+			"	float2 Tex   : TEXCOORD0;\r\n"
+			"	float4 color0 : COLOR0;\r\n"
+			"};\r\n"
+			"OutputVS FadeVS(float3 posL : POSITION0,float2 tex0 : TEXCOORD0 , float4 color : COLOR0) {\r\n"
+			"	OutputVS outVS = (OutputVS)0;	\r\n"
+			"	outVS.posH = mul(float4(posL, 1.0f), gWVP);		\r\n"
+			"	outVS.Tex = tex0;\r\n"
+			"	outVS.color0 = color;\r\n"
+			"	return outVS;\r\n"
+			"}\r\n"
+			"float4 BloomPS(OutputVS input) : COLOR0 {\r\n"
+			"	float4 Color = tex2D(TexS, input.Tex);\r\n"
+			"	return saturate((Color - Threshold) / (1 - Threshold));\r\n"
+			"}\r\n"
+			"technique BloomTech {\r\n"
+			"	pass P0 {\r\n"
+			"		vertexShader = compile vs_2_0 FadeVS();\r\n"
+			"		pixelShader = compile ps_2_0 BloomPS();\r\n"
+			"	}\r\n"
+			"}\r\n";
+			int ret = renderer->createShaderFromText(g_strBuffer,"BloomTech");
+			Shader sh = renderer->getShader(ret);
+			shader::setTexture(sh,"gTex",renderer,textureID);
+			shader::setFloat(sh,"Threshold",threshold);
+			return ret;
+		}
+
+		int createBlurShader(Renderer* renderer,int textureID) {
+			const char* g_strBuffer =
+			"uniform extern float4x4 gWVP;\r\n"
+			"uniform extern texture gTex;\r\n"
+			"#define SAMPLE_COUNT 15\r\n"
+			"float2 SampleOffsets[SAMPLE_COUNT];\r\n"
+			"float SampleWeights[SAMPLE_COUNT];\r\n"
+			"sampler TexS = sampler_state {\r\n"
+			"	Texture = <gTex>;\r\n"
+			"	MinFilter = LINEAR;\r\n"
+			"	MagFilter = LINEAR;\r\n"
+			"	MipFilter = LINEAR;\r\n"
+			"	AddressU  = WRAP;\r\n"
+			"	AddressV  = WRAP;\r\n"
+			"};\r\n"
+			"struct OutputVS {\r\n"
+			"	float4 posH   : POSITION0;\r\n"
+			"	float2 Tex   : TEXCOORD0;\r\n"
+			"	float4 color0 : COLOR0;\r\n"
+			"};\r\n"
+			"OutputVS BlurVS(float3 posL : POSITION0,float2 tex0 : TEXCOORD0 , float4 color : COLOR0) {\r\n"
+			"	OutputVS outVS = (OutputVS)0;	\r\n"
+			"	outVS.posH = mul(float4(posL, 1.0f), gWVP);		\r\n"
+			"	outVS.Tex = tex0;\r\n"
+			"	outVS.color0 = color;\r\n"
+			"	return outVS;\r\n"
+			"}\r\n"
+			"float4 BlurPS(OutputVS input) : COLOR {\r\n"
+			"	float4 c = 0;    \r\n"
+			"	for (int i = 0; i < SAMPLE_COUNT; i++) {\r\n"
+			"		c += tex2D(TexS, input.Tex + SampleOffsets[i]) * SampleWeights[i];\r\n"
+			"	}    \r\n"
+			"	return c;\r\n"
+			"}\r\n"
+			"technique BlurTech {\r\n"
+			"	pass P0 {\r\n"
+			"		vertexShader = compile vs_2_0 BlurVS();\r\n"
+			"		pixelShader = compile ps_2_0 BlurPS();\r\n"
+			"	}\r\n"
+			"}\r\n";
+			int ret = renderer->createShaderFromText(g_strBuffer,"BlurTech");
+			Shader sh = renderer->getShader(ret);
+			shader::setTexture(sh,"gTex",renderer,textureID);
+			return ret;
+		}
+
+		int createBloomCombineShader(Renderer* renderer,int colorTextureID,int bloomTextureID) {
+			const char* g_strBuffer =
+			"uniform extern float4x4 gWVP;\r\n"
+			"uniform extern texture gTex;\r\n"
+			"uniform extern texture ColorMap;\r\n"
+			"uniform extern texture gBlurTex;\r\n"
+			"sampler TexS = sampler_state {\r\n"
+			"	Texture = <gTex>;\r\n"
+			"	MinFilter = LINEAR;\r\n"
+			"	MagFilter = LINEAR;\r\n"
+			"	MipFilter = LINEAR;\r\n"
+			"	AddressU  = Clamp;\r\n"
+			"	AddressV  = Clamp;\r\n"
+			"};\r\n"
+			"sampler ColorMapSampler = sampler_state {\r\n"
+			"	Texture = <ColorMap>;\r\n"
+			"	MinFilter = Linear;\r\n"
+			"	MagFilter = Linear;\r\n"
+			"	MipFilter = Linear;\r\n"
+			"	AddressU  = Clamp;\r\n"
+			"	AddressV  = Clamp;\r\n"
+			"};\r\n"
+			"float BloomIntensity = 2.3;\r\n"
+			"float OriginalIntensity = 1.0;\r\n"
+			"float BloomSaturation = 1.0;\r\n"
+			"float OriginalSaturation = 1.0;\r\n"
+			"float4 AdjustSaturation(float4 color, float saturation) {\r\n"
+			"	float grey = dot(color, float4(0.3, 0.59, 0.11,1.0));  \r\n"
+			"	return lerp(grey, color, saturation);\r\n"
+			"}\r\n"
+			"struct OutputVS {\r\n"
+			"	float4 posH   : POSITION0;\r\n"
+			"	float2 Tex   : TEXCOORD0;\r\n"
+			"	float4 color0 : COLOR0;\r\n"
+			"};\r\n"
+			"OutputVS FadeVS(float3 posL : POSITION0,float2 tex0 : TEXCOORD0 , float4 color : COLOR0) {\r\n"
+			"	OutputVS outVS = (OutputVS)0; \r\n"
+			"	outVS.posH = mul(float4(posL, 1.0f), gWVP);   \r\n"
+			"	outVS.Tex = tex0;\r\n"
+			"	outVS.color0 = color;\r\n"
+			"	return outVS;\r\n"
+			"}\r\n"
+			"float4 BCPS(OutputVS input) : COLOR0 {\r\n"
+			"	float4 bloomColor = tex2D(TexS, input.Tex);\r\n"
+			"	float4 originalColor = tex2D(ColorMapSampler, input.Tex);\r\n"
+			"	bloomColor = AdjustSaturation(bloomColor, BloomSaturation) * BloomIntensity;\r\n"
+			"	originalColor = AdjustSaturation(originalColor, OriginalSaturation) * OriginalIntensity;\r\n"
+			"	originalColor *= (1 - saturate(bloomColor));\r\n"
+			"	return originalColor + bloomColor;\r\n"
+			"}\r\n"
+			"technique BCTech {\r\n"
+			"	pass P0 {\r\n"
+			"		vertexShader = compile vs_2_0 FadeVS();\r\n"
+			"		pixelShader = compile ps_2_0 BCPS();\r\n"
+			"	}\r\n"
+			"}\r\n";
+			int ret = renderer->createShaderFromText(g_strBuffer,"BCTech");
+			Shader sh = renderer->getShader(ret);
+			shader::setTexture(sh,"gTex",renderer,bloomTextureID);
+			shader::setTexture(sh,"ColorMap",renderer,colorTextureID);
 			return ret;
 		}
 	}

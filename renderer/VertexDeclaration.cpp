@@ -90,6 +90,7 @@ void VertexDeclaration::create(GraphicsDevice* device) {
 		vdElements[m_DecElements.size()].UsageIndex = 0;
 
 		device->get()->CreateVertexDeclaration(vdElements, &m_Decl);
+		
 		delete[] vdElements;
 	}
 }

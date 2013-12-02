@@ -280,11 +280,24 @@ public:
 // -------------------------------------------------------
 // Transformed textures colors
 // -------------------------------------------------------
+
 class TTCBuffer : public IndexVertexBuffer<TTCVertex> {
 
 public:
 	TTCBuffer(Renderer* renderer,int vertexSize,int indexSize,bool dynamic) :
-	  IndexVertexBuffer<TTCVertex>(renderer,D3DPT_TRIANGLELIST,VD_TTC,vertexSize,dynamic) {
+	  // Note: VD_TTC is not working so use 0 directly
+	  IndexVertexBuffer<TTCVertex>(renderer,D3DPT_TRIANGLELIST,0,vertexSize,dynamic) {
+		  createIndexBuffer(indexSize);
+	  }
+
+};
+
+class PTCBuffer : public IndexVertexBuffer<PTCVertex> {
+
+public:
+	PTCBuffer(Renderer* renderer,int vertexSize,int indexSize,bool dynamic) :
+	  // Note: VD_TTC is not working so use 0 directly
+	  IndexVertexBuffer<PTCVertex>(renderer,D3DPT_TRIANGLELIST,0,vertexSize,dynamic) {
 		  createIndexBuffer(indexSize);
 	  }
 

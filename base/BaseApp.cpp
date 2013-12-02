@@ -2,9 +2,7 @@
 #include "..\utils\Log.h"
 #include <windows.h>
 #include "..\utils\Profiler.h"
-#include "..\nodes\SkyNode.h"
 #include "..\utils\PlainTextReader.h"
-#include "..\cvar\TVar.h"
 
 namespace ds {
 
@@ -20,9 +18,6 @@ BaseApp::BaseApp() {
 	m_LastTime = 0;
 	m_Loading = true;
 	gProfiler = new NewProfiler();
-	if ( gTVarSystem == 0 ) {
-		gTVarSystem = new TVarSystem();
-	}
 	m_ClearColor = Color(100,149,237,255);
 	m_DebugInfo.showProfiler = false;
 	m_DebugInfo.printProfiler = false;
@@ -31,16 +26,18 @@ BaseApp::BaseApp() {
 	m_ButtonState.processed = true;
 	m_MousePos = Vec2(0,0);
 	rand.seed(GetTickCount());
-	game = new Game();
-	gui = new DialogManager();
+	audio = new AudioManager;
+	m_Fullscreen = false;
 }
 
 // -------------------------------------------------------
 // Destructor
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
-	delete renderer;
-	delete gui;
+	LOGC(logINFO,"BaseApp") << "Destructing all elements";
+	delete gProfiler;
+	delete audio;
+	delete renderer;	
 }
 
 // -------------------------------------------------------
@@ -48,15 +45,15 @@ BaseApp::~BaseApp() {
 // -------------------------------------------------------
 void BaseApp::init() {
 	Settings settings;
-	settings.fullscreen = false;
+	settings.fullscreen = m_Fullscreen;
 	settings.height = m_Height;
 	settings.width = m_Width;
 	settings.synched = true;
 	settings.mode = 1;
 	settings.postProcessing = false;
 	renderer = new Renderer(m_hWnd,settings);   
-	game->init(m_hWnd);
-	loadTVarFile();
+	m_World.init(renderer);
+	audio->initialize(m_hWnd);
 	initialize();	
 	loadContent();
 	m_Loading = false;
@@ -124,10 +121,10 @@ void BaseApp::initTimer() {
 void BaseApp::updateTime() {
 	m_CurTime = GetTickCount();
 	//g_fElapsedTime = (float)((m_CurTime - m_LastTime) * 0.001);
-	g_fElapsedTime = 0.016;
+	g_fElapsedTime = 0.016f;
 	m_LastTime = m_CurTime;
 	m_GameTime.elapsed = g_fElapsedTime;
-	m_GameTime.elapsedMillis = g_fElapsedTime * 1000.0f;
+	m_GameTime.elapsedMillis = static_cast<uint32>(g_fElapsedTime * 1000.0f);
 	m_GameTime.totalTime += m_GameTime.elapsedMillis;
 }
 
@@ -138,7 +135,7 @@ void BaseApp::buildFrame() {
 	gProfiler->reset();
 	PR_START("MAIN")
 	renderer->getDrawCounter().reset();
-	renderer->getDebugRenderer().clear();	
+	renderer->clearDebugMessages();
 	// handle key states
 	PR_START("INPUT")
 	if ( m_KeyStates.keyDown ) {
@@ -152,7 +149,7 @@ void BaseApp::buildFrame() {
 	if ( m_KeyStates.onChar ) {
 		m_KeyStates.onChar = false;
 		// if any dialog has processed the char then do not propagate it
-		if ( !gui->OnChar(m_KeyStates.ascii,0) ) {
+		if ( !gui.OnChar(m_KeyStates.ascii,0) ) {
 			OnChar(m_KeyStates.ascii,0);
 		}
 	}
@@ -164,7 +161,7 @@ void BaseApp::buildFrame() {
 			OnButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);
 			DialogID did;
 			int selected;
-			if ( gui->onButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y,&did,&selected) ) {
+			if ( gui.onButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y,&did,&selected) ) {
 				onGUIButton(did,selected);
 			}
 		}
@@ -173,26 +170,29 @@ void BaseApp::buildFrame() {
 		}
 	}
 	PR_START("UPDATE")
-	gui->updateMousePos(getMousePos());
+	gui.updateMousePos(getMousePos());
 	update(m_GameTime);
+	m_World.update(m_GameTime.elapsed);
 	PR_END("UPDATE")
 	PR_START("RENDER")
 	renderer->beginRendering(m_ClearColor);	
 	renderer->setupMatrices();
 	PR_START("RENDER_GAME")
 	draw(m_GameTime);
-	gui->render();
+	m_World.draw();
+	gui.render();
 	PR_END("RENDER_GAME")
 	PR_START("DEBUG_RENDER")
 #ifdef DEBUG		
 	if ( m_DebugInfo.showDrawCounter ) {
-		renderer->getDebugRenderer().showDrawCounter(Vec2(10,10));
+		int y = renderer->getHeight() - 80;
+		renderer->showDrawCounter(10,y);
 	}
 	if ( m_DebugInfo.showProfiler ) {
-		renderer->getDebugRenderer().showProfile(Vec2(10,10));
+		renderer->showProfiler(10,10);
 	}		
 #endif
-	renderer->getDebugRenderer().draw();
+	renderer->drawDebugMessages();
 	PR_END("DEBUG_RENDER")
 	PR_END("RENDER")		
 	renderer->endRendering();	
@@ -201,11 +201,6 @@ void BaseApp::buildFrame() {
 		m_DebugInfo.printProfiler = false;
 		gProfiler->print();
 	}	
-}
-
-void BaseApp::loadSkyNode(const std::string& envMapFile,float radius) {
-	SkyNode* sn = new SkyNode(renderer,0,envMapFile,radius);
-	renderer->setSkyNode(sn);
 }
 
 // -------------------------------------------------------
@@ -226,9 +221,6 @@ void BaseApp::sendOnChar(char ascii,unsigned int state) {
 #ifdef DEBUG
 	if ( ascii == 'p' ) {
 		gProfiler->print();
-	}
-	else if ( ascii == 'r' ) {
-		loadTVarFile();
 	}
 #endif
 	m_KeyStates.ascii = ascii;
@@ -266,30 +258,5 @@ void BaseApp::sendKeyUp(WPARAM virtualKey) {
 	m_KeyStates.keyReleased = virtualKey;
 }
 
-// -------------------------------------------------------
-// Load TVAR file if found
-// -------------------------------------------------------
-void BaseApp::loadTVarFile() {
-	SettingsReader settingsReader;
-	if ( settingsReader.parse("content\\resources\\Settings.tvar") ) {	
-		LOGC(logINFO,"BaseApp") << "Loading tvar file";
-		//PAKWriter writer;
-		//writer.open(buffer);
-		//writer.writeHeader(DT_TVAR);		
-		std::vector<std::string> names;
-		settingsReader.getNames(names);
-		for ( size_t i = 0; i < names.size(); ++i ) {
-			gTVarSystem->update(names[i].c_str(),settingsReader.getValue(names[i]).c_str());
-		}
-		//gTVarSystem->saveBinaryFile(writer);				
-		//writer.close();
-#ifdef DEBUG
-		gTVarSystem->debug();
-#endif
-	}
-	else {
-		LOGC(logINFO,"BaseApp") << "No tvar file found";
-	}
-}
 
 }

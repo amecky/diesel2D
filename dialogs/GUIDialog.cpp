@@ -1,19 +1,23 @@
 #include "GUIDialog.h"
 #include "..\utils\Log.h"
 #include "..\utils\StringUtils.h"
+#include "..\utils\font.h"
 
 namespace ds {
 
 const float INPUT_PADDING = 8.0f;
 // -------------------------------------------------------
-// Constructor
+// Init
 // -------------------------------------------------------
-GUIDialog::GUIDialog(const char* name,Renderer* renderer,int material,int bitmapFont) : Node("GUIDialog",renderer,material) , m_Active(false) {
-	m_MeshNode = new SimpleQuadNode("GUIQuadNode",renderer,material,100);
-	m_TextNode = new TextNode("GUITextNode",renderer,material,bitmapFont);
+void GUIDialog::init(const char* name,const DialogID& id,SpriteBatch* spriteBatch,const BitmapFont& bitmapFont) {	
+	m_Batch = spriteBatch;
+	m_ID = id;
+	m_BitmapFont = bitmapFont;
+	m_Active = false;
 	m_HashName = string::murmur_hash(name);
 	m_SupportHover = false;
 	m_SelectedInput = -1;
+	m_Index = 0;
 }
 
 
@@ -21,46 +25,57 @@ GUIDialog::GUIDialog(const char* name,Renderer* renderer,int material,int bitmap
 // Destructor
 // -------------------------------------------------------
 GUIDialog::~GUIDialog(void) {
-	delete m_MeshNode;
-	delete m_TextNode;
 }
 
 // -------------------------------------------------------
 // Add static image
 // -------------------------------------------------------
-uint32 GUIDialog::addImage(const Vec2& pos,const Rect& textureRect,float textureSize,bool centered) {
+uint32 GUIDialog::addImage(const Vec2& pos,const Rect& textureRect,bool centered) {
 	Vec2 p = pos;
 	if ( centered ) {
-		p.x = ( 1024.0f - textureRect.width()) * 0.5f;
+		p.x = 512.0f;
 	}
-	return m_MeshNode->create(textureRect.width(),textureRect.height(),p,textureRect,textureSize);
+	GUIItem item;
+	Sprite sp;
+	sp.position = p;
+	sp.textureRect = textureRect;
+	sp.color = Color::WHITE;
+	item.sprites.push_back(sp);
+	item.id = m_Index;
+	++m_Index;
+	m_Items.push_back(item);
+	return item.id;
 }
 
 // -------------------------------------------------------
 // Add image
 // -------------------------------------------------------
 uint32 GUIDialog::addImage(float y,const char* taItem) {
+	/*
 	float w = m_Renderer->getAtlasItemWidth(m_Material,taItem);
 	float h = m_Renderer->getAtlasItemHeight(m_Material,taItem);
 	Vec2 p(0.0f,y);
 	p.x = ( 1024.0f - w) * 0.5f;	
-	return m_MeshNode->create(w,h,p,taItem);
+	*/
+	return -1;//m_MeshNode->create(w,h,p,taItem);
 }
 
 // -------------------------------------------------------
 // Add image link
 // -------------------------------------------------------
-uint32 GUIDialog::addImageLink(const Vec2& pos,const Rect& textureRect,float textureSize,bool centered) {
+uint32 GUIDialog::addImageLink(const Vec2& pos,const Rect& textureRect,bool centered) {
 	ImageLink link;
 	Vec2 p = pos;
 	if ( centered ) {
-		p.x = ( 1024.0f - textureRect.width()) * 0.5f;
+		p.x = 512.0f;
 	}
-	link.index = m_MeshNode->create(textureRect.width(),textureRect.height(),p,textureRect,textureSize);
-	link.pos = p;
+	link.index = addImage(pos,textureRect,centered);	
+	link.pos = p;	
 	float w = textureRect.width();
 	float h = textureRect.height();
-	link.rect = Rect(p.y,p.x,w,h);
+	float x = ( 1024.0f - textureRect.width()) * 0.5f;
+	float y = 768.0f - p.y - h * 0.5f;
+	link.rect = Rect(y,x,w,h);
 	m_ImageLinks.push_back(link);
 	return link.index;
 }
@@ -70,14 +85,16 @@ uint32 GUIDialog::addImageLink(const Vec2& pos,const Rect& textureRect,float tex
 // -------------------------------------------------------
 uint32 GUIDialog::addImageLink(float y,const char* taItem) {
 	ImageLink link;
+	/*
 	float w = m_Renderer->getAtlasItemWidth(m_Material,taItem);
 	float h = m_Renderer->getAtlasItemHeight(m_Material,taItem);
 	Vec2 p(0.0f,y);
 	p.x = ( 1024.0f - w) * 0.5f;	
-	link.index = m_MeshNode->create(w,h,p,taItem);
+	//link.index = m_MeshNode->create(w,h,p,taItem);
 	link.pos = p;
 	link.rect = Rect(p.y,p.x,w,h);
 	m_ImageLinks.push_back(link);
+	*/
 	return link.index;
 }
 
@@ -86,16 +103,18 @@ uint32 GUIDialog::addImageLink(float y,const char* taItem) {
 // -------------------------------------------------------
 uint32 GUIDialog::addImageLink(const Vec2& pos,const char* taItem,bool centered) {
 	ImageLink link;
+	/*
 	Vec2 p = pos;
 	float w = m_Renderer->getAtlasItemWidth(m_Material,taItem);
 	float h = m_Renderer->getAtlasItemHeight(m_Material,taItem);
 	if ( centered ) {
 		p.x = ( 1024.0f - w) * 0.5f;
 	}
-	link.index = m_MeshNode->create(w,h,p,taItem);
+	//link.index = m_MeshNode->create(w,h,p,taItem);
 	link.pos = p;
 	link.rect = Rect(p.y,p.x,w,h);
 	m_ImageLinks.push_back(link);
+	*/
 	return link.index;
 }
 
@@ -105,24 +124,32 @@ uint32 GUIDialog::addImageLink(const Vec2& pos,const char* taItem,bool centered)
 uint32 GUIDialog::addText(const Vec2& pos,const std::string& text,const Color& color,float scale,bool centered) {
 	Vec2 p = pos;
 	if ( centered ) {
-		Vec2 size = m_TextNode->calculateSize(text,scale);
+		Vec2 size = font::calculateSize(m_BitmapFont,text,scale);
 		p.x = ( 1024.0f - size.x ) * 0.5f;
+
 	}
-	return m_TextNode->addText(p,text,color,scale);
+	GUIItem item;
+	font::createText(m_BitmapFont,p,text,color,item.sprites,scale,scale);
+	item.id = m_Index;
+	++m_Index;
+	m_Items.push_back(item);
+	return item.id;
 }
 
 // -------------------------------------------------------
 // Update text
 // -------------------------------------------------------
-void GUIDialog::updateText(uint32 id,const std::string& text,bool centered) {
-	m_TextNode->updateText(id,text);
-	if (centered ) {
-		const TextEntry& te = m_TextNode->getText(id);
-		Vec2 p = te.pos;
-		Vec2 size = m_TextNode->calculateSize(text,te.scale);
+void GUIDialog::updateText(uint32 id,const Vec2& pos,const std::string& text,const Color& color,float scale,bool centered) {
+	Vec2 p = pos;
+	if ( centered ) {
+		Vec2 size = font::calculateSize(m_BitmapFont,text,scale);
 		p.x = ( 1024.0f - size.x ) * 0.5f;
-		m_TextNode->setPosition(id,p);
+
 	}
+	GUIItem* item = &m_Items[id];
+	
+	item->sprites.clear();
+	font::createText(m_BitmapFont,p,text,color,item->sprites,scale,scale);	
 }
 
 // -------------------------------------------------------
@@ -133,7 +160,7 @@ int GUIDialog::onButton(int button,int x,int y,bool down) {
 		return -1;
 	}
 	for ( size_t i = 0; i < m_Buttons.size(); ++i ) {
-		DialogButton* db = &m_Buttons[i];			
+		DialogButton* db = &m_Buttons[i];		
 		for ( size_t i = 0; i < m_ImageLinks.size(); ++i ) {
 			ImageLink* link = &m_ImageLinks[i];
 			if ( link->index == db->imageIndex ) {
@@ -204,7 +231,8 @@ bool GUIDialog::OnChar(char ascii) {
 						input->text += ascii;
 					}
 				}
-				updateText(input->textIndex,input->text,false);
+				// FIXME: adapt to new method
+				//updateText(input->textIndex,input->text,false);
 				return true;
 			}
 		}
@@ -214,11 +242,14 @@ bool GUIDialog::OnChar(char ascii) {
 // -------------------------------------------------------
 // Set button texture
 // -------------------------------------------------------
-void GUIDialog::setButtonTexture(const DialogButton& button,const char* taItem) {
+void GUIDialog::setButtonTexture(const DialogButton& button,const Rect& textureRect) {
 	for ( size_t i = 0; i < m_ImageLinks.size(); ++i ) {
 		ImageLink* link = &m_ImageLinks[i];
 		if ( link->index == button.imageIndex ) {
-			m_MeshNode->setTextureRect(link->index,taItem);
+			GUIItem* item = &m_Items[link->index];
+			for ( size_t j = 0; j < item->sprites.size(); ++j ) {
+				item->sprites[j].textureRect = textureRect;
+			}
 		}
 	}
 }
@@ -227,15 +258,18 @@ void GUIDialog::setButtonTexture(const DialogButton& button,const char* taItem) 
 // Set image link texture
 // -------------------------------------------------------
 void GUIDialog::setImageLinkTexture(uint32 id,const char* taItem) {
+	/*
 	for ( size_t i = 0; i < m_ImageLinks.size(); ++i ) {
 		ImageLink* link = &m_ImageLinks[i];
 		if ( link->index == id ) {
 			m_MeshNode->setTextureRect(link->index,taItem);
 		}
 	}
+	*/
 }
 
 void GUIDialog::addInputField(float x,float y,const char* regularItem,const char* highlightItem,const std::string& text,const char* cursorItem,int size) {
+	/*
 	InputField input;
 	input.size = size;
 	input.text = text;
@@ -264,12 +298,44 @@ void GUIDialog::addInputField(float x,float y,const char* regularItem,const char
 	uint32 idx = m_Buttons.size();
 	input.id = idx;
 	m_InputFields.push_back(input);
+	*/
+}
+
+const DialogButton& GUIDialog::addButton(float y,const std::string& text,const Rect& textureRect,const Color& textColor,float textScale) {
+	DialogButton db;
+	db.imageIndex = addImageLink(Vec2(0.0f,y),textureRect);
+	//y = y - textureRect.height() * 0.5f;
+	Vec2 size = font::calculateSize(m_BitmapFont,text,textScale);
+	float ty = y - size.y * 0.5f;
+	db.textIndex = addText(Vec2(100.0f,ty),text,textColor,textScale,true);
+	/*
+	ImageLink link;
+	Vec2 p(0.0f,y);
+	float w = m_Renderer->getAtlasItemWidth(m_Material,taItem);
+	float h = m_Renderer->getAtlasItemHeight(m_Material,taItem);
+	p.x = ( 1024.0f - w) * 0.5f;	
+	link.index = m_MeshNode->create(w,h,p,taItem);
+	link.pos = p;	
+	link.rect = Rect(p.y,p.x,w,h);
+	m_ImageLinks.push_back(link);
+	db.imageIndex = link.index;
+	Vec2 ts = m_TextNode->calculateSize(text);
+	// FIXME: calculate scale as well
+	float ty = y + ( h - ts.y) * 0.5f;
+	float tx = p.x + ( w - ts.x ) * 0.5f;
+	db.textIndex = addText(ds::Vec2(tx,ty),text,color,scale,false);
+	*/
+	uint32 idx = m_Buttons.size();
+	db.id = idx;
+	m_Buttons.push_back(db);
+	return m_Buttons[idx];
 }
 // -----------------------------------------------------------
 // Add a button which is a combination of an image and text
 // -----------------------------------------------------------
 DialogButton GUIDialog::addButton(float y,const char* taItem,const std::string& text,const Color& color,float scale) {
 	DialogButton db;
+	/*
 	ImageLink link;
 	Vec2 p(0.0f,y);
 	float w = m_Renderer->getAtlasItemWidth(m_Material,taItem);
@@ -288,6 +354,7 @@ DialogButton GUIDialog::addButton(float y,const char* taItem,const std::string& 
 	uint32 idx = m_Buttons.size();
 	db.id = idx;
 	m_Buttons.push_back(db);
+	*/
 	return db;
 }
 
@@ -321,8 +388,12 @@ void GUIDialog::deactivate() {
 // -------------------------------------------------------
 void GUIDialog::render() {
 	if ( m_Active ) {
-		m_Renderer->drawNode(m_MeshNode);
-		m_Renderer->drawNode(m_TextNode);	
+		for ( size_t i = 0; i < m_Items.size(); ++i ) {
+			GUIItem* gi = &m_Items[i];
+			for ( size_t j =0; j < gi->sprites.size(); ++j ) {
+				m_Batch->draw(gi->sprites[j]);
+			}
+		}
 	}
 }
 
@@ -353,7 +424,7 @@ void GUIDialog::updateMousePos(const ds::Vec2& mousePos) {
 // -------------------------------------------------------
 // Set button hover
 // -------------------------------------------------------
-void GUIDialog::setButtonHover(const char* regularItem,const char* highlightItem) {
+void GUIDialog::setButtonHover(const Rect& regularItem,const Rect& highlightItem) {
 	m_SupportHover = true;
 	m_ButtonItem = regularItem;
 	m_ButtonItemSelected = highlightItem;

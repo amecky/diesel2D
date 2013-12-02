@@ -25,6 +25,22 @@ namespace color {
 		float invT = 1.0f - t;
 		return Color(lhs.r * invT + rhs.r * t,lhs.g * invT + rhs.g * t,lhs.b * invT + rhs.b * t,lhs.a * invT + rhs.a * t);
 	}
+
+	Color hsvToColor(float h,float s,float v) {
+		if (h == 0 && s == 0) {
+			return Color(v, v, v);
+		}
+		float c = s * v;
+		float x = c * (1.0f - abs(fmod(h,2.0f) - 1.0f));
+		float m = v - c;
+
+		if (h < 1) return Color(c + m, x + m, m);
+		else if (h < 2) return Color(x + m, c + m, m);
+		else if (h < 3) return Color(m, c + m, x + m);
+		else if (h < 4) return Color(m, x + m, c + m);
+		else if (h < 5) return Color(x + m, m, c + m);
+		else return Color(c + m, m, x + m);
+	}
 }
 
 }

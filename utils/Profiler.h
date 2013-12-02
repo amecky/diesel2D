@@ -5,7 +5,7 @@
 #include "..\lib\container\List.h"
 #include "..\dxstdafx.h"
 #include <vector>
-#include "..\renderer\DebugRenderer.h"
+#include "..\renderer\Renderer.h"
 
 const int HISTORY_TICKS = 60;
 const int MAX_PROFILE_DATA = 100;
@@ -52,7 +52,7 @@ public:
 	void reset();
 	void print();
 	void printCollectedData(const char* name);
-	void show(const ds::Vec2& pos,ds::DebugRenderer* debugRenderer);
+	void show(int x,int y,ds::Renderer* renderer);
 	// profiling data
 	void startCollectData(const char* name);
 	void stopCollectData(const char* name);

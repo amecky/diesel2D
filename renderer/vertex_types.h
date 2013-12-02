@@ -62,6 +62,45 @@ namespace ds {
 	};
 
 	// -------------------------------------------------------
+	// TTC Vertex
+	// -------------------------------------------------------
+	struct PTCVertex {
+
+		float x,y,z;
+		Vec2 uv;
+		Color color;
+
+		PTCVertex() {
+			x = y = z = 0.0f;
+			uv = Vec2(0,0);//tu = tv = 0.0f;
+			color = Color(1.0f,1.0f,1.0f,1.0f);
+		}
+
+		PTCVertex(float xp,float yp,float zp,float u,float v,const Color& clr = Color::WHITE) {
+			x = xp;
+			y = yp;
+			z = zp;
+			//tu = u;
+			//tv = v;
+			uv = Vec2(u,v);	
+			color = clr;
+		}
+
+		PTCVertex(const Vec3& pos,const Vec2& texcoords,const Color& clr = Color::WHITE) {
+			x = pos.x;
+			y = pos.y;
+			z = pos.z;
+			//tu = texcoords.x;
+			//tv = texcoords.y;
+			uv = texcoords;
+			color = clr;
+		}
+	};
+
+	struct SpritePlane {
+		PTCVertex v[4];
+	};
+	// -------------------------------------------------------
 	// Quad using 4 TTCVertex
 	// -------------------------------------------------------
 	struct Plane {

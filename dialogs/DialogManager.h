@@ -5,8 +5,6 @@
 
 namespace ds {
 
-typedef uint32 DialogID;
-
 class DialogManager {
 
 struct ToggleAction {
@@ -21,8 +19,11 @@ typedef std::vector<ToggleAction> ToggleActions;
 public:
 	DialogManager(void);
 	~DialogManager(void);
+	void init(SpriteBatch* spriteBatch,Renderer* renderer,const char* fontName,int textureID);
 	DialogID addDialog(GUIDialog* dialog);
 	void render();
+	//GUIDialog* createDialog(const char* name);
+	void createDialog(const char* name,GUIDialog* dialog);
 	void toggle(const char* oldDialogName,const char* newDialogName);
 	void activate(const char* dialogName);
 	void deactivate(const char* dialogName);
@@ -33,7 +34,11 @@ public:
 	void addToggleAction(const char* oldDialogName,const char* newDialogName,int buttonId);
 private:
 	void setActiveFlag(const char* name,bool active);
+	SpriteBatch* m_SpriteBatch;
+	BitmapFont m_Font;
+	bool m_Initialized;
 	Dialogs m_Dialogs;
+	uint32 m_Index;
 	ToggleActions m_ToggleActions;
 };
 

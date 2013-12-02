@@ -1,14 +1,16 @@
 #pragma once
 #include "..\dxstdafx.h"
 #include <vector>
-//#include "..\content\ResManager.h"
 #include "..\renderer\Renderer.h"
 #include "..\utils\mtrand.h"
-#include "Game.h"
 #include "..\dialogs\DialogManager.h"
+#include "..\world\World.h"
+#include "..\audio\AudioManager.h"
 
 namespace ds {
-	
+
+class GameStateManager;
+
 struct GameTime {
 	float elapsed;
 	uint32 elapsedMillis;
@@ -79,8 +81,8 @@ public:
 		return m_MousePos;
 	}
 	void setMousePos(int x,int y) {		
-		m_MousePos.x = x;
-		m_MousePos.y = y;
+		m_MousePos.x = static_cast<float>(x);
+		m_MousePos.y = static_cast<float>(y);
 	}
 	float random(float min,float max) {
 		return min + (max - min)* (float)rand();
@@ -93,20 +95,20 @@ protected:
 	virtual void OnKeyUp( WPARAM wParam ) {}
 	virtual void onGUIButton(DialogID dlgID,int button) {}
 	virtual void OnChar(char ascii,unsigned int keyState) {}
-	void loadSkyNode(const std::string& envMapFile,float radius);	
 	Renderer* renderer;
-	DialogManager* gui;
-	Game* game;
+	DialogManager gui;
+	AudioManager* audio;
 	HINSTANCE hInstance;
 	HWND m_hWnd;
 	bool m_Active;
 	WINDOWPLACEMENT m_wp;	
 	int m_Width;
 	int m_Height;
+	bool m_Fullscreen;
 	GameTime m_GameTime;
 	Color m_ClearColor;
+	World m_World;
 private:
-	void loadTVarFile();
 	Vec2 m_MousePos;
 	DWORD m_CurTime;
 	float g_fElapsedTime;

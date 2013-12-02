@@ -8,7 +8,14 @@
 #include "..\math\math_types.h"
 #include "StringUtils.h"
 #include "Color.h"
+#include "..\dxstdafx.h"
+#include "Log.h"
+#include "..\math\GameMath.h"
+#include "..\math\FloatArray.h"
 
+// -------------------------------------------------------
+// Category
+// -------------------------------------------------------
 class Category {
 
 typedef std::map<std::string,std::string> PropertyMap;
@@ -24,7 +31,7 @@ public:
 			it = m_Children.erase(it);
 		}
 	}
-	std::string& getName() {
+	const std::string& getName() const {
 		return m_Name;
 	}
 	void addProperty(const std::string& name,const std::string& value) {
@@ -52,10 +59,10 @@ public:
 		return ds::Color(r,g,b,a);
 	}
 	ds::Rect getRect(const std::string& name) {
-		int top = getInt(0,name);
-		int left = getInt(1,name);
-		int width = getInt(2,name);
-		int height = getInt(3,name);
+		float top = static_cast<float>(getInt(0,name));
+		float left = static_cast<float>(getInt(1,name));
+		float width = static_cast<float>(getInt(2,name));
+		float height = static_cast<float>(getInt(3,name));
 		return ds::Rect(top,left,width,height);
 	}
 	bool getBool(const std::string& name,bool defaultValue) {
@@ -77,7 +84,7 @@ public:
 		std::istringstream ist(s);
 		ist >> t;
 		return t;
-	}
+	}	
 	bool hasProperty(const std::string& name) const {
 		return m_Properties.find(name) != m_Properties.end();
 	}
@@ -87,7 +94,13 @@ public:
 	std::vector<Category*>& getChildren() {
 		return m_Children;
 	}
-private:
+	void getPropertyNames(std::vector<std::string>& propertyNames) {
+		PropertyMap::iterator it = m_Properties.begin();
+		while ( it != m_Properties.end()) {
+			propertyNames.push_back(it->first);
+			++it;
+		}
+	}
 	float getFloat(int index,const std::string& name) {
 		std::string s = m_Properties[name];
 		std::vector<std::string> values = ds::string::split(s);
@@ -104,6 +117,7 @@ private:
 		ist >> v;
 		return v;
 	}
+private:
 	std::string m_Name;
 	std::map<std::string,std::string> m_Properties;
 	std::vector<Category*> m_Children;
@@ -155,6 +169,7 @@ public:
 	bool parse(const char* fileName);
 	std::string& getValue(const std::string& name);
 	void getNames(std::vector<std::string>& names);
+	float getRandomFloat(const char* name);
 	template<class T> T get(const std::string& name,const T& defaultValue) {
 		if ( m_Settings.find(name) == m_Settings.end() ) {
 			return defaultValue;
@@ -166,5 +181,108 @@ public:
 		return t;
 	}
 private:
+	Settings m_Settings;
+};
+
+// -------------------------------------------------------
+// NewSettingsReader
+// -------------------------------------------------------
+class NewSettingsReader {
+
+struct Setting {
+	char name[20];
+	IdString hash;
+	std::string value;
+};
+
+typedef std::vector<Setting> Settings;
+
+public:
+	NewSettingsReader() {}
+	~NewSettingsReader() {}
+	bool parse(const char* fileName);
+	bool contains(const char* name) {
+		return find(name) != 0;
+	}
+	void getString(const char* name,std::string& ret) {
+		Setting* setting = find(name);
+		if ( setting != 0 ) {
+			//ret = setting->value.copy();
+		}
+	}
+	void get(const char* first,const char* second,ds::FloatArray* array) {
+		Setting* firstSetting = find(first);
+		Setting* secondSetting = find(second);
+		//LOG(logINFO) << "first " << firstSetting->value;
+		//LOG(logINFO) << "second " << secondSetting->value;
+		if ( firstSetting != 0 && secondSetting != 0 ) {
+			array->reset();
+			std::vector<std::string> firstEntries;
+			ds::string::split(firstSetting->value,firstEntries,' ');
+			std::vector<std::string> secondEntries;
+			ds::string::split(secondSetting->value,secondEntries,' ');
+			if ( firstEntries.size() == secondEntries.size() ) {
+				for ( size_t i = 0; i < firstEntries.size(); ++i ) {
+					float x = convert<float>(firstEntries[i]);
+					float t = convert<float>(secondEntries[i]);
+					array->add(t,x);
+				}
+			}
+			else {
+				LOGC(logINFO,"NewSettingsReader") << "Found uneven settings for: " << first << " and " << second;
+			}
+		}
+		else {
+			LOGC(logINFO,"NewSettingsReader") << "Cannot find matching settings for: " << first << " and " << second;
+		}
+	}
+	void get(const char* name,float* value) {
+		Setting* set = find(name);
+		if ( set != 0 ) {		
+			if ( set->value.find("[") != std::string::npos ) {
+				std::string nv = set->value.substr(1,set->value.length()-2);
+				std::vector<std::string> entries;
+				ds::string::split(nv,entries,'-');
+				float min = convert<float>(entries[0]);
+				float max = convert<float>(entries[1]);
+				*value = ds::math::random(min,max);
+			}
+			else {
+				get<float>(name,value);
+			}
+		}		
+	}
+	template<class T>
+	void get(const char* name,T* value) {
+		Setting* set = find(name);
+		if ( set != 0 ) {					
+			T t;
+			std::istringstream ist(set->value);
+			ist >> t;
+			*value = t;			
+		}		
+	}
+	size_t num() {
+		return m_Settings.size();
+	}
+private:
+	Setting* NewSettingsReader::find(const char* name) {
+		IdString hash = ds::string::murmur_hash(name);
+		for ( size_t i = 0; i < m_Settings.size(); ++i ) {
+			Setting* set = &m_Settings[i];
+			if ( set->hash == hash ) {
+				return set;
+			}
+		}
+		LOGC(logINFO,"NewSettingsReader") << "Sorry - but " << name << " was not found";
+		return 0;
+	}
+	template<class T>
+	T convert(const std::string& value) {
+		T t;
+		std::istringstream ist(value);
+		ist >> t;
+		return t;
+	}
 	Settings m_Settings;
 };

@@ -9,6 +9,7 @@ Sound::Sound(const char* name) {
 
 
 Sound::~Sound(void) {
+	delete m_PCMBuffer;
 }
 
 bool Sound::load(const char* fileName) {
@@ -43,29 +44,43 @@ int Sound::loadWavFile(const char* filename) {
 
   MMIOINFO mmioinfo;
   ZeroMemory(&mmioinfo,sizeof(MMIOINFO));
-  hmfr=mmioOpenA(const_cast<char *>(filename), &mmioinfo, MMIO_READ|MMIO_ALLOCBUF);
-  if(hmfr==NULL)return NULL;
-
+  hmfr = mmioOpenA(const_cast<char *>(filename), &mmioinfo, MMIO_READ|MMIO_ALLOCBUF);
+  if( hmfr == NULL) {
+	  LOGC(logERROR,"Sound") << "Cannot open file " << filename;
+	  return NULL;
+  }
   //descend into the RIFF
   parent.fccType=mmioFOURCC('W','A','V','E');
   if(mmioDescend(hmfr, &parent, NULL, MMIO_FINDRIFF)){
-    mmioClose(hmfr, 0); return NULL; //not a wave file
+    mmioClose(hmfr, 0); 
+	//not a wave file
+	LOGC(logERROR,"Sound") << "Not a valid wav " << filename;
+	return NULL;
   }
 
   //descend to the WAVEfmt
   child.ckid=mmioFOURCC('f', 'm', 't', ' ');
   if(mmioDescend(hmfr, &child, &parent, 0)){
-    mmioClose(hmfr, 0); return NULL; //file has no fmt chunk
+    mmioClose(hmfr, 0); 
+	//file has no fmt chunk
+	LOGC(logERROR,"Sound") << "file has no fmt chunk " << filename;
+	return NULL;
   }
 
   //read the WAVEFMT from the wave file
   if(mmioRead(hmfr, (char*)&m_WavFormatEx, sizeof(m_WavFormatEx)) != sizeof(m_WavFormatEx)){
-    mmioClose(hmfr, 0); return NULL; //unable to read fmt chunk
+    mmioClose(hmfr, 0); 
+	//unable to read fmt chunk
+	LOGC(logERROR,"Sound") << "unable to read fmt chunk " << filename;
+	return NULL;
   }
 
   //check wave format
   if(m_WavFormatEx.wFormatTag != WAVE_FORMAT_PCM){
-    mmioClose(hmfr, 0); return NULL; //WAVE file is not PCM format
+    mmioClose(hmfr, 0); 
+	//WAVE file is not PCM format
+	LOGC(logERROR,"Sound") << "WAVE file is not PCM format " << filename;
+	return NULL;
   }
 
   //ascend back to RIFF level
@@ -89,7 +104,10 @@ int Sound::loadWavFile(const char* filename) {
   //read the wave data
   if((int)mmioRead(hmfr, (char *)m_PCMBuffer, size) != size){
     //data read failed
-    mmioClose(hmfr, 0); delete [] m_PCMBuffer; return NULL; 
+    mmioClose(hmfr, 0); 
+	delete [] m_PCMBuffer; 
+	LOGC(logERROR,"Sound") << "Data read failed " << filename;
+	return NULL;
   }
 
   // Fill in wave properties

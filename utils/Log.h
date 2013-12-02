@@ -57,6 +57,9 @@ private:
 #define FILELOG_MAX_LEVEL logDEBUG
 #endif
 
+#define LG \
+	Log().get()
+
 #define LOG(level) \
     if (level > FILELOG_MAX_LEVEL) ;\
     else if (level > Log::reportingLevel() ) ; \

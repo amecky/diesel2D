@@ -40,6 +40,18 @@ inline ds::Vec2 operator * (float s,const ds::Vec2& u) {
 	return tmp;
 }
 
+inline void operator *= (ds::Vec2& u,float s) {
+	ds::Vec2 tmp;
+	u.x *= s;
+	u.y *= s;
+}
+
+inline void operator *= (ds::Vec3& u,float s) {
+	u.x *= s;
+	u.y *= s;
+	u.z *= s;
+}
+
 inline bool operator == (const ds::Vec2 &u, const ds::Vec2 &v) {
 	float dx = abs(u.x - v.x);
 	float dy = abs(u.y - v.y);
@@ -93,6 +105,14 @@ inline ds::Vec3 operator * (const ds::Vec3& u,float s) {
 	return tmp;
 }
 
+inline ds::Vec3 operator / (const ds::Vec3& u,float s) {
+	ds::Vec3 tmp;
+	tmp.x = u.x / s;
+	tmp.y = u.y / s;
+	tmp.z = u.z / s;
+	return tmp;
+}
+
 inline bool operator == (const ds::Vec3 &u, const ds::Vec3 &v) {
 	float dx = abs(u.x - v.x);
 	float dy = abs(u.y - v.y);
@@ -121,17 +141,21 @@ namespace ds {
 
 		void addScaled(Vec2& v,const Vec2& in,float scale);
 
+		Vec2 srt(const Vec2& v,const Vec2& u,float scaleX,float scaleY,float rotation);
+
 		float length(const Vec2& v);
 
 		float sqrLength(const Vec2& v);
 
-		Vec2 cross(const Vec2& v1,const Vec2& v2);
+		float cross(const Vec2& v1,const Vec2& v2);
 
 		float dot(const Vec2& v1,const Vec2& v2);
 
 		Vec2 normalize(const Vec2& v);
 
 		void addRadial(Vec2& v,float radius,float angle);
+
+		Vec2 calucateRadial(const Vec2& v,float radius,float angle);
 
 		void rotate(Vec2& v,float angle);
 

@@ -8,6 +8,11 @@ namespace ds {
 	namespace shader {
 
 		int createTransformedTextureColorShader(Renderer* renderer,int textureId);
+		int createPTCShader(Renderer* renderer,int textureId);
+
+		int createBloomShader(Renderer* renderer,int textureID,float threshold);
+		int createBlurShader(Renderer* renderer,int textureID);
+		int createBloomCombineShader(Renderer* renderer,int colorTextureID,int bloomTextureID);
 
 		bool setVec3(Shader& shader,const char* name,const Vec3& v);
 		bool setValue(Shader& shader,const char* name,void* data,UINT size);
