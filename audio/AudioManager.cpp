@@ -104,7 +104,7 @@ bool AudioManager::setPrimaryBufferFormat(DWORD dwPrimaryChannels,DWORD dwPrimar
 bool AudioManager::createAudioBuffer(Sound* sound) {
 	LPDIRECTSOUNDBUFFER sampleHandle;
 	if ( sound == NULL ) {
-		LOG(logERROR) <<  "No sound " << sound->getName() << " available";
+		LOG(logERROR) <<  "No sound available";
 		return false;
 	}
     DSBUFFERDESC dsbd;

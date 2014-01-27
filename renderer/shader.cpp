@@ -53,7 +53,7 @@ namespace ds {
 		D3DXHANDLE findHandle(const Shader& shader,const char* name) {
 			IdString hashName = string::murmur_hash(name);
 			ShaderConstant* sh = shader.constants;
-			for ( int i = 0; i < shader.constantCount; ++i ) {
+			for ( uint32 i = 0; i < shader.constantCount; ++i ) {
 				if ( hashName == sh->name ) {
 					return sh->handle;
 				}

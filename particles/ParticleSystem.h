@@ -1,12 +1,10 @@
 #pragma once
 #include "ParticleEmitter.h"
 #include "ParticleBuffer.h"
-#include "ParticleAffector.h"
 #include "..\renderer\Renderer.h"
 #include "..\renderer\render_types.h"
 #include "..\nodes\SpriteBatch.h"
 #include "..\renderer\Camera2D.h"
-//#include "..\renderer\DebugRenderer.h"
 
 namespace ds {
 

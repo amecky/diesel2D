@@ -17,7 +17,6 @@ struct Vec2 {
 	Vec2(const Vec2& v);
 
 	Vec2& operator += (const Vec2& v) {
-		Vec2 u;
 		x += v.x;
 		y += v.y;
 		return *this;
@@ -263,11 +262,17 @@ struct Circle {
 // -------------------------------------------------------
 struct Point {
 
-	float x,y;
+	int x,y;
 
-	Point() : x(0.0f) , y(0.0f) {}
+	Point() : x(0) , y(0) {}
 
-	Point(float xp,float yp) : x(xp) , y(yp) {}
+	Point(int xp,int yp) : x(xp) , y(yp) {}
+
+	Point& operator += (const ds::Point& s) {
+		x += s.x;
+		y += s.y;
+		return *this;
+	}
 };
 
 }

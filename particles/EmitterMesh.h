@@ -26,6 +26,9 @@ public:
 		delete m_Settings;
 	}
 	void getPoint(uint32 index,uint32 total,Vec2& position,Vec2& normal);
+	RingEmitterSettings* getSettings() {
+		return m_Settings;
+	}
 private:
 	RingEmitterSettings* m_Settings;
 };
@@ -61,9 +64,35 @@ public:
 		delete[] m_Entries;
 	}
 	void getPoint(uint32 index,uint32 total,Vec2& position,Vec2& normal);
+	BoxEmitterSettings* getSettings() {
+		return m_Settings;
+	}
 private:
 	BoxEmitterSettings* m_Settings;
 	BoxEntry* m_Entries;
+	int m_Max;
+};
+
+// -------------------------------------------------------
+// ConeEmitterMesh
+// -------------------------------------------------------
+class ConeEmitterMesh : public EmitterMesh {
+
+public:
+	ConeEmitterMesh(ConeEmitterSettings* settings) : m_Settings(settings) {}
+	virtual ~ConeEmitterMesh() {
+		delete m_Settings;
+	}
+	void getPoint(uint32 index,uint32 total,Vec2& position,Vec2& normal);
+	ConeEmitterSettings* getSettings() {
+		return m_Settings;
+	}
+	void setAngle(float startAngle,float endAngle) {
+		m_Settings->startAngle = startAngle;
+		m_Settings->endAngle = endAngle;
+	}
+private:
+	ConeEmitterSettings* m_Settings;
 	int m_Max;
 };
 

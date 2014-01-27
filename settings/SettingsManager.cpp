@@ -3,6 +3,7 @@
 #include "..\utils\Profiler.h"
 #include "..\pipeline\PAKReader.h"
 #include "..\pipeline\PAKWriter.h"
+#include "..\memory\DataBlockAllocator.h"
 
 namespace ds {
 
@@ -12,11 +13,13 @@ SettingsManager::SettingsManager(void) {
 
 SettingsManager::~SettingsManager(void) {
 	// FIXME: delete all settings
+	/*
 	SpriteSettings::iterator it = m_Settings.begin();
 	while ( it != m_Settings.end() ) {
 		delete (*it).sprite;
 		++it;
 	}
+	*/
 }
 
 bool SettingsManager::hasSettings(const char* fileName) {
@@ -162,7 +165,7 @@ void SettingsManager::loadInternalSpriteSettings(SpriteSetting* setting) {
 // Load settings
 // -------------------------------------------------------
 ds::Sprite* SettingsManager::loadSpriteSettings(const char* name) {
-	Sprite* sprite = new Sprite;
+	Sprite* sprite = (Sprite*)gBlockMemory->alloc(sizeof(Sprite));//new Sprite;
 	SpriteSetting iss;
 	iss.sprite = sprite;
 	iss.name = string::murmur_hash(name);

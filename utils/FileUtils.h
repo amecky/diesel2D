@@ -24,6 +24,11 @@ namespace file {
 	bool loadTextFile(const char* name,std::vector<std::string>& lines);
 	void getFileTime(const char* fileName,FILETIME& time);
 	bool compareFileTime(const char* fileName,const FILETIME& time);
+	//! Check if a file exists
+	/*
+		\param name the actual file include directories
+	*/
+	bool fileExists(const char* name);
 }
 
 class FSDirectory {

@@ -108,6 +108,7 @@ public:
 	// Textures
 	int createTexture(int width,int height);
 	int loadTexture(const char* name);
+	int loadTexture(const char* dirName,const char* name);
 	int getTextureId(const char* name);
 	int loadTextureWithColorKey(const char* name,const Color& color);
 	void setTexture(int id,int index = 0);

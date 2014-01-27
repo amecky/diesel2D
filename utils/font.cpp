@@ -11,16 +11,16 @@ namespace ds {
 		// -------------------------------------------------------
 		// Calculate size of text
 		// -------------------------------------------------------
-		Vec2 calculateSize(const BitmapFont& bitmapFont,const std::string& text,float scaleX,float scaleY) {
-			float padding = 0.0f;
+		Vec2 calculateSize(const BitmapFont& bitmapFont,const std::string& text,int padding,float scaleX,float scaleY) {
+			float cPadding = 0.0f;
 			Vec2 ret(0.0f,0.0f);
 			ret.y = bitmapFont.charHeight * scaleY;
 			for ( size_t cnt = 0; cnt < text.length(); ++cnt ) {
 				char c = text[cnt];
 				CharDef cd = bitmapFont.getCharDef(c);
-				padding = (cd.width+2)  * scaleX;		
+				cPadding = (cd.width+padding)  * scaleX;		
 				float dimX = cd.width * scaleX;
-				ret.x += dimX + 4;				
+				ret.x += dimX + padding;				
 			}
 			return ret;
 		}

@@ -61,6 +61,11 @@ JSONReader::JSONReader() {
 }
 
 JSONReader::~JSONReader() {
+	std::vector<Category*>::iterator it = m_Categories.begin();
+	while ( it != m_Categories.end()) {
+		delete (*it);
+		it = m_Categories.erase(it);
+	}
 }
 
 // -------------------------------------------------------
@@ -94,6 +99,7 @@ bool JSONReader::parse(const char* fileName) {
 	FILE *fp = fopen(fileName, "rb");
 	char* text;
 	if (fp) {
+		LOGC(logINFO,"JSONReader") << "Parsing " << fileName;
 		fseek(fp, 0, SEEK_END);
 		int size = ftell(fp);
 		fseek(fp, 0, SEEK_SET);

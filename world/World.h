@@ -1,3 +1,10 @@
+//-------------------------------------------------------------------------
+//
+// File:   World.h
+// Desc:   The 2d world.
+// Author: amecky <amecky@gamil.com>
+//
+//-------------------------------------------------------------------------
 #pragma once
 #include <vector>
 #include "..\nodes\SpriteBatch.h"
@@ -10,7 +17,8 @@
 #include "..\renderer\render_types.h"
 #include "..\renderer\shader.h"
 #include "CollisionManager.h"
-
+#include "..\io\Serializer.h"
+#include "..\memory\DataBlockAllocator.h"
 
 namespace ds {
 // -------------------------------------------------------
@@ -29,7 +37,10 @@ enum EntityType {
 };
 
 // -------------------------------------------------------
-// Entity
+//! The basic entity virtual base class
+/*! This is the base of all entity subclasses. It provides
+	already common methods 
+*/
 // -------------------------------------------------------
 class Entity {
 
@@ -42,15 +53,31 @@ public:
 	const int getID() const {
 		return m_ID;
 	}
+	//! Sets the layer that this entity belongs to
+	/*
+		\param layer the layer
+	*/
 	void setLayer(int layer) {
 		m_Layer = layer;
 	}
+	//! Returns the layer that this entity belongs to
+	/*
+		\return the layer
+	*/
 	const int getLayer() const {
 		return m_Layer;
 	}
+	//! Sets the state of the entity to be active or not
+	/*
+		\param active the new state of the entity
+	*/
 	void setActive(bool active) {
 		m_Active = active;
 	}
+	//! Returns the state of this entity whether it is active or not
+	/*
+		\return true if entity is active
+	*/
 	const bool isActive() const {
 		return m_Active;
 	}
@@ -114,8 +141,8 @@ public:
 
 		m_Buffer = new PTCBuffer(renderer,12,20,false);	
 		m_Buffer->clear();
-		float width = renderer->getWidth();
-		float height = renderer->getHeight();	
+		float width = static_cast<float>(renderer->getWidth());
+		float height = static_cast<float>(renderer->getHeight());
 
 		m_Buffer->add(PTCVertex(Vec3(-0.5f * width, 0.5f * height,0.0f),Vec2(0.0f,0.0f)));
 		m_Buffer->add(PTCVertex( 0.5f * width, 0.5f * height,0.0f,1.0f,0.0f));
@@ -363,7 +390,24 @@ class HUDEntity;
 class TextEntity;
 class SpriteEntity;
 
-class World {
+struct SpritePrefab : public Gizmo {
+
+	Sprite* sprite;
+	IdString name;
+
+	SpritePrefab() : Gizmo("SpritePrefab") {
+		sprite = BM_NEW(Sprite);
+		add("position",&sprite->position);
+		add("texture",&sprite->textureRect);
+		add("scale_x",&sprite->scaleX);
+		add("scale_y",&sprite->scaleY);
+		add("rotation",&sprite->rotation);
+		add("color",&sprite->color);
+	}
+
+};
+
+class World : public Serializer {
 
 struct RTSetting {
 
@@ -373,6 +417,8 @@ struct RTSetting {
 };
 
 typedef std::vector<GameObject*> GameObjects;
+//typedef std::vector<Sprite*> Sprites;
+typedef std::vector<SpritePrefab*> SpritePrefabs;
 
 public:
 	World(void);
@@ -381,18 +427,24 @@ public:
 	void setCamera(int layer,Camera2D* camera) {
 		m_Camera[layer] = camera;
 	}
+	// FIXME: loadSprites(const char* fileName); oder loadSprites();
 	// create
 	int createRenderTarget(int layer);
 	int createRenderTarget(int layer,float width,float height);
+	void createSpriteBatch(int id,const char* textureName,int maxQuads = 1024);
 	int createSpriteBatch(const char* textureName);
 	int createSpriteBatch(int textureID,float textureWidth = 1024.0f,float textureHeight = 1024.0f,int blendState = -1);
 	void setSpriteBatchShader(int batchID,int shaderID);
 	// add entity
 	void add(int layer,Entity* entity);
-	void addSpriteEntity(int layer,int batchID,SpriteEntity* entity,const char* settingsFile);
+	// FIXME: addSpriteEntity(layer,batch,entity,const char* spriteName);
+	void addSpriteEntity(int layer,int batchID,SpriteEntity* entity,Sprite* sprite);
+	void addSpriteEntity(int layer,int batchID,SpriteEntity* entity,int x,int y,Sprite* sprite);
+	void addSpriteEntity(int layer,int batchID,SpriteEntity* entity,const char* name);
 	void addSpriteEntity(int layer,int batchID,SpriteEntity* entity,int x,int y,const Rect& textureRect,float rotation = 0.0f,float scaleX = 1.0f,float scaleY = 1.0f,const Color& color = Color::WHITE);
+
 	void addParticleSystemEntity(int layer,int textureID,const char* dirName,ParticlesystemEntity* entity,int maxParticles,int blendState = -1);
-	void addNewParticleSystemEntity(int layer,int textureID,const char* dirName,NewParticlesystemEntity* entity,int maxParticles,int blendState = -1);
+	void addNewParticleSystemEntity(int layer,int textureID,const char* fileName,NewParticlesystemEntity* entity,int maxParticles,int blendState = -1);
 	void addHUDEntity(int layer,HUDEntity* entity,int textureID,const char* fontName);
 	void addTextEntity(int layer,int batchID,const char* fontName,TextEntity* textEntity);
 	//
@@ -438,10 +490,35 @@ public:
 	}
 	template<class S>
 	void createGameObject(S* obj);
+
+	bool loadData(const char* name);
+	bool loadHUD(const char* fileName,HUDEntity* hudEntity);
 	void debug();
+
+	Sprite* getSprite(const char* name) {
+		IdString hash = string::murmur_hash(name);
+		for ( size_t i = 0; i < m_SpritePrefabs.size(); ++i ) {
+			if ( m_SpritePrefabs[i]->name == hash ) {
+				return m_SpritePrefabs[i]->sprite;
+			}
+		}
+		return 0;
+	}
+	SpritePrefab* getPrefab(const char* name) {
+		IdString hash = string::murmur_hash(name);
+		for ( size_t i = 0; i < m_SpritePrefabs.size(); ++i ) {
+			if ( m_SpritePrefabs[i]->name == hash ) {
+				return m_SpritePrefabs[i];
+			}
+		}
+		return 0;
+	}
 private:
+	
 	void toggleSpriteBatch();
 	void stopSpriteBatch();
+	// serializable
+	virtual void reload(const char* fileName);
 
 	CollisionManager m_CollisionManager;
 	GameObjects m_GameObjects;
@@ -455,6 +532,9 @@ private:
 	SettingsManager m_SettingsManager;
 	bool m_Paused;
 	RTSetting m_RenderTargets[16];
+
+	// FIXME: move to resource manager
+	SpritePrefabs m_SpritePrefabs;
 };
 
 template<class S>

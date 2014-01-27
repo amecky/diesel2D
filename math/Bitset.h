@@ -1,5 +1,4 @@
-#ifndef BITSET_H
-#define	BITSET_H
+#pragma once
 
 namespace ds {
 
@@ -35,5 +34,3 @@ private:
 };
 
 }
-
-#endif	/* BITSET_H */

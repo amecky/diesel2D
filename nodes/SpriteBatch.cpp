@@ -64,30 +64,43 @@ SpriteBatch::~SpriteBatch() {
 // Draw
 // -------------------------------------------------------
 void SpriteBatch::draw(float x,float y,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vec2& center) {
-	Sprite sp;
-	sp.position = ds::Vec2(x,y);
-	sp.textureRect = textureRect;
-	sp.rotation = rotation;
-	sp.scaleX = scaleX;
-	sp.scaleY = scaleY;
-	sp.color = color;
-	sp.center = center;
-	draw(sp);
+	draw(Vec2(x,y),textureRect,rotation,scaleX,scaleY,color,center);	
 }
 
 // -------------------------------------------------------
 // Draw
 // -------------------------------------------------------
 void SpriteBatch::draw(const Vec2& pos,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vec2& center) {
-	Sprite sp;
-	sp.position = pos;
-	sp.textureRect = textureRect;
-	sp.rotation = rotation;
-	sp.scaleX = scaleX;
-	sp.scaleY = scaleY;
-	sp.color = color;
-	sp.center = center;
-	draw(sp);
+	if ( m_VertexCounter < m_MaxVertices ) {
+		float u1,v1,u2,v2;
+		ds::math::getTextureCoordinates(textureRect,m_TextureWidth,m_TextureHeight,&u1,&v1,&u2,&v2,true);
+		float dimX = textureRect.width();
+		float dimY = textureRect.height();
+		float dx = dimX * 0.5f;
+		float dy = dimY * 0.5f;
+		char* buffer = m_DataBuffer + QUAD_SIZE * m_Index;
+		(*(SpritePlane*)buffer).v[0].uv = Vec2(u1,v1);
+		(*(SpritePlane*)buffer).v[1].uv = Vec2(u2,v1);
+		(*(SpritePlane*)buffer).v[2].uv = Vec2(u2,v2);
+		(*(SpritePlane*)buffer).v[3].uv = Vec2(u1,v2);
+
+		Vec2 cor = pos;
+		cor = cor - Vec2(m_Renderer->getWidth() * 0.5f,m_Renderer->getHeight() * 0.5f);
+		Vec2 p(0,0);
+		for ( int i = 0; i < 4; ++i ) {
+			p.x = VP_ARRAY[i * 2] * dimX;
+			p.y = VP_ARRAY[i * 2 + 1] * dimY;
+			p = p - center;
+			Vec2 np = vector::srt(cor,p,scaleX,scaleY,rotation);		
+			(*(SpritePlane*)buffer).v[i].x = np.x;
+			(*(SpritePlane*)buffer).v[i].y = np.y;
+			(*(SpritePlane*)buffer).v[i].z = 0.0f;
+			(*(SpritePlane*)buffer).v[i].color = color;
+		}	
+		++m_Index;
+		m_VertexCounter += 4;
+		m_Renderer->getDrawCounter().addSprite();
+	}
 }
 // -------------------------------------------------------
 // Draw

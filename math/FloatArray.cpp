@@ -29,10 +29,10 @@ float FloatArray::get(float time) {
 	if ( m_LoopMode == PLM_ZERO ) {
 		float maxTime = m_Array[m_Count-1].time;
 		if ( normTime > maxTime ) {
-			normTime = maxTime;
+			normTime = 0.0f;
 		}
 	}
-	else if ( m_LoopMode == PLM_ZERO ) {
+	else if ( m_LoopMode == PLM_LAST ) {
 		float maxTime = m_Array[m_Count-1].time;
 		if ( normTime > maxTime ) {
 			normTime = maxTime;

@@ -3,26 +3,47 @@
 
 namespace ds {
 
+class SpriteEntity;
 
+class SpriteBehavior {
+
+public:
+	SpriteBehavior() : m_Entity(0) , m_Active(true) {}
+	virtual ~SpriteBehavior() {}
+	void setEntity(SpriteEntity* entity) {
+		m_Entity = entity;
+	}
+	virtual void update(float elapsed) = 0;
+	void setActive(bool active) {
+		m_Active = active;
+	}
+	const bool isActive() const {
+		return m_Active;
+	}
+protected:
+	SpriteEntity* m_Entity;
+private:	
+	bool m_Active;
+};
 // -------------------------------------------------------
 // SpriteEntity
 // -------------------------------------------------------
 class SpriteEntity : public Entity {
 
-	//typedef std::vector<BaseAnimation*> Animations;
+typedef std::vector<SpriteBehavior*> Behaviors;
 
 public:
 	SpriteEntity() : Entity() , m_Rotation(0.0f) , m_BatchItemID(-1) , m_Sprite(0) , m_UseColor(false) , m_Color(Color::WHITE) , m_Created(false) , m_UseScale(false) , m_ScaleX(1.0f) , m_ScaleY(1.0f) {}
 	virtual ~SpriteEntity() {
 		if ( m_Created ) {
 			delete m_Sprite;
-		}
+		}		
 	}
 	void init(int batchID,Sprite* sprite,bool created = false) {
 		m_BatchItemID = batchID;
 		m_Sprite = sprite;
 		m_Position = sprite->position;
-		m_Created = created;
+		m_Created = created;		
 	}
 	const EntityType getType() const {
 		return ET_SPRITE;
@@ -37,14 +58,18 @@ public:
 		return m_Sprite;
 	}
 	void update(float elapsed) {
-		//for ( size_t i = 0; i < m_Animations.size(); ++i ) {
-		//m_Animations[i]->update(elapsed);
-		//m_Animations[i]->updateSprite(m_Sprite);
-		//}
+		for ( size_t i = 0; i < m_Behaviors.size(); ++i ) {
+			SpriteBehavior* behavior = m_Behaviors[i];
+			if ( behavior->isActive() ) {
+				behavior->update(elapsed);
+			}
+		}
 	}
-	//void addAnimation(BaseAnimation* animation) {
-	//m_Animations.push_back(animation);
-	//}
+	template<class T>
+	void addBehavior(T* behavior) {
+		behavior->setEntity(this);
+		m_Behaviors.push_back(behavior);
+	}
 	void setRotation(float rotation) {
 		m_Rotation = rotation;
 	}
@@ -77,7 +102,7 @@ public:
 	}
 	void draw() {}
 private:
-	//Animations m_Animations;
+	Behaviors m_Behaviors;
 	bool m_UseScale;
 	float m_ScaleX;
 	float m_ScaleY;

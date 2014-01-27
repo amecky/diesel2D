@@ -1,23 +1,24 @@
 #pragma once
 #include "ParticleEmitter.h"
+#include "..\data\Gizmo.h"
 
 namespace ds {
 
 // -------------------------------------------------------
 // BoxEmitterSettings
 // -------------------------------------------------------
-struct BoxEmitterSettings : public DynamicSettings {
+struct BoxEmitterSettings : public Gizmo {
 
 	int width;
 	int height;
 	int size;	
 	float angleVariance;
 
-	void load(NewSettingsReader& reader) {
-		reader.get<int>("width",&width);
-		reader.get<int>("height",&height);
-		reader.get<int>("size",&size);
-		reader.get<float>("angle_variance",&angleVariance);
+	BoxEmitterSettings() : Gizmo("box_emitter") , width(10) , height(10) , size(2) , angleVariance(0.0f) {
+		add("width",&width);
+		add("height",&height);
+		add("size",&size);
+		add("angle_variance",&angleVariance);	
 	}
 
 };
@@ -31,6 +32,7 @@ public:
 		delete m_Settings;
 	}
 	void createParticles(ParticleBuffer* buffer,float forcedCount = -1);	
+	
 private:
 	BoxEmitterSettings* m_Settings;
 };

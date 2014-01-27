@@ -255,7 +255,6 @@ namespace ds {
 	// Sprite
 	// -------------------------------------------------------
 	struct Sprite {
-
 		Vec2 position;
 		float rotation;
 		Vec2 center;
@@ -264,7 +263,8 @@ namespace ds {
 		Color color;
 		Rect textureRect;
 
-		Sprite() : position(0,0) , rotation(0.0f) , center(0,0) , scaleX(1.0f) , scaleY(1.0f) , color(Color::WHITE) , textureRect(0,0,32,32) {}
+		Sprite() :position(0,0) , rotation(0.0f) , center(0,0) , scaleX(1.0f) , scaleY(1.0f) , color(Color::WHITE) , textureRect(0,0,32,32) {			
+		}
 		Sprite(int x,int y,const Rect tr,float rot = 0.0f, float sx = 1.0f,float sy = 1.0f,const Color& clr = Color::WHITE, const Vec2& cntr = Vec2(0,0)) 
 			: position(Vec2(x,y)) , textureRect(tr) , rotation(rot) , scaleX(sx) , scaleY(sy) , center(cntr) , color(clr) {}
 		Sprite(const Vec2& pos,const Rect tr) : position(pos) , textureRect(tr) , rotation(0.0f) , scaleX(1.0f) , scaleY(1.0f) , center(0,0) , color(Color::WHITE) {}

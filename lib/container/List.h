@@ -70,7 +70,6 @@ inline uint32 List<type>::num() const {
 // ----------------------------------------------------
 template<class type>
 inline void List<type>::resize(uint32 newSize) {	
-	assert(newSize >= 0);
 	//assert(newSize < 1024);
 	// free up the list if no data is being reserved
 	if ( newSize == 0 ) {
@@ -115,7 +114,6 @@ inline void List<type>::assureSize(uint32 addon) {
 // ----------------------------------------------------
 template<class type>
 inline type& List<type>::operator[](uint32 index) {
-	assert(index >= 0);
 	//assert(index < m_Num);
 	return m_Data[index];
 }
@@ -125,7 +123,6 @@ inline type& List<type>::operator[](uint32 index) {
 // ----------------------------------------------------
 template<class type>
 inline const type& List<type>::operator[](uint32 index) const {
-	assert(index >= 0);
 	//assert(index < m_Num);
 	return m_Data[index];
 }

@@ -18,8 +18,8 @@ Camera::Camera(int width,int height) {
 	m_RightVec = Vec3(1,0,0);
 	
 
-	float w = width;
-	float h = height;
+	float w = static_cast<float>(width);
+	float h = static_cast<float>(height);
 	setLens(0.25f*PI, 1.0f, 1.0f, 1000.0f);
 	m_OrthoProj = matrix::mat4OrthoLH(w,h,0.0f,1.0f);	// checked
 	m_OrthoView = matrix::m4identity();//matrix::mat4LookAtLH(m_ViewPos,m_LookAt,m_UpVec); // checked

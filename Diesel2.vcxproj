@@ -98,7 +98,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>
       </BasicRuntimeChecks>
@@ -107,6 +107,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
@@ -222,12 +223,17 @@
     <ClCompile Include="audio\Sound.cpp" />
     <ClCompile Include="base\EventStream.cpp" />
     <ClCompile Include="base\WindowsBase.cpp" />
+    <ClCompile Include="data\Gizmo.cpp" />
     <ClCompile Include="dialogs\DialogManager.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
+    <ClCompile Include="io\BinaryLoader.cpp" />
+    <ClCompile Include="io\BinaryWriter.cpp" />
+    <ClCompile Include="io\FileWatcher.cpp" />
     <ClCompile Include="math\FloatArray.cpp" />
     <ClCompile Include="math\GameMath.cpp" />
     <ClCompile Include="math\matrix.cpp" />
     <ClCompile Include="math\vector.cpp" />
+    <ClCompile Include="memory\DataBlockAllocator.cpp" />
     <ClCompile Include="memory\FreeListAllocator.cpp" />
     <ClCompile Include="memory\MallocAllocator.cpp" />
     <ClCompile Include="nodes\SpriteBatch.cpp" />
@@ -236,7 +242,6 @@
     <ClCompile Include="particles\BoxEmitter.cpp" />
     <ClCompile Include="particles\EmitterMesh.cpp" />
     <ClCompile Include="particles\NewParticleSystem.cpp" />
-    <ClCompile Include="particles\ParticleAffector.cpp" />
     <ClCompile Include="particles\ParticleBuffer.cpp" />
     <ClCompile Include="particles\ParticleEmitter.cpp" />
     <ClCompile Include="particles\ParticleSystem.cpp" />
@@ -251,6 +256,7 @@
     <ClCompile Include="renderer\TexGen.cpp" />
     <ClCompile Include="renderer\VertexDeclaration.cpp" />
     <ClCompile Include="renderer\Viewport.cpp" />
+    <ClCompile Include="resources\AssetManager.cpp" />
     <ClCompile Include="settings\SettingsManager.cpp" />
     <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\FileUtils.cpp" />
@@ -261,6 +267,7 @@
     <ClCompile Include="renderer\Renderer.cpp" />
     <ClCompile Include="utils\Profiler.cpp" />
     <ClCompile Include="utils\PlainTextReader.cpp" />
+    <ClCompile Include="utils\SettingsFile.cpp" />
     <ClCompile Include="utils\StringUtils.cpp" />
     <ClCompile Include="base\BaseApp.cpp" />
     <ClCompile Include="world\CollisionManager.cpp" />
@@ -274,9 +281,16 @@
     <ClInclude Include="audio\Sound.h" />
     <ClInclude Include="base\EventStream.h" />
     <ClInclude Include="base\Settings.h" />
+    <ClInclude Include="data\Gizmo.h" />
+    <ClInclude Include="data\Param.h" />
     <ClInclude Include="dialogs\DialogManager.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
+    <ClInclude Include="io\BinaryLoader.h" />
+    <ClInclude Include="io\BinaryWriter.h" />
+    <ClInclude Include="io\FileWatcher.h" />
+    <ClInclude Include="io\Serializer.h" />
     <ClInclude Include="lib\container\GridArray.h" />
+    <ClInclude Include="lib\container\ImmutableBag.h" />
     <ClInclude Include="lib\container\List.h" />
     <ClInclude Include="lib\container\String.h" />
     <ClInclude Include="lib\DataBuffer.h" />
@@ -288,6 +302,7 @@
     <ClInclude Include="math\math_types.h" />
     <ClInclude Include="math\matrix.h" />
     <ClInclude Include="math\vector.h" />
+    <ClInclude Include="memory\DataBlockAllocator.h" />
     <ClInclude Include="memory\FreeListAllocator.h" />
     <ClInclude Include="memory\FSAllocator.h" />
     <ClInclude Include="memory\MallocAllocator.h" />
@@ -300,7 +315,6 @@
     <ClInclude Include="particles\EmitterMesh.h" />
     <ClInclude Include="particles\NewParticleSystem.h" />
     <ClInclude Include="particles\Particle.h" />
-    <ClInclude Include="particles\ParticleAffector.h" />
     <ClInclude Include="particles\ParticleBuffer.h" />
     <ClInclude Include="particles\ParticleEmitter.h" />
     <ClInclude Include="particles\ParticleSystem.h" />
@@ -319,17 +333,20 @@
     <ClInclude Include="renderer\vertex_types.h" />
     <ClInclude Include="renderer\Viewport.h" />
     <ClInclude Include="base\Input.h" />
+    <ClInclude Include="resources\AssetManager.h" />
     <ClInclude Include="settings\DynamicSettings.h" />
     <ClInclude Include="settings\SettingsManager.h" />
     <ClInclude Include="utils\Color.h" />
     <ClInclude Include="utils\FileUtils.h" />
     <ClInclude Include="utils\font.h" />
+    <ClInclude Include="utils\GameTimer.h" />
     <ClInclude Include="utils\Log.h" />
     <ClInclude Include="utils\mtrand.h" />
     <ClInclude Include="renderer\Renderer.h" />
     <ClInclude Include="dxstdafx.h" />
     <ClInclude Include="utils\Profiler.h" />
     <ClInclude Include="utils\PlainTextReader.h" />
+    <ClInclude Include="utils\SettingsFile.h" />
     <ClInclude Include="utils\StringUtils.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="world\CollisionManager.h" />

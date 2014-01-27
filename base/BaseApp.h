@@ -109,6 +109,7 @@ protected:
 	Color m_ClearColor;
 	World m_World;
 private:
+	void initializeGUI();
 	Vec2 m_MousePos;
 	DWORD m_CurTime;
 	float g_fElapsedTime;
@@ -118,6 +119,7 @@ private:
 	DebugInfo m_DebugInfo;
 	ButtonState m_ButtonState;
 	MTRand_open rand;		
+	SpriteBatch* m_DialogBatch;
 }; 
 
 };

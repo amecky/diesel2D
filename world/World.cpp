@@ -8,6 +8,9 @@
 #include "SpriteEntity.h"
 #include "..\particles\BoxEmitter.h"
 
+#include "..\utils\StringUtils.h"
+#include "..\io\FileWatcher.h"
+
 namespace ds {
 
 World::World() : m_Counter(0) , m_Paused(false) {
@@ -21,8 +24,14 @@ World::World() : m_Counter(0) , m_Paused(false) {
 }
 
 World::~World(void) {
+
 	for ( size_t i = 0; i < m_BatchItems.size(); ++i ) {
 		delete m_BatchItems[i].spriteBatch;
+	}
+	SpritePrefabs::iterator it = m_SpritePrefabs.begin();
+	while ( it != m_SpritePrefabs.end()) {
+		delete (*it);
+		it = m_SpritePrefabs.erase(it);
 	}
 }
 
@@ -79,13 +88,24 @@ void World::setSpriteBatchShader(int batchID,int shaderID) {
 // -------------------------------------------------------
 int World::createSpriteBatch(const char* textureName) {
 	int idx = m_BatchItems.size();
+	createSpriteBatch(idx,textureName);
+	return idx;
+}
+
+// -------------------------------------------------------
+// Create sprite batch
+// -------------------------------------------------------
+void World::createSpriteBatch(int idx,const char* textureName,int maxQuads) {
+	LOGC(logINFO,"World") << "creating sprite batch - id: " << idx << " texture " << textureName << " maxQuads: " << maxQuads;
 	SpriteBatchItem sbi;
-	int texture = m_Renderer->loadTexture(textureName);
+	int texture = m_Renderer->getTextureId(textureName);
+	if ( texture == -1 ) {
+		texture = m_Renderer->loadTexture(textureName);
+	}
 	assert( texture != -1 );	
-	sbi.spriteBatch = new SpriteBatch(m_Renderer,1024,texture);
+	sbi.spriteBatch = new SpriteBatch(m_Renderer,maxQuads,texture);
 	sbi.textureID = texture;
 	m_BatchItems.push_back(sbi);
-	return idx;
 }
 
 // -------------------------------------------------------
@@ -104,24 +124,46 @@ void World::addHUDEntity(int layer,HUDEntity* entity,int textureID,const char* f
 	entity->init(m_Renderer,textureID,fontName);
 }
 
+// -------------------------------------------------------
+// Add SpriteEntity
+// -------------------------------------------------------
 void World::addSpriteEntity(int layer,int batchID,SpriteEntity* entity,int x,int y,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color) {
-	Sprite* sprite = new Sprite(x,y,textureRect,rotation,scaleX,scaleY,color);
+	Sprite* sprite = BM_NEW(Sprite);
+	sprite->position = ds::Vec2(x,y);
+	sprite->textureRect = textureRect;
+	sprite->rotation = rotation;
+	sprite->scaleX = scaleX;
+	sprite->scaleY = scaleY;
+	sprite->color = color;
 	add(layer,entity);
-	entity->init(batchID,sprite,true);
+	entity->init(batchID,sprite);
 }
 // -------------------------------------------------------
 // Add SpriteEntity
 // -------------------------------------------------------
-void World::addSpriteEntity(int layer,int batchID,SpriteEntity* entity,const char* settingsFile) {
-	Sprite* sprite = 0;
-	if ( m_SettingsManager.hasSpriteSettings(settingsFile)) {
-		sprite = m_SettingsManager.getSpriteSettings(settingsFile);
-	}
-	else {		
-		sprite = m_SettingsManager.loadSpriteSettings(settingsFile);
-	}	
+void World::addSpriteEntity(int layer,int batchID,SpriteEntity* entity,const char* name) {
+	SpritePrefab* prefab = getPrefab(name);
+	assert(prefab != 0);	
+	add(layer,entity);
+	entity->init(batchID,prefab->sprite);
+}
+
+// -------------------------------------------------------
+// Add SpriteEntity
+// -------------------------------------------------------
+void World::addSpriteEntity(int layer,int batchID,SpriteEntity* entity,Sprite* sprite) {	
+	assert(sprite != 0);
 	add(layer,entity);
 	entity->init(batchID,sprite);
+}
+
+// -------------------------------------------------------
+// Add SpriteEntity
+// -------------------------------------------------------
+void World::addSpriteEntity(int layer,int batchID,SpriteEntity* entity,int x,int y,Sprite* sprite) {	
+	add(layer,entity);
+	entity->init(batchID,sprite);
+	entity->setPosition(ds::Vec2(x,y));
 }
 
 // -------------------------------------------------------
@@ -247,6 +289,7 @@ void World::draw() {
 				}
 				if ( e->getType() == ET_SPRITE ) {
 					SpriteEntity* se = static_cast<SpriteEntity*>(e);
+					assert( se->getSprite() != 0);
 					if ( se->getBatchItemID() != m_CurrentBatchItem ) {			
 						stopSpriteBatch();
 						m_CurrentBatchItem = se->getBatchItemID();
@@ -369,66 +412,14 @@ void World::debug() {
 
 }
 
-void World::addNewParticleSystemEntity(int layer,int textureID,const char* dirName,NewParticlesystemEntity* entity,int maxParticles,int blendState) {
+// -------------------------------------------------------
+// Add new ParticleSystemEntity
+// -------------------------------------------------------
+void World::addNewParticleSystemEntity(int layer,int textureID,const char* fileName,NewParticlesystemEntity* entity,int maxParticles,int blendState) {
+	// FIXME: check if file exists!!
 	add(layer,entity);
-	NewParticleSystem* particleSystem = new NewParticleSystem(m_Renderer,maxParticles,textureID,blendState);
-	ParticleData* particleData = new ParticleData;
-	char dirBuffer[256];
-	sprintf(dirBuffer,"content\\resources\\settings\\%s",dirName);
-	FSDirectory dir(dirBuffer);
-	dir.list();
-	char buffer[256];
-	// first we need particle data
-	for ( size_t i = 0; i < dir.numFiles(); ++i ) {
-		if ( dir.getFileNameNoEnding(i) == "particle_data") {
-			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
-			m_SettingsManager.loadSettings(buffer,particleData,false);
-			particleSystem->setParticleData(particleData);
-		}
-		if ( dir.getFileNameNoEnding(i) == "emitter_data") {
-			ParticleEmitterData* emitterData = new ParticleEmitterData;
-			sprintf(buffer,"%s\\emitter_data",dirName);
-			m_SettingsManager.loadSettings(buffer,emitterData);
-			particleSystem->setEmitterData(emitterData);
-		}
-	}
-
-	for ( size_t i = 0; i < dir.numFiles(); ++i ) {				
-		if ( dir.getFileNameNoEnding(i) == "size") {
-			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
-			m_SettingsManager.loadSettings(buffer,particleSystem->createSizePath(),false);
-		}
-		if ( dir.getFileNameNoEnding(i) == "color") {
-			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
-			m_SettingsManager.loadSettings(buffer,particleSystem->getColorPath(),false);
-		}
-		if ( dir.getFileNameNoEnding(i) == "radial_velocity") {
-			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
-			m_SettingsManager.loadSettings(buffer,particleSystem->createRadialVelocityPath(),false);
-		}	
-		if ( dir.getFileNameNoEnding(i) == "rotation") {
-			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
-			m_SettingsManager.loadSettings(buffer,particleSystem->createRotationPath(),false);
-		}	
-		if ( dir.getFileNameNoEnding(i) == "ring_emitter") {			
-			RingEmitterSettings* emitterSettings = new RingEmitterSettings;
-			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
-			m_SettingsManager.loadSettings(buffer,emitterSettings);
-			RingEmitterMesh* emitter = new RingEmitterMesh(emitterSettings);
-			particleSystem->setEmitter(emitter);
-		}		
-		if ( dir.getFileNameNoEnding(i) == "box_emitter") {			
-			BoxEmitterSettings* emitterSettings = new BoxEmitterSettings;
-			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
-			m_SettingsManager.loadSettings(buffer,emitterSettings);
-			BoxEmitterMesh* emitter = new BoxEmitterMesh(emitterSettings);
-			particleSystem->setEmitter(emitter);
-		}	
-		if ( dir.getFileNameNoEnding(i) == "point_emitter") {						
-			PointEmitterMesh* emitter = new PointEmitterMesh();
-			particleSystem->setEmitter(emitter);
-		}		
-	}
+	NewParticleSystem* particleSystem = new NewParticleSystem(m_Renderer,maxParticles,textureID,blendState);	
+	particleSystem->load(fileName);
 	if ( m_Camera[layer] != 0 ) {
 		particleSystem->setCamera(m_Camera[layer]);
 	}
@@ -448,15 +439,15 @@ void World::addParticleSystemEntity(int layer,int textureID,const char* dirName,
 	dir.list();
 	char buffer[256];
 	// first we need particle data
-	for ( size_t i = 0; i < dir.numFiles(); ++i ) {
+	for ( int i = 0; i < dir.numFiles(); ++i ) {
 		if ( dir.getFileNameNoEnding(i) == "particle_data") {
 			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
-			m_SettingsManager.loadSettings(buffer,particleData,false);
+			//m_SettingsManager.loadSettings(buffer,particleData,false);
 			particleSystem->setParticleData(particleData);
 		}
 	}
 
-	for ( size_t i = 0; i < dir.numFiles(); ++i ) {				
+	for ( int i = 0; i < dir.numFiles(); ++i ) {				
 		if ( dir.getFileNameNoEnding(i) == "step_size") {
 			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
 			m_SettingsManager.loadSettings(buffer,particleSystem->createSizePath(),false);
@@ -484,7 +475,7 @@ void World::addParticleSystemEntity(int layer,int textureID,const char* dirName,
 		if ( dir.getFileNameNoEnding(i) == "ring_emitter") {
 			ParticleEmitterData* emitterData = new ParticleEmitterData;
 			sprintf(buffer,"%s\\emitter_data",dirName);
-			m_SettingsManager.loadSettings(buffer,emitterData);
+			//m_SettingsManager.loadSettings(buffer,emitterData);
 			RingEmitterSettings* emitterSettings = new RingEmitterSettings;
 			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
 			m_SettingsManager.loadSettings(buffer,emitterSettings);
@@ -494,20 +485,20 @@ void World::addParticleSystemEntity(int layer,int textureID,const char* dirName,
 		if ( dir.getFileNameNoEnding(i) == "box_emitter") {
 			ParticleEmitterData* emitterData = new ParticleEmitterData;
 			sprintf(buffer,"%s\\emitter_data",dirName);
-			m_SettingsManager.loadSettings(buffer,emitterData);
+			//m_SettingsManager.loadSettings(buffer,emitterData);
 			BoxEmitterSettings* emitterSettings = new BoxEmitterSettings;
 			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
-			m_SettingsManager.loadSettings(buffer,emitterSettings);
+			//m_SettingsManager.loadSettings(buffer,emitterSettings);
 			BoxEmitter* emitter = new BoxEmitter(emitterData,emitterSettings,particleData);
 			particleSystem->setEmitter(emitter);
 		}	
 		if ( dir.getFileNameNoEnding(i) == "cone_emitter") {
 			ParticleEmitterData* emitterData = new ParticleEmitterData;
 			sprintf(buffer,"%s\\emitter_data",dirName);
-			m_SettingsManager.loadSettings(buffer,emitterData,false);
+			//m_SettingsManager.loadSettings(buffer,emitterData,false);
 			ConeEmitterSettings* emitterSettings = new ConeEmitterSettings;
 			sprintf(buffer,"%s\\%s",dirName,dir.getFileNameNoEnding(i).c_str());
-			m_SettingsManager.loadSettings(buffer,emitterSettings,false);
+			//m_SettingsManager.loadSettings(buffer,emitterSettings,false);
 			ConeEmitter* emitter = new ConeEmitter(emitterData,emitterSettings,particleData);
 			LOG(logINFO) << "Setting cone emitter";
 			particleSystem->setEmitter(emitter);
@@ -518,6 +509,84 @@ void World::addParticleSystemEntity(int layer,int textureID,const char* dirName,
 	}
 	entity->init(particleSystem,textureID,blendState);
 
+}
+
+bool World::loadData(const char* name) {
+	char buffer[256];
+	sprintf(buffer,"content\\resources\\%s.json",name);
+	JSONReader reader;
+	if ( reader.parse(buffer) ) {
+		std::vector<Category*> categories = reader.getCategories();
+		for ( size_t i = 0; i < categories.size(); ++i ) {
+			Category* c = categories[i];
+			if ( c->getName() == "spritebatch" ) {
+				/*
+				"texture" : "Textures" ,
+				"id" : "0" ,
+				"size_x" : "1024" ,
+				"size_y" : "1024"
+				*/
+				int id = c->getInt(0,"id");
+				// FIXME: check if we already have one with this id
+				std::string texture = c->getProperty("texture");
+				createSpriteBatch(id,texture.c_str());
+			}
+			else if ( c->getName() == "sprite" ) {
+				LOG(logINFO) << "Creating sprite " << c->getProperty("name");
+				SpritePrefab* prefab = new SpritePrefab();
+				prefab->name = string::murmur_hash(c->getProperty("name").c_str());
+				prefab->load(c);
+				m_SpritePrefabs.push_back(prefab);
+			}
+		}
+		gFileWatcher->registerFile(buffer,this);
+		return true;
+	}
+	return false;
+}
+
+bool World::loadHUD(const char* name,HUDEntity* hudEntity) {	
+	char buffer[256];
+	sprintf(buffer,"content\\resources\\%s.json",name);
+	JSONReader reader;
+	if ( reader.parse("content\\resources\\hud.json") ) {
+		std::vector<Category*> categories = reader.getCategories();
+		for ( size_t i = 0; i < categories.size(); ++i ) {
+			Category* c = categories[i];
+			if ( c->getName() == "hud" ) {
+				int layer = c->getInt(0,"layer");
+				int textureID = c->getInt(0,"texture_id");
+				std::string fontName = c->getProperty("font_name");
+				addHUDEntity(layer,hudEntity,textureID,fontName.c_str());
+				hudEntity->load(name);
+			}	
+		}		
+		return true;
+	}
+	return false;
+}
+
+void World::reload(const char* fileName) {
+	LOG(logINFO) << "----- RELOADING -----";
+	JSONReader reader;
+	if ( reader.parse(fileName) ) {
+		std::vector<Category*> categories = reader.getCategories();
+		for ( size_t i = 0; i < categories.size(); ++i ) {
+			Category* c = categories[i];
+			if ( c->getName() == "sprite" ) {				
+				SpritePrefab* prefab = getPrefab(c->getProperty("name").c_str());
+				if ( prefab != 0 ) {
+					prefab->load(c);
+				}
+				else {
+					SpritePrefab* sp = new SpritePrefab();
+					sp->name = string::murmur_hash(c->getProperty("name").c_str());
+					sp->load(c);
+					m_SpritePrefabs.push_back(sp);
+				}				
+			}
+		}
+	}
 }
 
 }

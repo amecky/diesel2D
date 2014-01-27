@@ -2,15 +2,36 @@
 #include "ParticleSystem.h"
 #include "EmitterMesh.h"
 #include "..\lib\container\List.h"
+#include "..\io\Serializer.h"
 
 namespace ds {
 
 
+struct RotationPath : public Gizmo {
+
+	FloatArray data;
+
+	RotationPath() : Gizmo("rotation") {
+		add("rotation",&data);
+	}
+};
+
+
+struct WiggleSettings : public Gizmo {
+
+	float radius;
+	float amplitude;
+
+	WiggleSettings() : Gizmo("wiggle") , radius(10.0f) , amplitude(5.0f) {
+		add("radius",&radius);
+		add("amplitude",&amplitude);
+	}
+};
 
 // -------------------------------------------------------
 // NewParticleSystem
 // -------------------------------------------------------
-class NewParticleSystem {
+class NewParticleSystem : public Serializer {
 
 public:
 	NewParticleSystem(Renderer* renderer,uint32 maxParticles,int textureID,int blendState);
@@ -68,19 +89,17 @@ public:
 			m_RadialVelocityPath->reset();
 		}
 		return m_RadialVelocityPath;
-	}
-	FloatPath* createRotationPath() {
-		if ( m_RotationPath == 0 ) {
-			m_RotationPath = new FloatPath;
-		}
-		else {
-			m_RotationPath->reset();
-		}
-		return m_RotationPath;
-	}
+	}	
 	const uint32 getMaxParticles() const {
 		return m_MaxParticles;
 	}
+	//! Loads data from a json file
+	/*
+		\param filename the name of the json file include directories
+	*/
+	void load(const char* fileName);	
+	//! Reloads data from a json file
+	void reload(const char* fileName);
 private:
 	Vec2 m_Position;
 	List<Particle> m_Particles;
@@ -95,7 +114,13 @@ private:
 	ColorPath* m_ColorPath;
 	Vec2Path* m_SizePath;
 	FloatPath* m_RadialVelocityPath;
-	FloatPath* m_RotationPath;
+	
+	RotationPath m_RotationPath;
+	bool m_Rotating;
+
+	WiggleSettings m_WiggleSettings;
+	bool m_UseWiggle;
+	//FloatPath* m_RotationPath;
 	// emitter
 	float m_EmitFrequency;
 	float m_EmitDelay;

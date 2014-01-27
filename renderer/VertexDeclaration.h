@@ -90,6 +90,7 @@ public:
 // -----------------------------------------------
 //
 // -----------------------------------------------
+/*
 class TransformedTexturedVertex {
 
 public:
@@ -120,7 +121,7 @@ public:
 		tu = texcoords.x;
 		tv = texcoords.y;
 	}
-	/*
+
 	static VertexDeclaration* getVertexDeclaration() {
 		if ( !gEngine->getResourceManager().contains("TransformedTexturedVertex")) {
 			ResourceHandle handle = gEngine->getResourceManager().createVertexDeclaration("TransformedTexturedVertex");
@@ -134,9 +135,9 @@ public:
 			return gEngine->getResourceManager().getVertexDeclaration("TransformedTexturedVertex");
 		}
 	}
-	*/
-};
 
+};
+*/
 
 // -----------------------------------------------
 //

@@ -6,7 +6,7 @@ namespace ds {
 
 	namespace font {
 
-		Vec2 calculateSize(const BitmapFont& bitmapFont,const std::string& text,float scaleX = 1.0f,float scaleY = 1.0f);
+		Vec2 calculateSize(const BitmapFont& bitmapFont,const std::string& text,int padding = 4,float scaleX = 1.0f,float scaleY = 1.0f);
 
 		void createText(const BitmapFont& bitmapFont,const Vec2& pos,const std::string& text,const Color& color,std::vector<Sprite>& sprites,float scaleX = 1.0f,float scaleY = 1.0f);
 

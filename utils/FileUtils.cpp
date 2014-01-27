@@ -15,6 +15,14 @@ FileUtils::~FileUtils() { }
 
 namespace file {
 
+	bool fileExists(const char* name) {
+		if (FILE * file = fopen(name, "r")) {
+			fclose(file);
+			return true;
+		}
+		return false;
+	}
+
 	bool loadTextFile(const char* name,std::vector<std::string>& lines) {    
 		std::string line;
 		std::ifstream myfile(name);

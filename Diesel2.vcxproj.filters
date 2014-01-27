@@ -64,9 +64,6 @@
     <ClCompile Include="audio\Sound.cpp">
       <Filter>audio</Filter>
     </ClCompile>
-    <ClCompile Include="particles\ParticleAffector.cpp">
-      <Filter>particles</Filter>
-    </ClCompile>
     <ClCompile Include="particles\ParticleBuffer.cpp">
       <Filter>particles</Filter>
     </ClCompile>
@@ -150,6 +147,27 @@
     </ClCompile>
     <ClCompile Include="world\components\LightComponent.cpp">
       <Filter>world\components</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\SettingsFile.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\DataBlockAllocator.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\AssetManager.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="io\FileWatcher.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\BinaryLoader.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\BinaryWriter.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="data\Gizmo.cpp">
+      <Filter>data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -240,9 +258,6 @@
       <Filter>audio</Filter>
     </ClInclude>
     <ClInclude Include="particles\Particle.h">
-      <Filter>particles</Filter>
-    </ClInclude>
-    <ClInclude Include="particles\ParticleAffector.h">
       <Filter>particles</Filter>
     </ClInclude>
     <ClInclude Include="particles\ParticleBuffer.h">
@@ -353,6 +368,39 @@
     <ClInclude Include="world\components\LightComponent.h">
       <Filter>world\components</Filter>
     </ClInclude>
+    <ClInclude Include="utils\SettingsFile.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\GameTimer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\DataBlockAllocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\AssetManager.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="io\Serializer.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\FileWatcher.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\BinaryLoader.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\BinaryWriter.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\container\ImmutableBag.h">
+      <Filter>lib\container</Filter>
+    </ClInclude>
+    <ClInclude Include="data\Param.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="data\Gizmo.h">
+      <Filter>data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico" />
@@ -403,6 +451,15 @@
     </Filter>
     <Filter Include="world\components">
       <UniqueIdentifier>{1d97f0c4-4969-4b32-abbd-ef47bed840fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{dfe32379-0885-4adc-8b7f-83708690abbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="io">
+      <UniqueIdentifier>{f18a0897-5410-4308-af35-93f8459b4957}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{60f9dd9d-4ebf-4c59-9f8e-781cf033ff9e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

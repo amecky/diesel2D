@@ -739,9 +739,40 @@ Vec2 Renderer::getTextureSize(int idx) {
 }
 
 // -------------------------------------------------------
+// Creates and loads a texture from specific directory
+// -------------------------------------------------------
+int Renderer::loadTexture(const char* dirName,const char* name) {
+	int id = findFreeTextureSlot();
+	if ( id != -1 ) {
+		Texture* tr = &m_Textures[id];
+		tr->name = string::murmur_hash(name);
+		tr->flags = 1;
+		int lw = D3DX_DEFAULT;
+		int lh = D3DX_DEFAULT;		
+		D3DXIMAGE_INFO imageInfo;
+		char fileName[256];
+		sprintf(fileName,"%s\\%s.png",dirName,name);
+		LOGC(logINFO,"Renderer") << "Trying to load texture " << fileName;
+		HR(D3DXCreateTextureFromFileEx(device->get(),fileName, 0, 0, 1, 0,
+			D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL,&tr->texture));
+		tr->texture->SetPrivateData(WKPDID_D3DDebugObjectName,name,strlen( name ) - 1,0);
+		tr->width = imageInfo.Width;
+		tr->height = imageInfo.Height;		
+		LOGC(logINFO,"Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
+		return id;
+	}
+	else {
+		LOGC(logERROR,"Renderer") << "No more texture slots available";
+		return -1;
+	}
+}
+
+// -------------------------------------------------------
 // Creates and loads a texture
 // -------------------------------------------------------
 int Renderer::loadTexture(const char* name) {
+	return loadTexture("content\\textures",name);
+	/*
 	int id = findFreeTextureSlot();
 	if ( id != -1 ) {
 		Texture* tr = &m_Textures[id];
@@ -765,6 +796,7 @@ int Renderer::loadTexture(const char* name) {
 		LOGC(logERROR,"Renderer") << "No more texture slots available";
 		return -1;
 	}
+	*/
 }
 
 // -------------------------------------------------------

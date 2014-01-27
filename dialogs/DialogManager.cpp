@@ -1,6 +1,8 @@
 #include "DialogManager.h"
 #include "..\utils\StringUtils.h"
 #include "..\utils\font.h"
+#include "..\utils\PlainTextReader.h"
+#include "..\utils\FileUtils.h"
 
 namespace ds {
 
@@ -13,7 +15,12 @@ DialogManager::DialogManager(void) : m_Index(0) , m_Initialized(false) {
 // -------------------------------------------------------
 // Destructor - delete all dialogs
 // -------------------------------------------------------
-DialogManager::~DialogManager(void) {	
+DialogManager::~DialogManager(void) {
+	Dialogs::iterator it = m_Dialogs.begin();
+	while ( it != m_Dialogs.end()) {
+		delete (*it);
+		it = m_Dialogs.erase(it);
+	}
 }
 
 // -------------------------------------------------------
@@ -28,18 +35,11 @@ void DialogManager::init(SpriteBatch* spriteBatch,Renderer* renderer,const char*
 // -------------------------------------------------------
 // Create dialog
 // -------------------------------------------------------
-void DialogManager::createDialog(const char* name,GUIDialog* dialog) {
-	dialog->init(name,m_Index,m_SpriteBatch,m_Font);
+void DialogManager::createDialog(const char* name,int id,GUIDialog* dialog) {
+	assert(get(name) == 0);
+	dialog->init(name,id,m_SpriteBatch,&m_Font);
 	++m_Index;
 	m_Dialogs.push_back(dialog);
-}
-// -------------------------------------------------------
-// Add dialog to internal list
-// -------------------------------------------------------
-DialogID DialogManager::addDialog(GUIDialog* dialog) {
-	uint32 idx = m_Dialogs.size();
-	m_Dialogs.push_back(dialog);
-	return idx;
 }
 
 // -------------------------------------------------------
@@ -106,7 +106,7 @@ bool DialogManager::onButtonDown(int button,int x,int y,DialogID* dlgId,int* sel
 		if ( dlg->isActive() ) {
 			int ret = dlg->onButton(button,x,y,true);
 			if ( ret != -1 ) {
-				*dlgId = i;
+				*dlgId = dlg->getDialogID();
 				*selected = ret;
 				// check if we have a toggleAction
 				for ( size_t j = 0; j < m_ToggleActions.size(); ++j ) {
@@ -127,8 +127,8 @@ bool DialogManager::onButtonDown(int button,int x,int y,DialogID* dlgId,int* sel
 // Add direct toggle action
 // -------------------------------------------------------
 void DialogManager::addToggleAction(const char* oldDialogName,const char* newDialogName,int buttonId) {
-	GUIDialog* oldDlg = findByName(oldDialogName);
-	GUIDialog* newDlg = findByName(newDialogName);
+	GUIDialog* oldDlg = get(oldDialogName);
+	GUIDialog* newDlg = get(newDialogName);
 	assert(oldDlg != 0);
 	assert(newDlg != 0);
 	ToggleAction ta;
@@ -153,7 +153,7 @@ void DialogManager::updateMousePos(const Vec2& mousePos) {
 // -------------------------------------------------------
 // Find dialog by name
 // -------------------------------------------------------
-GUIDialog* DialogManager::findByName(const char* name) {
+GUIDialog* DialogManager::get(const char* name) {
 	IdString hashName = string::murmur_hash(name);
 	for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
 		GUIDialog* dlg = m_Dialogs[i];
@@ -173,6 +173,21 @@ bool DialogManager::OnChar(char ascii,unsigned int keyState) {
 		if ( dlg->OnChar(ascii) ) {
 			return true;
 		}
+	}
+	return false;
+}
+
+bool DialogManager::loadDialogFromJSON(const char* dialogName,const char* name,int id) {
+	char buffer[256];
+	sprintf(buffer,"content\\dialogs\\%s.json",name);
+	if ( file::fileExists(buffer)) {
+		GUIDialog* dialog = new GUIDialog();
+		createDialog(dialogName,id,dialog);
+		dialog->load(name);
+		return true;
+	}	
+	else {
+		LOG(logINFO) << "File '" << name << "' not found";
 	}
 	return false;
 }

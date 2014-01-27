@@ -85,3 +85,11 @@ typedef unsigned long ulong;
 #define DBG_RECT(v) "top: " << v.top << " left: " << v.left << " width: " << v.width() << " height: " << v.height()
 #endif
 
+#ifndef DBG_CLR
+#define DBG_CLR(v) "r: " << v.r << " g: " << v.g << " b: " << v.b << " a: " << v.a
+#endif
+
+#ifndef BM_NEW
+#define BM_NEW(x) new(gBlockMemory->alloc(sizeof(x)))x();
+#endif
+

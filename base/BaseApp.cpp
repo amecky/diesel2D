@@ -3,6 +3,9 @@
 #include <windows.h>
 #include "..\utils\Profiler.h"
 #include "..\utils\PlainTextReader.h"
+#include "..\memory\DataBlockAllocator.h"
+#include "..\io\FileWatcher.h"
+#include "..\utils\FileUtils.h"
 
 namespace ds {
 
@@ -10,6 +13,8 @@ namespace ds {
 // Constructing new BaseApp
 // -------------------------------------------------------	
 BaseApp::BaseApp() {
+	gBlockMemory = new DataBlockAllocator();
+	gFileWatcher = new FileWatcher();
 	m_Active = true;
 	m_GameTime.elapsed = 0.0f;
 	m_GameTime.elapsedMillis = 0;
@@ -28,6 +33,7 @@ BaseApp::BaseApp() {
 	rand.seed(GetTickCount());
 	audio = new AudioManager;
 	m_Fullscreen = false;
+	m_DialogBatch = 0;
 }
 
 // -------------------------------------------------------
@@ -35,15 +41,21 @@ BaseApp::BaseApp() {
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
 	LOGC(logINFO,"BaseApp") << "Destructing all elements";
+	if ( m_DialogBatch != 0 ) {
+		delete m_DialogBatch;
+	}
 	delete gProfiler;
 	delete audio;
 	delete renderer;	
+	delete gFileWatcher;
+	delete gBlockMemory;
 }
 
 // -------------------------------------------------------
 // Init
 // -------------------------------------------------------
 void BaseApp::init() {
+	LOGC(logINFO,"BaseApp") << "----------------- Init ----------------------";
 	Settings settings;
 	settings.fullscreen = m_Fullscreen;
 	settings.height = m_Height;
@@ -54,11 +66,48 @@ void BaseApp::init() {
 	renderer = new Renderer(m_hWnd,settings);   
 	m_World.init(renderer);
 	audio->initialize(m_hWnd);
-	initialize();	
+	initialize();		
+	LOGC(logINFO,"BaseApp") << "-> loading sprites.json";
+	if ( file::fileExists("content\\resources\\sprites.json")) {
+		LOGC(logINFO,"BaseApp") << "There is a Sprites file";
+		m_World.loadData("sprites");
+	}
+	LOGC(logINFO,"BaseApp") << "-> loading gui.json";
+	if ( file::fileExists("content\\resources\\gui.json")) {
+		LOGC(logINFO,"BaseApp") << "There is a gui file";
+		initializeGUI();
+	}	
+	LOGC(logINFO,"BaseApp") << "----------------- Init ----------------------";
+	LOGC(logINFO,"BaseApp") << "------------ Loading content  ---------------";
 	loadContent();
+	LOGC(logINFO,"BaseApp") << "------------ Loading content  ---------------";
 	m_Loading = false;
 }
 
+void BaseApp::initializeGUI() {
+	JSONReader reader;
+	if ( reader.parse("content\\resources\\gui.json") ) {		
+		Category* cat = reader.getCategory("gui");
+		if ( cat != 0 ) {
+			int textureID = cat->getInt(0,"texture_id");
+			std::string font = cat->getProperty("font");
+			int maxQuads = 1024;
+			cat->getInt("max_quads",&maxQuads);
+			m_DialogBatch = new SpriteBatch(renderer,maxQuads,m_World.getTextureID(textureID));
+			gui.init(m_DialogBatch,renderer,font.c_str(),m_World.getTextureID(textureID));
+		}
+		std::vector<Category*> categories = reader.getCategories();
+		for ( size_t i = 0; i < categories.size(); ++i ) {
+			Category* c = categories[i];
+			if ( c->getName() != "gui" ) {
+				int id = c->getInt(0,"id");
+				LOGC(logINFO,"BaseAPP") << "dialog: " << c->getName() << " id: " << id;
+				gui.loadDialogFromJSON(c->getName().c_str(),c->getProperty("file").c_str(),id);
+			}
+		}		
+	}
+	
+}
 // -------------------------------------------------------
 // Creates the window
 // -------------------------------------------------------
@@ -132,8 +181,11 @@ void BaseApp::updateTime() {
 // Build frame
 // -------------------------------------------------------
 void BaseApp::buildFrame() {	
-	gProfiler->reset();
+	gProfiler->reset();	
 	PR_START("MAIN")
+	PR_START("FILEWATCHER")
+	gFileWatcher->update();
+	PR_END("FILEWATCHER")
 	renderer->getDrawCounter().reset();
 	renderer->clearDebugMessages();
 	// handle key states
@@ -154,7 +206,6 @@ void BaseApp::buildFrame() {
 		}
 	}
 	PR_END("INPUT")
-
 	if ( !m_ButtonState.processed ) {
 		m_ButtonState.processed = true;
 		if ( m_ButtonState.down ) {
@@ -221,6 +272,9 @@ void BaseApp::sendOnChar(char ascii,unsigned int state) {
 #ifdef DEBUG
 	if ( ascii == 'p' ) {
 		gProfiler->print();
+	}
+	if ( ascii == 'o' ) {
+		gBlockMemory->debug();
 	}
 #endif
 	m_KeyStates.ascii = ascii;

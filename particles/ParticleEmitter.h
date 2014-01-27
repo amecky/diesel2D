@@ -3,14 +3,13 @@
 #include "ParticleBuffer.h"
 #include <vector>
 #include "..\utils\mtrand.h"
-#include "..\utils\PlainTextReader.h"
-#include "..\settings\DynamicSettings.h"
+#include "..\data\Gizmo.h"
 
 namespace ds {
 // -------------------------------------------------------
 // Particle emitter data
 // -------------------------------------------------------
-struct ParticleEmitterData : public DynamicSettings {
+struct ParticleEmitterData : public Gizmo {
 
 	uint32 ejectionPeriod;
 	uint32 ejectionVariance;
@@ -23,20 +22,20 @@ struct ParticleEmitterData : public DynamicSettings {
 	float sizeYVariance;
 	uint32 count;
 
-	ParticleEmitterData() : ejectionPeriod(0) , ejectionVariance(0.0f) , ejectionCounter(0) , velocity(0.0f) , velocityVariance(0.0f) , ttl(1.0f) , ttlVariance(0.0f) , sizeXVariance(0.0f) , sizeYVariance(0.0f) , count(1) {}
+	ParticleEmitterData() : Gizmo("emitter_data") , ejectionPeriod(0) , ejectionVariance(0) , ejectionCounter(0) , velocity(0.0f) , velocityVariance(0.0f) , ttl(1.0f) , ttlVariance(0.0f) , sizeXVariance(0.0f) , sizeYVariance(0.0f) , count(1) {
 
-	void load(NewSettingsReader& reader) {
-		reader.get<float>("velocity",&velocity);
-		reader.get<float>("velocity_variance",&velocityVariance);
-		reader.get<uint32>("ejection_period",&ejectionPeriod);
-		reader.get<uint32>("ejection_variance",&ejectionVariance);
-		reader.get<uint32>("ejection_counter",&ejectionCounter);
-		reader.get<float>("ttl",&ttl);
-		reader.get<float>("ttl_variance",&ttlVariance);
-		reader.get<float>("size_x_variance",&sizeXVariance);
-		reader.get<float>("size_y_variance",&sizeYVariance);
-		reader.get<uint32>("count",&count);
+		add("velocity",&velocity);
+		add("velocity_variance",&velocityVariance);
+		add("ejection_period",&ejectionPeriod);
+		add("ejection_variance",&ejectionVariance);
+		add("ejection_counter",&ejectionCounter);
+		add("ttl",&ttl);
+		add("ttl_variance",&ttlVariance);
+		add("size_x_variance",&sizeXVariance);
+		add("size_y_variance",&sizeYVariance);
+		add("count",&count);
 	}
+
 };
 // -------------------------------------------------------
 // Particle emitter
@@ -123,6 +122,15 @@ struct RingEmitterSettings : public DynamicSettings {
 		reader.get<float>("start_variance",&startVariance);
 	}
 
+	void load(Category* category) {
+		category->getInt("radius",&radius);
+		category->getInt("count",&count);
+		category->getInt("radius_variance",&radiusVariance);
+		category->getFloat("start_angle",&startAngle);
+		category->getFloat("angle_variance",&angleVariance);
+		category->getFloat("start_variance",&startVariance);
+	}
+
 };
 class RingEmitter : public ParticleEmitter {
 
@@ -143,7 +151,7 @@ private:
 // -------------------------------------------------------
 // Cone emitter settings
 // -------------------------------------------------------
-struct ConeEmitterSettings : public DynamicSettings {
+struct ConeEmitterSettings : public Gizmo {
 
 	int radius;
 	int count;
@@ -152,13 +160,13 @@ struct ConeEmitterSettings : public DynamicSettings {
 	float angleVariance;
 	float endAngle;
 
-	void load(NewSettingsReader& reader) {
-		reader.get<int>("radius",&radius);
-		reader.get<int>("count",&count);
-		reader.get<int>("radius_variance",&radiusVariance);
-		reader.get<float>("start_angle",&startAngle);
-		reader.get<float>("angle_variance",&angleVariance);
-		reader.get<float>("end_angle",&endAngle);
+	ConeEmitterSettings() : Gizmo("cone_emitter") , radius(10) , radiusVariance(2) , startAngle(0.0f) , endAngle(180.0f) , angleVariance(0.0f) {
+		add("radius",&radius);
+		add("count",&count);
+		add("radius_variance",&radiusVariance);
+		add("start_angle",&startAngle);
+		add("angle_variance",&angleVariance);
+		add("end_angle",&endAngle);
 	}
 
 };
