@@ -33,6 +33,7 @@ BaseApp::BaseApp() {
 	rand.seed(GetTickCount());
 	audio = new AudioManager;
 	m_Fullscreen = false;
+	m_CollisionManager = new SpriteCollisionManager();
 	//m_DialogBatch = 0;
 }
 
@@ -44,11 +45,13 @@ BaseApp::~BaseApp() {
 	//if ( m_DialogBatch != 0 ) {
 		//delete m_DialogBatch;
 	//}
+	delete m_CollisionManager;
 	delete gProfiler;
 	delete audio;
 	delete renderer;	
 	delete gFileWatcher;
 	delete gBlockMemory;
+	
 }
 
 // -------------------------------------------------------
@@ -178,6 +181,7 @@ void BaseApp::updateTime() {
 // -------------------------------------------------------
 void BaseApp::buildFrame() {	
 	gProfiler->reset();	
+	m_CollisionManager->reset();
 	PR_START("MAIN")
 	PR_START("FILEWATCHER")
 	gFileWatcher->update();
@@ -230,6 +234,10 @@ void BaseApp::buildFrame() {
 	//}
 	PR_END("World-update-GameObjects")
 	update(m_GameTime);
+	int collisions = m_CollisionManager->checkIntersections();
+	if ( collisions > 0 ) {
+		handleCollisions();
+	}
 	m_World.update(m_GameTime.elapsed);
 	PR_END("UPDATE")
 	PR_START("RENDER")

@@ -345,7 +345,6 @@
     <ClInclude Include="sprites\NewSpriteBatch.h" />
     <ClInclude Include="sprites\SpriteAnimation.h" />
     <ClInclude Include="sprites\SpriteCollisionManager.h" />
-    <ClInclude Include="sprites\SpriteData.h" />
     <ClInclude Include="sprites\SpriteObject.h" />
     <ClInclude Include="sprites\SpriteObjectDescription.h" />
     <ClInclude Include="utils\Color.h" />

@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "SpriteData.h"
+#include "SpriteObject.h"
 
 const int COLL_SIZE = 32;
 const int COLL_BUFFER_MAX = 1000;
@@ -25,11 +25,10 @@ struct SpriteCollision {
 // -------------------------------------------------------
 struct SpriteCollisionObject {
 	Vector2f prevPosition;
-	//Vector2f offset;
 	Vector2f extent;
 	int id;
 	int type;
-	SpriteData* sprite;
+	SpriteObject* sprite;
 };
 
 // -------------------------------------------------------
@@ -66,8 +65,8 @@ typedef std::vector<IgnoreCollision> Ignores;
 public:
 	SpriteCollisionManager();	
 	virtual ~SpriteCollisionManager();
-	int add(SpriteData* sprite,int type);
-	void remove(SpriteData* sprite,int type);
+	int add(SpriteObject* sprite,int type);
+	void remove(SpriteObject* sprite,int type);
 	int checkIntersections();
 	void reset();
 	bool getCollision(int index,SpriteCollision& collision) const;

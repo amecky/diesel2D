@@ -7,6 +7,7 @@
 #include "..\world\World.h"
 #include "..\audio\AudioManager.h"
 #include "GameObject.h"
+#include "..\sprites\SpriteCollisionManager.h"
 
 namespace ds {
 
@@ -58,6 +59,7 @@ public:
 	}
 	virtual void update(const GameTime& gameTime) {}
 	virtual void draw(const GameTime& gameTime) {}
+	virtual void handleCollisions() {}
 	void setInstance(const HINSTANCE hInst){ 
 		hInstance = hInst; 
 	}
@@ -114,6 +116,7 @@ protected:
 	GameTime m_GameTime;
 	Color m_ClearColor;
 	World m_World;
+	SpriteCollisionManager* m_CollisionManager;
 private:
 	
 	Vector2f m_MousePos;
@@ -126,11 +129,13 @@ private:
 	ButtonState m_ButtonState;
 	MTRand_open rand;		
 	GameObjects m_GameObjects;
+	
 }; 
 
 template<class S>
 void BaseApp::createGameObject(S* obj) {
 	obj->setRenderer(renderer);
+	obj->setCollisionManager(m_CollisionManager);
 	obj->init();
 	obj->GameObject::setActive(true);
 	m_GameObjects.push_back(obj);

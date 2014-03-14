@@ -91,38 +91,6 @@ void SpriteBatch::draw(const SpriteObject& spriteObject) {
 	}
 }
 
-void SpriteBatch::draw(const SpriteData& spriteData) {
-	if ( m_VertexCounter < m_MaxVertices ) {
-		
-		float dimX = spriteData.dimX;
-		float dimY = spriteData.dimY;
-		float dx = dimX * 0.5f;
-		float dy = dimY * 0.5f;
-		char* buffer = m_DataBuffer + QUAD_SIZE * m_Index;
-		(*(SpritePlane*)buffer).v[0].uv = Vector2f(spriteData.u1,spriteData.v1);
-		(*(SpritePlane*)buffer).v[1].uv = Vector2f(spriteData.u2,spriteData.v1);
-		(*(SpritePlane*)buffer).v[2].uv = Vector2f(spriteData.u2,spriteData.v2);
-		(*(SpritePlane*)buffer).v[3].uv = Vector2f(spriteData.u1,spriteData.v2);
-
-		Vector2f cor = spriteData.position;
-		cor = cor - Vector2f(m_Renderer->getWidth() * 0.5f,m_Renderer->getHeight() * 0.5f);
-		Vector2f p(0,0);
-		for ( int i = 0; i < 4; ++i ) {
-			p.x = VP_ARRAY[i * 2] * dimX;
-			p.y = VP_ARRAY[i * 2 + 1] * dimY;
-			//p = p - center;
-			Vector2f np = vector::srt(cor,p,spriteData.size.x,spriteData.size.y,spriteData.angle);		
-			(*(SpritePlane*)buffer).v[i].x = np.x;
-			(*(SpritePlane*)buffer).v[i].y = np.y;
-			(*(SpritePlane*)buffer).v[i].z = 0.0f;
-			(*(SpritePlane*)buffer).v[i].color = spriteData.color;
-		}	
-		++m_Index;
-		m_VertexCounter += 4;
-		m_Renderer->getDrawCounter().addSprite();
-	}
-}
-
 // -------------------------------------------------------
 // Draw
 // -------------------------------------------------------

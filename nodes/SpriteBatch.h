@@ -1,6 +1,5 @@
 #pragma once
 #include "..\renderer\render_types.h"
-#include "..\sprites\SpriteData.h"
 #include "..\renderer\Renderer.h"
 
 namespace ds {
@@ -21,7 +20,6 @@ public:
 		m_BlendState = blendState;
 	}
 	void begin();
-	void draw(const SpriteData& spriteData);
 	void draw(const SpriteObject& spriteObject);
 	void draw(const Vector2f& pos,const Rect& textureRect,float rotation = 0.0f,float scaleX = 1.0f,float scaleY = 1.0f,const Color& color = Color::WHITE,const Vector2f& center = Vector2f(0,0));
 	void draw(float x,float y,const Rect& textureRect,float rotation = 0.0f,float scaleX = 1.0f,float scaleY = 1.0f,const Color& color = Color::WHITE,const Vector2f& center = Vector2f(0,0));

@@ -11,6 +11,11 @@ SpriteCollisionManager::SpriteCollisionManager(const SpriteCollisionManager& ori
 }
 
 SpriteCollisionManager::~SpriteCollisionManager() {
+	SpriteCollisionObjects::iterator it = m_Objects.begin();
+	while ( it != m_Objects.end()) {
+		delete (*it);
+		it = m_Objects.erase(it);
+	}
     delete m_ColBuffer;
 }
 
@@ -52,14 +57,14 @@ void SpriteCollisionManager::reset() {
 // -------------------------------------------------------
 // Add circle
 // -------------------------------------------------------
-int SpriteCollisionManager::add(SpriteData* sprite,int type) {
+int SpriteCollisionManager::add(SpriteObject* sprite,int type) {
     int idx = m_Counter;
     SpriteCollisionObject* co = new SpriteCollisionObject;
-    co->prevPosition = sprite->position;
-    co->extent.x = sprite->radius;
+    co->prevPosition = sprite->getPosition();
+    co->extent.x = sprite->getRadius();
     co->extent.y = 0.0f;
 	co->type = type;
-    co->id = sprite->id;
+    co->id = sprite->getID();
 	co->sprite = sprite;
     m_Objects.push_back(co);
     ++m_Counter;
@@ -69,10 +74,10 @@ int SpriteCollisionManager::add(SpriteData* sprite,int type) {
 // -------------------------------------------------------
 // Remove
 // -------------------------------------------------------
-void SpriteCollisionManager::remove(SpriteData* entity,int type) {
+void SpriteCollisionManager::remove(SpriteObject* entity,int type) {
 	std::vector<SpriteCollisionObject*>::iterator it = m_Objects.begin();
 	while ( it != m_Objects.end() ) {
-		if ( (*it)->sprite->id == entity->id && (*it)->type == type ) {
+		if ( (*it)->sprite->getID() == entity->getID() && (*it)->type == type ) {
 			delete (*it);
 			it = m_Objects.erase(it);
 		}
@@ -98,10 +103,10 @@ int SpriteCollisionManager::checkIntersections() {
 	int ret = 0;
     for ( std::size_t i = 0; i < m_Objects.size(); ++i ) {
         SpriteCollisionObject* object = m_Objects[i];
-		if ( object->sprite->active ) {
+		if ( object->sprite->isActive() ) {
 			for ( std::size_t j = 0; j < m_Objects.size(); ++j ) {
 				SpriteCollisionObject* checkObject = m_Objects[j];   
-				if ( checkObject->sprite->active && !equals(object,checkObject)) {
+				if ( checkObject->sprite->isActive() && !equals(object,checkObject)) {
 					if ( !shouldIgnore(object->type,checkObject->type)) {
 						if ( intersectCircleCircle(object,checkObject)) {
 							if ( addCollision(object,checkObject) ) {
@@ -109,23 +114,23 @@ int SpriteCollisionManager::checkIntersections() {
 							}
 						}
 					}				
-					checkObject->prevPosition = object->sprite->position;
+					checkObject->prevPosition = object->sprite->getPosition();
 				}
 			}
-			object->prevPosition = object->sprite->position;
+			object->prevPosition = object->sprite->getPosition();
 		}
     }
 	return ret;
 }
 
 bool SpriteCollisionManager::addCollision(SpriteCollisionObject* first, SpriteCollisionObject* second) {	
-    if ( !bufferContains(first->sprite->id,second->sprite->id) ) {
+    if ( !bufferContains(first->sprite->getID(),second->sprite->getID()) ) {
 		if ( m_Size < COLL_BUFFER_SIZE ) {
 			char* buffer = m_ColBuffer + m_Size;
-			(*(SpriteCollision*)(buffer)).firstId = first->sprite->id;
-			(*(SpriteCollision*)(buffer)).secondId = second->sprite->id;
-			(*(SpriteCollision*)(buffer)).firstPosition = first->sprite->position;
-			(*(SpriteCollision*)(buffer)).secondPosition = second->sprite->position;
+			(*(SpriteCollision*)(buffer)).firstId = first->sprite->getID();
+			(*(SpriteCollision*)(buffer)).secondId = second->sprite->getID();
+			(*(SpriteCollision*)(buffer)).firstPosition = first->sprite->getPosition();
+			(*(SpriteCollision*)(buffer)).secondPosition = second->sprite->getPosition();
 			(*(SpriteCollision*)(buffer)).firstType = first->type;
 			(*(SpriteCollision*)(buffer)).secondType = second->type;
 			m_Size += COLL_SIZE;
@@ -137,7 +142,7 @@ bool SpriteCollisionManager::addCollision(SpriteCollisionObject* first, SpriteCo
 }
 
 bool SpriteCollisionManager::intersectCircleCircle(const SpriteCollisionObject* first, const SpriteCollisionObject* second) {
-    Vector2f diff = first->sprite->position - second->sprite->position;
+    Vector2f diff = first->sprite->getPosition() - second->sprite->getPosition();
     float distSq = sqr_length(diff);
     float r1 = first->extent.x;
     float r2 = second->extent.x;
@@ -163,7 +168,7 @@ SpriteCollisionObject* SpriteCollisionManager::findObject(int id) {
 void SpriteCollisionManager::debug() {
 	for ( std::size_t i = 0; i < m_Objects.size(); ++i ) {
 		SpriteCollisionObject* object = m_Objects[i];
-		LOG(logINFO) << i << " id: " << object->id << " entity-id: " << object->sprite->id << " type: " << object->type << " active: " << object->sprite->active << " position: " << DBG_V2(object->sprite->position) << " radius: " << object->extent.x;
+		LOG(logINFO) << i << " id: " << object->id << " entity-id: " << object->sprite->getID() << " type: " << object->type << " active: " << object->sprite->isActive() << " position: " << DBG_V2(object->sprite->getPosition()) << " radius: " << object->extent.x;
 	}
 }
 

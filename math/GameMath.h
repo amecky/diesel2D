@@ -3,7 +3,6 @@
 #include "..\utils\Color.h"
 #include "math_types.h"
 #include <Vector.h>
-#include "..\sprites\SpriteData.h"
 
 Vector2f rotate(float angle,float vel);
 
@@ -35,8 +34,6 @@ namespace ds {
 		float cubicPulse( float c, float w, float x );
 		float almostIdentity( float x, float m, float n );
 		void transformMousePosToWorld(Vector3f* vPickRayDir,Vector3f* vPickRayOrig);
-
-		void getTextureCoordinates(SpriteData* spriteData,const Rect& textureRect,int textureSize = 1024,bool useHalfTexel = true);
 
 		void getTextureCoordinates(const Rect& textureRect,int textureSize,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel = true);
 		void getTextureCoordinates(const Rect& textureRect,int textureWidth,float textureHeight,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel);

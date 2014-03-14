@@ -81,12 +81,6 @@ namespace ds {
 		return value;
 	}
 
-	void getTextureCoordinates(SpriteData* spriteData,const Rect& textureRect,int textureSize,bool useHalfTexel) {		
-		getTextureCoordinates(textureRect,textureSize,&spriteData->u1,&spriteData->v1,&spriteData->u2,&spriteData->v2,useHalfTexel);
-		spriteData->dimX = textureRect.width();
-		spriteData->dimY = textureRect.height();
-	}
-
 	void getTextureCoordinates(const Rect& textureRect,int textureSize,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel) {
 		if ( useHalfTexel ) {
 			float halfTexel = 0.5f;

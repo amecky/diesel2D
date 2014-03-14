@@ -4,7 +4,6 @@
 #include "Vector.h"
 #include "..\utils\Color.h"
 #include "..\nodes\SpriteBatch.h"
-#include "SpriteData.h"
 
 namespace ds {
 
@@ -16,7 +15,7 @@ typedef std::vector<SpriteAnimation*> Animations;
 
 public:
 	SpriteObject();
-	~SpriteObject(void);
+	virtual ~SpriteObject(void);
 	void update(float elapsed);
 	void add(SpriteAnimation* animation) {
 		m_Animations.push_back(animation);

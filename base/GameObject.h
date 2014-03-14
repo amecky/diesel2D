@@ -1,6 +1,7 @@
 #pragma once
 #include "EventStream.h"
 #include "..\renderer\Renderer.h"
+#include "..\sprites\SpriteCollisionManager.h"
 
 namespace ds {
 // -------------------------------------------------------
@@ -13,6 +14,9 @@ public:
 	virtual ~GameObject() {}	
 	void setRenderer(Renderer* renderer) {
 		m_Renderer = renderer;
+	}
+	void setCollisionManager(SpriteCollisionManager* collisionManager) {
+		m_CollisionManager = collisionManager;
 	}
 	virtual void update(float elapsed) = 0;
 	virtual void render() = 0;
@@ -35,6 +39,7 @@ public:
 protected:
 	EventStream m_Events;
 	Renderer* m_Renderer;
+	SpriteCollisionManager* m_CollisionManager;
 private:
 	GameObject(const GameObject& other) {}
 	bool m_Active;

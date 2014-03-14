@@ -401,9 +401,6 @@
     <ClInclude Include="sprites\SpriteCollisionManager.h">
       <Filter>sprites</Filter>
     </ClInclude>
-    <ClInclude Include="sprites\SpriteData.h">
-      <Filter>sprites</Filter>
-    </ClInclude>
     <ClInclude Include="sprites\SpriteObject.h">
       <Filter>sprites</Filter>
     </ClInclude>
