@@ -11,29 +11,29 @@ class UITextbox : public UIControl {
 public:
 	UITextbox(UIDialog *dialog,uint32 ID,const std::string& label,const std::string& value);
 	~UITextbox(void);
-	bool isSelected(const Vec2& mousePos);
+	bool isSelected(const Vector2f& mousePos);
 	void onChar(char ascii);
 	void setValue(const std::string& value);
-	void fillBuffer(const Vec2& basePosition,UIBuffer& buffer);
-	void align(const Vec2& gridPosition);
+	void fillBuffer(const Vector2f& basePosition,UIBuffer& buffer);
+	void align(const Vector2f& gridPosition);
 	std::string& getValue() { 
 		return m_Value; 
 	}
 	const UIControlType getType() const { 
 		return UI_CONTROL_TEXTBOX; 
 	}
-	Vec2& getExtent() {
+	Vector2f& getExtent() {
 		return m_Dimension;
 	}
 private:
-	Vec2 m_Dimension;
-	Vec2 m_BoxPosition;
-	Vec2 m_CalculatedSize;
+	Vector2f m_Dimension;
+	Vector2f m_BoxPosition;
+	Vector2f m_CalculatedSize;
 	bool m_Selected;
 	std::string m_Value;
 	std::string m_Label;
 	Rect m_BoundingBox;	
-	Vec2 m_TextPos;
+	Vector2f m_TextPos;
 	std::vector<TransformedTextureColorVertex> m_Vertices;
 };
 

@@ -10,6 +10,7 @@
 #include "..\utils\Color.h"
 #include "render_types.h"
 #include "DrawCounter.h"
+#include "..\sprites\NewSpriteBatch.h"
 
 
 namespace ds {
@@ -34,15 +35,8 @@ const int VD_TTC   = 0;
 const int VD_PTNBT = 1;
 const int VD_PTC   = 2;
 
-class ScreenOverlayNode;
-class SkyNode;
 class DebugRenderer;
 class VertexDeclaration;
-class PostProcessor;
-
-enum RenderMode {
-	RM_2D, RM_3D
-};
 
 struct VDStruct {
 	int vertexSize;
@@ -59,15 +53,17 @@ typedef List<DebugMessage> DebugMessages;
 public:
 	Renderer(HWND hWnd,const Settings& settings);
 	~Renderer();
+	/*
 	LPDIRECT3DDEVICE9 getDevice() { return device->get();}
 	GraphicsDevice* getGraphicsDevice() {
 		return device;
 	}
+	*/
 	// basic rendering methods
 	bool beginRendering(const Color& clearColor);
 	void endRendering();	
-	bool Windowed;
-	bool rendering;
+	//bool Windowed;
+	//bool rendering;
 	void setWorldMatrix(const mat4& world);
 	const mat4& getWVPMatrix() const { 
 		return matWorldViewProj; 
@@ -89,7 +85,7 @@ public:
 	void getRenderStates();
 	void setRenderState(D3DRENDERSTATETYPE rs,DWORD value);
 	DWORD getRenderState(D3DRENDERSTATETYPE rs);
-	RenderMode getRenderMode() { return m_RenderMode; }
+	//RenderMode getRenderMode() { return m_RenderMode; }
 	void setupMatrices();
 	
 	void debug();
@@ -115,8 +111,8 @@ public:
 	LPDIRECT3DTEXTURE9 getDirectTexture(int textureID);
 	D3DLOCKED_RECT lockTexture(int id);
 	void unlockTexture(int id);
-	void fillTexture(int id,const Vec2& pos,int sizeX,int sizeY,Color* colors);
-	Vec2 getTextureSize(int idx);
+	void fillTexture(int id,const Vector2f& pos,int sizeX,int sizeY,Color* colors);
+	Vector2f getTextureSize(int idx);
 	// Materials
 	int createMaterial(const char* name,int textureID = -1);
 	void applyMaterial(int mtrlID);
@@ -133,8 +129,8 @@ public:
 	// Bitmap Font
 	void initializeBitmapFont(BitmapFont& bitmapFont,int textureID,const Color& fillColor);
 	// render target
-	int createRenderTarget(const char* name);
-	int createRenderTarget(const char* name,float width,float height);
+	int createRenderTarget(const char* name,const Color& clearColor = Color::WHITE);
+	int createRenderTarget(const char* name,float width,float height,const Color& clearColor = Color::WHITE);
 	void setRenderTarget(const char* name);
 	void restoreBackBuffer(const char* name);
 	// blend states
@@ -196,6 +192,13 @@ public:
 	void showProfiler(int x,int y);
 	void showDrawCounter(int x,int y);
 
+
+	void draw(const SpriteObject& spriteObject) {
+		m_SpriteBatch->draw(spriteObject);
+	}
+
+	BitmapFont* loadBitmapFont(const char* name,int textureId,const Color& fillColor = Color(1.0f,0.0f,1.0f,1.0f));
+
 private:	
 	bool isFillColor(const Color& fillColor,const Color& currentColor);
 	void setTransformations();
@@ -211,7 +214,7 @@ private:
 	int allocateBuffer(GeoBufferType type,int vertexDefinition,int size,int& start,bool dynamic);
 	void resetDynamicBuffers();
 
-	RenderMode m_RenderMode;	
+	//RenderMode m_RenderMode;	
 	D3DCAPS9 m_DeviceCaps;	
 	Camera* m_Camera;	
 	mat4 matWorldViewProj;
@@ -226,7 +229,7 @@ private:
 	HWND m_Hwnd;
 	RenderTargets m_RenderTargets;
 	RasterizerStates m_RasterizerStates;
-	SkyNode* m_SkyNode;
+	//SkyNode* m_SkyNode;
 	// new stuff
 	LPDIRECT3DSURFACE9 m_BackBuffer;	
 	RasterizerState m_RSState;
@@ -245,6 +248,8 @@ private:
 	BlendState m_BlendStates[MAX_BLENDSTATES];
 	GeometryBuffer m_Buffers[MAX_BUFFERS];
 	GeoBufferHandle m_BufferHandles[MAX_BUFFER_HANDLES];
+	BitmapFont m_BitmapFonts[MAX_SYSTEM_FONTS];
+	int m_BFCounter;
 	int m_CurrentIB;
 	int m_CurrentVB;
 	int m_CurrentVD;
@@ -255,6 +260,8 @@ private:
 	DebugMessages m_DebugMessages;
 	LPD3DXSPRITE m_DebugSprite;
 	int m_DebugFont;
+
+	NewSpriteBatch* m_SpriteBatch;
 };
 
 };

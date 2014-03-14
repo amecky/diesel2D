@@ -12,13 +12,13 @@ class UICheckBox : public UIControl {
 public:
 	UICheckBox(UIDialog *dialog,uint32 ID,const std::string& label);
 	virtual ~UICheckBox(void);
-	bool isSelected(const Vec2& mousePos);
+	bool isSelected(const Vector2f& mousePos);
 	void setValue(bool value);
-	void fillBuffer(const Vec2& basePosition,UIBuffer& buffer);	
-	Vec2& getExtent() {
+	void fillBuffer(const Vector2f& basePosition,UIBuffer& buffer);	
+	Vector2f& getExtent() {
 		return m_Dimension;		
 	}
-	void align(const Vec2& gridPosition);
+	void align(const Vector2f& gridPosition);
 	bool getValue() const { 
 		return m_Value; 
 	}
@@ -26,12 +26,12 @@ public:
 		return UI_CONTROL_CHECKBOX; 
 	}
 private:
-	Vec2 m_Dimension;
-	Vec2 m_CalculatedSize;
+	Vector2f m_Dimension;
+	Vector2f m_CalculatedSize;
 	std::string m_Label;
 	Rect m_BoundingBox;	
 	bool m_Value;
-	Vec2 m_BoxPosition;
+	Vector2f m_BoxPosition;
 };
 
 }

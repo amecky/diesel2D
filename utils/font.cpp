@@ -11,9 +11,9 @@ namespace ds {
 		// -------------------------------------------------------
 		// Calculate size of text
 		// -------------------------------------------------------
-		Vec2 calculateSize(const BitmapFont& bitmapFont,const std::string& text,int padding,float scaleX,float scaleY) {
+		Vector2f calculateSize(const BitmapFont& bitmapFont,const std::string& text,int padding,float scaleX,float scaleY) {
 			float cPadding = 0.0f;
-			Vec2 ret(0.0f,0.0f);
+			Vector2f ret(0.0f,0.0f);
 			ret.y = bitmapFont.charHeight * scaleY;
 			for ( size_t cnt = 0; cnt < text.length(); ++cnt ) {
 				char c = text[cnt];
@@ -24,11 +24,11 @@ namespace ds {
 			}
 			return ret;
 		}
-
+		
 		// -------------------------------------------------------
 		// Create text
 		// -------------------------------------------------------
-		void createText(const BitmapFont& bitmapFont,const Vec2& pos,const std::string& text,const Color& color,std::vector<Sprite>& sprites,float scaleX,float scaleY) {
+		void createText(const BitmapFont& bitmapFont,const Vector2f& pos,const std::string& text,const Color& color,std::vector<SpriteObject>& sprites,float scaleX,float scaleY) {
 			float x = pos.x;
 			float y = pos.y;
 			float padding = 0.0f;
@@ -40,13 +40,11 @@ namespace ds {
 				float dimX = cd.width * scaleX;
 				float dimY = bitmapFont.charHeight * scaleY;
 				// quad buffer is centered by default so adjust position!
-				Sprite sp;
-				sp.position = ds::Vec2(x + dimX * 0.5f ,y + dimY * 0.5f);
-				//sp.textureRect = 
-				sp.textureRect = cd.texureRect;
-				sp.color = color;
-				sp.scaleX = scaleX;
-				sp.scaleY = scaleY;
+				SpriteObject sp;
+				sp.setPosition(Vector2f(x + dimX * 0.5f ,y + dimY * 0.5f));
+				sp.setTextureRect(cd.texureRect);
+				sp.setColor(color);
+				sp.setScale(Vector2f(scaleX,scaleY));
 				sprites.push_back(sp);		
 				x += dimX +4;
 			}
@@ -157,6 +155,17 @@ namespace ds {
 			else {
 				LOGC(logERROR,"font") << "Failed to load bitmap font " << fileName;
 				return false;
+			}
+		}
+
+		void debug(BitmapFont& font) {
+			for ( int i = font.startChar; i < font.endChar; ++i ) {
+				const CharDef& def = font.getCharDef(i);
+				LOG(logINFO) << "\"" << i << "\" {";
+				LOG(logINFO) << "    \"pos\" : \"" << def.startX << "," << def.startY << "\" ,";
+				LOG(logINFO) << "    \"width\" : \"" << def.width << "\" , ";
+				LOG(logINFO) << "    \"rect\" : \"" << def.texureRect.top << "," << def.texureRect.left << "," << def.texureRect.width() << "," << def.texureRect.height() << "\"";
+				LOG(logINFO) << "}";
 			}
 		}
 	}

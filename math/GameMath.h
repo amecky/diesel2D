@@ -2,12 +2,19 @@
 #include "..\dxstdafx.h"
 #include "..\utils\Color.h"
 #include "math_types.h"
-#include "vector.h"
+#include <Vector.h>
+#include "..\sprites\SpriteData.h"
+
+Vector2f rotate(float angle,float vel);
 
 namespace ds {
 
 
 	namespace math {
+
+		float hill(float x);
+		float fastSin(float x);
+		float fastCos(float x);
 
 		float norm(float t,float max);
 		bool addClamped(float *value,float add,float max,float newValue = 0.0f);
@@ -17,32 +24,35 @@ namespace ds {
 		void clamp(int* value,int min,int max);
 		void clamp(float* value,float min,float max);
 		float clamp(float value,float min = 0.0f,float max = 1.0f);
-		Vec2 getRadialVelocity(float angle,float vel);
-		Vec2 getTargetVelocity(const Vec2& targetPosition,const Vec2& currentPosition,float* angle,float vel);
+		Vector2f getRadialVelocity(float angle,float vel);
+		Vector2f getTargetVelocity(const Vector2f& targetPosition,const Vector2f& currentPosition,float* angle,float vel);
 		float getAngle(float x1,float y1,float x2,float y2);
-		float getAngle(const Vec2& v1,const Vec2& v2);
-		float getTargetAngle(const Vec2& v1,const Vec2& v2);
-		Vec2 getDistantPosition(float x,float y,float angle,float radius);
-		Vec2 getDistantPosition(const Vec2& initialPosition,float angle,float radius);
+		float getAngle(const Vector2f& v1,const Vector2f& v2);
+		float getTargetAngle(const Vector2f& v1,const Vector2f& v2);
+		Vector2f getDistantPosition(float x,float y,float angle,float radius);
+		Vector2f getDistantPosition(const Vector2f& initialPosition,float angle,float radius);
 		float impulse(float k,float x );
 		float cubicPulse( float c, float w, float x );
 		float almostIdentity( float x, float m, float n );
-		void transformMousePosToWorld(Vec3* vPickRayDir,Vec3* vPickRayOrig);
+		void transformMousePosToWorld(Vector3f* vPickRayDir,Vector3f* vPickRayOrig);
+
+		void getTextureCoordinates(SpriteData* spriteData,const Rect& textureRect,int textureSize = 1024,bool useHalfTexel = true);
+
 		void getTextureCoordinates(const Rect& textureRect,int textureSize,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel = true);
 		void getTextureCoordinates(const Rect& textureRect,int textureWidth,float textureHeight,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel);
-		void follow(const Vec2& targetPos,Vec2& newPos,float* angle,float distance,float add);
-		void followRelative(const Vec2& targetPos,Vec2& newPos,float* angle,float distance,float percentage);
-		void clipToRect(Vec2& newPos,const Rect& rect);
-		bool isOutside(Vec2& pos,const Rect& rect);
+		void follow(const Vector2f& targetPos,Vector2f& newPos,float* angle,float distance,float add);
+		void followRelative(const Vector2f& targetPos,Vector2f& newPos,float* angle,float distance,float percentage);
+		void clipToRect(Vector2f& newPos,const Rect& rect);
+		bool isOutside(Vector2f& pos,const Rect& rect);
 		float reflect(float angle);
-		void interpolateColor(const Color& firstCol,const Color& secondColor,float t,Color* outColor);
+		//void interpolateColor(const Color& firstCol,const Color& secondColor,float t,Color* outColor);
 		bool outside(float value,float min,float max);
 
-		void clamp(Vec2& v,float minX,float maxX,float minY,float maxY);
+		void clamp(Vector2f& v,float minX,float maxX,float minY,float maxY);
 		// -------------------------------------------------------
 		// 
 		// -------------------------------------------------------
-		bool checkLineCircle(const Vec2& center, float radius,const Vec2& lineFrom,const Vec2& lineTo);
+		bool checkLineCircle(const Vector2f& center, float radius,const Vector2f& lineFrom,const Vector2f& lineTo);
 		// -------------------------------------------------------
 		// Get random float between min and max
 		// -------------------------------------------------------
@@ -54,17 +64,17 @@ namespace ds {
 		// -------------------------------------------------------
 		// Check if two circles overlap
 		// -------------------------------------------------------
-		bool checkCircleIntersection(const Vec2& p1,float r1,const Vec2& p2,float r2);
+		bool checkCircleIntersection(const Vector2f& p1,float r1,const Vector2f& p2,float r2);
 		// ------------------------------------------------------------------------------------------
 		// Check if two circles overlap also calculating penetration distance and penetration vector
 		// ------------------------------------------------------------------------------------------
-		bool checkCircleIntersection(const Vec2& p1,float r1,const Vec2& p2,float r2,float* dist,Vec2& penVec);
+		bool checkCircleIntersection(const Vector2f& p1,float r1,const Vector2f& p2,float r2,float* dist,Vector2f& penVec);
 
-		Vec2 getShiftVector(const Vec2& p1,float r1,const Vec2& p2,float r2);
+		Vector2f getShiftVector(const Vector2f& p1,float r1,const Vector2f& p2,float r2);
 
 		bool solveQuadraticFormula(const float a,const float b,const float c,float* r1,float* r2);
 
-		bool circleSweepTest(const Vec2& a0,const Vec2& a1,float ra,const Vec2& b0,const Vec2& b1,float rb,float* u0,float* u1);			
+		bool circleSweepTest(const Vector2f& a0,const Vector2f& a1,float ra,const Vector2f& b0,const Vector2f& b1,float rb,float* u0,float* u1);			
 
 		struct TexCoord {
 

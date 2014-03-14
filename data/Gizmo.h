@@ -28,8 +28,8 @@ public:
 		FloatParam* ip = new FloatParam(name,value);
 		m_Params.push_back(ip);
 	}
-	void add(const char* name,ds::Vec2* value) {
-		Vec2Param* ip = new Vec2Param(name,value);
+	void add(const char* name,Vector2f* value) {
+		Vector2fParam* ip = new Vector2fParam(name,value);
 		m_Params.push_back(ip);
 	}
 	void add(const char* name,ds::Color* value) {
@@ -40,8 +40,16 @@ public:
 		RectParam* ip = new RectParam(name,value);
 		m_Params.push_back(ip);
 	}
-	void add(const char* name,ds::FloatArray* value) {
+	void add(const char* name,IPath<20,float>* value) {
 		FloatArrayParam* ip = new FloatArrayParam(name,value);
+		m_Params.push_back(ip);
+	}
+	void add(const char* name,IPath<20,Vector2f>* value) {
+		Vec2PathParam* ip = new Vec2PathParam(name,value);
+		m_Params.push_back(ip);
+	}
+	void add(const char* name,IPath<20,ds::Color>* value) {
+		ColorPathParam* ip = new ColorPathParam(name,value);
 		m_Params.push_back(ip);
 	}
 	void load(Category* category);

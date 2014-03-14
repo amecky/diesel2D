@@ -11,8 +11,8 @@ const float INPUT_PADDING = 8.0f;
 // -------------------------------------------------------
 // Init
 // -------------------------------------------------------
-void GUIDialog::init(const char* name,const DialogID& id,SpriteBatch* spriteBatch,BitmapFont* bitmapFont) {	
-	m_Batch = spriteBatch;
+void GUIDialog::init(const char* name,const DialogID& id,Renderer* renderer,BitmapFont* bitmapFont) {	
+	m_Renderer = renderer;
 	m_ID = id;
 	m_BitmapFont = bitmapFont;
 	m_Active = false;
@@ -33,15 +33,15 @@ GUIDialog::~GUIDialog(void) {
 // Add static image
 // -------------------------------------------------------
 uint32 GUIDialog::addImage(int x,int y,const Rect& textureRect,bool centered) {
-	Vec2 p = ds::Vec2(x,y);
+	Vector2f p = Vector2f(x,y);
 	if ( centered ) {
-		p.x = 512.0f;
+		p.x = m_ScreenWidth * 0.5f;
 	}
 	GUIItem item;
-	Sprite sp;
-	sp.position = p;
-	sp.textureRect = textureRect;
-	sp.color = Color::WHITE;
+	SpriteObject sp;
+	sp.setPosition(p);
+	sp.setTextureRect(textureRect);
+	sp.setColor(Color::WHITE);
 	item.sprites.push_back(sp);
 	item.id = m_Index;
 	++m_Index;
@@ -54,16 +54,16 @@ uint32 GUIDialog::addImage(int x,int y,const Rect& textureRect,bool centered) {
 // -------------------------------------------------------
 uint32 GUIDialog::addImageLink(int x,int y,const Rect& textureRect,bool centered) {
 	ImageLink link;
-	Vec2 p = Vec2(x,y);
+	Vector2f p = Vector2f(x,y);
 	if ( centered ) {
-		p.x = 512.0f;
+		p.x = m_ScreenWidth * 0.5f;
 	}
 	link.index = addImage(x,y,textureRect,centered);	
 	link.pos = p;	
 	float w = textureRect.width();
 	float h = textureRect.height();
-	float rx = ( 1024.0f - textureRect.width()) * 0.5f;
-	float ry = 768.0f - p.y - h * 0.5f;
+	float rx = ( m_ScreenWidth - textureRect.width()) * 0.5f;
+	float ry = m_ScreenHeight - p.y - h * 0.5f;
 	link.rect = Rect(ry,rx,w,h);
 	m_ImageLinks.push_back(link);
 	return link.index;
@@ -73,10 +73,10 @@ uint32 GUIDialog::addImageLink(int x,int y,const Rect& textureRect,bool centered
 // Adds a text
 // -------------------------------------------------------
 void GUIDialog::addText(int id,int x,int y,const std::string& text,const Color& color,float scale,bool centered) {
-	Vec2 p = Vec2(x,y);
+	Vector2f p = Vector2f(x,y);
 	if ( centered ) {
-		Vec2 size = font::calculateSize(*m_BitmapFont,text,4,scale,scale);		
-		p.x = ( 1024.0f - size.x ) * 0.5f;
+		Vector2f size = font::calculateSize(*m_BitmapFont,text,4,scale,scale);		
+		p.x = ( m_ScreenWidth - size.x ) * 0.5f;
 
 	}
 	GUIItem item;
@@ -93,10 +93,10 @@ void GUIDialog::addText(int id,int x,int y,const std::string& text,const Color& 
 // Update text
 // -------------------------------------------------------
 void GUIDialog::updateText(int id,int x,int y,const std::string& text,const Color& color,float scale,bool centered) {
-	Vec2 p = Vec2(x,y);
+	Vector2f p = Vector2f(x,y);
 	if ( centered ) {
-		Vec2 size = font::calculateSize(*m_BitmapFont,text,4,scale,scale);
-		p.x = ( 1024.0f - size.x ) * 0.5f;
+		Vector2f size = font::calculateSize(*m_BitmapFont,text,4,scale,scale);
+		p.x = ( m_ScreenWidth - size.x ) * 0.5f;
 
 	}
 	GUIItem* item = findByID(id);
@@ -115,10 +115,10 @@ void GUIDialog::updateText(int id,int x,int y,const std::string& text,const Colo
 void GUIDialog::updateText(int id,const std::string& text) {	
 	GUIItem* item = findByID(id);
 	assert(item != 0);
-	Vec2 p = item->pos;
+	Vector2f p = item->pos;
 	if ( item->centered ) {
-		Vec2 size = font::calculateSize(*m_BitmapFont,text,4,item->scale,item->scale);
-		p.x = ( 1024.0f - size.x ) * 0.5f;
+		Vector2f size = font::calculateSize(*m_BitmapFont,text,4,item->scale,item->scale);
+		p.x = ( m_ScreenWidth - size.x ) * 0.5f;
 
 	}
 	item->pos.x = p.x;
@@ -184,7 +184,7 @@ void GUIDialog::setButtonTexture(int id,const Rect& textureRect) {
 		if ( button->id == id ) {		
 			GUIItem* item = &m_Items[button->imageIndex];
 			for ( size_t j = 0; j < item->sprites.size(); ++j ) {
-				item->sprites[j].textureRect = textureRect;
+				item->sprites[j].setTextureRect(textureRect);
 			}
 		}
 	}
@@ -194,7 +194,7 @@ void GUIDialog::addButton(int id,float y,const std::string& text,const Rect& tex
 	DialogButton db;
 	db.imageIndex = addImageLink(0,y,textureRect);
 	//y = y - textureRect.height() * 0.5f;
-	Vec2 size = font::calculateSize(*m_BitmapFont,text,textScale);
+	Vector2f size = font::calculateSize(*m_BitmapFont,text,textScale);
 	float ty = y - size.y * 0.5f;
 	int textID = findFreeID();
 	addText(textID,100,ty,text,textColor,textScale,true);	
@@ -232,7 +232,7 @@ void GUIDialog::render() {
 		for ( size_t i = 0; i < m_Items.size(); ++i ) {
 			GUIItem* gi = &m_Items[i];
 			for ( size_t j =0; j < gi->sprites.size(); ++j ) {
-				m_Batch->draw(gi->sprites[j]);
+				m_Renderer->draw(gi->sprites[j]);
 			}
 		}
 	}
@@ -241,7 +241,7 @@ void GUIDialog::render() {
 // -------------------------------------------------------
 // Update Mouse pos and set button textures if enabled
 // -------------------------------------------------------
-void GUIDialog::updateMousePos(const ds::Vec2& mousePos) {
+void GUIDialog::updateMousePos(const Vector2f& mousePos) {
 	if ( m_SupportHover ) {
 		int ret = onButton(0,mousePos.x,mousePos.y,false);	
 		for ( size_t i = 0; i < m_Buttons.size(); ++i ) {
@@ -323,23 +323,25 @@ void GUIDialog::loadDialogFromJSON(JSONReader& reader) {
 	for ( size_t i = 0; i < categories.size(); ++i ) {
 		Category* c = categories[i];
 		if ( c->getName() == "image" ) {
-			Rect r = c->getRect("rect");
-			Vec2 p = c->getVec2("pos");
+			Rect r;
+			c->getRect("rect",&r);
+			Vector2f p = c->getVector2f("pos");
 			bool centered = true;
 			c->getBool("centered",&centered);
 			addImage(p.x,p.y,r,centered);
 		}
 		if ( c->getName() == "button" ) {
 			int id = c->getInt(0,"id");
-			Rect r = c->getRect("rect");
-			Vec2 p = c->getVec2("pos");
+			Rect r;
+			c->getRect("rect",&r);
+			Vector2f p = c->getVector2f("pos");
 			std::string txt = c->getProperty("text");
 			// FIXME: read centered
 			addButton(id,p.y,txt,r);
 		}
 		if ( c->getName() == "text" ) {
 			int id = c->getInt(0,"id");
-			Vec2 p = c->getVec2("pos");
+			Vector2f p = c->getVector2f("pos");
 			float scale = 1.0f;
 			c->getFloat("scale",&scale);
 			std::string txt = c->getProperty("text");

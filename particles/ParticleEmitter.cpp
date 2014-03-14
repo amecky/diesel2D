@@ -38,10 +38,14 @@ Particle* ParticleEmitter::prepare(ParticleBuffer* buffer) {
 	p->rotationSpeed = math::random(m_ParticleData->minRotationSpeed,m_ParticleData->maxRotationSpeed);
 	p->rotation = 0.0f;		
 	p->radialVelocity = 1.0f;
-	p->normal = Vec2(0,0);
+	p->normal = Vector2f(0,0);
 	p->ttl = m_Data->ttl + math::random(-m_Data->ttlVariance,m_Data->ttlVariance);
-	p->initialSize.x = m_ParticleData->initialSize.x + math::random(-m_Data->sizeXVariance,m_Data->sizeXVariance);
-	p->initialSize.y = m_ParticleData->initialSize.y + math::random(-m_Data->sizeYVariance,m_Data->sizeYVariance);
+	float rndSize = 1.0f;
+	if ( m_Data->sizeMinVariance != 0.0f && m_Data->sizeMaxVariance != 0.0f ) {
+		rndSize = math::random(m_Data->sizeMinVariance,m_Data->sizeMaxVariance);
+	}
+	p->initialSize.x = m_ParticleData->initialSize.x * rndSize;
+	p->initialSize.y = m_ParticleData->initialSize.y * rndSize;
 	float vel = m_Data->velocity;
 	if ( m_Data->velocityVariance != 0.0f ) {
 		vel += math::random(-m_Data->velocityVariance,m_Data->velocityVariance);
@@ -67,7 +71,7 @@ void ParticleEmitter::emitParticles(ParticleBuffer* buffer) {
 // StarEmitter
 // -------------------------------------------------------
 void StarEmitter::createParticles(ParticleBuffer* buffer,float forcedCount) {
-	Vec2 pos;
+	Vector2f pos;
 	float xp = m_Position.x;
 	float yp = m_Position.y;
 	float angle = math::random(0.0f,360.0f);
@@ -77,7 +81,7 @@ void StarEmitter::createParticles(ParticleBuffer* buffer,float forcedCount) {
 		Particle* p = prepare(buffer);
 		assert(p != 0);
 		p->position = pos;				
-		p->normal = vector::normalize(ds::math::getRadialVelocity(angle,p->radialVelocity));		
+		p->normal = normalize(ds::math::getRadialVelocity(angle,p->radialVelocity));		
 		angle += math::random(100.0f,140.0f);
 	}	
 }
@@ -90,7 +94,7 @@ RingEmitter::RingEmitter(ParticleEmitterData* emitterData,RingEmitterSettings* s
 
 }
 void RingEmitter::createParticles(ParticleBuffer* buffer,float forcedCount) {
-	Vec2 pos;
+	Vector2f pos;
 	float xp = m_Position.x;
 	float yp = m_Position.y;
 	float angle = m_Settings->startAngle + ds::math::random(-m_Settings->startVariance,m_Settings->startVariance);
@@ -103,7 +107,7 @@ void RingEmitter::createParticles(ParticleBuffer* buffer,float forcedCount) {
 		Particle* p = prepare(buffer);
 		p->position = pos;		
 		p->rotationSpeed = math::random(m_ParticleData->minRotationSpeed,m_ParticleData->maxRotationSpeed);
-		p->normal = vector::normalize(math::getRadialVelocity(ang,p->radialVelocity));
+		p->normal = normalize(math::getRadialVelocity(ang,p->radialVelocity));
 		p->rotation = math::reflect(DEGTORAD(angle));			
 		angle += step;
 	}	
@@ -113,7 +117,7 @@ void RingEmitter::createParticles(ParticleBuffer* buffer,float forcedCount) {
 // ConeEmitter
 // -------------------------------------------------------
 void ConeEmitter::createParticles(ParticleBuffer* buffer,float forcedCount) {
-	Vec2 pos;
+	Vector2f pos;
 	float xp = m_Position.x;
 	float yp = m_Position.y;
 	int count = m_Settings->count;
@@ -135,7 +139,7 @@ void ConeEmitter::createParticles(ParticleBuffer* buffer,float forcedCount) {
 		assert(p != 0);
 		p->position = pos;		
 		p->rotationSpeed = math::random(m_ParticleData->minRotationSpeed,m_ParticleData->maxRotationSpeed);		
-		p->normal = vector::normalize(math::getRadialVelocity(ang,p->radialVelocity));
+		p->normal = normalize(math::getRadialVelocity(ang,p->radialVelocity));
 		p->rotation = math::reflect(DEGTORAD(angle));
 		if ( m_ParticleData->random != 0.0f ) {
 			p->random = math::random(-m_ParticleData->random,m_ParticleData->random);

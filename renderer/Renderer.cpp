@@ -8,6 +8,7 @@
 #include "..\utils\PlainTextReader.h"
 #include <d3dcommon.h>
 #include "..\math\matrix.h"
+#include "..\utils\font.h"
 
 namespace ds {
 
@@ -78,15 +79,15 @@ Renderer::Renderer(HWND hWnd,const Settings& settings) : m_Hwnd(hWnd) {
 	getRenderStates();
 	//m_RenderTarget = 0;
 	//m_OverlayNode = 0;
-	m_SkyNode = 0;
+
 	//m_PostProcessing = settings.postProcessing;	
-	rendering = false;
+
 	m_DefaultBS = createBlendState(BL_SRC_ALPHA,BL_ONE_MINUS_SRC_ALPHA,true);
 	LOG(logINFO) << "default blendstate " << m_DefaultBS;
 	m_CurrentBS = -1;
 	createBasicVertexDeclarations();
 	m_DrawCounter = new DrawCounter;
-	getDevice()->GetRenderTarget(0,&m_BackBuffer);
+	device->get()->GetRenderTarget(0,&m_BackBuffer);
 	char buffer[128];
 	sprintf(buffer,"Backbuffer 0x%p",m_BackBuffer);
 	LOGC(logINFO,"Renderer") << "Address of " << buffer;
@@ -100,11 +101,14 @@ Renderer::Renderer(HWND hWnd,const Settings& settings) : m_Hwnd(hWnd) {
 	// prepare debug
 	m_DebugFont = loadSystemFont("Verdana","Verdana",10,false);
 	D3DXCreateSprite( device->get(), &m_DebugSprite );
+	m_BFCounter = 0;
+	m_SpriteBatch = new NewSpriteBatch(this);
 }
 
 
 Renderer::~Renderer(void) {	
 	LOG(logINFO) << "destructing Renderer";		
+	delete m_SpriteBatch;
 	m_RenderTargets.deleteContents();
 	m_RasterizerStates.deleteContents();
 	LOGC(logINFO,"Renderer") << "Releasing textures";
@@ -173,17 +177,16 @@ bool Renderer::beginRendering(const Color& clearColor) {
 	// Clear the back buffer to a blue color
     HR(device->get()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clearColor, 1.0f, 0 ));		
     // Begin the scene
-	if ( !rendering ) {
-		if( SUCCEEDED( device->get()->BeginScene() ) ) {		
-			rendering = true;		
-			setBlendState(m_DefaultBS);
-			return true;
-		}
-		else {
-			LOG(logERROR) << "cannot begin scene";
-			assert(rendering);
-		}
+	if( SUCCEEDED( device->get()->BeginScene() ) ) {		
+		setBlendState(m_DefaultBS);
+		set2DCameraOn();
+		m_SpriteBatch->prepare();
+		m_SpriteBatch->begin();
+		return true;
 	}
+	else {
+		LOG(logERROR) << "cannot begin scene";
+	}	
 	return false;
 }
 
@@ -198,7 +201,7 @@ void Renderer::clear() {
 // End rendering
 // -------------------------------------------------------
 void Renderer::endRendering() {
-	rendering = false;
+	m_SpriteBatch->end();
 	resetDynamicBuffers();
 	device->get()->EndScene();
     device->get()->Present( NULL, NULL, NULL, NULL );
@@ -216,7 +219,6 @@ void Renderer::setTransformations() {
 // Desc: Sets up the world, view, and projection transform Matrices.
 //-----------------------------------------------------------------------------
 VOID Renderer::setupMatrices() {  
-	m_RenderMode = RM_3D;
 	//D3DXMatrixIdentity(&m_World);    
 	m_World = matrix::m4identity();
 	setTransformations();
@@ -254,11 +256,11 @@ void Renderer::setRenderTarget(const char* name) {
 	for ( uint32 i = 0; i < m_RenderTargets.num(); ++i ) {
 		RenderTarget* rt = m_RenderTargets[i];
 		if ( rt->name == hash ) {
-			getDevice()->EndScene();
+			device->get()->EndScene();
 			rt->rts->BeginScene( rt->surface, NULL );
-			getDevice()->SetRenderTarget(0,rt->surface);			
+			device->get()->SetRenderTarget(0,rt->surface);			
 			//HR(getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, m_ClearColor, 1.0f, 0 ));
-			HR(getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET, m_ClearColor, 1.0f, 0 ));
+			HR(device->get()->Clear( 0, NULL, D3DCLEAR_TARGET,rt->clearColor, 1.0f, 0 ));
 			m_UsedRTs = 1;
 			found = true;
 		}
@@ -276,12 +278,12 @@ void Renderer::restoreBackBuffer(const char* name) {
 			rt->rts->EndScene(0);
 		}
 	}
-	getDevice()->BeginScene();
-	getDevice()->SetRenderTarget(0,m_BackBuffer);
+	device->get()->BeginScene();
+	device->get()->SetRenderTarget(0,m_BackBuffer);
 
 	if ( m_UsedRTs > 0 ) {
 		for ( int i = 1; i < m_UsedRTs; ++i ) {
-			getDevice()->SetRenderTarget(i,NULL);
+			device->get()->SetRenderTarget(i,NULL);
 		}
 		m_UsedRTs = 0;
 	}
@@ -370,7 +372,7 @@ void Renderer::applyMaterial(int mtrlID) {
 			else {
 				// check if we had a texture set before
 				if ( m_CurrentTextures[i] != -1 ) {
-					HR(getDevice()->SetTexture( i, 0));	
+					HR(device->get()->SetTexture( i, 0));	
 					m_CurrentTextures[i] = -1;
 				}
 			}
@@ -668,7 +670,7 @@ int Renderer::createTexture(int width,int height) {
 		Texture* tr = &m_Textures[id];
 		tr->name = string::murmur_hash("xxxx");
 		tr->flags = 1;
-		HR(getDevice()->CreateTexture( width, height,1, 0,D3DFMT_A8R8G8B8,D3DPOOL_MANAGED,&tr->texture,NULL ));
+		HR(device->get()->CreateTexture( width, height,1, 0,D3DFMT_A8R8G8B8,D3DPOOL_MANAGED,&tr->texture,NULL ));
 		tr->width = width;
 		tr->height = height;		
 		// clear the texture with white color		
@@ -694,7 +696,7 @@ void Renderer::unlockTexture(int id) {
 	HR(tr->texture->UnlockRect(0));	
 }
 
-void Renderer::fillTexture(int id,const Vec2& pos,int sizeX,int sizeY,Color* colors) {
+void Renderer::fillTexture(int id,const Vector2f& pos,int sizeX,int sizeY,Color* colors) {
 	D3DLOCKED_RECT r = lockTexture(id);
 	uchar * pBits = (uchar *)r.pBits;
 	Color* current = colors;
@@ -730,12 +732,12 @@ int Renderer::getTextureId(const char* name) {
 // -------------------------------------------------------
 // Get texture size
 // -------------------------------------------------------
-Vec2 Renderer::getTextureSize(int idx) {
+Vector2f Renderer::getTextureSize(int idx) {
 	// FIXME: check if valid id
 	assert(idx >= 0 && idx < MAX_TEXTURES);
 	Texture* tr = &m_Textures[idx];
 	assert(tr->flags != 0);
-	return Vec2(static_cast<int>(tr->width),static_cast<int>(tr->height));
+	return Vector2f(static_cast<int>(tr->width),static_cast<int>(tr->height));
 }
 
 // -------------------------------------------------------
@@ -829,6 +831,39 @@ int Renderer::loadTextureWithColorKey(const char* name,const Color& color) {
 		return -1;
 	}
 }
+
+BitmapFont* Renderer::loadBitmapFont(const char* name,int textureId,const Color& fillColor) {
+	IdString hash = string::murmur_hash(name);
+	for ( int i = 0; i < MAX_SYSTEM_FONTS; ++i ) {
+		if ( m_BitmapFonts[i].hashName == hash ) {
+			LOG(logINFO) << "Found already loaded font " << name;
+			return &m_BitmapFonts[i];
+		}
+	}
+	LOG(logINFO) << "Loading bitmap font " << name;
+	BitmapFont* font = &m_BitmapFonts[m_BFCounter];	
+	char fileName[256];
+	sprintf(fileName,"content\\resources\\%s.settings",name);
+	NewSettingsReader reader;
+	if ( reader.parse(fileName)) {
+		font->hashName = hash;
+		reader.get<uint32>("start_char",&font->startChar);
+		reader.get<uint32>("end_char",&font->endChar);
+		reader.get<uint32>("char_height",&font->charHeight);
+		reader.get<uint32>("grid_height",&font->gridHeight);
+		reader.get<uint32>("start_x",&font->startX);
+		reader.get<uint32>("start_y",&font->startY);
+		reader.get<uint32>("width",&font->width);
+		reader.get<uint32>("height",&font->height);
+		reader.get<uint32>("padding",&font->padding);
+		reader.get<uint32>("texture_size",&font->textureSize);				
+		assert(font->textureSize != 0 );
+		initializeBitmapFont(*font,textureId,fillColor);
+		++m_BFCounter;
+		return font;
+	}
+	return 0;
+}
 // -------------------------------------------------------
 // Create a bitmap font
 // -------------------------------------------------------
@@ -880,7 +915,8 @@ void Renderer::initializeBitmapFont(BitmapFont& bitmapFont,int textureID,const C
 
 		}
 	}
-	HR(texture->texture->UnlockRect(0));		
+	HR(texture->texture->UnlockRect(0));	
+	//font::debug(bitmapFont);
 }
 
 ID3DXFont* Renderer::getInternalSystemFont(int fontID) {
@@ -906,7 +942,7 @@ int Renderer::loadSystemFont(const char* name,const char* fontName,int size,bool
 		}
 		HDC hDC = GetDC(m_Hwnd);
 		int nHeight = -MulDiv(size, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-		HR(D3DXCreateFontA(getDevice(),nHeight,0,type,0,false,DEFAULT_CHARSET,
+		HR(D3DXCreateFontA(device->get(),nHeight,0,type,0,false,DEFAULT_CHARSET,
 			DEFAULT_QUALITY,ANTIALIASED_QUALITY,
 			DEFAULT_PITCH|FF_DONTCARE,
 			fontName,&f->font));
@@ -1058,7 +1094,7 @@ int Renderer::createShaderFromText(const char* buffer,const char* techName) {
 		Shader* shader = &m_Shaders[id];
 		UINT dwBufferSize = ( UINT )strlen( buffer ) + 1;
 		ID3DXBuffer* errors = 0;
-		D3DXCreateEffect(getDevice(), buffer, dwBufferSize,0, 0, SHADER_FLAGS, 0, &shader->m_FX, &errors);
+		D3DXCreateEffect(device->get(), buffer, dwBufferSize,0, 0, SHADER_FLAGS, 0, &shader->m_FX, &errors);
 		if ( errors != 0 ) {
 			LOGC(logERROR,"Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
 			return -1;
@@ -1082,7 +1118,7 @@ int Renderer::loadShader(const char* fxName,const char* techName) {
 		Shader* shader = &m_Shaders[id];
 
 		ID3DXBuffer* errors = 0;
-		HRESULT hr = D3DXCreateEffectFromFileA(getDevice(), fileName,0, 0, SHADER_FLAGS, 0, &shader->m_FX, &errors);
+		HRESULT hr = D3DXCreateEffectFromFileA(device->get(), fileName,0, 0, SHADER_FLAGS, 0, &shader->m_FX, &errors);
 		//if ( hr != S_OK && errors != 0 ) {
 		if ( errors != 0 ) {
 			LOGC(logERROR,"Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
@@ -1159,12 +1195,13 @@ void Renderer::createBasicVertexDeclarations() {
 // ---------------------------------------------------------
 // Creates a render target and returns the attached texture
 // ---------------------------------------------------------
-int Renderer::createRenderTarget(const char* name) {
+int Renderer::createRenderTarget(const char* name,const Color& clearColor) {
 	int id = findFreeTextureSlot();
 	if ( id != -1 ) {
 		RenderTarget* renderTarget = new RenderTarget;
+		renderTarget->clearColor = clearColor;
 		renderTarget->name = string::murmur_hash(name);		
-		D3DXCreateRenderToSurface( getDevice(),
+		D3DXCreateRenderToSurface( device->get(),
 			m_Width, 
 			m_Height,
 			D3DFMT_A8R8G8B8,
@@ -1172,7 +1209,7 @@ int Renderer::createRenderTarget(const char* name) {
 			D3DFMT_UNKNOWN ,
 			&renderTarget->rts);
 
-		getDevice()->CreateTexture(m_Width,
+		device->get()->CreateTexture(m_Width,
 			m_Height,
 			1,
 			D3DUSAGE_RENDERTARGET,
@@ -1199,12 +1236,13 @@ int Renderer::createRenderTarget(const char* name) {
 // ---------------------------------------------------------
 // Creates a render target and returns the attached texture
 // ---------------------------------------------------------
-int Renderer::createRenderTarget(const char* name,float width,float height) {
+int Renderer::createRenderTarget(const char* name,float width,float height,const Color& clearColor) {
 	int id = findFreeTextureSlot();
 	if ( id != -1 ) {
 		RenderTarget* renderTarget = new RenderTarget;
 		renderTarget->name = string::murmur_hash(name);		
-		D3DXCreateRenderToSurface( getDevice(),
+		renderTarget->clearColor = clearColor;
+		D3DXCreateRenderToSurface( device->get(),
 			width, 
 			height,
 			D3DFMT_A8R8G8B8,
@@ -1212,7 +1250,7 @@ int Renderer::createRenderTarget(const char* name,float width,float height) {
 			D3DFMT_UNKNOWN ,
 			&renderTarget->rts);
 
-		getDevice()->CreateTexture(width,
+		device->get()->CreateTexture(width,
 			height,
 			1,
 			D3DUSAGE_RENDERTARGET,
@@ -1259,7 +1297,7 @@ int Renderer::createVertexBuffer(PrimitiveType primitiveType,int vertexDefinitio
 		D3DPOOL pool = dynamic ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED; 
 		DWORD usage = dynamic ? D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY; 			
 		LOGC(logINFO,"Renderer") << "creating new vertex buffer - size: " << size << " vertexDefinition: " << vertexDefinition << " vertexSize: " << vertexSize << " dynamic: " << (dynamic == 0 ? false : true);
-		HR(getDevice()->CreateVertexBuffer( size * vertexSize,usage,0 ,pool, &m_Buffers[id].vertexBuffer, NULL ))
+		HR(device->get()->CreateVertexBuffer( size * vertexSize,usage,0 ,pool, &m_Buffers[id].vertexBuffer, NULL ))
 	}
 	return id;
 }
@@ -1283,7 +1321,7 @@ int Renderer::createIndexBuffer(int size,bool dynamic) {
 		buffer->vertexDefinition = 0;
 		D3DPOOL pool = dynamic ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED; 
 		DWORD usage = dynamic ? D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY; 			
-		HR(getDevice()->CreateIndexBuffer( size * sizeof(WORD),usage,D3DFMT_INDEX16,pool,&m_Buffers[id].indexBuffer,NULL));	
+		HR(device->get()->CreateIndexBuffer( size * sizeof(WORD),usage,D3DFMT_INDEX16,pool,&m_Buffers[id].indexBuffer,NULL));	
 		LOGC(logINFO,"Renderer") << "new IndexBuffer created size: " << size << " dynamic: " << (dynamic == 0 ? false : true);
 	}
 	return id;
@@ -1310,7 +1348,7 @@ int Renderer::createQuadIndexBuffer(uint32 maxQuads) {
 		buffer->vertexDefinition = 0;
 		D3DPOOL pool = dynamic ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED; 
 		DWORD usage = dynamic ? D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY; 			
-		HR(getDevice()->CreateIndexBuffer( indices * sizeof(WORD),usage,D3DFMT_INDEX16,pool,&m_Buffers[id].indexBuffer,NULL));	
+		HR(device->get()->CreateIndexBuffer( indices * sizeof(WORD),usage,D3DFMT_INDEX16,pool,&m_Buffers[id].indexBuffer,NULL));	
 		LOGC(logINFO,"Renderer") << "new IndexBuffer created size: " << indices << " dynamic: " << (dynamic == 0 ? false : true);
 		WORD* indexBuffer;
 		HR(m_Buffers[id].indexBuffer->Lock( 0, indices * sizeof(WORD), ( void** )&indexBuffer, 0 ));
@@ -1475,18 +1513,18 @@ int Renderer::drawBuffer(int handleID,int textureID) {
 	//LOG(logINFO) << "vDef " << vDef << " current " << m_CurrentVD;
 	if ( m_CurrentVD != vDef ) {
 		m_CurrentVD = vDef;
-		getDevice()->SetVertexDeclaration(m_VDStructs[vDef].declaration->get());
+		device->get()->SetVertexDeclaration(m_VDStructs[vDef].declaration->get());
 	}
 	if ( handle->bufferType == GBT_INDEX || handle->bufferType == GBT_BOTH ) {
 		if ( handle->iBufferRef.bufferIdx != m_CurrentIB ) {
 			m_CurrentIB = handle->iBufferRef.bufferIdx;
-			HR(getDevice()->SetIndices( m_Buffers[handle->iBufferRef.bufferIdx].indexBuffer)); 
+			HR(device->get()->SetIndices( m_Buffers[handle->iBufferRef.bufferIdx].indexBuffer)); 
 		}
 	}
 	if ( handle->bufferType == GBT_VERTEX || handle->bufferType == GBT_BOTH ) {
 		if ( handle->vBufferRef.bufferIdx != m_CurrentVB ) {
 			m_CurrentVB = handle->vBufferRef.bufferIdx;
-			HR(getDevice()->SetStreamSource( 0, m_Buffers[handle->vBufferRef.bufferIdx].vertexBuffer, 0 , m_VDStructs[m_CurrentVD].vertexSize ));
+			HR(device->get()->SetStreamSource( 0, m_Buffers[handle->vBufferRef.bufferIdx].vertexBuffer, 0 , m_VDStructs[m_CurrentVD].vertexSize ));
 		}
 	}	
 	D3DPRIMITIVETYPE pt = D3DPT_TRIANGLELIST;
@@ -1506,14 +1544,14 @@ int Renderer::drawBuffer(int handleID,int textureID) {
 		for ( UINT p = 0; p < numPasses; ++p ) {		
 			HR(shader->m_FX->BeginPass(p));			
 			setShaderParameter(shader);
-			HR(getDevice()->DrawIndexedPrimitive( pt, handle->vBufferRef.start, 0, handle->vBufferRef.count, handle->iBufferRef.start, numPrimitives ));
+			HR(device->get()->DrawIndexedPrimitive( pt, handle->vBufferRef.start, 0, handle->vBufferRef.count, handle->iBufferRef.start, numPrimitives ));
 			HR(shader->m_FX->EndPass());
 		}
 		//HR(shader->m_FX->End());	
 		endShader(shader);
 	}
 	else {
-		HR(getDevice()->DrawIndexedPrimitive( pt, handle->vBufferRef.start, 0, handle->vBufferRef.count, handle->iBufferRef.start, numPrimitives ));
+		HR(device->get()->DrawIndexedPrimitive( pt, handle->vBufferRef.start, 0, handle->vBufferRef.count, handle->iBufferRef.start, numPrimitives ));
 	}
 	return handle->iBufferRef.start;
 }

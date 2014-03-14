@@ -6,6 +6,7 @@
 #include "..\pipeline\PAKWriter.h"
 #include "..\utils\FileUtils.h"
 #include "..\renderer\shader.h"
+#include "..\sprites\SpriteObject.h"
 
 namespace ds {
 
@@ -20,14 +21,15 @@ const float VP_ARRAY[] = {
 // ------------------------------------------------------------
 //
 // ------------------------------------------------------------
-SpriteBatch::SpriteBatch(Renderer* renderer,uint32 maxQuads,int textureID) : m_Renderer(renderer) , m_VertexCounter(0) , m_Index(0) , m_TextureID(textureID) {
+SpriteBatch::SpriteBatch(Renderer* renderer,uint32 maxQuads,int textureID) : m_Renderer(renderer) 
+	, m_VertexCounter(0) , m_Index(0) , m_TextureID(textureID) , m_Rendering(false) {
 	m_MaxVertices = 4 * maxQuads;
 	m_MaxIndices = 6 * maxQuads;
 	m_BufferSize = QUAD_SIZE * m_MaxVertices + INDEX_SIZE * m_MaxIndices;
 	m_StartIndices = QUAD_SIZE * m_MaxVertices;
 	m_DataBuffer = new char[m_BufferSize];
 
-	Vec2 textureSize = m_Renderer->getTextureSize(textureID);
+	Vector2f textureSize = m_Renderer->getTextureSize(textureID);
 	m_TextureWidth = textureSize.x;
 	m_TextureHeight = textureSize.y;
 	m_BlendState = m_Renderer->getDefaultBlendState();
@@ -63,14 +65,68 @@ SpriteBatch::~SpriteBatch() {
 // -------------------------------------------------------
 // Draw
 // -------------------------------------------------------
-void SpriteBatch::draw(float x,float y,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vec2& center) {
-	draw(Vec2(x,y),textureRect,rotation,scaleX,scaleY,color,center);	
+void SpriteBatch::draw(float x,float y,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vector2f& center) {
+	draw(Vector2f(x,y),textureRect,rotation,scaleX,scaleY,color,center);	
+}
+
+void SpriteBatch::draw(const SpriteObject& spriteObject) {
+	assert(m_Rendering);
+	if ( spriteObject.isActive()) {
+		if ( m_VertexCounter < m_MaxVertices ) {
+			char* buffer = m_DataBuffer + QUAD_SIZE * m_Index;
+			float cx = m_Renderer->getWidth() * 0.5f;
+			float cy = m_Renderer->getHeight() * 0.5f;
+			for ( int i = 0; i < 4; ++i ) {		
+				(*(SpritePlane*)buffer).v[i].uv = spriteObject.getUV(i);
+				const Vector3f& p = spriteObject.getVertex(i);
+				(*(SpritePlane*)buffer).v[i].x = p.x - cx;
+				(*(SpritePlane*)buffer).v[i].y = p.y - cy;
+				(*(SpritePlane*)buffer).v[i].z = p.z;
+				(*(SpritePlane*)buffer).v[i].color = spriteObject.getColor();
+			}	
+			++m_Index;
+			m_VertexCounter += 4;
+			m_Renderer->getDrawCounter().addSprite();
+		}
+	}
+}
+
+void SpriteBatch::draw(const SpriteData& spriteData) {
+	if ( m_VertexCounter < m_MaxVertices ) {
+		
+		float dimX = spriteData.dimX;
+		float dimY = spriteData.dimY;
+		float dx = dimX * 0.5f;
+		float dy = dimY * 0.5f;
+		char* buffer = m_DataBuffer + QUAD_SIZE * m_Index;
+		(*(SpritePlane*)buffer).v[0].uv = Vector2f(spriteData.u1,spriteData.v1);
+		(*(SpritePlane*)buffer).v[1].uv = Vector2f(spriteData.u2,spriteData.v1);
+		(*(SpritePlane*)buffer).v[2].uv = Vector2f(spriteData.u2,spriteData.v2);
+		(*(SpritePlane*)buffer).v[3].uv = Vector2f(spriteData.u1,spriteData.v2);
+
+		Vector2f cor = spriteData.position;
+		cor = cor - Vector2f(m_Renderer->getWidth() * 0.5f,m_Renderer->getHeight() * 0.5f);
+		Vector2f p(0,0);
+		for ( int i = 0; i < 4; ++i ) {
+			p.x = VP_ARRAY[i * 2] * dimX;
+			p.y = VP_ARRAY[i * 2 + 1] * dimY;
+			//p = p - center;
+			Vector2f np = vector::srt(cor,p,spriteData.size.x,spriteData.size.y,spriteData.angle);		
+			(*(SpritePlane*)buffer).v[i].x = np.x;
+			(*(SpritePlane*)buffer).v[i].y = np.y;
+			(*(SpritePlane*)buffer).v[i].z = 0.0f;
+			(*(SpritePlane*)buffer).v[i].color = spriteData.color;
+		}	
+		++m_Index;
+		m_VertexCounter += 4;
+		m_Renderer->getDrawCounter().addSprite();
+	}
 }
 
 // -------------------------------------------------------
 // Draw
 // -------------------------------------------------------
-void SpriteBatch::draw(const Vec2& pos,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vec2& center) {
+void SpriteBatch::draw(const Vector2f& pos,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vector2f& center) {
 	if ( m_VertexCounter < m_MaxVertices ) {
 		float u1,v1,u2,v2;
 		ds::math::getTextureCoordinates(textureRect,m_TextureWidth,m_TextureHeight,&u1,&v1,&u2,&v2,true);
@@ -79,19 +135,19 @@ void SpriteBatch::draw(const Vec2& pos,const Rect& textureRect,float rotation,fl
 		float dx = dimX * 0.5f;
 		float dy = dimY * 0.5f;
 		char* buffer = m_DataBuffer + QUAD_SIZE * m_Index;
-		(*(SpritePlane*)buffer).v[0].uv = Vec2(u1,v1);
-		(*(SpritePlane*)buffer).v[1].uv = Vec2(u2,v1);
-		(*(SpritePlane*)buffer).v[2].uv = Vec2(u2,v2);
-		(*(SpritePlane*)buffer).v[3].uv = Vec2(u1,v2);
+		(*(SpritePlane*)buffer).v[0].uv = Vector2f(u1,v1);
+		(*(SpritePlane*)buffer).v[1].uv = Vector2f(u2,v1);
+		(*(SpritePlane*)buffer).v[2].uv = Vector2f(u2,v2);
+		(*(SpritePlane*)buffer).v[3].uv = Vector2f(u1,v2);
 
-		Vec2 cor = pos;
-		cor = cor - Vec2(m_Renderer->getWidth() * 0.5f,m_Renderer->getHeight() * 0.5f);
-		Vec2 p(0,0);
+		Vector2f cor = pos;
+		cor = cor - Vector2f(m_Renderer->getWidth() * 0.5f,m_Renderer->getHeight() * 0.5f);
+		Vector2f p(0,0);
 		for ( int i = 0; i < 4; ++i ) {
 			p.x = VP_ARRAY[i * 2] * dimX;
 			p.y = VP_ARRAY[i * 2 + 1] * dimY;
 			p = p - center;
-			Vec2 np = vector::srt(cor,p,scaleX,scaleY,rotation);		
+			Vector2f np = vector::srt(cor,p,scaleX,scaleY,rotation);		
 			(*(SpritePlane*)buffer).v[i].x = np.x;
 			(*(SpritePlane*)buffer).v[i].y = np.y;
 			(*(SpritePlane*)buffer).v[i].z = 0.0f;
@@ -102,41 +158,7 @@ void SpriteBatch::draw(const Vec2& pos,const Rect& textureRect,float rotation,fl
 		m_Renderer->getDrawCounter().addSprite();
 	}
 }
-// -------------------------------------------------------
-// Draw
-// -------------------------------------------------------
-void SpriteBatch::draw(const Sprite& sprite) {
-	if ( m_VertexCounter < m_MaxVertices ) {
-		float u1,v1,u2,v2;
-		ds::math::getTextureCoordinates(sprite.textureRect,m_TextureWidth,m_TextureHeight,&u1,&v1,&u2,&v2,true);
-		float dimX = sprite.textureRect.width();
-		float dimY = sprite.textureRect.height();
-		float dx = dimX * 0.5f;
-		float dy = dimY * 0.5f;
-		char* buffer = m_DataBuffer + QUAD_SIZE * m_Index;
-		(*(SpritePlane*)buffer).v[0].uv = Vec2(u1,v1);
-		(*(SpritePlane*)buffer).v[1].uv = Vec2(u2,v1);
-		(*(SpritePlane*)buffer).v[2].uv = Vec2(u2,v2);
-		(*(SpritePlane*)buffer).v[3].uv = Vec2(u1,v2);
 
-		Vec2 cor = sprite.position;
-		cor = cor - Vec2(m_Renderer->getWidth() * 0.5f,m_Renderer->getHeight() * 0.5f);
-		Vec2 p(0,0);
-		for ( int i = 0; i < 4; ++i ) {
-			p.x = VP_ARRAY[i * 2] * dimX;
-			p.y = VP_ARRAY[i * 2 + 1] * dimY;
-			p = p - sprite.center;
-			Vec2 np = vector::srt(cor,p,sprite.scaleX,sprite.scaleY,sprite.rotation);		
-			(*(SpritePlane*)buffer).v[i].x = np.x;
-			(*(SpritePlane*)buffer).v[i].y = np.y;
-			(*(SpritePlane*)buffer).v[i].z = 0.0f;
-			(*(SpritePlane*)buffer).v[i].color = sprite.color;
-		}	
-		++m_Index;
-		m_VertexCounter += 4;
-		m_Renderer->getDrawCounter().addSprite();
-	}
-}
 
 // -------------------------------------------------------
 // Begin
@@ -144,6 +166,7 @@ void SpriteBatch::draw(const Sprite& sprite) {
 void SpriteBatch::begin() {
 	m_Index = 0;
 	m_VertexCounter = 0;
+	m_Rendering = true;
 }
 // -------------------------------------------------------
 // Prepare buffer
@@ -189,6 +212,7 @@ void SpriteBatch::end() {
 	if ( m_VertexCounter > 0 ) {	
 		m_Renderer->drawBuffer(m_Handle,m_TextureID);
 	}
+	m_Rendering = false;
 	PR_END("SpriteBatch")
 }
 

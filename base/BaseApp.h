@@ -6,6 +6,7 @@
 #include "..\dialogs\DialogManager.h"
 #include "..\world\World.h"
 #include "..\audio\AudioManager.h"
+#include "GameObject.h"
 
 namespace ds {
 
@@ -18,6 +19,8 @@ struct GameTime {
 };
 
 class BaseApp {
+
+typedef std::vector<GameObject*> GameObjects;
 
 struct DebugInfo {
 	bool showProfiler;
@@ -77,7 +80,7 @@ public:
 	void sendKeyDown(WPARAM virtualKey);
 	void sendKeyUp(WPARAM virtualKey);
 	void sendButton(int button,int x,int y,bool down);
-	const Vec2& getMousePos() const {
+	const Vector2f& getMousePos() const {
 		return m_MousePos;
 	}
 	void setMousePos(int x,int y) {		
@@ -87,7 +90,10 @@ public:
 	float random(float min,float max) {
 		return min + (max - min)* (float)rand();
 	}	
+	template<class S>
+	void createGameObject(S* obj);
 protected:
+	void initializeGUI();
 	virtual const char* getTitle() = 0;
 	virtual void OnButtonDown(int button,int x,int y) {}
 	virtual void OnButtonUp(int button,int x,int y) {}
@@ -109,8 +115,8 @@ protected:
 	Color m_ClearColor;
 	World m_World;
 private:
-	void initializeGUI();
-	Vec2 m_MousePos;
+	
+	Vector2f m_MousePos;
 	DWORD m_CurTime;
 	float g_fElapsedTime;
 	DWORD m_LastTime;
@@ -119,7 +125,15 @@ private:
 	DebugInfo m_DebugInfo;
 	ButtonState m_ButtonState;
 	MTRand_open rand;		
-	SpriteBatch* m_DialogBatch;
+	GameObjects m_GameObjects;
 }; 
+
+template<class S>
+void BaseApp::createGameObject(S* obj) {
+	obj->setRenderer(renderer);
+	obj->init();
+	obj->GameObject::setActive(true);
+	m_GameObjects.push_back(obj);
+}
 
 };

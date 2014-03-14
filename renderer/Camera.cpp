@@ -11,11 +11,11 @@ Camera::Camera(int width,int height) {
 	mViewProj = matrix::m4identity();
 
 	m_Speed = 10.0f;
-	m_LastMousePosition = Vec2(0,0);
-	m_ViewPos = Vec3(0,0,-5);
-	m_UpVec = Vec3(0,1,0);
-	m_LookAt = Vec3(0,0,1);
-	m_RightVec = Vec3(1,0,0);
+	m_LastMousePosition = Vector2f(0,0);
+	m_ViewPos = Vector3f(0,0,-5);
+	m_UpVec = Vector3f(0,1,0);
+	m_LookAt = Vector3f(0,0,1);
+	m_RightVec = Vector3f(1,0,0);
 	
 
 	float w = static_cast<float>(width);
@@ -35,23 +35,23 @@ void Camera::setLens(float fov, float aspect, float nearZ, float farZ) {
 	buildView();
 }
 
-void Camera::setPosition(const Vec3& pos) { 
+void Camera::setPosition(const Vector3f& pos) { 
 	m_ViewPos = pos;
 	buildView();
 }
 
-void Camera::lookAt(const Vec3& lookAt) { 
+void Camera::lookAt(const Vector3f& lookAt) { 
 	m_LookAt = lookAt;
 	buildView();
 }
 
-void Camera::lookAt(Vec3 pos,Vec3 target,Vec3 up) {
-	Vec3 L = target - pos;
-	L = vector::normalize(L);
-	Vec3 R = vector::cross(up,L);
-	R = vector::normalize(R);
-	Vec3 U = vector::cross(L,R);
-	U = vector::normalize(U);
+void Camera::lookAt(Vector3f pos,Vector3f target,Vector3f up) {
+	Vector3f L = target - pos;
+	L = normalize(L);
+	Vector3f R = cross(up,L);
+	R = normalize(R);
+	Vector3f U = cross(L,R);
+	U = normalize(U);
 	m_ViewPos = pos;
 	m_RightVec = R;
 	m_UpVec = U;
@@ -60,13 +60,13 @@ void Camera::lookAt(Vec3 pos,Vec3 target,Vec3 up) {
 }
 
 void Camera::move(float unit) {
-	Vec3 tmp = m_LookAt * unit;
+	Vector3f tmp = m_LookAt * unit;
 	m_ViewPos = m_ViewPos + tmp;
 	buildView();
 }
 
 void Camera::strafe(float unit) {
-	Vec3 tmp = m_RightVec * unit;
+	Vector3f tmp = m_RightVec * unit;
 	m_ViewPos = m_ViewPos + tmp;
 	buildView();
 }
@@ -114,7 +114,7 @@ const mat4& Camera::getViewProjectionMatrix() const {
     return mViewProj;
 }
 
-void Camera::update(float elapsedTime,const Vec2& mousePosition,bool buttonPressed) {
+void Camera::update(float elapsedTime,const Vector2f& mousePosition,bool buttonPressed) {
 	/*
 	if ( !gEngine->isConsoleActive() ) {
 	*/
@@ -146,20 +146,20 @@ void Camera::update(float elapsedTime,const Vec2& mousePosition,bool buttonPress
 void Camera::buildView() {
 
 	// Keep camera's axes orthogonal to each other and of unit length.
-	Vec3 L = vector::normalize(m_LookAt);
-	Vec3 U = vector::cross(m_LookAt,m_RightVec);
-	U = vector::normalize(U);
-	Vec3 R = vector::cross(U,L);
-	R = vector::normalize(R);
+	Vector3f L = normalize(m_LookAt);
+	Vector3f U = cross(m_LookAt,m_RightVec);
+	U = normalize(U);
+	Vector3f R = cross(U,L);
+	R = normalize(R);
 
 	// Fill in the view matrix entries.
 	m_LookAt = L;
 	m_RightVec = R;
 	m_UpVec = U;
 
-	float x = -vector::dot(m_ViewPos,R);
-	float y = -vector::dot(m_ViewPos,U);
-	float z = -vector::dot(m_ViewPos,L);
+	float x = -dot(m_ViewPos,R);
+	float y = -dot(m_ViewPos,U);
+	float z = -dot(m_ViewPos,L);
 
 	m_View._11 = m_RightVec.x; 
 	m_View._21 = m_RightVec.y; 

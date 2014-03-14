@@ -15,13 +15,14 @@ BloomComponent::~BloomComponent(void) {
 }
 
 void BloomComponent::initialize(int startLayer,int baseTexture,BloomSettings* bloomSettings,int blendState) {
+	/*
 	m_Settings = bloomSettings;
 	int layer = startLayer;
 	// Bloom
 	LOG(logINFO) << "Creating Bloom rendertarget at layer: " << layer;
 	int bloomTexture = m_World->createRenderTarget(layer);
 	int blid = m_World->createSpriteBatch(baseTexture,1024.0f,768.0f);
-	m_World->addSpriteEntity(layer,blid,&m_BloomEntity,SC_X,SC_Y,Rect(0,0,1024,768));
+	//m_World->addSpriteEntity(layer,blid,&m_BloomEntity,SC_X,SC_Y,Rect(0,0,1024,768));
 	int bloomShaderID = shader::createBloomShader(m_Renderer,baseTexture,m_Settings->bloomThreshold);
 	m_BloomShader = m_Renderer->getShader(bloomShaderID);
 	m_World->setSpriteBatchShader(blid,bloomShaderID);
@@ -34,7 +35,7 @@ void BloomComponent::initialize(int startLayer,int baseTexture,BloomSettings* bl
 	LOG(logINFO) << "Creating horizontal blur at layer: " << layer;
 	int blurHTexture = m_World->createRenderTarget(layer);
 	int bhid = m_World->createSpriteBatch(blurHTexture,1024.0f,768.0f);
-	m_World->addSpriteEntity(layer,bhid,&m_BlurHEntity,SC_X,SC_Y,Rect(0,0,1024,768));	
+	//m_World->addSpriteEntity(layer,bhid,&m_BlurHEntity,SC_X,SC_Y,Rect(0,0,1024,768));	
 	m_World->setSpriteBatchShader(bhid,blurHShaderID);
 	// vertical blur
 	int blurVShaderID = shader::createBlurShader(m_Renderer,blurHTexture);
@@ -44,14 +45,14 @@ void BloomComponent::initialize(int startLayer,int baseTexture,BloomSettings* bl
 	LOG(logINFO) << "Creating vertical blur at layer: " << layer;
 	int blurVTexture = m_World->createRenderTarget(layer);
 	int bvid = m_World->createSpriteBatch(blurVTexture,1024.0f,768.0f);
-	m_World->addSpriteEntity(layer,bvid,&m_BlurVEntity,SC_X,SC_Y,Rect(0,0,1024,768));	
+	//m_World->addSpriteEntity(layer,bvid,&m_BlurVEntity,SC_X,SC_Y,Rect(0,0,1024,768));	
 	m_World->setSpriteBatchShader(bvid,blurVShaderID);
 	// Bloom combine	
 	++layer;
 	LOG(logINFO) << "Creating Bloom combine at layer: " << layer;
 	int bloomCombineTexture = m_World->createRenderTarget(layer);
 	int bcid = m_World->createSpriteBatch(bloomCombineTexture);
-	m_World->addSpriteEntity(layer,bcid,&m_BloomCombineEntity,SC_X,SC_Y,Rect(0,0,1024,768));
+	//m_World->addSpriteEntity(layer,bcid,&m_BloomCombineEntity,SC_X,SC_Y,Rect(0,0,1024,768));
 	int bcShaderID = shader::createBloomCombineShader(m_Renderer,baseTexture,blurVTexture);
 	m_BloomCombineShader = m_Renderer->getShader(bcShaderID);
 	m_World->setSpriteBatchShader(bcid,bcShaderID);
@@ -59,15 +60,16 @@ void BloomComponent::initialize(int startLayer,int baseTexture,BloomSettings* bl
 	++layer;
 	LOG(logINFO) << "Creating Overlay at layer: " << layer;
 	int oid = m_World->createSpriteBatch(bloomCombineTexture,1024.0f,768.0f,blendState);	
-	m_World->addSpriteEntity(layer,oid,&m_OverlayEntity,SC_X,SC_Y,Rect(0,0,1024,768));
+	//m_World->addSpriteEntity(layer,oid,&m_OverlayEntity,SC_X,SC_Y,Rect(0,0,1024,768));
+	*/
 }
 
 void BloomComponent::setState(bool active) {
-	m_BloomEntity.setActive(active);
-	m_BloomCombineEntity.setActive(active);
-	m_OverlayEntity.setActive(active);
-	m_BlurHEntity.setActive(active);
-	m_BlurVEntity.setActive(active);
+	//m_BloomEntity.setActive(active);
+	//m_BloomCombineEntity.setActive(active);
+	//m_OverlayEntity.setActive(active);
+	//m_BlurHEntity.setActive(active);
+	//m_BlurVEntity.setActive(active);
 	
 }
 
@@ -84,10 +86,10 @@ void BloomComponent::setBlurEffectParameters(Shader& shader,float dx, float dy) 
 	int sampleCount = SAMPLE_COUNT;
 	// Create temporary arrays for computing our filter settings.
 	float sampleWeights[SAMPLE_COUNT];
-	Vec2 sampleOffsets[SAMPLE_COUNT];
+	Vector2f sampleOffsets[SAMPLE_COUNT];
 	// The first sample always has a zero offset.
 	sampleWeights[0] = computeGaussian(0);
-	sampleOffsets[0] = Vec2(0,0);
+	sampleOffsets[0] = Vector2f(0,0);
 	// Maintain a sum of all the weighting values.
 	float totalWeights = sampleWeights[0];
 	// Add pairs of additional sample taps, positioned
@@ -107,7 +109,7 @@ void BloomComponent::setBlurEffectParameters(Shader& shader,float dx, float dy) 
 		// than just one at a time. The 1.5 offset kicks things off by
 		// positioning us nicely in between two texels.
 		float sampleOffset = i * 2 + 1.5f;
-		Vec2 delta = Vec2(dx, dy) * sampleOffset;
+		Vector2f delta = Vector2f(dx, dy) * sampleOffset;
 		// Store texture coordinate offsets for the positive and negative taps.
 		sampleOffsets[i * 2 + 1] = delta;
 		sampleOffsets[i * 2 + 2] = -delta;
@@ -126,7 +128,7 @@ void BloomComponent::setBlurEffectParameters(Shader& shader,float dx, float dy) 
 	}
 	*/
 	shader::setValue(shader,"SampleWeights",&sampleWeights,sizeof(float)*SAMPLE_COUNT);
-	shader::setValue(shader,"SampleOffsets",&sampleOffsets,sizeof(Vec2)*SAMPLE_COUNT);
+	shader::setValue(shader,"SampleOffsets",&sampleOffsets,sizeof(Vector2f)*SAMPLE_COUNT);
 }
 
 float BloomComponent::computeGaussian(float n) {

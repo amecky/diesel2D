@@ -97,38 +97,4 @@ private:
 	int m_Count;
 };
 
-
-class Vec2Array {
-	
-public:
-	Vec2Array() {}
-	~Vec2Array() {}
-	void add(float timeStep,const Vec2& v) {
-		x.add(timeStep,v.x);
-		y.add(timeStep,v.y);
-	} 
-	void update(float time,Vec2* v) {
-		v->x = x.get(time);
-		v->y = y.get(time);		
-	}
-	void reset() {
-		x.reset();
-		y.reset();
-	}
-	int size() {
-		return x.size();
-	}
-	void setInterpolationMode(const PathInterpolation& interpolation) {
-		x.setInterpolationMode(interpolation);
-		y.setInterpolationMode(interpolation);
-	}
-	void setLoopMode(const PathLoopMode& loopMode) {
-		x.setLoopMode(loopMode);
-		y.setLoopMode(loopMode);
-	}
-private:
-	FloatArray x;
-	FloatArray y;
-};
-
 }

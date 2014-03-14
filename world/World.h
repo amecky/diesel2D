@@ -86,10 +86,10 @@ public:
 	virtual void draw() = 0;
 	virtual const EntityType getType() const = 0;
 
-	void setPosition(const Vec2& pos) {
+	void setPosition(const Vector2f& pos) {
 		m_Position = pos;
 	}
-	const Vec2& getPosition() const {
+	const Vector2f& getPosition() const {
 		return m_Position;
 	}	
 	void setCollisionID(int colID) {
@@ -99,7 +99,7 @@ public:
 		return m_ColID;
 	}
 protected:
-	Vec2 m_Position;
+	Vector2f m_Position;
 private:
 	int m_ColID;
 	bool m_Active;
@@ -121,81 +121,6 @@ public:
 	void update(float elapsed) {}
 	void draw() {}
 };
-// -------------------------------------------------------
-// ScreenOverlayEntity
-// -------------------------------------------------------
-class ScreenOverlayEntity : public Entity {
-
-public:
-	ScreenOverlayEntity() : Entity() , m_TextureID(-1) , m_Shader(-1) {}
-	virtual ~ScreenOverlayEntity() {}
-	void init(Renderer* renderer,int textureID,int shaderID = -1) {
-		m_Renderer = renderer;
-		m_TextureID = textureID;
-		if ( shaderID == -1 ) {
-			m_Shader = shader::createPTCShader(renderer,textureID);
-		}
-		else {
-			m_Shader = shaderID;
-		}
-
-		m_Buffer = new PTCBuffer(renderer,12,20,false);	
-		m_Buffer->clear();
-		float width = static_cast<float>(renderer->getWidth());
-		float height = static_cast<float>(renderer->getHeight());
-
-		m_Buffer->add(PTCVertex(Vec3(-0.5f * width, 0.5f * height,0.0f),Vec2(0.0f,0.0f)));
-		m_Buffer->add(PTCVertex( 0.5f * width, 0.5f * height,0.0f,1.0f,0.0f));
-		m_Buffer->add(PTCVertex( 0.5f * width,-0.5f * height,0.0f,1.0f,1.0f));
-		m_Buffer->add(PTCVertex(-0.5f * width,-0.5f * height,0.0f,0.0f,1.0f));	
-
-		m_Buffer->addIndex(0);
-		m_Buffer->addIndex(1);
-		m_Buffer->addIndex(2);
-		m_Buffer->addIndex(2);
-		m_Buffer->addIndex(3);
-		m_Buffer->addIndex(0);
-
-		m_Buffer->update();
-	}
-	void update(float elapsed) {}
-	 const EntityType getType() const {
-		 return ET_OVERLAY;
-	 }
-	 void draw() {
-		 //DrawCounter* drawCounter = m_Renderer->getDrawCounter();
-		 //m_DrawCounter->addDrawCall();
-		 //m_DrawCounter->addPrimitives(handle->vBufferRef.count);
-		 //m_DrawCounter->addIndices(handle->iBufferRef.count);
-		 m_Renderer->setTexture(m_TextureID,0);
-		 if ( m_Shader != -1 ) {
-			 Shader* shader = &m_Renderer->getShader(m_Shader);			 
-			 uint32 numPasses = m_Renderer->startShader(shader);
-			 for ( UINT p = 0; p < numPasses; ++p ) {		
-				 HR(shader->m_FX->BeginPass(p));
-				 m_Renderer->setShaderParameter(shader);
-				 m_Buffer->prepareData();	 
-				 m_Buffer->render(2);
-				 HR(shader->m_FX->EndPass());
-			 }
-			 m_Renderer->endShader(shader);
-		 }
-		 else {
-			m_Renderer->setTexture(m_TextureID,0);
-			 m_Buffer->prepareData();	 
-			 m_Buffer->render(2);
-		 }
-	 }
-	 const int getTextureID() const {
-		 return m_TextureID;
-	 }
-private:
-	Renderer* m_Renderer;
-	int m_Shader;
-	int m_TextureID;
-	PTCBuffer* m_Buffer;
-};
-
 
 // -------------------------------------------------------
 // ParticlesystemEntity
@@ -226,12 +151,12 @@ public:
 	const int getBlendState() const {
 		return m_BlendState;
 	}
-	void start(const Vec2& pos) {
+	void start(const Vector2f& pos) {
 		m_ParticleSystem->resetEmitterCounter();
 		m_ParticleSystem->setEmitterPosition(pos);
 		m_ParticleSystem->emitParticles();
 	}
-	void setEmitterPosition(const Vec2& emitterPos) {
+	void setEmitterPosition(const Vector2f& emitterPos) {
 		m_ParticleSystem->setEmitterPosition(emitterPos);
 	}
 	template<class T>
@@ -276,6 +201,7 @@ public:
 		m_ParticleSystem = particleSystem;
 		m_TextureID = textureID;
 		m_BlendState = blendState;
+		setActive(false);
 	}
 	void update(float elapsed) {
 		m_ParticleSystem->update(elapsed);
@@ -289,12 +215,11 @@ public:
 	const int getBlendState() const {
 		return m_BlendState;
 	}
-	void start(const Vec2& pos) {
-		//m_ParticleSystem->resetEmitterCounter();
-		//m_ParticleSystem->setEmitterPosition(pos);
+	void start(const Vector2f& pos) {
 		m_ParticleSystem->start(pos);
+		setActive(true);
 	}
-	void setEmitterPosition(const Vec2& emitterPos) {
+	void setEmitterPosition(const Vector2f& emitterPos) {
 		m_ParticleSystem->setPosition(emitterPos);
 	}
 	template<class T>
@@ -303,6 +228,7 @@ public:
 	}
 	void stop() {
 		//m_ParticleSystem->stop();
+		setActive(false);
 	}
 	const bool isAlive() const {
 		return m_ParticleSystem->isActive();
@@ -343,69 +269,11 @@ struct SpriteBatchItem {
 };
 
 
-class World;
-// -------------------------------------------------------
-// GameObject
-// -------------------------------------------------------
-class GameObject {
-
-public:
-	GameObject() {}
-	virtual ~GameObject() {}
-	void setWorld(World* world) {
-		m_World = world;
-	}
-	void setRenderer(Renderer* renderer) {
-		m_Renderer = renderer;
-	}
-	virtual void update(float elapsed) = 0;
-	virtual void init() = 0;
-	const bool isActive() const {
-		return m_Active;
-	}
-	void setActive(bool active) {
-		m_Active = active;
-	}
-	EventStream& getEvents() {
-		return m_Events;
-	}
-	void resetEvents() {
-		m_Events.reset();
-	}
-	const bool hasEvents() const {
-		return m_Events.num() > 0;
-	}
-protected:
-	World* m_World;
-	EventStream m_Events;
-	Renderer* m_Renderer;
-private:
-	GameObject(const GameObject& other) {}
-	bool m_Active;
-};
 // -------------------------------------------------------
 // World
 // -------------------------------------------------------
 class HUDEntity;
 class TextEntity;
-class SpriteEntity;
-
-struct SpritePrefab : public Gizmo {
-
-	Sprite* sprite;
-	IdString name;
-
-	SpritePrefab() : Gizmo("SpritePrefab") {
-		sprite = BM_NEW(Sprite);
-		add("position",&sprite->position);
-		add("texture",&sprite->textureRect);
-		add("scale_x",&sprite->scaleX);
-		add("scale_y",&sprite->scaleY);
-		add("rotation",&sprite->rotation);
-		add("color",&sprite->color);
-	}
-
-};
 
 class World : public Serializer {
 
@@ -415,10 +283,6 @@ struct RTSetting {
 	int texture;
 	char name[10];
 };
-
-typedef std::vector<GameObject*> GameObjects;
-//typedef std::vector<Sprite*> Sprites;
-typedef std::vector<SpritePrefab*> SpritePrefabs;
 
 public:
 	World(void);
@@ -437,12 +301,7 @@ public:
 	void setSpriteBatchShader(int batchID,int shaderID);
 	// add entity
 	void add(int layer,Entity* entity);
-	// FIXME: addSpriteEntity(layer,batch,entity,const char* spriteName);
-	void addSpriteEntity(int layer,int batchID,SpriteEntity* entity,Sprite* sprite);
-	void addSpriteEntity(int layer,int batchID,SpriteEntity* entity,int x,int y,Sprite* sprite);
-	void addSpriteEntity(int layer,int batchID,SpriteEntity* entity,const char* name);
-	void addSpriteEntity(int layer,int batchID,SpriteEntity* entity,int x,int y,const Rect& textureRect,float rotation = 0.0f,float scaleX = 1.0f,float scaleY = 1.0f,const Color& color = Color::WHITE);
-
+	
 	void addParticleSystemEntity(int layer,int textureID,const char* dirName,ParticlesystemEntity* entity,int maxParticles,int blendState = -1);
 	void addNewParticleSystemEntity(int layer,int textureID,const char* fileName,NewParticlesystemEntity* entity,int maxParticles,int blendState = -1);
 	void addHUDEntity(int layer,HUDEntity* entity,int textureID,const char* fontName);
@@ -477,14 +336,7 @@ public:
 	DynamicSettings* getSettings(const char* name) {
 		return m_SettingsManager.getSettings(name);
 	}
-	void loadSpriteSettings(const char* name,Sprite* sprite) {
-		if ( m_SettingsManager.hasSpriteSettings(name)) {
-			sprite = m_SettingsManager.getSpriteSettings(name);
-		}
-		else {
-			sprite = m_SettingsManager.loadSpriteSettings(name);
-		}
-	}
+	
 	void togglePause() {
 		m_Paused = !m_Paused;
 	}
@@ -492,27 +344,10 @@ public:
 	void createGameObject(S* obj);
 
 	bool loadData(const char* name);
-	bool loadHUD(const char* fileName,HUDEntity* hudEntity);
+	//bool loadHUD(const char* fileName,HUDEntity* hudEntity);
 	void debug();
 
-	Sprite* getSprite(const char* name) {
-		IdString hash = string::murmur_hash(name);
-		for ( size_t i = 0; i < m_SpritePrefabs.size(); ++i ) {
-			if ( m_SpritePrefabs[i]->name == hash ) {
-				return m_SpritePrefabs[i]->sprite;
-			}
-		}
-		return 0;
-	}
-	SpritePrefab* getPrefab(const char* name) {
-		IdString hash = string::murmur_hash(name);
-		for ( size_t i = 0; i < m_SpritePrefabs.size(); ++i ) {
-			if ( m_SpritePrefabs[i]->name == hash ) {
-				return m_SpritePrefabs[i];
-			}
-		}
-		return 0;
-	}
+	
 private:
 	
 	void toggleSpriteBatch();
@@ -521,7 +356,7 @@ private:
 	virtual void reload(const char* fileName);
 
 	CollisionManager m_CollisionManager;
-	GameObjects m_GameObjects;
+	//GameObjects m_GameObjects;
 	Camera2D* m_Camera[16];
 	int m_CurrentBatchItem;
 	std::vector<SpriteBatchItem> m_BatchItems;
@@ -533,17 +368,8 @@ private:
 	bool m_Paused;
 	RTSetting m_RenderTargets[16];
 
-	// FIXME: move to resource manager
-	SpritePrefabs m_SpritePrefabs;
 };
 
-template<class S>
-void World::createGameObject(S* obj) {
-	obj->setWorld(this);
-	obj->setRenderer(m_Renderer);
-	obj->init();
-	obj->GameObject::setActive(true);
-	m_GameObjects.push_back(obj);
-}
+
 
 }

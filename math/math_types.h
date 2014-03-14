@@ -1,93 +1,10 @@
 #pragma once
 #include <iostream>
+#include "Vector.h"
 
 namespace ds {
 
 const float PI = 3.141592654f;
-
-// -------------------------------------------------------
-// Vec2
-// -------------------------------------------------------
-struct Vec2 {
-
-	float x,y;
-	Vec2();
-	Vec2(float _x,float _y);
-	Vec2(int _x,int _y);
-	Vec2(const Vec2& v);
-
-	Vec2& operator += (const Vec2& v) {
-		x += v.x;
-		y += v.y;
-		return *this;
-	}
-	Vec2& operator -() {
-		x *= -1.0f;
-		y *= -1.0f;
-		return *this;
-	}
-	operator float *() const { return (float *) &x; }
-};
-
-inline Vec2::Vec2() : x(0.0f) , y(0.0f) {}
-
-inline Vec2::Vec2(float _x,float _y) : x(_x) , y(_y) {}
-
-inline Vec2::Vec2(const Vec2& v) : x(v.x) , y(v.y) {}
-
-inline Vec2::Vec2(int _x,int _y) {
-	x = static_cast<float>(_x);
-	y = static_cast<float>(_y);
-}
-
-inline std::ostream& operator << (std::ostream& os, const Vec2& v) {
-	os << v.x;
-	os << v.y;
-	return os;
-}
-
-inline std::istream& operator >> (std::istream& input, Vec2& v) {
-	input >> v.x;
-	input >> v.y;	
-	return input;
-}
-
-const Vec2 V2_UP    = Vec2(0.0f,-1.0f);
-const Vec2 V2_RIGHT = Vec2(1.0f,0.0f);
-const Vec2 V2_LEFT  = Vec2(-1.0f,0.0f);
-const Vec2 V2_DOWN  = Vec2(0.0f,1.0f);
-// -------------------------------------------------------
-// Vec3
-// -------------------------------------------------------
-struct Vec3 {
-
-	float x,y,z;
-
-	Vec3() : x(0.0f) , y(0.0f) , z(0.0f) {}
-	Vec3(float _x,float _y,float _z) : x(_x) , y(_y) , z(_z) {}
-
-	Vec2 xy() {
-		return Vec2(x,y);
-	}
-
-	operator float *() const { return (float *) &x; }
-};
-
-
-
-// -------------------------------------------------------
-// Vec4
-// -------------------------------------------------------
-struct Vec4 {
-
-	float x,y,z,w;
-
-	Vec4() : x(0.0f) , y(0.0f) , z(0.0f) , w(0.0f) {}
-	Vec4(float _x,float _y,float _z,float _w) : x(_x) , y(_y) , z(_z) , w(_w) {}
-
-	operator float *() const { return (float *) &x; }
-
-};
 
 // -------------------------------------------------------
 // 3x3 Matrix
@@ -103,7 +20,7 @@ struct mat3 {
 		float m[3][3];
 	};
 
-	//Vec3 a,b,c;
+	//Vector3f a,b,c;
 	mat3();
 
 	mat3(float m11,float m12,float m13,float m21,float m22,float m23,float m31,float m32,float m33);
@@ -249,30 +166,12 @@ inline std::istream& operator >> (std::istream& input, Rect& rect) {
 // -------------------------------------------------------
 struct Circle {
 	
-	Vec2 pos;
+	Vector2f pos;
 	float radius;
 
 	Circle() : pos(0.0f,0.0f) , radius(0.0f) {}
 
-	Circle(const Vec2& p,float r) : pos(p) , radius(r) {}
-};
-
-// -------------------------------------------------------
-// Point
-// -------------------------------------------------------
-struct Point {
-
-	int x,y;
-
-	Point() : x(0) , y(0) {}
-
-	Point(int xp,int yp) : x(xp) , y(yp) {}
-
-	Point& operator += (const ds::Point& s) {
-		x += s.x;
-		y += s.y;
-		return *this;
-	}
+	Circle(const Vector2f& p,float r) : pos(p) , radius(r) {}
 };
 
 }

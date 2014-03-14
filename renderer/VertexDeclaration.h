@@ -4,7 +4,7 @@
 #include "..\utils\Color.h"
 #include "GraphicsDevice.h"
 #include "..\math\math_types.h"
-
+#include "Vector.h"
 
 namespace ds {
 
@@ -63,7 +63,7 @@ public:
 		tv = v;
 	}
 
-	TexturedVertex(const Vec3& pos,const Vec2& texcoords) {
+	TexturedVertex(const Vector3f& pos,const Vector2f& texcoords) {
 		x = pos.x;
 		y = pos.y;
 		z = pos.z;
@@ -113,7 +113,7 @@ public:
 		tv = v;
 	}
 
-	TransformedTexturedVertex(const Vec3& pos,const Vec2& texcoords) {
+	TransformedTexturedVertex(const Vector3f& pos,const Vector2f& texcoords) {
 		x = pos.x;
 		y = pos.y;
 		z = pos.z;
@@ -163,7 +163,7 @@ public:
 		this->color = color;
 	}
 
-	TransformedColorVertex(const Vec3& pos,const Color& color) {
+	TransformedColorVertex(const Vector3f& pos,const Color& color) {
 		x = pos.x;
 		y = pos.y;
 		z = pos.z;
@@ -204,7 +204,7 @@ public:
 		color = Color(1.0f,1.0f,1.0f,1.0f);
 	}
 
-	PositionTextureNormalsVertex(const Vec3& pos,const Vec2& texcoords,const Vec3& normals,const Color& ncolor = Color(1.0f,1.0f,1.0f,1.0f)) {
+	PositionTextureNormalsVertex(const Vector3f& pos,const Vector2f& texcoords,const Vector3f& normals,const Color& ncolor = Color(1.0f,1.0f,1.0f,1.0f)) {
 		x = pos.x;
 		y = pos.y;
 		z = pos.z;
@@ -250,7 +250,7 @@ public:
 		color = Color(1.0f,1.0f,1.0f,1.0f);
 	}
 
-	PTNCVertex(const Vec3& pos,const Vec2& texcoords,const Vec3& normals,const Color& ncolor = Color(1.0f,1.0f,1.0f,1.0f)) {
+	PTNCVertex(const Vector3f& pos,const Vector2f& texcoords,const Vector3f& normals,const Color& ncolor = Color(1.0f,1.0f,1.0f,1.0f)) {
 		x = pos.x;
 		y = pos.y;
 		z = pos.z;
@@ -299,7 +299,7 @@ public:
 		tx = ty = tz = 0.0f;
 	}
 
-	PTNBTVertex(const Vec3& pos,const Vec2& texcoords,const Vec3& tangents,const Vec3& binormals,const Vec3& normals) {
+	PTNBTVertex(const Vector3f& pos,const Vector2f& texcoords,const Vector3f& tangents,const Vector3f& binormals,const Vector3f& normals) {
 		x = pos.x;
 		y = pos.y;
 		z = pos.z;

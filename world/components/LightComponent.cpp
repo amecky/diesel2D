@@ -21,14 +21,14 @@ void LightComponent::initialize(int startLayer,int colorRT,int normalRT,float am
 	float centerY = m_ScreenH * 0.5f;
 
 	PTCVertex VERTICES[] = {
-		PTCVertex(Vec3(-centerX,centerY,0.0f),Vec2(0.0f,0.0f)),
-		PTCVertex(Vec3(centerX,centerY,0.0f),Vec2(1.0f,0.0f)),
-		PTCVertex(Vec3(centerX,-centerY,0.0f),Vec2(1.0f,1.0f)),
-		PTCVertex(Vec3(-centerX,-centerY,0.0f),Vec2(0.0f,1.0f))
+		PTCVertex(Vector3f(-centerX,centerY,0.0f),Vector2f(0.0f,0.0f)),
+		PTCVertex(Vector3f(centerX,centerY,0.0f),Vector2f(1.0f,0.0f)),
+		PTCVertex(Vector3f(centerX,-centerY,0.0f),Vector2f(1.0f,1.0f)),
+		PTCVertex(Vector3f(-centerX,-centerY,0.0f),Vector2f(0.0f,1.0f))
 	};
 
 	m_AddBS = m_Renderer->createBlendState(BL_ONE,BL_ONE,true);	
-
+/*
 	int layer = startLayer;
 	int lightRT = m_World->createRenderTarget(layer,m_ScreenW,m_ScreenH);
 	m_World->add(layer,this);
@@ -56,7 +56,7 @@ void LightComponent::initialize(int startLayer,int colorRT,int normalRT,float am
 	shader::setFloat(m_LightShader,"screenHeight",m_ScreenH);
 	shader::setFloat(m_LightShader,"lightStrength",1.0f);
 	shader::setFloat(m_LightShader,"lightDecay",200.0f);
-	shader::setVec3(m_LightShader,"lightPosition",Vec3(512,384,100));
+	shader::setVector3f(m_LightShader,"lightPosition",Vector3f(512,384,100));
 	shader::setColor(m_LightShader,"lightColor",Color(255,0,0,255));
 	shader::setFloat(m_LightShader,"specularStrength",2.0f);
 	shader::setTexture(m_LightShader,"NormalMap",m_Renderer,normalRT);
@@ -74,11 +74,12 @@ void LightComponent::initialize(int startLayer,int colorRT,int normalRT,float am
 	shader::setTexture(combineShader,"NormalMap",m_Renderer,normalRT);
 	int cbid = m_World->createSpriteBatch(combinedRT,m_ScreenW,m_ScreenH);
 	m_World->setSpriteBatchShader(cbid,combineShaderID);
-	m_World->addSpriteEntity(3,cbid,&m_CombineEntity,centerX,centerY,Rect(0.0f,0.0f,m_ScreenW,m_ScreenH));
+	//m_World->addSpriteEntity(3,cbid,&m_CombineEntity,centerX,centerY,Rect(0.0f,0.0f,m_ScreenW,m_ScreenH));
 
 	++layer;
 	int bbID = m_World->createSpriteBatch(combinedRT,m_ScreenW,m_ScreenH);
-	m_World->addSpriteEntity(layer,bbID,&m_OverlayEntity,centerX,centerY,Rect(0.0f,0.0f,m_ScreenW,m_ScreenH));
+	//m_World->addSpriteEntity(layer,bbID,&m_OverlayEntity,centerX,centerY,Rect(0.0f,0.0f,m_ScreenW,m_ScreenH));
+	*/
 }
 
 // -------------------------------------------------------
@@ -90,7 +91,7 @@ void LightComponent::update(float elapsed) {
 // -------------------------------------------------------
 // Add light
 // -------------------------------------------------------
-int LightComponent::addLight(const Vec3& position,float radius,const Color& color,float specular,float strength) {
+int LightComponent::addLight(const Vector3f& position,float radius,const Color& color,float specular,float strength) {
 	int idx = m_Lights.size();
 	Light l;
 	l.position = position;
@@ -113,9 +114,9 @@ void LightComponent::draw() {
 	for ( size_t i = 0; i < m_Lights.size(); ++i ) {
 		Light* l = &m_Lights[i];
 		if ( l->active ) {
-			ds::Vec3 pos = l->position;
+			Vector3f pos = l->position;
 			pos.y = m_ScreenH - pos.y;
-			shader::setVec3(m_LightShader,"lightPosition",pos);
+			shader::setVector3f(m_LightShader,"lightPosition",pos);
 			shader::setColor(m_LightShader,"lightColor",l->color);
 			shader::setFloat(m_LightShader,"lightDecay",l->radius);
 			shader::setFloat(m_LightShader,"specularStrength",l->specular);

@@ -12,7 +12,7 @@ class EmitterMesh {
 public:
 	EmitterMesh() {}
 	virtual ~EmitterMesh() {}
-	virtual void getPoint(uint32 index,uint32 total,Vec2& position,Vec2& normal) = 0;
+	virtual void getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,bool random = false) = 0;
 };
 
 // -------------------------------------------------------
@@ -25,7 +25,7 @@ public:
 	virtual ~RingEmitterMesh() {
 		delete m_Settings;
 	}
-	void getPoint(uint32 index,uint32 total,Vec2& position,Vec2& normal);
+	void getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,bool random = false);
 	RingEmitterSettings* getSettings() {
 		return m_Settings;
 	}
@@ -41,7 +41,7 @@ class PointEmitterMesh : public EmitterMesh {
 public:
 	PointEmitterMesh() : EmitterMesh() {}
 	virtual ~PointEmitterMesh() {}
-	void getPoint(uint32 index,uint32 total,Vec2& position,Vec2& normal);
+	void getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,bool random = false);
 private:
 	
 };
@@ -52,9 +52,9 @@ private:
 class BoxEmitterMesh : public EmitterMesh {
 
 struct BoxEntry {
-	Vec2 pos;
+	Vector2f pos;
 	float angle;
-	Vec2 normal;
+	Vector2f normal;
 };
 
 public:
@@ -63,7 +63,7 @@ public:
 		delete m_Settings;
 		delete[] m_Entries;
 	}
-	void getPoint(uint32 index,uint32 total,Vec2& position,Vec2& normal);
+	void getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,bool random = false);
 	BoxEmitterSettings* getSettings() {
 		return m_Settings;
 	}
@@ -83,7 +83,7 @@ public:
 	virtual ~ConeEmitterMesh() {
 		delete m_Settings;
 	}
-	void getPoint(uint32 index,uint32 total,Vec2& position,Vec2& normal);
+	void getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,bool random = false);
 	ConeEmitterSettings* getSettings() {
 		return m_Settings;
 	}

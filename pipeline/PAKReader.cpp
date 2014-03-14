@@ -90,15 +90,15 @@ float PAKReader::readFloat() const {
 	return v;
 }
 
-Vec2 PAKReader::readVec2() const {    
-	Vec2 vec;
+Vector2f PAKReader::readVector2f() const {    
+	Vector2f vec;
 	vec.x = readFloat();
 	vec.y = readFloat();
 	return vec;
 }
 
-Vec3 PAKReader::readVec3() const {
-	Vec3 vec;
+Vector3f PAKReader::readVector3f() const {
+	Vector3f vec;
 	vec.x = readFloat();
 	vec.y = readFloat();
 	vec.z = readFloat();

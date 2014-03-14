@@ -26,9 +26,10 @@ DialogManager::~DialogManager(void) {
 // -------------------------------------------------------
 // Init
 // -------------------------------------------------------
-void DialogManager::init(SpriteBatch* spriteBatch,Renderer* renderer,const char* fontName,int textureID) {
-	m_SpriteBatch = spriteBatch;
-	font::load(fontName,renderer,textureID,m_Font);
+void DialogManager::init(Renderer* renderer,const char* fontName,int textureID) {
+	//m_SpriteBatch = spriteBatch;
+	m_Renderer = renderer;
+	m_Font = m_Renderer->loadBitmapFont(fontName,textureID);	
 	m_Initialized = true;
 }
 
@@ -37,7 +38,7 @@ void DialogManager::init(SpriteBatch* spriteBatch,Renderer* renderer,const char*
 // -------------------------------------------------------
 void DialogManager::createDialog(const char* name,int id,GUIDialog* dialog) {
 	assert(get(name) == 0);
-	dialog->init(name,id,m_SpriteBatch,&m_Font);
+	dialog->init(name,id,m_Renderer,m_Font);
 	++m_Index;
 	m_Dialogs.push_back(dialog);
 }
@@ -86,14 +87,14 @@ void DialogManager::setActiveFlag(const char* name,bool active) {
 // -------------------------------------------------------
 void DialogManager::render() {
 	if ( m_Initialized && !m_Dialogs.empty() ) {
-		m_SpriteBatch->begin();
+		//m_SpriteBatch->begin();
 		for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
 			GUIDialog* dlg = m_Dialogs[i];
 			if ( dlg->isActive() ) {
 				dlg->render();
 			}
 		}
-		m_SpriteBatch->end();
+		//m_SpriteBatch->end();
 	}
 }
 
@@ -141,7 +142,7 @@ void DialogManager::addToggleAction(const char* oldDialogName,const char* newDia
 // -------------------------------------------------------
 // Update mouse position
 // -------------------------------------------------------
-void DialogManager::updateMousePos(const Vec2& mousePos) {
+void DialogManager::updateMousePos(const Vector2f& mousePos) {
 	for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
 		GUIDialog* dlg = m_Dialogs[i];
 		if ( dlg->isActive() ) {
@@ -181,7 +182,7 @@ bool DialogManager::loadDialogFromJSON(const char* dialogName,const char* name,i
 	char buffer[256];
 	sprintf(buffer,"content\\dialogs\\%s.json",name);
 	if ( file::fileExists(buffer)) {
-		GUIDialog* dialog = new GUIDialog();
+		GUIDialog* dialog = new GUIDialog(m_Renderer->getWidth(),m_Renderer->getHeight());
 		createDialog(dialogName,id,dialog);
 		dialog->load(name);
 		return true;

@@ -10,6 +10,13 @@
 const int HISTORY_TICKS = 60;
 const int MAX_PROFILE_DATA = 100;
 
+struct DataMeasurement {
+	IdString hash;
+	char name[32];
+	LARGE_INTEGER started;
+	float value;
+};
+
 class NewProfiler {
 
 struct ProfileFrame {

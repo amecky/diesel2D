@@ -5,9 +5,9 @@ namespace ds {
 // 
 // =======================================================
 UIDropDown::UIDropDown(UIDialog *dialog,uint32 ID,const std::string& label) : UIControl(dialog,ID) , m_Label(label) , m_Selected(false) , m_Selection(0) , m_Highlight(-1) {
-	//m_Dialog->getTextNode()->setText(string::to_string(m_ID),Vec2(0,0),"%s",m_Label.c_str());
+	//m_Dialog->getTextNode()->setText(string::to_string(m_ID),Vector2f(0,0),"%s",m_Label.c_str());
 	//m_Text = "Select one entry";
-	//m_Dialog->getTextNode()->setText(string::to_string(m_ID)+"_Text",Vec2(0,0),"%s",m_Label.c_str());
+	//m_Dialog->getTextNode()->setText(string::to_string(m_ID)+"_Text",Vector2f(0,0),"%s",m_Label.c_str());
 	//m_Dialog->getTextNode()->calculateSize(string::to_string(m_ID)+"_Text",m_CalculatedSize);
 
 }
@@ -17,7 +17,7 @@ void UIDropDown::add(const std::string& text) {
 	ModelItem mi;
 	mi.text = text;
 	mi.reference = string::to_string(m_ID)+"_Model_"+string::to_string(index);
-	//m_Dialog->getTextNode()->setText(mi.reference,Vec2(0,0),"%s",text.c_str());
+	//m_Dialog->getTextNode()->setText(mi.reference,Vector2f(0,0),"%s",text.c_str());
 	//m_Dialog->getTextNode()->calculateSize(mi.reference,mi.size);
 	if ( index == 0 ) {
 		mi.active = true;
@@ -28,7 +28,7 @@ void UIDropDown::add(const std::string& text) {
 	m_Items.push_back(mi);	
 }
 
-void UIDropDown::align(const Vec2& gridPosition) {
+void UIDropDown::align(const Vector2f& gridPosition) {
 	m_Position = gridPosition;
 	/*
 	m_Dialog->getTextNode()->setText(string::to_string(m_ID),m_Position,"%s",m_Label.c_str());	
@@ -39,7 +39,7 @@ void UIDropDown::align(const Vec2& gridPosition) {
 	m_TextPosition.y = gridPosition.y;	
 	m_Width = 0.0f;
 	m_Height = 0.0f;
-	Vec2 tp = m_TextPosition;
+	Vector2f tp = m_TextPosition;
 	m_Dialog->getTextNode()->setText(string::to_string(m_ID)+"_Text",tp,"%s",m_Text.c_str());
 	tp.y += m_CalculatedSize.y;
 	tp.y += 2.0f;
@@ -65,7 +65,7 @@ void UIDropDown::align(const Vec2& gridPosition) {
 	*/
 }
 
-void UIDropDown::fillBuffer(const Vec2& basePosition,UIBuffer& buffer) {
+void UIDropDown::fillBuffer(const Vector2f& basePosition,UIBuffer& buffer) {
 	/*
 	if ( m_Selected ) {
 		buffer.add(m_BoxPosition.x,m_BoxPosition.y,m_Width,m_Height,Rect(240,260,200,20));
@@ -86,7 +86,7 @@ void UIDropDown::fillBuffer(const Vec2& basePosition,UIBuffer& buffer) {
 void UIDropDown::update(float elapsed) {
 	if ( m_Selected ) {
 		m_Highlight = -1;
-		Vec2 mousePos = gEngine->getMousePosition();
+		Vector2f mousePos = gEngine->getMousePosition();
 		for ( size_t i = 0; i < m_Items.size();++i ) {
 			ModelItem* mi = &m_Items[i];	
 			if ( mousePos.x >= mi->boundingBox.left && mousePos.x <= mi->boundingBox.right && mousePos.y >= mi->boundingBox.top && mousePos.y <= mi->boundingBox.bottom ) {
@@ -96,7 +96,7 @@ void UIDropDown::update(float elapsed) {
 	}
 }
 
-bool UIDropDown::isSelected(const Vec2& mousePos) {
+bool UIDropDown::isSelected(const Vector2f& mousePos) {
 	Rect br = m_BoundingBox;
 	//m_Selected = false;
 	if ( m_Selected ) {

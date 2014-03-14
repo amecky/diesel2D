@@ -19,7 +19,7 @@ bool GUIControl::operator ==(const GUIControl* ctrl) {
 // -------------------------------------------------------
 // GUIControl - isInside
 // -------------------------------------------------------
-bool GUIControl::isInside(const Vec2& pos) {
+bool GUIControl::isInside(const Vector2f& pos) {
 	if ( pos.x < m_Position.x ) {
 		return false;
 	}
@@ -38,7 +38,7 @@ bool GUIControl::isInside(const Vec2& pos) {
 // -------------------------------------------------------
 // GUIControl - find
 // -------------------------------------------------------
-void GUIControl::find(const Vec2& pos,GUIControl* control,int& index,bool& found) {
+void GUIControl::find(const Vector2f& pos,GUIControl* control,int& index,bool& found) {
 	if ( hasChildren() ) {
 		for ( std::size_t i = 0; i < m_Children.size(); ++i ) {
 			m_Children[i]->find(pos,control,index,found);			
@@ -93,24 +93,24 @@ void GUILabel::setText() {
 		ch.dimY = dimY;
 		LOG(logINFO) << "char dim " << ch.dimX << " / " << ch.dimY;
 		m_Buffer->setTextureCoordinates(ch.index,cd.u1,cd.v1,cd.u2,cd.v2);
-		m_Buffer->update(ch.index,Vec2(x,y));
+		m_Buffer->update(ch.index,Vector2f(x,y));
 		m_Chars.push_back(ch);				
 	}
 	float height = m_BitmapFont->getCharHeight() * scale;
-	m_Dimension = Vec2(dim,height);
+	m_Dimension = Vector2f(dim,height);
 }
 
 void GUILabel::align() {
 	if ( m_Parent != 0 ) {
-		Vec2 parentPos = m_Parent->getPosition();
-		Vec2 parentDim = m_Parent->getDimension();
+		Vector2f parentPos = m_Parent->getPosition();
+		Vector2f parentDim = m_Parent->getDimension();
 		float cx = (parentDim.x - m_Dimension.x) * 0.5f;
 		float cy = (parentDim.y - m_Dimension.y) * 0.5f;
-		m_Position = parentPos + Vec2(cx,cy);
-		Vec2 p = m_Position;
+		m_Position = parentPos + Vector2f(cx,cy);
+		Vector2f p = m_Position;
 		for ( size_t i = 0; i < m_Chars.size();++i ) {
 			Char* c = &m_Chars[i];
-			m_Buffer->update(c->index,Vec2(p.x,p.y));
+			m_Buffer->update(c->index,Vector2f(p.x,p.y));
 			p.x += c->dimX;
 		}
 	}
@@ -154,32 +154,32 @@ void GUINode::addControl(GUIControl* control) {
 	}
 }
 // creates a new button
-GUIButton* GUINode::createButton(GUIControl* parent,const Vec2& pos,const Rect& textureRect) {
+GUIButton* GUINode::createButton(GUIControl* parent,const Vector2f& pos,const Rect& textureRect) {
 	GUIButton* button = new GUIButton(m_Counter,parent,m_Buffer,pos,textureRect);
 	addControl(button);
 	return button;
 }
 // create new window
-GUIWindow* GUINode::createWindow(GUIControl* parent,const Vec2& pos,const Vec2& size,const Rect& textureRect) {
+GUIWindow* GUINode::createWindow(GUIControl* parent,const Vector2f& pos,const Vector2f& size,const Rect& textureRect) {
 	GUIWindow* window = new GUIWindow(m_Counter,parent,m_Buffer,pos,size,textureRect);
 	addControl(window);
 	return window;
 }
 // create new image
-GUIImage* GUINode::createImage(GUIControl* parent,const Vec2& pos,const Vec2& size,const Rect& textureRect) {
+GUIImage* GUINode::createImage(GUIControl* parent,const Vector2f& pos,const Vector2f& size,const Rect& textureRect) {
 	GUIImage* image = new GUIImage(m_Counter,parent,m_Buffer,pos,size,textureRect);
 	addControl(image);
 	return image;
 }
 
-GUILabel* GUINode::createLabel(GUIControl* parent,const Vec2& pos,const std::string& text) {
+GUILabel* GUINode::createLabel(GUIControl* parent,const Vector2f& pos,const std::string& text) {
 	GUILabel* label = new GUILabel(m_Counter,parent,m_Buffer,pos,text,m_Font);
 	addControl(label);
 	return label;
 }
 */
 
-GCID GUINode::createImage(GCID parent,const Vec2& pos,const Vec2& size,const Rect& textureRect) {
+GCID GUINode::createImage(GCID parent,const Vector2f& pos,const Vector2f& size,const Rect& textureRect) {
 	GUICtrl* ctrl = new GUICtrl();
 	if ( parent != GC_NONE ) {
 		ctrl->parent = parent;
@@ -211,7 +211,7 @@ GCID GUINode::createImage(GCID parent,const Vec2& pos,const Vec2& size,const Rec
 }
 
 void GUINode::update(float elapsed) {
-	Vec2 mousePos = gEngine->getMousePosition();
+	Vector2f mousePos = gEngine->getMousePosition();
 	if ( m_MainControl != 0 ) {
 		/*
 		bool found = false;

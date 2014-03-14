@@ -3,9 +3,6 @@
 #include <assert.h>
 #include "..\utils\FileUtils.h"
 #include "..\utils\Profiler.h"
-#include "HUDEntity.h"
-#include "TextEntity.h"
-#include "SpriteEntity.h"
 #include "..\particles\BoxEmitter.h"
 
 #include "..\utils\StringUtils.h"
@@ -24,15 +21,9 @@ World::World() : m_Counter(0) , m_Paused(false) {
 }
 
 World::~World(void) {
-
 	for ( size_t i = 0; i < m_BatchItems.size(); ++i ) {
 		delete m_BatchItems[i].spriteBatch;
-	}
-	SpritePrefabs::iterator it = m_SpritePrefabs.begin();
-	while ( it != m_SpritePrefabs.end()) {
-		delete (*it);
-		it = m_SpritePrefabs.erase(it);
-	}
+	}	
 }
 
 void World::init(Renderer* renderer) {
@@ -112,24 +103,24 @@ void World::createSpriteBatch(int idx,const char* textureName,int maxQuads) {
 // Add TextEntity
 // -------------------------------------------------------
 void World::addTextEntity(int layer,int batchID,const char* fontName,TextEntity* textEntity) {
-	add(layer,textEntity);
-	textEntity->init(m_Renderer,m_BatchItems[batchID].spriteBatch,fontName,getTextureID(batchID),batchID);
+	//add(layer,textEntity);
+	//textEntity->init(m_Renderer,m_BatchItems[batchID].spriteBatch,fontName,getTextureID(batchID),batchID);
 }
 
 // -------------------------------------------------------
 // Add HUDEntity
 // -------------------------------------------------------
 void World::addHUDEntity(int layer,HUDEntity* entity,int textureID,const char* fontName) {
-	add(layer,entity);
-	entity->init(m_Renderer,textureID,fontName);
+	//add(layer,entity);
+	//entity->init(m_Renderer,textureID,fontName);
 }
-
+/*
 // -------------------------------------------------------
 // Add SpriteEntity
 // -------------------------------------------------------
 void World::addSpriteEntity(int layer,int batchID,SpriteEntity* entity,int x,int y,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color) {
 	Sprite* sprite = BM_NEW(Sprite);
-	sprite->position = ds::Vec2(x,y);
+	sprite->position = Vector2f(x,y);
 	sprite->textureRect = textureRect;
 	sprite->rotation = rotation;
 	sprite->scaleX = scaleX;
@@ -163,9 +154,9 @@ void World::addSpriteEntity(int layer,int batchID,SpriteEntity* entity,Sprite* s
 void World::addSpriteEntity(int layer,int batchID,SpriteEntity* entity,int x,int y,Sprite* sprite) {	
 	add(layer,entity);
 	entity->init(batchID,sprite);
-	entity->setPosition(ds::Vec2(x,y));
+	entity->setPosition(Vector2f(x,y));
 }
-
+*/
 // -------------------------------------------------------
 // Add CollisionEntity
 // -------------------------------------------------------
@@ -220,17 +211,7 @@ void World::setBoxShape(Entity* entity,float width,float height,int type) {
 void World::update(float elapsed) {
 	PR_START("World-update")
 	m_SettingsManager.checkSettingsFiles();
-	PR_START("World-update-GameObjects")
-	if ( !m_Paused ) {
-		for ( size_t i = 0; i < m_GameObjects.size(); ++i ) {
-			GameObject* obj = m_GameObjects[i];
-			if (obj->isActive()) {
-				obj->resetEvents();
-				obj->update(elapsed);
-			}
-		}
-	}
-	PR_END("World-update-GameObjects")
+	
 	PR_START("World-update-Entities")
 	for ( int i = 0; i < 16; ++i ) {
 		Layer* layer = &m_Layers[i];		
@@ -288,6 +269,7 @@ void World::draw() {
 					currentType = e->getType();
 				}
 				if ( e->getType() == ET_SPRITE ) {
+					/*
 					SpriteEntity* se = static_cast<SpriteEntity*>(e);
 					assert( se->getSprite() != 0);
 					if ( se->getBatchItemID() != m_CurrentBatchItem ) {			
@@ -297,7 +279,7 @@ void World::draw() {
 						m_CurrentBatch->spriteBatch->begin();					
 					}				
 					Sprite* sp = se->getSprite();
-					Vec2 pos = e->getPosition();
+					Vector2f pos = e->getPosition();
 					if ( m_Camera[i] != 0 ) {
 						pos = m_Camera[i]->transform(pos);
 					}
@@ -316,18 +298,10 @@ void World::draw() {
 						sy = se->getScaleY();
 					}
 					m_CurrentBatch->spriteBatch->draw(pos,sp->textureRect,rotation,sx,sy,cl);
+					*/
 	
 				}
-				else if ( e->getType() == ET_TEXT ) {
-					TextEntity* se = static_cast<TextEntity*>(e);
-					if ( se->getBatchItemID() != m_CurrentBatchItem ) {			
-						stopSpriteBatch();
-						m_CurrentBatchItem = se->getBatchItemID();
-						m_CurrentBatch = &m_BatchItems[m_CurrentBatchItem];
-						m_CurrentBatch->spriteBatch->begin();					
-					}				
-					se->render();
-				}
+				
 				else if ( e->getType() == ET_PARTICLE ) {
 					ParticlesystemEntity* pse = static_cast<ParticlesystemEntity*>(e);
 					if ( pse->isAlive() ) {
@@ -351,19 +325,9 @@ void World::draw() {
 						pse->draw();
 						m_Renderer->setBlendState(currentBS);
 					}					
-				}
-				else if ( e->getType() == ET_HUD ) {
-					HUDEntity* he = static_cast<HUDEntity*>(e);
-					he->draw();
-				}
+				}				
 				else if ( e->getType() == ET_CUSTOM ) {
 					e->draw();
-				}
-				else if ( e->getType() == ET_OVERLAY ) {
-					ScreenOverlayEntity* overlay = static_cast<ScreenOverlayEntity*>(e);
-					m_Renderer->resetBufferHandle();
-					//m_Renderer->setTexture(overlay->getTextureID(),0);
-					overlay->draw();
 				}
 			}
 		}
@@ -533,10 +497,6 @@ bool World::loadData(const char* name) {
 			}
 			else if ( c->getName() == "sprite" ) {
 				LOG(logINFO) << "Creating sprite " << c->getProperty("name");
-				SpritePrefab* prefab = new SpritePrefab();
-				prefab->name = string::murmur_hash(c->getProperty("name").c_str());
-				prefab->load(c);
-				m_SpritePrefabs.push_back(prefab);
 			}
 		}
 		gFileWatcher->registerFile(buffer,this);
@@ -544,7 +504,7 @@ bool World::loadData(const char* name) {
 	}
 	return false;
 }
-
+/*
 bool World::loadHUD(const char* name,HUDEntity* hudEntity) {	
 	char buffer[256];
 	sprintf(buffer,"content\\resources\\%s.json",name);
@@ -565,7 +525,7 @@ bool World::loadHUD(const char* name,HUDEntity* hudEntity) {
 	}
 	return false;
 }
-
+*/
 void World::reload(const char* fileName) {
 	LOG(logINFO) << "----- RELOADING -----";
 	JSONReader reader;
@@ -574,16 +534,6 @@ void World::reload(const char* fileName) {
 		for ( size_t i = 0; i < categories.size(); ++i ) {
 			Category* c = categories[i];
 			if ( c->getName() == "sprite" ) {				
-				SpritePrefab* prefab = getPrefab(c->getProperty("name").c_str());
-				if ( prefab != 0 ) {
-					prefab->load(c);
-				}
-				else {
-					SpritePrefab* sp = new SpritePrefab();
-					sp->name = string::murmur_hash(c->getProperty("name").c_str());
-					sp->load(c);
-					m_SpritePrefabs.push_back(sp);
-				}				
 			}
 		}
 	}

@@ -29,11 +29,11 @@ BaseApp::BaseApp() {
 	m_DebugInfo.showDrawCounter = false;
 	m_DebugInfo.debugRenderer = false;
 	m_ButtonState.processed = true;
-	m_MousePos = Vec2(0,0);
+	m_MousePos = Vector2f(0,0);
 	rand.seed(GetTickCount());
 	audio = new AudioManager;
 	m_Fullscreen = false;
-	m_DialogBatch = 0;
+	//m_DialogBatch = 0;
 }
 
 // -------------------------------------------------------
@@ -41,9 +41,9 @@ BaseApp::BaseApp() {
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
 	LOGC(logINFO,"BaseApp") << "Destructing all elements";
-	if ( m_DialogBatch != 0 ) {
-		delete m_DialogBatch;
-	}
+	//if ( m_DialogBatch != 0 ) {
+		//delete m_DialogBatch;
+	//}
 	delete gProfiler;
 	delete audio;
 	delete renderer;	
@@ -67,16 +67,13 @@ void BaseApp::init() {
 	m_World.init(renderer);
 	audio->initialize(m_hWnd);
 	initialize();		
-	LOGC(logINFO,"BaseApp") << "-> loading sprites.json";
-	if ( file::fileExists("content\\resources\\sprites.json")) {
-		LOGC(logINFO,"BaseApp") << "There is a Sprites file";
-		m_World.loadData("sprites");
-	}
+	/*
 	LOGC(logINFO,"BaseApp") << "-> loading gui.json";
 	if ( file::fileExists("content\\resources\\gui.json")) {
 		LOGC(logINFO,"BaseApp") << "There is a gui file";
 		initializeGUI();
-	}	
+	}
+	*/
 	LOGC(logINFO,"BaseApp") << "----------------- Init ----------------------";
 	LOGC(logINFO,"BaseApp") << "------------ Loading content  ---------------";
 	loadContent();
@@ -93,8 +90,7 @@ void BaseApp::initializeGUI() {
 			std::string font = cat->getProperty("font");
 			int maxQuads = 1024;
 			cat->getInt("max_quads",&maxQuads);
-			m_DialogBatch = new SpriteBatch(renderer,maxQuads,m_World.getTextureID(textureID));
-			gui.init(m_DialogBatch,renderer,font.c_str(),m_World.getTextureID(textureID));
+			gui.init(renderer,font.c_str(),textureID);
 		}
 		std::vector<Category*> categories = reader.getCategories();
 		for ( size_t i = 0; i < categories.size(); ++i ) {
@@ -222,6 +218,17 @@ void BaseApp::buildFrame() {
 	}
 	PR_START("UPDATE")
 	gui.updateMousePos(getMousePos());
+	PR_START("World-update-GameObjects")
+	//if ( !m_Paused ) {
+		for ( size_t i = 0; i < m_GameObjects.size(); ++i ) {
+			GameObject* obj = m_GameObjects[i];
+			if (obj->isActive()) {
+				obj->resetEvents();
+				obj->update(m_GameTime.elapsed);
+			}
+		}
+	//}
+	PR_END("World-update-GameObjects")
 	update(m_GameTime);
 	m_World.update(m_GameTime.elapsed);
 	PR_END("UPDATE")
@@ -230,7 +237,7 @@ void BaseApp::buildFrame() {
 	renderer->setupMatrices();
 	PR_START("RENDER_GAME")
 	draw(m_GameTime);
-	m_World.draw();
+	//m_World.draw();
 	gui.render();
 	PR_END("RENDER_GAME")
 	PR_START("DEBUG_RENDER")

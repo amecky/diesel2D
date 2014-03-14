@@ -24,8 +24,8 @@ public:
 	void writeUChar(uchar c);
 	void writeULong(ulong v);
 	void writeFloat(float value);
-	void writeVec2(const Vec2& v);
-	void writeVec3(const Vec3& v);
+	void writeVector2f(const Vector2f& v);
+	void writeVector3f(const Vector3f& v);
 	void writeColor(const Color& color);
 	void writeRect(const Rect& rect);
 	void writeHeader(uint32 resourceType);

@@ -21,6 +21,9 @@ struct GridPoint {
     }
 };
 
+// -------------------------------------------------------
+// Dropped Cell
+// -------------------------------------------------------
 struct DroppedCell {
 
 	GridPoint from;
@@ -48,6 +51,7 @@ public:
 	void clear();
     void clear(const T& t);
     const T& get(int x,int y) const;
+	T& get(int x,int y);
     void set(int x,int y,const T& t);
     bool remove(int x,int y);    
     void remove(const std::vector<GridPoint>& points);  
@@ -66,6 +70,7 @@ public:
     void shiftColumns(int startColumn);
     T& operator() (int x,int y);    
     const bool isFree(int x,int y) const;
+	bool isColumnEmpty(int col);
     void dropRow(int x);
     void dropCell(int x,int y);
 	void dropCells(std::vector<DroppedCell>& droppedCells);
@@ -135,6 +140,15 @@ template<class T>
 inline const T& Grid<T>::get(int x,int y) const {
     int idx = getIndex(x,y);
     return m_Data[idx].data;
+}
+
+// ------------------------------------------------
+// Gets the object at given position
+// ------------------------------------------------
+template<class T>
+inline T& Grid<T>::get(int x,int y) {
+	int idx = getIndex(x,y);
+	return m_Data[idx].data;
 }
 
 // ------------------------------------------------
@@ -267,9 +281,14 @@ template<class T>
 inline void Grid<T>::copyColumn(int oldColumn, int newColumn) {
     for ( int y = 0; y < m_Height; ++y ) {
         int oldIndex = getIndex(oldColumn,y);
-        int newIndex = getIndex(newColumn,y);
-        m_Data[newIndex].data = m_Data[oldIndex].data;
-        m_Data[newIndex].used = true;
+		int newIndex = getIndex(newColumn,y);
+		if ( m_Data[oldIndex].used ) {			
+			m_Data[newIndex].data = m_Data[oldIndex].data;
+			m_Data[newIndex].used = true;
+		}
+		else {
+			m_Data[newIndex].used = false;
+		}
     }
 }
 
@@ -390,6 +409,20 @@ inline void Grid<T>::dropCells(std::vector<DroppedCell>& droppedCells) {
 	}
 }
 
+// -------------------------------------------------------
+// Is column empty
+// -------------------------------------------------------
+template<class T>
+bool Grid<T>::isColumnEmpty(int col) {
+	int count = 0;
+	for (int i = 0; i < m_Height; ++i ) {
+		if ( !isFree(col,i)) {
+			++count;
+		}
+	}
+	return count == 0;
+}
+
 // ------------------------------------------------
 // Remove grid points
 // ------------------------------------------------
@@ -399,6 +432,12 @@ inline void Grid<T>::remove(const std::vector<GridPoint>& points) {
         GridPoint gp = points[i];
         remove(gp.x,gp.y);
     }
+	int moved = 0;
+	for ( int i = 0; i < m_Width ; ++i ) {
+		if ( isColumnEmpty(i)) {
+			shiftColumns(i+1);
+		}
+	}
 }
 
 }

@@ -16,22 +16,22 @@ ds::mat3 operator * (const ds::mat3& m1,const ds::mat3& m2) {
 	return tmp;
 }
 
-ds::Vec2 operator * (const ds::mat3& m,const ds::Vec2& v) {
-	ds::Vec3 in(v.x,v.y,1.0f);
-	ds::Vec3 out = m * in;
-	return ds::Vec2(out.x,out.y);
+Vector2f operator * (const ds::mat3& m,const Vector2f& v) {
+	Vector3f in(v.x,v.y,1.0f);
+	Vector3f out = m * in;
+	return Vector2f(out.x,out.y);
 }
 
-ds::Vec3 operator * (const ds::mat3& m,const ds::Vec3& v) {
-	ds::Vec3 tmp;
+Vector3f operator * (const ds::mat3& m,const Vector3f& v) {
+	Vector3f tmp;
 	tmp.x = m._11 * v.x + m._12 * v.y + m._13 * v.z;
 	tmp.y = m._21 * v.x + m._22 * v.y + m._23 * v.z;
 	tmp.z = m._31 * v.x + m._32 * v.y + m._33 * v.z;
 	return tmp;
 }
 
-ds::Vec4 operator * (const ds::mat4& m,const ds::Vec4& v) {
-	ds::Vec4 tmp;
+Vector4f operator * (const ds::mat4& m,const Vector4f& v) {
+	Vector4f tmp;
 	tmp.x = m._11 * v.x + m._12 * v.y + m._13 * v.z + m._14 * v.w;
 	tmp.y = m._21 * v.x + m._22 * v.y + m._23 * v.z + m._24 * v.w;
 	tmp.z = m._31 * v.x + m._32 * v.y + m._33 * v.z + m._34 * v.w;
@@ -39,10 +39,10 @@ ds::Vec4 operator * (const ds::mat4& m,const ds::Vec4& v) {
 	return tmp;
 }
 
-ds::Vec3 operator * (const ds::mat4& m,const ds::Vec3& v) {
-	ds::Vec4 nv(v.x,v.y,v.z,1.0f);
-	ds::Vec4 tmp = m * nv;	
-	return ds::Vec3(tmp.x,tmp.y,tmp.z);
+Vector3f operator * (const ds::mat4& m,const Vector3f& v) {
+	Vector4f nv(v.x,v.y,v.z,1.0f);
+	Vector4f tmp = m * nv;	
+	return Vector3f(tmp.x,tmp.y,tmp.z);
 }
 
 ds::mat4 operator * (const ds::mat4& m1,const ds::mat4& m2) {
@@ -105,7 +105,7 @@ namespace matrix {
 		return m;
 	}
 
-	mat3 mat3Scale(const Vec2& pos) {
+	mat3 mat3Scale(const Vector2f& pos) {
 		mat3 tm (
 			pos.x,  0.0f, 0.0f,
 			 0.0f, pos.y, 0.0f,
@@ -116,7 +116,7 @@ namespace matrix {
 	// -------------------------------------------------------
 	// Translation matrix
 	// -------------------------------------------------------
-	mat3 mat3Transform(const Vec2& pos) {
+	mat3 mat3Transform(const Vector2f& pos) {
 		/*
 		mat3 tm (
 			1.0f,  0.0f,  0.0f,
@@ -185,18 +185,18 @@ namespace matrix {
 		return tmp;
 	}
 
-	Vec3 mul(const mat3& m,const Vec3& v) {
+	Vector3f mul(const mat3& m,const Vector3f& v) {
 		float m0 = m._11 * v.x + m._12 * v.y + m._13 * v.z;
 		float m1 = m._21 * v.x + m._22 * v.y + m._23 * v.z;
 		float m2 = m._31 * v.x + m._32 * v.y + m._33 * v.z;
-		return Vec3(m0,m1,m2);
+		return Vector3f(m0,m1,m2);
 	}
 
-	Vec2 mul(const mat3& m,const Vec2& v) {
+	Vector2f mul(const mat3& m,const Vector2f& v) {
 		// we have to flip y because 0,0 is at the top left corner
-		Vec3 tmp(v.x,-v.y,1.0f);
-		Vec3 res = mul(m,tmp);
-		return Vec2(res.x,res.y);
+		Vector3f tmp(v.x,-v.y,1.0f);
+		Vector3f res = mul(m,tmp);
+		return Vector2f(res.x,res.y);
 	}
 
 
@@ -210,7 +210,7 @@ namespace matrix {
 		return m;
 	}
 
-	mat4 mat4Rotation(const Vec3& v,float angle) {
+	mat4 mat4Rotation(const Vector3f& v,float angle) {
 		float L = (v.x * v.x + v.y * v.y + v.z * v.z);
 		float u2 = v.x * v.x;
 		float v2 = v.y * v.y;
@@ -269,15 +269,15 @@ namespace matrix {
 		return tmp;
 	}
 
-	mat4 mat4LookAtLH(const Vec3& eye,const Vec3& lookAt,const Vec3& up) {
+	mat4 mat4LookAtLH(const Vector3f& eye,const Vector3f& lookAt,const Vector3f& up) {
 		//mat4 tmp = m4identity();
 		// see msdn.microsoft.com/de-de/library/windows/desktop/bb205342(v=vs.85).aspx
-		Vec3 zAxis = vector::normalize(lookAt - eye);
-		Vec3 xAxis = vector::normalize(vector::cross(up,zAxis));
-		Vec3 yAxis = vector::cross(zAxis,xAxis);
-		float dox = -vector::dot(xAxis,eye);
-		float doy = -vector::dot(yAxis,eye);
-		float doz = -vector::dot(zAxis,eye);
+		Vector3f zAxis = normalize(lookAt - eye);
+		Vector3f xAxis = normalize(cross(up,zAxis));
+		Vector3f yAxis = cross(zAxis,xAxis);
+		float dox = -dot(xAxis,eye);
+		float doy = -dot(yAxis,eye);
+		float doz = -dot(zAxis,eye);
 		mat4 tmp (
 		    xAxis.x, yAxis.x, zAxis.x, 0.0f,
 			xAxis.y, yAxis.y, zAxis.y, 0.0f,
@@ -300,7 +300,7 @@ namespace matrix {
 	// -------------------------------------------------------
 	// Translation matrix
 	// -------------------------------------------------------
-	mat4 mat4Transform(const Vec3& pos) {
+	mat4 mat4Transform(const Vector3f& pos) {
 		mat4 tm (
 			 1.0f,  0.0f,  0.0f, 0.0f,
 			 0.0f,  1.0f,  0.0f, 0.0f,
@@ -444,23 +444,23 @@ namespace matrix {
 		return tmp;
 	}
 
-	mat3 rotationAlign(const Vec2& d) {
-		return rotation(Vec3(d.x,d.y,0.0f),Vec3(1,0,0));
+	mat3 rotationAlign(const Vector2f& d) {
+		return rotation(Vector3f(d.x,d.y,0.0f),Vector3f(1,0,0));
 	}
 
-	mat3 rotationAlign(const Vec3& d) {
-		return rotation(d,Vec3(1,0,0));
+	mat3 rotationAlign(const Vector3f& d) {
+		return rotation(d,Vector3f(1,0,0));
 	}
 
-	mat3 rotation(const Vec3& d,const Vec3& z) {
-		Vec3 dn = vector::normalize(d);
-		Vec3 axi = vector::cross( z, dn );
-		float si  = vector::length( axi );
-		float co  = vector::dot( z, dn );
+	mat3 rotation(const Vector3f& d,const Vector3f& z) {
+		Vector3f dn = normalize(d);
+		Vector3f axi = cross( z, dn );
+		float si  = length( axi );
+		float co  = dot( z, dn );
 		return rotationAxisCosSin( axi/si, co, si );
 	}
 
-	mat3 rotationAxisCosSin(const Vec3& v,float co,float si ) {
+	mat3 rotationAxisCosSin(const Vector3f& v,float co,float si ) {
 		float ic = 1.0f - co;
 		return mat3( v.x*v.x*ic + co,       v.y*v.x*ic - si*v.z,    v.z*v.x*ic + si*v.y,
 			v.x*v.y*ic + si*v.z,   v.y*v.y*ic + co,        v.z*v.y*ic - si*v.x,

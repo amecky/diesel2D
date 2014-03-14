@@ -5,10 +5,10 @@ namespace ds {
 
 	namespace shader {
 
-		bool setVec3(Shader& shader,const char* name,const Vec3& v) {
+		bool setVector3f(Shader& shader,const char* name,const Vector3f& v) {
 			D3DXHANDLE handle = findHandle(shader,name);
 			if ( handle != 0 ) {
-				shader.m_FX->SetValue(handle,&v,sizeof(Vec3));
+				shader.m_FX->SetValue(handle,&v,sizeof(Vector3f));
 				return true;
 			}
 			return false;
@@ -140,7 +140,9 @@ namespace ds {
 				"}\r\n";
 			int ret = renderer->createShaderFromText(g_strBuffer,"PTCTech");
 			Shader sh = renderer->getShader(ret);
-			shader::setTexture(sh,"gTex",renderer,textureId);
+			if ( textureId != -1 ) {
+				shader::setTexture(sh,"gTex",renderer,textureId);
+			}
 			return ret;
 		}
 

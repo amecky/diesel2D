@@ -21,8 +21,8 @@ public:
 	uint32 readString(String& str) const;
 	char readChar() const;
 	float readFloat() const;
-	Vec2 readVec2() const;
-	Vec3 readVec3() const;
+	Vector2f readVector2f() const;
+	Vector3f readVector3f() const;
 	ulong readULong() const;
 	Color readColor() const;
 	uchar readUChar() const;

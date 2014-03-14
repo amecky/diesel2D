@@ -1,18 +1,20 @@
 #pragma once
 #include "..\math\math_types.h"
 #include "..\utils\Color.h"
-#include "..\math\FloatArray.h"
+#include <IPath.h>
 
 enum ParamType {
 	PT_FLOAT,
 	PT_INT,
 	PT_UINT,
-	PT_VEC2,
-	PT_VEC3,
+	PT_Vector2f,
+	PT_Vector3f,
 	PT_RECT,
 	PT_COLOR,
 	PT_ID_STRING,
-	PT_FLOAT_ARRAY
+	PT_FLOAT_ARRAY,
+	PT_VEC2_PATH,
+	PT_COLOR_PATH
 };
 
 class Param {
@@ -48,12 +50,14 @@ private:
 	T* m_Value;
 };
 
-typedef BaseParam<ds::Vec2,PT_VEC2> Vec2Param;
-typedef BaseParam<ds::Vec3,PT_VEC3> Vec3Param;
+typedef BaseParam<Vector2f,PT_Vector2f> Vector2fParam;
+typedef BaseParam<Vector3f,PT_Vector3f> Vector3fParam;
 typedef BaseParam<float,PT_FLOAT> FloatParam;
 typedef BaseParam<uint32,PT_UINT> UIntParam;
 typedef BaseParam<int,PT_INT> IntParam;
 typedef BaseParam<ds::Color,PT_COLOR> ColorParam;
 typedef BaseParam<ds::Rect,PT_RECT> RectParam;
 typedef BaseParam<IdString,PT_ID_STRING> IdStringParam;
-typedef BaseParam<ds::FloatArray,PT_FLOAT_ARRAY> FloatArrayParam;
+typedef BaseParam<IPath<20,float>,PT_FLOAT_ARRAY> FloatArrayParam;
+typedef BaseParam<IPath<20,Vector2f>,PT_VEC2_PATH> Vec2PathParam;
+typedef BaseParam<IPath<20,ds::Color>,PT_COLOR_PATH> ColorPathParam;

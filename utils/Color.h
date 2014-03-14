@@ -25,6 +25,13 @@ public:
 	static const Color GRAY40;
 	static const Color GRAY25;
 	static const Color GRAY65;
+
+	void operator = (const D3DXCOLOR& v) {
+		r = v.r;
+		g = v.g;
+		b = v.b;
+		a = v.a;
+	}
 };
 
 inline Color::Color(const D3DCOLORVALUE& v) {
@@ -98,6 +105,14 @@ namespace color {
 
 }
 
+//ds::Color operator *= (ds::Color& u,const ds::Color& other);
+//ds::Color operator += (ds::Color& u,ds::Color other);
+//ds::Color operator + (const ds::Color& u,const ds::Color& other);
+//ds::Color operator * (const ds::Color& u,const ds::Color& other);
+//ds::Color operator * (const ds::Color& u,float v);
+
 };
+
+ds::Color catmullRom(float t,const ds::Color& v0,const ds::Color& v1,const ds::Color& v2,const ds::Color& v3);
 
 

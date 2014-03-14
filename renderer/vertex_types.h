@@ -1,6 +1,7 @@
 #pragma once
 #include "..\utils\Color.h"
 #include "..\math\math_types.h"
+#include "Vector.h"
 
 namespace ds {
 
@@ -40,7 +41,7 @@ namespace ds {
 			color = clr;
 		}
 
-		TTCVertex(const Vec3& pos,const Vec2& texcoords) {
+		TTCVertex(const Vector3f& pos,const Vector2f& texcoords) {
 			x = pos.x;
 			y = pos.y;
 			z = pos.z;
@@ -50,7 +51,7 @@ namespace ds {
 			color = Color(1.0f,1.0f,1.0f,1.0f);
 		}
 
-		TTCVertex(const Vec3& pos,const Vec2& texcoords,const Color& clr) {
+		TTCVertex(const Vector3f& pos,const Vector2f& texcoords,const Color& clr) {
 			x = pos.x;
 			y = pos.y;
 			z = pos.z;
@@ -67,12 +68,12 @@ namespace ds {
 	struct PTCVertex {
 
 		float x,y,z;
-		Vec2 uv;
+		Vector2f uv;
 		Color color;
 
 		PTCVertex() {
 			x = y = z = 0.0f;
-			uv = Vec2(0,0);//tu = tv = 0.0f;
+			uv = Vector2f(0,0);//tu = tv = 0.0f;
 			color = Color(1.0f,1.0f,1.0f,1.0f);
 		}
 
@@ -82,11 +83,11 @@ namespace ds {
 			z = zp;
 			//tu = u;
 			//tv = v;
-			uv = Vec2(u,v);	
+			uv = Vector2f(u,v);	
 			color = clr;
 		}
 
-		PTCVertex(const Vec3& pos,const Vec2& texcoords,const Color& clr = Color::WHITE) {
+		PTCVertex(const Vector3f& pos,const Vector2f& texcoords,const Color& clr = Color::WHITE) {
 			x = pos.x;
 			y = pos.y;
 			z = pos.z;
@@ -111,7 +112,7 @@ namespace ds {
 		float rotation;
 		float dimX;
 		float dimY;
-		Vec2 center;
+		Vector2f center;
 		TTCVertex v1;
 		TTCVertex v2;
 		TTCVertex v3;
@@ -123,17 +124,17 @@ namespace ds {
 	// -------------------------------------------------------
 	struct Surface {
 
-		Vec3 v[4];		
-		Vec2 uv[4];		
-		Vec3 n;
-		Vec3 t;
-		Vec3 b;
+		Vector3f v[4];		
+		Vector2f uv[4];		
+		Vector3f n;
+		Vector3f t;
+		Vector3f b;
 
 		Surface() {
 
 		}
 
-		Surface(const Vec3& cv1,const Vec3& cv2,const Vec3& cv3,const Vec3& cv4,const Vec3& nn,const Vec3& tt,const Vec3& bb,float ttu1,float ttv1,float ttu2,float ttv2) {
+		Surface(const Vector3f& cv1,const Vector3f& cv2,const Vector3f& cv3,const Vector3f& cv4,const Vector3f& nn,const Vector3f& tt,const Vector3f& bb,float ttu1,float ttv1,float ttu2,float ttv2) {
 			v[0] = cv1;
 			v[1] = cv2;
 			v[2] = cv3;
@@ -147,7 +148,7 @@ namespace ds {
 			b = bb;
 		}
 
-		Surface(const Vec3& cv1,const Vec3& cv2,const Vec3& cv3,const Vec3& cv4,const Vec3& nn,const Vec3& tt,const Vec3& bb,const Vec2& _uv1,const Vec2& _uv2,const Vec2& _uv3,const Vec2& _uv4) {
+		Surface(const Vector3f& cv1,const Vector3f& cv2,const Vector3f& cv3,const Vector3f& cv4,const Vector3f& nn,const Vector3f& tt,const Vector3f& bb,const Vector2f& _uv1,const Vector2f& _uv2,const Vector2f& _uv3,const Vector2f& _uv4) {
 			v[0] = cv1;
 			v[1] = cv2;
 			v[2] = cv3;

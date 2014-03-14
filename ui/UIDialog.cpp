@@ -11,12 +11,12 @@ namespace ds {
 // =======================================================
 // The dialog implementation
 // =======================================================
-UIDialog::UIDialog(const char* dialogName,const char* materialName,const char* bitmapFont,const char* layerName,const Vec2& pos,int gridSizeX,int gridSizeY) 
+UIDialog::UIDialog(const char* dialogName,const char* materialName,const char* bitmapFont,const char* layerName,const Vector2f& pos,int gridSizeX,int gridSizeY) 
 	: Node(dialogName,materialName,true)
 	, m_BasePos(pos) 
 	, m_ShowHeader(false)
 	, m_MinSize(-1.0f)
-	, m_MouseOffset(Vec2(0,0))
+	, m_MouseOffset(Vector2f(0,0))
 	, m_GridSizeX(gridSizeX) 
 	, m_GridSizeY(gridSizeY) {
 
@@ -26,7 +26,7 @@ UIDialog::UIDialog(const char* dialogName,const char* materialName,const char* b
 	m_Font = gEngine->getResourceManager().getBitmapFontByName(bitmapFont);
 	m_Active = true;	
 	m_Selected = 0;	
-	m_Size = Vec2(200,200);
+	m_Size = Vector2f(200,200);
 	m_Rect = Rect(0,0,256,256);
 	// grid layout
 	for ( uint32 y = 0; y < m_GridSizeY;++y ) {
@@ -51,7 +51,7 @@ UIDialog::~UIDialog(void) {
 //
 // -----------------------------------------------
 void UIDialog::setHeader(const char* header) {
-	Vec2 hp = m_BasePos;
+	Vector2f hp = m_BasePos;
 	hp.add(8.0f,4.0f);
 	//m_TextNode->setText("DialogHeader",hp,ds::Color(1.0f,1.0f,1.0f,1.0f),"%s",header);
 	m_ShowHeader = true;
@@ -89,10 +89,10 @@ void UIDialog::update(float elapsedTime) {
 //
 // -----------------------------------------------
 void UIDialog::setPosition(int x,int y) {
-	m_BasePos = Vec2(x,y);	
+	m_BasePos = Vector2f(x,y);	
 	resize(m_MinSize);
 	if ( m_ShowHeader ) {
-		Vec2 hp = m_BasePos;
+		Vector2f hp = m_BasePos;
 		hp.add(8.0f,4.0f);
 		//TextLine* tl = m_TextNode->getText("DialogHeader");
 		//tl->pos = hp;
@@ -116,7 +116,7 @@ void UIDialog::OnChar(char ascii,unsigned int keyState) {
 void UIDialog::OnButtonUp(int button) {
 	if ( m_Active ) {
 		m_Selected = 0;
-		Vec2 mousePos = Vec2(0,0);
+		Vector2f mousePos = Vector2f(0,0);
 		mousePos.x = gEngine->getMousePosX() + m_MouseOffset.x;
 		mousePos.y = gEngine->getMousePosY() + m_MouseOffset.y;	
 		for ( size_t i = 0; i < m_Items.num(); ++i ) {
@@ -270,10 +270,10 @@ void UIDialog::sendEvent(const IUIEvent& event) {
 // -----------------------------------------------
 //
 // -----------------------------------------------
-Vec2 UIDialog::getAbsPos(const Vec2& relPos) {
+Vector2f UIDialog::getAbsPos(const Vector2f& relPos) {
 	float x = m_BasePos.x + relPos.x;
 	float y = m_BasePos.y + relPos.y;
-	return Vec2(x,y);
+	return Vector2f(x,y);
 }
 
 // =================================================
@@ -290,7 +290,7 @@ void UIDialog::setCellOwner(uint32 id,int gx,int gy,UIControlAlignment alignment
 // -----------------------------------------------
 //
 // -----------------------------------------------
-Vec2& UIDialog::resize(float minSize) {
+Vector2f& UIDialog::resize(float minSize) {
 	m_MinSize = minSize;
 	// list to store the maximum size of each column
 	List<float> xdim;
@@ -326,7 +326,7 @@ Vec2& UIDialog::resize(float minSize) {
 					py += m_HeaderSize.y;
 					py += 8.0f;
 				}
-				cell->cellPos = Vec2(px,py);
+				cell->cellPos = Vector2f(px,py);
 			}
 		}
 	}

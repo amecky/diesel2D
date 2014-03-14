@@ -128,7 +128,7 @@ void PAKWriter::writeFloat(float value) {
 // ----------------------------------------------
 //
 // ----------------------------------------------
-void PAKWriter::writeVec2(const Vec2& v) {
+void PAKWriter::writeVector2f(const Vector2f& v) {
 	writeFloat(v.x);
 	writeFloat(v.y);
 }
@@ -136,7 +136,7 @@ void PAKWriter::writeVec2(const Vec2& v) {
 // ----------------------------------------------
 //
 // ----------------------------------------------
-void PAKWriter::writeVec3(const Vec3& v) {
+void PAKWriter::writeVector3f(const Vector3f& v) {
 	writeFloat(v.x);
 	writeFloat(v.y);
 	writeFloat(v.z);

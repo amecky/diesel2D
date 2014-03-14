@@ -6,14 +6,14 @@ namespace ds {
 // The checkbox UI control implementation
 // =======================================================
 UICheckBox::UICheckBox(UIDialog *dialog,uint32 ID,const std::string& label) : UIControl(dialog,ID) , m_Label(label) {
-	//m_Dialog->getTextNode()->setText("Label"+string::to_string(m_ID),Vec2(0,0),Color(1.0f,1.0f,1.0f,1.0f),"%s",label.c_str());
+	//m_Dialog->getTextNode()->setText("Label"+string::to_string(m_ID),Vector2f(0,0),Color(1.0f,1.0f,1.0f,1.0f),"%s",label.c_str());
 	//m_Dialog->getTextNode()->calculateSize("Label"+string::to_string(m_ID),m_CalculatedSize);
 	m_Value = false;
-	m_Dimension = Vec2(m_CalculatedSize.x + 28.0f,14.0f);
+	m_Dimension = Vector2f(m_CalculatedSize.x + 28.0f,14.0f);
 }
 
-void UICheckBox::align(const Vec2& gridPosition) {
-	//m_Dialog->getTextNode()->setText("Label"+string::to_string(m_ID),Vec2(gridPosition.x,gridPosition.y),Color(1.0f,1.0f,1.0f,1.0f),"%s",m_Label.c_str());
+void UICheckBox::align(const Vector2f& gridPosition) {
+	//m_Dialog->getTextNode()->setText("Label"+string::to_string(m_ID),Vector2f(gridPosition.x,gridPosition.y),Color(1.0f,1.0f,1.0f,1.0f),"%s",m_Label.c_str());
 	m_BoxPosition.x = gridPosition.x + m_CalculatedSize.x;
 	m_BoxPosition.x += 6.0f;
 	m_BoxPosition.y = gridPosition.y;
@@ -28,7 +28,7 @@ void UICheckBox::setValue(bool value) {
 	m_Value = value;	
 }
 
-bool UICheckBox::isSelected(const Vec2& mousePos) {
+bool UICheckBox::isSelected(const Vector2f& mousePos) {
 	Rect br = m_BoundingBox;	
 	if ( mousePos.x >= br.left && mousePos.x <= br.right && mousePos.y >= br.top && mousePos.y <= br.bottom ) {
 		if ( m_Value ) {
@@ -42,7 +42,7 @@ bool UICheckBox::isSelected(const Vec2& mousePos) {
 	return false;
 }
 
-void UICheckBox::fillBuffer(const Vec2& basePosition,UIBuffer& buffer) {
+void UICheckBox::fillBuffer(const Vector2f& basePosition,UIBuffer& buffer) {
 	/*
 	if ( m_Value ) {
 		buffer.add(m_BoxPosition.x,m_BoxPosition.y,13.0f,14.0f,Rect(0,390,13,14));

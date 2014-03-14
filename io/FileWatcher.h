@@ -26,6 +26,6 @@ private:
 	WatchList m_WatchList;
 };
 
-extern FileWatcher* gFileWatcher;
-
 }
+
+extern ds::FileWatcher* gFileWatcher;

@@ -10,7 +10,7 @@ namespace ds {
 // ---------------------------------------------------------------
 //
 // ---------------------------------------------------------------
-NewUIText::NewUIText(uint32 id,const Vec2& pos,const std::string& txt) : UIWidget(id) , m_Position(pos) {
+NewUIText::NewUIText(uint32 id,const Vector2f& pos,const std::string& txt) : UIWidget(id) , m_Position(pos) {
 	m_Text = txt;
 	for ( uint32 i = 0; i < 256;++i) {
 		m_CharMapping[i].supported = false;
@@ -44,8 +44,8 @@ void NewUIText::update(float elapsed) {
 
 }
 
-void NewUIText::fillBuffer(const Vec2& parentPosition,ScreenQuad& screenQuad) {
-	Vec2 absPos = parentPosition;
+void NewUIText::fillBuffer(const Vector2f& parentPosition,ScreenQuad& screenQuad) {
+	Vector2f absPos = parentPosition;
 	absPos += m_Position;
 	uint32 length = m_Text.length();
 	for ( uint32 i = 0; i < length; ++i ) {
@@ -66,7 +66,7 @@ void NewUIText::fillBuffer(const Vec2& parentPosition,ScreenQuad& screenQuad) {
 // ---------------------------------------------------------------
 //
 // ---------------------------------------------------------------
-NewUILabel::NewUILabel(uint32 id,const Vec2& pos,const std::string& text) : UIWidget(id) , m_Position(pos) {
+NewUILabel::NewUILabel(uint32 id,const Vector2f& pos,const std::string& text) : UIWidget(id) , m_Position(pos) {
 	m_Text = new NewUIText(id,pos,text);
 }
 
@@ -74,8 +74,8 @@ void NewUILabel::update(float elapsed) {
 
 }
 
-void NewUILabel::fillBuffer(const Vec2& parentPosition,ScreenQuad& screenQuad) {
-	Vec2 absPos = parentPosition;
+void NewUILabel::fillBuffer(const Vector2f& parentPosition,ScreenQuad& screenQuad) {
+	Vector2f absPos = parentPosition;
 	absPos += m_Position;
 	m_Text->fillBuffer(absPos,screenQuad);
 }
@@ -83,7 +83,7 @@ void NewUILabel::fillBuffer(const Vec2& parentPosition,ScreenQuad& screenQuad) {
 // ---------------------------------------------------------------
 //
 // ---------------------------------------------------------------
-NewUITextbox::NewUITextbox(uint32 id,const Vec2& pos,uint32 characters) : UIWidget(id) , m_Position(pos) {
+NewUITextbox::NewUITextbox(uint32 id,const Vector2f& pos,uint32 characters) : UIWidget(id) , m_Position(pos) {
 	m_Size = CHARACTER_WIDTH * characters;
 	m_Rect = Rect(0,260,m_Size,25);
 }
@@ -92,8 +92,8 @@ void NewUITextbox::update(float elapsed) {
 
 }
 
-void NewUITextbox::fillBuffer(const Vec2& parentPosition,ScreenQuad& screenQuad) {
-	Vec2 absPos = parentPosition;
+void NewUITextbox::fillBuffer(const Vector2f& parentPosition,ScreenQuad& screenQuad) {
+	Vector2f absPos = parentPosition;
 	absPos += m_Position;
 	screenQuad.add(absPos.x,absPos.y,m_Size,25.0f,m_Rect);
 }
@@ -103,8 +103,8 @@ void NewUITextbox::fillBuffer(const Vec2& parentPosition,ScreenQuad& screenQuad)
 // ---------------------------------------------------------------
 NewUIDialog::NewUIDialog(const char* name,const char* materialName)
 	: ScreenQuad(name,materialName,512,true) {
-	m_Position = Vec2(10,10);
-	m_Size = Vec2(200,200);
+	m_Position = Vector2f(10,10);
+	m_Size = Vector2f(200,200);
 	m_Rect = Rect(0,0,256,256);
 }
 
@@ -118,11 +118,11 @@ void NewUIDialog::update(float elapsed) {
 	rebuild();
 }
 
-void NewUIDialog::addTextbox(const Vec2& pos) {
+void NewUIDialog::addTextbox(const Vector2f& pos) {
 	m_Widgets.append(new NewUITextbox(1,pos));
 }
 
-void NewUIDialog::addLabel(uint32 id,const Vec2& pos,const std::string& text) {
+void NewUIDialog::addLabel(uint32 id,const Vector2f& pos,const std::string& text) {
 	m_Widgets.append(new NewUILabel(id,pos,text));
 }
 

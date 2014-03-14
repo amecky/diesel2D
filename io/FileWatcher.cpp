@@ -3,9 +3,9 @@
 #include "..\utils\Log.h"
 #include "..\utils\StringUtils.h"
 
-namespace ds {
+ds::FileWatcher* gFileWatcher;
 
-FileWatcher* gFileWatcher;
+namespace ds {
 
 FileWatcher::FileWatcher() {
 }
@@ -15,6 +15,7 @@ FileWatcher::~FileWatcher() {
 }
 
 void FileWatcher::update() {
+#ifdef DEBUG
 	for ( size_t i = 0; i < m_WatchList.size(); ++i ) {
 		FileWatch* watch = &m_WatchList[i];
 		if ( file::compareFileTime(watch->filename,watch->fileTime)) {
@@ -23,9 +24,11 @@ void FileWatcher::update() {
 			file::getFileTime(watch->filename,watch->fileTime);
 		}
 	}
+#endif
 }
 
 void FileWatcher::registerFile(const char* fileName,Serializer* serializer) {
+#ifdef DEBUG
 	LOGC(logINFO,"FileWatcher") << "Registering file " << fileName << " to be monitored";	
 	if ( !contains(fileName)) {
 		FileWatch watch;
@@ -36,6 +39,7 @@ void FileWatcher::registerFile(const char* fileName,Serializer* serializer) {
 		file::getFileTime(fileName,watch.fileTime);
 		m_WatchList.push_back(watch);
 	}
+#endif
 }
 
 bool FileWatcher::contains(const char* fileName) {

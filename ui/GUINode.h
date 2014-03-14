@@ -23,7 +23,7 @@ namespace ds {
 typedef std::vector<GUIControl*> Children;
 
 public:
-	GUIControl(uint32 index,GUIControl* parent,SimpleQuadBuffer* buffer,const Vec2& position) 
+	GUIControl(uint32 index,GUIControl* parent,SimpleQuadBuffer* buffer,const Vector2f& position) 
 		: m_CtrlIndex(index) , m_Parent(parent) , m_Buffer(buffer) , m_Dimension(0,0) , m_Position(position) {}
 	virtual ~GUIControl() {}
 	void add(GUIControl* control) {
@@ -32,17 +32,17 @@ public:
 	const bool hasChildren() const {
 		return !m_Children.empty();
 	}
-	const Vec2& getDimension() const {
+	const Vector2f& getDimension() const {
 		return m_Dimension;
 	}
-	const Vec2& getPosition() {
+	const Vector2f& getPosition() {
 		return m_Position;
 	}
 	virtual void setColor(const Color& color) {}
 	const uint32 getIndex() const {
 		return m_CtrlIndex;
 	}
-	void find(const Vec2& pos,GUIControl* control,int& index,bool& found);
+	void find(const Vector2f& pos,GUIControl* control,int& index,bool& found);
 	bool operator == (const GUIControl* ctrl);
 	bool operator != (const GUIControl* ctrl);
 	GUIControl* getParent() {
@@ -55,16 +55,16 @@ public:
 		LOG(logINFO) << "Control " << m_CtrlIndex << " mouse out";
 	}
 protected:
-	bool isInside(const Vec2& pos);
-	void updatePosition(const Vec2& pos) {
-		Vec2 np = pos;
+	bool isInside(const Vector2f& pos);
+	void updatePosition(const Vector2f& pos) {
+		Vector2f np = pos;
 		if ( m_Parent != 0 ) {
 			np += m_Parent->getPosition();
 		}
 		m_Position = np;
 	}
-	Vec2 m_Position;
-	Vec2 m_Dimension;
+	Vector2f m_Position;
+	Vector2f m_Dimension;
 	GUIControl* m_Parent;
 	SimpleQuadBuffer* m_Buffer;
 private:
@@ -79,8 +79,8 @@ private:
 class GUIWindow : public GUIControl {
 
 public:
-	GUIWindow(uint32 index,GUIControl* parent,SimpleQuadBuffer* buffer,const Vec2& pos,const Vec2& size,const Rect& textureRect) : GUIControl(index,parent,buffer,pos) {
-		m_Index = buffer->create(size.x,size.y,Vec2(0,0),textureRect,1024.0f);
+	GUIWindow(uint32 index,GUIControl* parent,SimpleQuadBuffer* buffer,const Vector2f& pos,const Vector2f& size,const Rect& textureRect) : GUIControl(index,parent,buffer,pos) {
+		m_Index = buffer->create(size.x,size.y,Vector2f(0,0),textureRect,1024.0f);
 		updatePosition(pos);
 		buffer->update(m_Index,m_Position);
 		m_Dimension = size;
@@ -97,8 +97,8 @@ private:
 class GUIImage : public GUIControl {
 
 public:
-	GUIImage(uint32 index,GUIControl* parent,SimpleQuadBuffer* buffer,const Vec2& pos,const Vec2& size,const Rect& textureRect) : GUIControl(index,parent,buffer,pos) {
-		m_Index = buffer->create(size.x,size.y,Vec2(0,0),textureRect,1024.0f);
+	GUIImage(uint32 index,GUIControl* parent,SimpleQuadBuffer* buffer,const Vector2f& pos,const Vector2f& size,const Rect& textureRect) : GUIControl(index,parent,buffer,pos) {
+		m_Index = buffer->create(size.x,size.y,Vector2f(0,0),textureRect,1024.0f);
 		updatePosition(pos);
 		m_Dimension = size;
 		buffer->update(m_Index,m_Position);
@@ -118,11 +118,11 @@ private:
 class GUIButton : public GUIControl {
 
 public:
-	GUIButton(uint32 index,GUIControl* parent,SimpleQuadBuffer* buffer,const Vec2& pos,const Rect& textureRect) : GUIControl(index,parent,buffer,pos) {
-		m_Index = buffer->create(textureRect.width(),textureRect.height(),Vec2(0,0),textureRect,1024.0f);
+	GUIButton(uint32 index,GUIControl* parent,SimpleQuadBuffer* buffer,const Vector2f& pos,const Rect& textureRect) : GUIControl(index,parent,buffer,pos) {
+		m_Index = buffer->create(textureRect.width(),textureRect.height(),Vector2f(0,0),textureRect,1024.0f);
 		updatePosition(pos);
 		buffer->update(m_Index,m_Position);
-		m_Dimension = Vec2(textureRect.width(),textureRect.height());
+		m_Dimension = Vector2f(textureRect.width(),textureRect.height());
 	}
 	virtual ~GUIButton() {}
 private:
@@ -144,7 +144,7 @@ struct Char {
 typedef std::vector<Char> Chars;
 
 public:
-	GUILabel(uint32 index,GUIControl* parent,SimpleQuadBuffer* buffer,const Vec2& pos,const std::string& text,BitmapFont* bitmapFont) 
+	GUILabel(uint32 index,GUIControl* parent,SimpleQuadBuffer* buffer,const Vector2f& pos,const std::string& text,BitmapFont* bitmapFont) 
 		: GUIControl(index,parent,buffer,pos) , m_BitmapFont(bitmapFont) , m_Text(text) {
 		float padding = 0.0f;
 		float scale = 1.0f;
@@ -177,14 +177,14 @@ public:
 	GUINode(const char* name,const char* material,const char* bitmapFont);
 	virtual ~GUINode(void) {}
 	// creates a new button
-	//GUIButton* createButton(GUIControl* parent,const Vec2& pos,const Rect& textureRect);
+	//GUIButton* createButton(GUIControl* parent,const Vector2f& pos,const Rect& textureRect);
 	// creates new window
-	//GUIWindow* createWindow(GUIControl* parent,const Vec2& pos,const Vec2& size,const Rect& textureRect);
-	GCID createImage(GCID parent,const Vec2& pos,const Vec2& size,const Rect& textureRect);
+	//GUIWindow* createWindow(GUIControl* parent,const Vector2f& pos,const Vector2f& size,const Rect& textureRect);
+	GCID createImage(GCID parent,const Vector2f& pos,const Vector2f& size,const Rect& textureRect);
 	// creates new image
-	//GUIImage* createImage(GUIControl* parent,const Vec2& pos,const Vec2& size,const Rect& textureRect);
+	//GUIImage* createImage(GUIControl* parent,const Vector2f& pos,const Vector2f& size,const Rect& textureRect);
 	// creates new label
-	//GUILabel* createLabel(GUIControl* parent,const Vec2& pos,const std::string& text);
+	//GUILabel* createLabel(GUIControl* parent,const Vector2f& pos,const std::string& text);
 	// update
 	void update(float elapsed);
 	// these methods just redirect directly to the buffer

@@ -7,9 +7,51 @@
 //
 // ---------------------------------------------
 
+Vector2f rotate(float angle,float velocity) {
+	float vx = cos(angle) * velocity;
+	float vy = sin(angle) * velocity;
+	return Vector2f(vx,vy);
+}
+
 namespace ds {
 
 	namespace math {
+
+		// http://allenchou.net/2014/02/game-math-faster-sine-cosine-with-polynomial-curves/
+		float hill(float x)	{
+			const float a0 = 1.0f;
+			const float a2 = 2.0f / PI - 12.0f / (PI * PI);
+			const float a3 = 16.0f / (PI * PI * PI) - 4.0f / (PI * PI);
+			const float xx = x * x;
+			const float xxx = xx * x;
+			return a0 + a2 * xx + a3 * xxx;
+		}
+
+		float fastSin(float x) {
+			// wrap x within [0, TWO_PI)
+			const float a = x * TWO_PI_INV;
+			x -= static_cast<int>(a) * TWO_PI;
+			if (x < 0.0f)
+				x += TWO_PI;
+
+			// 4 pieces of hills
+			if (x < HALF_PI)
+				return hill(HALF_PI - x);
+			else if (x < PI)
+				return hill(x - HALF_PI);
+			else if (x < 3.0f * HALF_PI)
+				return -hill(3.0f * HALF_PI - x);
+			else
+				return -hill(x - 3.0f * HALF_PI);
+		}
+
+		float fastCos(float x) {
+			return fastSin(x + HALF_PI);
+		}
+
+
+
+		const Vector2f V2_RIGHT = Vector2f(1.0f,0.0f);
 
 	void clamp(int* value,int min,int max) {
 		if ( *value > max ) {
@@ -37,6 +79,12 @@ namespace ds {
 			return max;
 		}
 		return value;
+	}
+
+	void getTextureCoordinates(SpriteData* spriteData,const Rect& textureRect,int textureSize,bool useHalfTexel) {		
+		getTextureCoordinates(textureRect,textureSize,&spriteData->u1,&spriteData->v1,&spriteData->u2,&spriteData->v2,useHalfTexel);
+		spriteData->dimX = textureRect.width();
+		spriteData->dimY = textureRect.height();
 	}
 
 	void getTextureCoordinates(const Rect& textureRect,int textureSize,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel) {
@@ -86,13 +134,13 @@ namespace ds {
 		}
 	}
 
-	void transformMousePosToWorld(Vec3* vPickRayDir,Vec3* vPickRayOrig) {
+	void transformMousePosToWorld(Vector3f* vPickRayDir,Vector3f* vPickRayOrig) {
 		// Get the Pick ray from the mouse position
 		/*
 		Camera *camera = gEngine->getRenderer()->getCamera();
 		const D3DXMATRIX* pmatProj = &camera->getProjectionMatrix();
 
-		ds::Vec3 mp = ds::Vec3(0,0,0);
+		Vector3f mp = Vector3f(0,0,0);
 		mp.x = gEngine->getMousePosX();
 		mp.y = gEngine->getMousePosY();
 
@@ -170,13 +218,13 @@ namespace ds {
 	//
 	// [in] angle - angle in degrees
 	// [in] velocity - the velocity
-	// [out] Vec2 - a 2D vector containing the velocity
+	// [out] Vector2f - a 2D vector containing the velocity
 	// -------------------------------------------------------
 
-	Vec2 getRadialVelocity(float angle,float velocity) {
+	Vector2f getRadialVelocity(float angle,float velocity) {
 		float vx = (float)cos(DEGTORAD(angle))*velocity;
 		float vy = (float)sin(DEGTORAD(angle))*velocity;
-		return Vec2(vx,vy);
+		return Vector2f(vx,vy);
 	}
 
 	float getAngle(float x1,float y1,float x2,float y2) {
@@ -186,24 +234,24 @@ namespace ds {
 		return (float)ang;
 	}
 
-	float getAngle(const Vec2& v1,const Vec2& v2) {	
+	float getAngle(const Vector2f& v1,const Vector2f& v2) {	
 		if ( v1 != v2 ) {
-			Vec2 vn1 = vector::normalize(v1);
-			Vec2 vn2 = vector::normalize(v2);
+			Vector2f vn1 = normalize(v1);
+			Vector2f vn2 = normalize(v2);
 			//LOG(logINFO) << "vn1 " << DBG_V2(vn1) << " vn2 " << DBG_V2(vn2);
-			float dot = vector::dot(vn1,vn2);		
-			//LOG(logINFO) << "dot " << dot;
-			if ( dot < -1.0f ) {
-				dot = -1.0f;
+			float dt = dot(vn1,vn2);		
+			//LOG(logINFO) << "dot " << dt;
+			if ( dt < -1.0f ) {
+				dt = -1.0f;
 			}
-			if ( dot > 1.0f ) {
-				dot = 1.0f;
+			if ( dt > 1.0f ) {
+				dt = 1.0f;
 			}
-			float tmp = acos(dot);
+			float tmp = acos(dt);
 			//LOG(logINFO) << "acos " << RADTODEG(tmp);
-			float cross = vector::cross(vn1,vn2);
-			//LOG(logINFO) << "cross " << cross;
-			if ( cross < 0.0f ) {
+			float crs = cross(vn1,vn2);
+			//LOG(logINFO) << "cross " << crs;
+			if ( crs < 0.0f ) {
 				tmp = TWO_PI - tmp;
 			}
 			//LOG(logINFO) << "new acos " << RADTODEG(tmp);
@@ -214,29 +262,29 @@ namespace ds {
 		}
 	}
 
-	float getTargetAngle(const Vec2& v1,const Vec2& v2) {	
-		Vec2 diff = v2 - v1;
+	float getTargetAngle(const Vector2f& v1,const Vector2f& v2) {	
+		Vector2f diff = v2 - v1;
 		//LOG(logINFO) << "diff " << DBG_V2(diff);
-		float angle = getAngle(diff,V2_RIGHT);// + PI;// + D3DX_PI;
+		float angle = getAngle(V2_RIGHT,diff);// + PI;// + D3DX_PI;
 		if ( angle >= TWO_PI ) {
 			angle -= TWO_PI;
 		}
 		return angle;
 	}
 
-	Vec2 getDistantPosition(const Vec2& initialPosition,float angle,float radius) {
+	Vector2f getDistantPosition(const Vector2f& initialPosition,float angle,float radius) {
 		return getDistantPosition(initialPosition.x,initialPosition.y,angle,radius);
 	}
 
-	Vec2 getDistantPosition(float x,float y,float angle,float radius) {
-		Vec2 ret;
+	Vector2f getDistantPosition(float x,float y,float angle,float radius) {
+		Vector2f ret;
 		ret.x = x + cos(angle) * radius;
 		ret.y = y + sin(angle) * radius;
 		return ret;
 	}
 
-	Vec2 getTargetVelocity(const Vec2& targetPosition,const Vec2& currentPosition,float* angle,float vel) {
-		Vec2 diff = targetPosition - currentPosition;
+	Vector2f getTargetVelocity(const Vector2f& targetPosition,const Vector2f& currentPosition,float* angle,float vel) {
+		Vector2f diff = targetPosition - currentPosition;
 		*angle = getAngle(diff,V2_RIGHT);
 		if ( *angle < 0.0f ) {
 			*angle += 2.0f * D3DX_PI;
@@ -244,38 +292,38 @@ namespace ds {
 		float correctedAngle = reflect(*angle);
 		float vx = cos(correctedAngle) * vel;
 		float vy = sin(correctedAngle) * vel;
-		return Vec2(vx,vy);
+		return Vector2f(vx,vy);
 	}
 
-	void follow(const Vec2& targetPos,Vec2& newPos,float* angle,float distance,float add) {
-		Vec2 p = newPos;
-		Vec2 diff = targetPos - p;
+	void follow(const Vector2f& targetPos,Vector2f& newPos,float* angle,float dst,float add) {
+		Vector2f p = newPos;
+		Vector2f diff = targetPos - p;
 		//*angle = 2.0f * D3DX_PI - getAngle(diff,V2_RIGHT);
 		*angle = getAngle(diff,V2_RIGHT);
 		if ( *angle < 0.0f ) {
 			*angle += 2.0f * D3DX_PI;
 		}
-		float dist = vector::distance(targetPos,p);
-		if ( dist > distance ) {				
-			vector::addScaled(newPos,diff,add);
+		float dist = distance(targetPos,p);
+		if ( dist > dst ) {				
+			newPos += diff * add;
 		}
 	}
 
-	void followRelative(const Vec2& targetPos,Vec2& newPos,float* angle,float distance,float percentage) {
-		Vec2 p = newPos;
-		Vec2 diff = targetPos - p;
+	void followRelative(const Vector2f& targetPos,Vector2f& newPos,float* angle,float dst,float percentage) {
+		Vector2f p = newPos;
+		Vector2f diff = targetPos - p;
 		*angle = getAngle(diff,V2_RIGHT);
 		if ( *angle < 0.0f ) {
 			*angle += 2.0f * D3DX_PI;
 		}
-		float dist = vector::distance(targetPos,p);
-		if ( dist > distance ) {				
+		float dist = distance(targetPos,p);
+		if ( dist > dst ) {				
 			newPos.x = newPos.x + diff.x * percentage;
 			newPos.y = newPos.y + diff.y * percentage;		
 		}
 	}
 
-	void clipToRect(Vec2& newPos,const Rect& rect) {
+	void clipToRect(Vector2f& newPos,const Rect& rect) {
 		if ( newPos.x < rect.left ) {
 			newPos.x = rect.left;
 		}
@@ -290,7 +338,7 @@ namespace ds {
 		}
 	}
 
-	bool isOutside(Vec2& pos,const Rect& rect) {
+	bool isOutside(Vector2f& pos,const Rect& rect) {
 		bool ret = false;
 		if ( pos.x > rect.right ) {
 			ret = true;
@@ -328,7 +376,7 @@ namespace ds {
 		float r = t/max;
 		return r;
 	}
-
+	/*
 	void interpolateColor(const Color& firstColor,const Color& secondColor,float t,Color* outColor) {
 		float time = clamp(t);		
 		outColor->r = firstColor.r * (1.0f - time) + secondColor.r * time;
@@ -336,7 +384,7 @@ namespace ds {
 		outColor->b = firstColor.b * (1.0f - time) + secondColor.b * time;
 		outColor->a = firstColor.a * (1.0f - time) + secondColor.a * time;
 	}
-
+	*/
 	bool outside(float value,float min,float max) {
 		bool ret = false;
 		if ( value < min || value > max ) {
@@ -357,11 +405,11 @@ namespace ds {
 		// -------------------------------------------------------
 		// 
 		// -------------------------------------------------------
-		bool checkLineCircle(const Vec2& center, float radius,const Vec2& lineFrom,const Vec2& lineTo) {
-			Vec2 ac = center - lineFrom;
-			Vec2 ab = lineTo - lineFrom;
-			float ab2 = vector::dot(ab,ab);
-			float acab = vector::dot(ac,ab);
+		bool checkLineCircle(const Vector2f& center, float radius,const Vector2f& lineFrom,const Vector2f& lineTo) {
+			Vector2f ac = center - lineFrom;
+			Vector2f ab = lineTo - lineFrom;
+			float ab2 = dot(ab,ab);
+			float acab = dot(ac,ab);
 			float t = acab / ab2;
 
 			if (t < 0)
@@ -369,8 +417,8 @@ namespace ds {
 			else if (t > 1)
 				t = 1;
 
-			Vec2 h = ((ab * t) + lineFrom) - center;
-			float h2 = vector::dot(h,h);
+			Vector2f h = ((ab * t) + lineFrom) - center;
+			float h2 = dot(h,h);
 
 			return (h2 <= (radius * radius));
 		}
@@ -403,9 +451,9 @@ namespace ds {
 		// -------------------------------------------------------
 		// Check if two circles overlap
 		// -------------------------------------------------------
-		bool checkCircleIntersection(const Vec2& p1,float r1,const Vec2& p2,float r2) {
-			Vec2 diff = p1 - p2;
-			float distance = vector::sqrLength(diff);
+		bool checkCircleIntersection(const Vector2f& p1,float r1,const Vector2f& p2,float r2) {
+			Vector2f diff = p1 - p2;
+			float distance = sqr_length(diff);
 			float rsqr = (r1 + r2) * (r1 + r2);			
 			if ( distance <= rsqr ) {
 				return true;
@@ -416,12 +464,12 @@ namespace ds {
 		// -------------------------------------------------------
 		// Check if two circles overlap
 		// -------------------------------------------------------
-		bool checkCircleIntersection(const Vec2& p1,float r1,const Vec2& p2,float r2,float* dist,Vec2& penVec) {
-			Vec2 diff = p1 - p2;
-			float distance = vector::sqrLength(diff);
+		bool checkCircleIntersection(const Vector2f& p1,float r1,const Vector2f& p2,float r2,float* dist,Vector2f& penVec) {
+			Vector2f diff = p1 - p2;
+			float distance = sqr_length(diff);
 			float rsqr = (r1 + r2) * (r1 + r2);
-			*dist = vector::length(diff) - (r1 + r2);
-			penVec = vector::normalize(diff);
+			*dist = length(diff) - (r1 + r2);
+			penVec = normalize(diff);
 			penVec = penVec * (*dist);
 			if ( distance <= rsqr ) {
 				return true;
@@ -429,13 +477,13 @@ namespace ds {
 			return false;
 		}
 
-		Vec2 getShiftVector(const Vec2& p1,float r1,const Vec2& p2,float r2) {
-			Vec2 diff = p1 - p2;
+		Vector2f getShiftVector(const Vector2f& p1,float r1,const Vector2f& p2,float r2) {
+			Vector2f diff = p1 - p2;
 			float maxSquareDistance = r1 + r2;
 			maxSquareDistance *= maxSquareDistance;
-			float squareDistance = vector::dot(diff, diff);
+			float squareDistance = dot(diff, diff);
 			if (squareDistance > maxSquareDistance) {
-				return ds::Vec2(0, 0);
+				return Vector2f(0, 0);
 			}
 			float distance = sqrtf(squareDistance);
 			if (distance > 0.0f ){
@@ -443,7 +491,7 @@ namespace ds {
 				diff.y /= distance;
 			}
 			else{
-				diff = ds::Vec2(1, 0);
+				diff = Vector2f(1, 0);
 			}
 
 			float scaleFactor = r1 + r2 - distance;
@@ -455,7 +503,7 @@ namespace ds {
 		}
 
 
-		void clamp(Vec2& v,float minX,float maxX,float minY,float maxY) {
+		void clamp(Vector2f& v,float minX,float maxX,float minY,float maxY) {
 			if ( v.x < minX ) {
 				v.x = minX;
 			}
@@ -470,24 +518,24 @@ namespace ds {
 			}
 		}
 
-		bool circleSweepTest(const Vec2& a0,const Vec2& a1,float ra,const Vec2& b0,const Vec2& b1,float rb,float* u0,float* u1) {
-			Vec2 va = a1 - a0;
+		bool circleSweepTest(const Vector2f& a0,const Vector2f& a1,float ra,const Vector2f& b0,const Vector2f& b1,float rb,float* u0,float* u1) {
+			Vector2f va = a1 - a0;
 			//vector from A0 to A1
-			Vec2 vb = b1 - b0;
+			Vector2f vb = b1 - b0;
 			//vector from B0 to B1
-			Vec2 AB = b0 - a0;
+			Vector2f AB = b0 - a0;
 			//vector from A0 to B0
-			Vec2 vab = vb - va;
+			Vector2f vab = vb - va;
 			//relative velocity (in normalized time)
 			float rab = ra + rb;
-			float a = vector::dot(vab,vab);
+			float a = dot(vab,vab);
 			//u*u coefficient
-			float b = 2.0f * vector::dot(vab,AB);
+			float b = 2.0f * dot(vab,AB);
 			//u coefficient
-			float c = vector::dot(AB,AB) - rab*rab;
+			float c = dot(AB,AB) - rab*rab;
 			//constant term
 			//check if they're currently overlapping
-			if( vector::dot(AB,AB) <= rab*rab )	{
+			if( dot(AB,AB) <= rab*rab )	{
 				*u0 = 0;
 				*u1 = 0;
 				return true;

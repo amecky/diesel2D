@@ -44,3 +44,45 @@ namespace color {
 }
 
 }
+
+ds::Color catmullRom(float t,const ds::Color& v0,const ds::Color& v1,const ds::Color& v2,const ds::Color& v3) {
+	return v0;
+}
+/*
+ds::Color operator *= (ds::Color& u,const ds::Color& other) {
+	u.r *= other.r;
+	u.g *= other.g;
+	u.b *= other.b;
+	u.a *= other.a;
+	return u;
+}
+
+ds::Color operator * (const ds::Color& u,const ds::Color& other) {
+	ds::Color ret = u;
+	ret *= other;
+	return ret;
+}
+
+ds::Color operator * (const ds::Color& u,float v) {
+	ds::Color ret = u;
+	ret.r *= v;
+	ret.g *= v;
+	ret.b *= v;
+	ret.a *= v;
+	return ret;
+}
+
+ds::Color operator += (ds::Color& u,ds::Color other) {
+	u.r += other.r;
+	u.g += other.g;
+	u.b += other.b;
+	u.a += other.a;
+	return u;
+}
+
+ds::Color operator + (const ds::Color& u,const ds::Color& other) {
+	ds::Color ret = u;
+	ret += other;
+	return ret;
+}
+*/

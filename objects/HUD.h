@@ -1,25 +1,32 @@
 #pragma once
-#include "World.h"
 #include "..\renderer\render_types.h"
 #include "..\renderer\Renderer.h"
-#include "..\nodes\SpriteBatch.h"
 #include "..\utils\GameTimer.h"
 #include "..\io\Serializer.h"
+#include "..\sprites\SpriteObject.h"
+#include "..\base\GameObject.h"
 
 namespace ds {
 
 const int MAX_COUNTER = 16;
 const int MAX_TIMER = 8;
+const int MAX_HUD_IMAGES = 64;
 
-class HUDEntity : public Entity , public Serializer{
+class HUD : public GameObject , public Serializer{
 
 struct HUDEntry {
 	uint32 id;
-	ds::Vec2 pos;
+	Vector2f pos;
 	ds::Color color;
 	float scale;
 	int flag;
-	std::vector<Sprite> sprites;
+	std::vector<SpriteObject> sprites;
+};
+
+struct HUDImage {
+	uint32 id;
+	int entryID;
+	int flag;
 };
 
 struct HUDText {
@@ -46,17 +53,16 @@ struct HUDCounter {
 };
 
 public:
-	HUDEntity();
-	virtual ~HUDEntity();
-	void init(ds::Renderer* renderer,int textureID,const char* fontName);
-	const EntityType getType() const {
-		return ET_HUD;
-	}
+	HUD();
+	virtual ~HUD();
+	void init() {}
+	void init(int textureID,const char* fontName);
+
 	void update(float elapsed);
-	void draw();
+	void render();
 	int addText(int x,int y,const std::string& txt,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
 			
-
+	void addImage(int id,int x,int y,const Rect& texturRect,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
 	/*
 	 * Add new counter
 	 *
@@ -120,15 +126,15 @@ public:
 	//! Reloads data from a json file
 	void reload(const char* fileName);
 private:	
-	int createEntry(const ds::Vec2& pos,float scale = 1.0f,const ds::Color& color = ds::Color::WHITE);
+	int createEntry(const Vector2f& pos,float scale = 1.0f,const ds::Color& color = ds::Color::WHITE);
 	void createText(HUDEntry* entry,const std::string& text,bool clear = true);
 
 	int getTextIndex(int id);
 	
-	BitmapFont m_Font;
-	ds::SpriteBatch* m_Buffer;
+	BitmapFont* m_Font;
 	HUDText m_TextEntries[32];
-	HUDEntry m_HUDEntries[128];
+	HUDImage m_Images[MAX_HUD_IMAGES];
+	HUDEntry m_HUDEntries[256];
 	HUDCounter m_Counter[MAX_COUNTER];
 	HUDTimer m_Timer[MAX_TIMER];
 };

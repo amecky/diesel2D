@@ -40,12 +40,12 @@ public:
 	std::string getProperty(const std::string& name) {
 		return m_Properties[name];
 	}
-	ds::Vec2 getVec2(const std::string& name) {
+	Vector2f getVector2f(const std::string& name) {
 		float x = getFloat(0,name);
 		float y = getFloat(1,name);
-		return ds::Vec2(x,y);
+		return Vector2f(x,y);
 	}
-	void getVec2(const std::string& name,ds::Vec2* ret) {
+	void getVector2f(const std::string& name,Vector2f* ret) {
 		if ( hasProperty(name)) {
 			ret->x = getFloat(0,name);
 			ret->y = getFloat(1,name);
@@ -56,11 +56,11 @@ void getIdString(const std::string& name,IdString* ret) {
 			*ret = ds::string::murmur_hash(getProperty(name).c_str());
 		}
 	}
-	ds::Vec3 getVec3(const std::string& name) {
+	Vector3f getVector3f(const std::string& name) {
 		float x = getFloat(0,name);
 		float y = getFloat(1,name);
 		float z = getFloat(2,name);
-		return ds::Vec3(x,y,z);
+		return Vector3f(x,y,z);
 	}
 	ds::Color getColor(const std::string& name) {
 		assert(getElementCount(name) == 4);

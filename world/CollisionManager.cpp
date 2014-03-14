@@ -51,14 +51,14 @@ void CollisionManager::reset() {
     m_BufferCounter = 0;
 }
 
-int CollisionManager::addLine(const Vec2& startPos, const Vec2& endPos) {
+int CollisionManager::addLine(const Vector2f& startPos, const Vector2f& endPos) {
     int idx = m_Counter;
     CollisionObject co;
     co.prevPosition = startPos;
     //co.position = startPos;
     //co.offset = endPos;
     co.type = CDT_LINE;
-    co.extent = Vec2(0.0f,0.0f);
+    co.extent = Vector2f(0.0f,0.0f);
     co.id = idx;
     m_Objects.push_back(co);
     ++m_Counter;
@@ -171,8 +171,8 @@ void CollisionManager::addCollision(CollisionObject* first, CollisionObject* sec
 }
 
 bool CollisionManager::intersectCircleCircle(const CollisionObject* first, const CollisionObject* second) {
-    Vec2 diff = first->entity->getPosition() - second->entity->getPosition();
-    float distSq = vector::sqrLength(diff);
+    Vector2f diff = first->entity->getPosition() - second->entity->getPosition();
+    float distSq = sqr_length(diff);
     float r1 = first->extent.x;
     float r2 = second->extent.x;
     if ( distSq == 0 && r1 == r2 ) {
@@ -184,11 +184,11 @@ bool CollisionManager::intersectCircleCircle(const CollisionObject* first, const
     return true;
 }
 
-bool CollisionManager::intersectLineCircle(const Vec2& location, float radius, const Vec2& lineFrom, const Vec2& lineTo) {
-    Vec2 ac = location - lineFrom;
-    Vec2 ab = lineTo - lineFrom;
-    float ab2 = vector::dot(ab,ab);
-    float acab = vector::dot(ac,ab);
+bool CollisionManager::intersectLineCircle(const Vector2f& location, float radius, const Vector2f& lineFrom, const Vector2f& lineTo) {
+    Vector2f ac = location - lineFrom;
+    Vector2f ab = lineTo - lineFrom;
+    float ab2 = dot(ab,ab);
+    float acab = dot(ac,ab);
     float t = acab / ab2;
 
     if (t < 0)
@@ -196,13 +196,13 @@ bool CollisionManager::intersectLineCircle(const Vec2& location, float radius, c
     else if (t > 1)
         t = 1;
 
-    Vec2 h = ((ab * t) + lineFrom) - location;
-    float h2 = vector::dot(h,h);
+    Vector2f h = ((ab * t) + lineFrom) - location;
+    float h2 = dot(h,h);
 
     return (h2 <= (radius * radius));
 }
 /*
-void CollisionManager::updateCircle(int id, const Vec2& position) {
+void CollisionManager::updateCircle(int id, const Vector2f& position) {
     for ( std::size_t i = 0; i < m_Objects.size(); ++i ) {
         CollisionObject* object = &m_Objects[i];
         if ( object->id == id && object->type == CDT_CIRCLE) {
@@ -212,7 +212,7 @@ void CollisionManager::updateCircle(int id, const Vec2& position) {
     }
 }
 
-void CollisionManager::updateLine(int id, const Vec2& startPos, const Vec2& endPos) {
+void CollisionManager::updateLine(int id, const Vector2f& startPos, const Vector2f& endPos) {
     for ( std::size_t i = 0; i < m_Objects.size(); ++i ) {
         CollisionObject* object = &m_Objects[i];
         if ( object->id == id && object->type == CDT_LINE) {
@@ -260,30 +260,30 @@ bool CollisionManager::circleSweepTest(int firstID, int secondID) {
     return ret;
 }
 
-bool CollisionManager::sweepTest(const Vec2& a0, const Vec2& a1, float ra, const Vec2& b0, const Vec2& b1, float rb, float* u0, float* u1) {
+bool CollisionManager::sweepTest(const Vector2f& a0, const Vector2f& a1, float ra, const Vector2f& b0, const Vector2f& b1, float rb, float* u0, float* u1) {
     //vector from A0 to A1
-    Vec2 va = a1 - a0;    
+    Vector2f va = a1 - a0;    
     //vector from B0 to B1
-    Vec2 vb = b1 - b0;
+    Vector2f vb = b1 - b0;
     //vector from A0 to B0
-    Vec2 AB = b0 - a0;
-    Vec2 AB1 = b1 - a1;
-    Vec2 vab = vb - va;
+    Vector2f AB = b0 - a0;
+    Vector2f AB1 = b1 - a1;
+    Vector2f vab = vb - va;
     //relative velocity (in normalized time)
     float rab = ra + rb;
-    float a = vector::dot(vab,vab);
+    float a = dot(vab,vab);
     //u*u coefficient
-    float b = 2 * vector::dot(vab,AB);
+    float b = 2 * dot(vab,AB);
     //u coefficient
-    float c = vector::dot(AB,AB) - rab * rab;
+    float c = dot(AB,AB) - rab * rab;
     //constant term
     //check if they're currently overlapping
-    if( vector::dot(AB,AB) <= rab * rab ) {
+    if( dot(AB,AB) <= rab * rab ) {
         *u0 = 0;
         *u1 = 0;
         return true;
     }
-    if( vector::dot(AB1,AB1) <= rab * rab ) {
+    if( dot(AB1,AB1) <= rab * rab ) {
         *u0 = 0;
         *u1 = 0;
         return true;
@@ -304,10 +304,10 @@ bool CollisionManager::sweepTest(const Vec2& a0, const Vec2& a1, float ra, const
 // ---------------------------------------------------------------
 // Box -> Circle
 // ---------------------------------------------------------------
-bool CollisionManager::checkBoxCircle(const Vec2& p1,float w,float h,const Vec2& pos,float radius) const {
+bool CollisionManager::checkBoxCircle(const Vector2f& p1,float w,float h,const Vector2f& pos,float radius) const {
 	float halfWidth = w * 0.5f;
 	float halfHeight = h * 0.5f;
-	Vec2 correctPos = p1;
+	Vector2f correctPos = p1;
 	correctPos.x = p1.x - halfWidth;
 	correctPos.y = p1.y - halfHeight;
 	float cx = abs(pos.x - correctPos.x - halfWidth);
@@ -353,7 +353,7 @@ namespace coll {
 		return collision.secondId;
 	}
 
-	Vec2 getPositionByType(const Collision& collision,int type) {
+	Vector2f getPositionByType(const Collision& collision,int type) {
 		if ( collision.firstType == type ) {
 			return collision.firstPosition;
 		}

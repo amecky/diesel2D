@@ -1,7 +1,7 @@
 #pragma once
 #include "..\World.h"
-#include "..\SpriteEntity.h"
 #include "..\..\renderer\render_types.h"
+#include "..\..\base\GameObject.h"
 
 namespace ds {
 
@@ -45,11 +45,11 @@ private:
 	void setBlurEffectParameters(Shader& shader,float dx, float dy);
 	float computeGaussian(float n);
 	BloomSettings* m_Settings;
-	SpriteEntity m_BloomEntity;
-	SpriteEntity m_BlurHEntity;
-	SpriteEntity m_BlurVEntity;
-	SpriteEntity m_BloomCombineEntity;
-	SpriteEntity m_OverlayEntity;
+	//SpriteEntity m_BloomEntity;
+	//SpriteEntity m_BlurHEntity;
+	//SpriteEntity m_BlurVEntity;
+	//SpriteEntity m_BloomCombineEntity;
+	//SpriteEntity m_OverlayEntity;
 	Shader m_BlurHShader;
 	Shader m_BlurVShader;
 	Shader m_BloomShader;

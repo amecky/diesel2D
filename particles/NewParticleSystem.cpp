@@ -72,15 +72,13 @@ void NewParticleSystem::update(float elapsed) {
 			float diff = m_EmitTimer / m_EmitDelay;
 			m_EmitTimer -= m_EmitDelay;
 			++cnt;
-			// create particle
-			//LOG(logINFO) << "create particle - diff " << diff;
 		}
-		if ( cnt > 0 ) {
+		if ( cnt > 0 ) {			
 			start(m_Position,cnt);
 		}
 	}
 	
-	Vec2 size(0,0);
+	Vector2f size(0,0);
 	float radialVelocity = 0.0f;
 	float rotationSpeed = 0.0f;
 	for ( uint32 i = 0; i < m_Count; ++i ) {
@@ -91,27 +89,46 @@ void NewParticleSystem::update(float elapsed) {
 			m_RadialVelocityPath->update(norm,&radialVelocity);
 			radialVelocity *= p->radialVelocity;
 		}
-		Vec2 velocity = p->normal * radialVelocity;
+		Vector2f velocity = p->normal * radialVelocity;
 		if ( m_Rotating ) {
-			rotationSpeed = m_RotationPath.data.get(norm);
+			m_RotationPath.data.get(norm,&rotationSpeed);
 			if ( p->random > 0.0f ) {				
 				p->rotation -= elapsed * DEGTORAD(rotationSpeed) * p->random;
 			}
 			else {
 				p->rotation += elapsed * DEGTORAD(rotationSpeed) * p->random;
 			}
-			//float angle = math::reflect(p->rotation);
-			//velocity = math::getRadialVelocity(RADTODEG(angle),radialVelocity);
 		}
 		// move particle		
 		if ( m_UseWiggle ) {
-			Vec2 perp = Vec2(-velocity.y,velocity.x);
-			perp = vector::normalize(perp);
-			perp = perp * (sin(norm * m_WiggleSettings.amplitude) * m_WiggleSettings.radius) * p->random;	
+			Vector2f perp = Vector2f(-velocity.y,velocity.x);
+			perp = normalize(perp);
+			perp = perp * (sin(norm * m_WiggleSettings.amplitude) * m_WiggleSettings.radius);// * p->random;	
 			velocity += perp;
 		}
-		vector::addScaled(p->position,velocity,elapsed);
+		p->position += velocity * elapsed;
+		if ( m_UseTrail && p->head ) {
+			float dist = distance(p->position,p->prevPos);
+			if ( dist >= m_TrailSettings.distance ) {
+				buildTrailParticle(p);
+				p->prevPos = p->position;
+			}
+		}
 	}
+}
+
+void NewParticleSystem::buildTrailParticle(Particle* baseParticle) {
+	Particle* p = &m_Particles[m_Count++];
+	p->head = false;
+	p->rotationSpeed = baseParticle->rotationSpeed;
+	p->rotation = baseParticle->rotation;
+	p->radialVelocity = baseParticle->radialVelocity;
+	p->ttl = baseParticle->ttl;	
+	p->initialSize = baseParticle->initialSize;
+	p->random = baseParticle->random;	
+	p->position = baseParticle->position;
+	p->prevPos = p->position;
+	p->timer = 0.0f;
 }
 
 // -------------------------------------------------------
@@ -121,10 +138,10 @@ void NewParticleSystem::draw() {
 	if ( m_Count > 0 ) {
 		m_SpriteBatch->begin();
 		Color color = Color::WHITE;
-		Vec2 size(0,0);	
+		Vector2f size(0,0);	
 		for ( uint32 i = 0; i < m_Count; ++i ) {
 			Particle* p = &m_Particles[i];
-			Vec2 pp = p->position;
+			Vector2f pp = p->position;
 			if ( m_Camera != 0 ) {
 				pp = m_Camera->transform(pp);
 			}
@@ -133,7 +150,7 @@ void NewParticleSystem::draw() {
 			float norm = p->timer / p->ttl;
 			m_ColorPath->update(norm,&color);	
 			if ( m_SizePath != 0 ) {
-				m_SizePath->update(norm,&size);
+				m_SizePath->get(norm,&size);
 				sizeX *= size.x;
 				sizeY *= size.y;
 			}
@@ -146,22 +163,29 @@ void NewParticleSystem::draw() {
 // -------------------------------------------------------
 // Start
 // -------------------------------------------------------
-void NewParticleSystem::start(const Vec2& startPos,int forcedCount) {
+void NewParticleSystem::start(const Vector2f& startPos,int forcedCount) {
 	if ( m_Emitter != 0 ) {
 		m_Position = startPos;
 		int total = m_EmitterData->count;
+		bool rnd = false;
 		if ( forcedCount != -1 ) {
 			total = forcedCount;
+			rnd = true;
 		}
 		for ( int i = 0; i < total; ++i ) {
 			if ( m_Count < m_MaxParticles ) {
 				Particle* p = &m_Particles[m_Count++];
+				p->head = true;
 				p->rotationSpeed = math::random(m_ParticleData->minRotationSpeed,m_ParticleData->maxRotationSpeed);
 				p->rotation = 0.0f;		
 				p->radialVelocity = 1.0f;
 				p->ttl = m_EmitterData->ttl + math::random(-m_EmitterData->ttlVariance,m_EmitterData->ttlVariance);
-				p->initialSize.x = m_ParticleData->initialSize.x + math::random(-m_EmitterData->sizeXVariance,m_EmitterData->sizeXVariance);
-				p->initialSize.y = m_ParticleData->initialSize.y + math::random(-m_EmitterData->sizeYVariance,m_EmitterData->sizeYVariance);
+				float rndSize = 1.0f;
+				if ( m_EmitterData->sizeMinVariance != 0.0f && m_EmitterData->sizeMaxVariance != 0.0f ) {
+					rndSize = math::random(m_EmitterData->sizeMinVariance,m_EmitterData->sizeMaxVariance);
+				}
+				p->initialSize.x = m_ParticleData->initialSize.x * rndSize;
+				p->initialSize.y = m_ParticleData->initialSize.y * rndSize;
 				float vel = m_EmitterData->velocity;
 				if ( m_EmitterData->velocityVariance != 0.0f ) {
 					vel += math::random(-m_EmitterData->velocityVariance,m_EmitterData->velocityVariance);
@@ -173,10 +197,11 @@ void NewParticleSystem::start(const Vec2& startPos,int forcedCount) {
 				else {
 					p->random = 0.0f;
 				}
-				m_Emitter->getPoint(i,total,p->position,p->normal);			
+				//m_Emitter->getPoint(i,total,p->position,p->normal,rnd);			
+				m_Emitter->getPoint(i,m_EmitterData->count,p->position,p->normal,rnd);			
 				p->position += startPos;
+				p->prevPos = p->position;
 				p->rotation = math::getTargetAngle(startPos,p->position);
-				//LOG(logINFO) << "pos " << DBG_V2(p->position) << " normal " << DBG_V2(p->normal);
 				p->timer = 0.0f;
 			}
 		}
@@ -212,6 +237,7 @@ void NewParticleSystem::load(const char* fileName) {
 	ParticleEmitterData* emitterData = new ParticleEmitterData;	
 	m_Rotating = false;
 	m_UseWiggle = false;
+	m_UseTrail = false;
 	char buffer[256];
 	sprintf(buffer,"content\\resources\\%s.json",fileName);
 	JSONReader reader;
@@ -241,7 +267,7 @@ void NewParticleSystem::load(const char* fileName) {
 				c->getPropertyNames(propertyNames);
 				for ( size_t i = 0; i < propertyNames.size(); ++i ) {
 					float timeStep = std::stof(propertyNames[i].c_str());
-					m_SizePath->add(timeStep,c->getVec2(propertyNames[i]));
+					m_SizePath->add(timeStep,c->getVector2f(propertyNames[i]));
 				}
 			}
 			if ( c->getName() == "color") {
@@ -270,21 +296,13 @@ void NewParticleSystem::load(const char* fileName) {
 				m_UseWiggle = true;
 				m_WiggleSettings.load(c);
 			}
+			if ( c->getName() == "trail" ) {
+				m_UseTrail = true;
+				m_TrailSettings.load(c);
+			}
 			if ( c->getName() == "rotation") {	
 				m_Rotating = true;
-				m_RotationPath.load(c);
-				/*
-				createRotationPath();
-				std::vector<std::string> propertyNames;
-				c->getPropertyNames(propertyNames);
-				for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-					float timeStep = atof(propertyNames[i].c_str());
-					float value = 1.0f;
-					c->getFloat(propertyNames[i],&value);
-					m_RotationPath->add(timeStep,value);
-				}
-				*/
-
+				m_RotationPath.load(c);				
 			}	
 			if ( c->getName() == "ring_emitter") {			
 				RingEmitterSettings* emitterSettings = new RingEmitterSettings;
@@ -317,6 +335,7 @@ void NewParticleSystem::reload(const char* fileName) {
 	if ( reader.parse(fileName) ) {
 		m_Rotating = false;
 		m_UseWiggle = false;
+		m_UseTrail = false;
 		LOG(logINFO) << "Reloading particle file " << fileName;
 		// FIXME: set default colors if not found
 		// FIXME: set default size path if not found		
@@ -327,7 +346,8 @@ void NewParticleSystem::reload(const char* fileName) {
 				m_ParticleData->load(c);
 			}
 			if ( c->getName() == "emitter_data" ) {				
-				m_EmitterData->load(c);				
+				m_EmitterData->load(c);			
+				setEmitterData(m_EmitterData);
 			}		
 			if ( c->getName() == "size") {	
 				createSizePath();
@@ -335,7 +355,7 @@ void NewParticleSystem::reload(const char* fileName) {
 				c->getPropertyNames(propertyNames);
 				for ( size_t i = 0; i < propertyNames.size(); ++i ) {
 					float timeStep = std::stof(propertyNames[i].c_str());
-					m_SizePath->add(timeStep,c->getVec2(propertyNames[i]));
+					m_SizePath->add(timeStep,c->getVector2f(propertyNames[i]));
 				}
 			}
 			if ( c->getName() == "color") {
@@ -364,18 +384,11 @@ void NewParticleSystem::reload(const char* fileName) {
 				m_UseWiggle = true;
 				m_WiggleSettings.load(c);
 			}
-			if ( c->getName() == "rotation") {
-				/*
-				createRotationPath();
-				std::vector<std::string> propertyNames;
-				c->getPropertyNames(propertyNames);
-				for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-					float timeStep = atof(propertyNames[i].c_str());
-					float value = 1.0f;
-					c->getFloat(propertyNames[i],&value);
-					m_RotationPath->add(timeStep,value);
-				}
-				*/
+			if ( c->getName() == "trail" ) {
+				m_UseTrail = true;
+				m_TrailSettings.load(c);
+			}
+			if ( c->getName() == "rotation") {				
 				m_Rotating = true;
 				m_RotationPath.load(c);
 			}	

@@ -16,11 +16,11 @@ public:
 	const mat4& getViewProjectionMatrix() const;
 	void setOrthogonal();
 	void restore();
-	Vec3 getPosition() { return m_ViewPos;}
-	void setPosition(const Vec3& pos);
-	void lookAt(const Vec3& target);
-	void lookAt(Vec3 pos,Vec3 target,Vec3 up);
-	const Vec3& getLookAt() const { return m_LookAt; }
+	Vector3f getPosition() { return m_ViewPos;}
+	void setPosition(const Vector3f& pos);
+	void lookAt(const Vector3f& target);
+	void lookAt(Vector3f pos,Vector3f target,Vector3f up);
+	const Vector3f& getLookAt() const { return m_LookAt; }
 	void setSpeed(float spd) { 
 		m_Speed = spd;
 	}	
@@ -32,10 +32,10 @@ public:
 	void setPitch(float angle);
 	void setYAngle(float angle);
 
-	void update(float elapsedTime,const Vec2& mousePosition,bool buttonPressed);
+	void update(float elapsedTime,const Vector2f& mousePosition,bool buttonPressed);
 	void buildView();
 private:	
-	Vec2 m_LastMousePosition;
+	Vector2f m_LastMousePosition;
     mat4 m_View;
 	mat4 m_Proj;
 	mat4 mViewProj;
@@ -43,10 +43,10 @@ private:
 	mat4 m_OrthoView;
 	mat4 m_OrthoProj;
 
-	Vec3 m_ViewPos;
-	Vec3 m_UpVec;
-	Vec3 m_LookAt;
-	Vec3 m_RightVec;
+	Vector3f m_ViewPos;
+	Vector3f m_UpVec;
+	Vector3f m_LookAt;
+	Vector3f m_RightVec;
 
 
 	float m_Speed;

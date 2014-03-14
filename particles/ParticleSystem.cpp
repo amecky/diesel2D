@@ -23,10 +23,10 @@ ParticleSystem::ParticleSystem(Renderer* renderer,uint32 maxQuads,int textureID,
 void ParticleSystem::draw() {
 	m_SpriteBatch->begin();
 	Color color = Color::WHITE;
-	Vec2 size(0,0);
+	Vector2f size(0,0);
 	Particle* p = m_ParticleBuffer->getParticles();
 	while ( p != 0 ) {
-		Vec2 pp = p->position;
+		Vector2f pp = p->position;
 		if ( m_Camera != 0 ) {
 			pp = m_Camera->transform(pp);
 		}
@@ -52,7 +52,7 @@ void ParticleSystem::update(float elapsed) {
 	m_ParticleBuffer->manageLifecyle(elapsed);	
 	m_Emitter->update(m_ParticleBuffer,elapsed);		
 	Particle* current = m_ParticleBuffer->getParticles();	
-	Vec2 size(0,0);
+	Vector2f size(0,0);
 	float radialVelocity = 0.0f;
 	float rotationSpeed = 0.0f;
 	while ( current != 0 ) {	
@@ -62,7 +62,7 @@ void ParticleSystem::update(float elapsed) {
 			m_RadialVelocityPath->update(norm,&radialVelocity);
 			radialVelocity *= current->radialVelocity;
 		}
-		Vec2 velocity = current->normal * radialVelocity;
+		Vector2f velocity = current->normal * radialVelocity;
 		if ( m_RotationPath != 0 ) {
 			m_RotationPath->update(norm,&rotationSpeed);
 			if ( current->random > 0.0f ) {				
@@ -75,7 +75,7 @@ void ParticleSystem::update(float elapsed) {
 			velocity = math::getRadialVelocity(RADTODEG(angle),radialVelocity);
 		}
 		// move particle		
-		vector::addScaled(current->position,velocity,elapsed);
+		current->position += velocity * elapsed;
 		current = current->next;
 	}
 }
@@ -97,7 +97,7 @@ void ParticleSystem::setEmitter(ParticleEmitter* emitter) {
 // -------------------------------------------------------
 // Set emitter position
 // -------------------------------------------------------
-void ParticleSystem::setEmitterPosition(const Vec2& pos) {
+void ParticleSystem::setEmitterPosition(const Vector2f& pos) {
 	m_Emitter->setPosition(pos);
 }
 
@@ -108,7 +108,7 @@ void ParticleSystem::resetEmitterCounter() {
 // -------------------------------------------------------
 // Start
 // -------------------------------------------------------
-void  ParticleSystem::start(const Vec2& startPos) {
+void  ParticleSystem::start(const Vector2f& startPos) {
 	resetEmitterCounter();
 	setEmitterPosition(startPos);
 	emitParticles();

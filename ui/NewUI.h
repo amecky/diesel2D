@@ -15,7 +15,7 @@ public:
 	UIWidget(uint32 id) : m_ID(id) {}
 	virtual ~UIWidget() {}
 	virtual void update(float elapsed) = 0;
-	virtual void fillBuffer(const Vec2& parentPosition,ScreenQuad& screenQuad) = 0;
+	virtual void fillBuffer(const Vector2f& parentPosition,ScreenQuad& screenQuad) = 0;
 	uint32 getID() const {
 		return m_ID;
 	}
@@ -34,13 +34,13 @@ struct Character {
 };
 
 public:
-	NewUIText(uint32 id,const Vec2& pos,const std::string& txt);
+	NewUIText(uint32 id,const Vector2f& pos,const std::string& txt);
 	virtual ~NewUIText() {}
 	void update(float elapsed);
-	void fillBuffer(const Vec2& parentPosition,ScreenQuad& screenQuad);
+	void fillBuffer(const Vector2f& parentPosition,ScreenQuad& screenQuad);
 private:
 	std::string m_Text;
-	Vec2 m_Position;
+	Vector2f m_Position;
 	Character m_CharMapping[256];
 };
 // ---------------------------------------------------------------
@@ -49,13 +49,13 @@ private:
 class NewUITextbox : public UIWidget {
 
 public:
-	NewUITextbox(uint32 id,const Vec2& pos,uint32 characters = 10);
+	NewUITextbox(uint32 id,const Vector2f& pos,uint32 characters = 10);
 	virtual ~NewUITextbox() {}
 	void update(float elapsed);
-	void fillBuffer(const Vec2& parentPosition,ScreenQuad& screenQuad);
+	void fillBuffer(const Vector2f& parentPosition,ScreenQuad& screenQuad);
 private:
 	uint32 m_Size;
-	Vec2 m_Position;
+	Vector2f m_Position;
 	Rect m_Rect;
 };
 // ---------------------------------------------------------------
@@ -64,13 +64,13 @@ private:
 class NewUILabel : public UIWidget {
 
 public:
-	NewUILabel(uint32 id,const Vec2& pos,const std::string& text);
+	NewUILabel(uint32 id,const Vector2f& pos,const std::string& text);
 	virtual ~NewUILabel() {}
 	void update(float elapsed);
-	void fillBuffer(const Vec2& parentPosition,ScreenQuad& screenQuad);
+	void fillBuffer(const Vector2f& parentPosition,ScreenQuad& screenQuad);
 private:
 	NewUIText* m_Text;
-	Vec2 m_Position;
+	Vector2f m_Position;
 };
 // ---------------------------------------------------------------
 //
@@ -82,11 +82,11 @@ public:
 	virtual ~NewUIDialog() {}
 	void loadContent(ResManager& resourceManager) {}
 	void update(float elapsed);
-	void addTextbox(const Vec2& pos);
-	void addLabel(uint32 id,const Vec2& pos,const std::string& text);
+	void addTextbox(const Vector2f& pos);
+	void addLabel(uint32 id,const Vector2f& pos,const std::string& text);
 private:
-	Vec2 m_Position;
-	Vec2 m_Size;
+	Vector2f m_Position;
+	Vector2f m_Size;
 	Rect m_Rect;
 	ScreenQuad* m_ScreenQuad;
 	List<UIWidget*> m_Widgets;

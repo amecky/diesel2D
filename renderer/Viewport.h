@@ -10,11 +10,11 @@ public:
 	~Viewport(void);
 	void setDimension(int width,int height);
 	void setPosition(int x,int y);
-	void setPosition(const Vec2& pos);
-	const Vec2& getPosition() const {
+	void setPosition(const Vector2f& pos);
+	const Vector2f& getPosition() const {
 		return m_Position;
 	}
-	const Vec2& getDelta() const {
+	const Vector2f& getDelta() const {
 		return m_Delta;
 	}
 	const int getWidth() const { 
@@ -24,8 +24,8 @@ public:
 		return m_Height; 
 	}
 private:
-	Vec2 m_Position;
-	Vec2 m_Delta;
+	Vector2f m_Position;
+	Vector2f m_Delta;
 	int m_Width;
 	int m_Height;
 	int m_MaxX;

@@ -1,0 +1,376 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0F449770-7010-4252-833D-FC64D74449A2}</ProjectGuid>
+    <RootNamespace>Diesel2D</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>Diesel2D</ProjectName>
+    <SccProjectName>
+    </SccProjectName>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.21006.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Debug\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</EmbedManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Release\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</EmbedManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</EmbedManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</EmbedManifest>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(LibraryPath)</LibraryPath>
+    <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(ReferencePath)</ReferencePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\math;C:\devtools\DirectX_SDK\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(LibraryPath)</LibraryPath>
+    <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(ReferencePath)</ReferencePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>g:\c++\math;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>
+      </BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>d3dxof.lib;dxguid.lib;d3dx9d.lib;d3d9.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)Diesel.exe</OutputFile>
+      <GenerateManifest>false</GenerateManifest>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)Diesel.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>DXUT\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>d3dxof.lib;dxguid.lib;d3dx9.lib;d3d9.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)Diesel.exe</OutputFile>
+      <GenerateManifest>false</GenerateManifest>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>DXUT\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>
+      </BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>d3dxof.lib;dxguid.lib;d3dx9d.lib;d3d9.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)Diesel.exe</OutputFile>
+      <GenerateManifest>false</GenerateManifest>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)Diesel.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>DXUT\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/IGNORE:4089 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>d3dxof.lib;dxguid.lib;d3dx9.lib;d3d9.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)Diesel.exe</OutputFile>
+      <GenerateManifest>false</GenerateManifest>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="audio\Sound.cpp" />
+    <ClCompile Include="base\EventStream.cpp" />
+    <ClCompile Include="base\WindowsBase.cpp" />
+    <ClCompile Include="data\Gizmo.cpp" />
+    <ClCompile Include="dialogs\DialogManager.cpp" />
+    <ClCompile Include="dialogs\GUIDialog.cpp" />
+    <ClCompile Include="io\BinaryLoader.cpp" />
+    <ClCompile Include="io\BinaryWriter.cpp" />
+    <ClCompile Include="io\FileWatcher.cpp" />
+    <ClCompile Include="math\FloatArray.cpp" />
+    <ClCompile Include="math\GameMath.cpp" />
+    <ClCompile Include="math\matrix.cpp" />
+    <ClCompile Include="math\vector.cpp" />
+    <ClCompile Include="memory\DataBlockAllocator.cpp" />
+    <ClCompile Include="memory\FreeListAllocator.cpp" />
+    <ClCompile Include="memory\MallocAllocator.cpp" />
+    <ClCompile Include="nodes\SpriteBatch.cpp" />
+    <ClCompile Include="audio\AudioBuffer.cpp" />
+    <ClCompile Include="audio\AudioManager.cpp" />
+    <ClCompile Include="objects\HUD.cpp" />
+    <ClCompile Include="objects\TextMessage.cpp" />
+    <ClCompile Include="particles\BoxEmitter.cpp" />
+    <ClCompile Include="particles\EmitterMesh.cpp" />
+    <ClCompile Include="particles\NewParticleSystem.cpp" />
+    <ClCompile Include="particles\ParticleBuffer.cpp" />
+    <ClCompile Include="particles\ParticleEmitter.cpp" />
+    <ClCompile Include="particles\ParticleSystem.cpp" />
+    <ClCompile Include="pipeline\PAKReader.cpp" />
+    <ClCompile Include="pipeline\PAKWriter.cpp" />
+    <ClCompile Include="renderer\buffer_types.cpp" />
+    <ClCompile Include="renderer\Camera.cpp" />
+    <ClCompile Include="renderer\Camera2D.cpp" />
+    <ClCompile Include="renderer\DrawCounter.cpp" />
+    <ClCompile Include="renderer\GraphicsDevice.cpp" />
+    <ClCompile Include="renderer\shader.cpp" />
+    <ClCompile Include="renderer\TexGen.cpp" />
+    <ClCompile Include="renderer\VertexDeclaration.cpp" />
+    <ClCompile Include="renderer\Viewport.cpp" />
+    <ClCompile Include="settings\SettingsManager.cpp" />
+    <ClCompile Include="sprites\NewSpriteBatch.cpp" />
+    <ClCompile Include="sprites\SpriteAnimation.cpp" />
+    <ClCompile Include="sprites\SpriteCollisionManager.cpp" />
+    <ClCompile Include="sprites\SpriteObject.cpp" />
+    <ClCompile Include="sprites\SpriteObjectDescription.cpp" />
+    <ClCompile Include="utils\Color.cpp" />
+    <ClCompile Include="utils\FileUtils.cpp" />
+    <ClCompile Include="base\Input.cpp" />
+    <ClCompile Include="utils\font.cpp" />
+    <ClCompile Include="utils\Log.cpp" />
+    <ClCompile Include="utils\mtrand.cpp" />
+    <ClCompile Include="renderer\Renderer.cpp" />
+    <ClCompile Include="utils\Profiler.cpp" />
+    <ClCompile Include="utils\PlainTextReader.cpp" />
+    <ClCompile Include="utils\SettingsFile.cpp" />
+    <ClCompile Include="utils\StringUtils.cpp" />
+    <ClCompile Include="base\BaseApp.cpp" />
+    <ClCompile Include="world\CollisionManager.cpp" />
+    <ClCompile Include="world\components\BloomComponent.cpp" />
+    <ClCompile Include="world\components\LightComponent.cpp" />
+    <ClCompile Include="world\World.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="audio\Sound.h" />
+    <ClInclude Include="base\ApplicationContext.h" />
+    <ClInclude Include="base\EventStream.h" />
+    <ClInclude Include="base\GameObject.h" />
+    <ClInclude Include="base\Settings.h" />
+    <ClInclude Include="data\Gizmo.h" />
+    <ClInclude Include="data\Param.h" />
+    <ClInclude Include="dialogs\DialogManager.h" />
+    <ClInclude Include="dialogs\GUIDialog.h" />
+    <ClInclude Include="io\BinaryLoader.h" />
+    <ClInclude Include="io\BinaryWriter.h" />
+    <ClInclude Include="io\FileWatcher.h" />
+    <ClInclude Include="io\Serializer.h" />
+    <ClInclude Include="lib\container\GridArray.h" />
+    <ClInclude Include="lib\container\ImmutableBag.h" />
+    <ClInclude Include="lib\container\List.h" />
+    <ClInclude Include="lib\container\String.h" />
+    <ClInclude Include="lib\DataBuffer.h" />
+    <ClInclude Include="lib\Grid.h" />
+    <ClInclude Include="lib\ScratchBuffer.h" />
+    <ClInclude Include="math\Bitset.h" />
+    <ClInclude Include="math\FloatArray.h" />
+    <ClInclude Include="math\GameMath.h" />
+    <ClInclude Include="math\math_types.h" />
+    <ClInclude Include="math\matrix.h" />
+    <ClInclude Include="math\vector.h" />
+    <ClInclude Include="memory\DataBlockAllocator.h" />
+    <ClInclude Include="memory\FreeListAllocator.h" />
+    <ClInclude Include="memory\FSAllocator.h" />
+    <ClInclude Include="memory\MallocAllocator.h" />
+    <ClInclude Include="memory\memory_types.h" />
+    <ClInclude Include="nodes\SpriteBatch.h" />
+    <ClInclude Include="audio\AudioBuffer.h" />
+    <ClInclude Include="audio\AudioManager.h" />
+    <ClInclude Include="base\BaseApp.h" />
+    <ClInclude Include="objects\HUD.h" />
+    <ClInclude Include="objects\TextMessage.h" />
+    <ClInclude Include="particles\BoxEmitter.h" />
+    <ClInclude Include="particles\EmitterMesh.h" />
+    <ClInclude Include="particles\NewParticleSystem.h" />
+    <ClInclude Include="particles\Particle.h" />
+    <ClInclude Include="particles\ParticleBuffer.h" />
+    <ClInclude Include="particles\ParticleEmitter.h" />
+    <ClInclude Include="particles\ParticleSystem.h" />
+    <ClInclude Include="pipeline\PAKReader.h" />
+    <ClInclude Include="pipeline\PAKWriter.h" />
+    <ClInclude Include="renderer\buffer_types.h" />
+    <ClInclude Include="renderer\Camera.h" />
+    <ClInclude Include="renderer\Camera2D.h" />
+    <ClInclude Include="renderer\DrawCounter.h" />
+    <ClInclude Include="renderer\GraphicsDevice.h" />
+    <ClInclude Include="renderer\render_types.h" />
+    <ClInclude Include="renderer\shader.h" />
+    <ClInclude Include="renderer\TexGen.h" />
+    <ClInclude Include="renderer\VertexDeclaration.h" />
+    <ClInclude Include="renderer\vertex_types.h" />
+    <ClInclude Include="renderer\Viewport.h" />
+    <ClInclude Include="base\Input.h" />
+    <ClInclude Include="settings\DynamicSettings.h" />
+    <ClInclude Include="settings\SettingsManager.h" />
+    <ClInclude Include="sprites\NewSpriteBatch.h" />
+    <ClInclude Include="sprites\SpriteAnimation.h" />
+    <ClInclude Include="sprites\SpriteCollisionManager.h" />
+    <ClInclude Include="sprites\SpriteData.h" />
+    <ClInclude Include="sprites\SpriteObject.h" />
+    <ClInclude Include="sprites\SpriteObjectDescription.h" />
+    <ClInclude Include="utils\Color.h" />
+    <ClInclude Include="utils\FileUtils.h" />
+    <ClInclude Include="utils\font.h" />
+    <ClInclude Include="utils\GameTimer.h" />
+    <ClInclude Include="utils\Log.h" />
+    <ClInclude Include="utils\mtrand.h" />
+    <ClInclude Include="renderer\Renderer.h" />
+    <ClInclude Include="dxstdafx.h" />
+    <ClInclude Include="utils\Profiler.h" />
+    <ClInclude Include="utils\PlainTextReader.h" />
+    <ClInclude Include="utils\SettingsFile.h" />
+    <ClInclude Include="utils\StringUtils.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="world\CollisionManager.h" />
+    <ClInclude Include="world\components\BloomComponent.h" />
+    <ClInclude Include="world\components\LightComponent.h" />
+    <ClInclude Include="world\World.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DXUT\Optional\directx.ico" />
+    <None Include="TODO.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

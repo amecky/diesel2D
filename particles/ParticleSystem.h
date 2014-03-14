@@ -41,7 +41,7 @@ public:
 	PE* getEmitter() {
 		return static_cast<PE*>(m_Emitter);
 	}
-	void setEmitterPosition(const Vec2& pos);
+	void setEmitterPosition(const Vector2f& pos);
 	const uint32 numParticles() const {
 		return m_ParticleBuffer->size();
 	}
@@ -52,14 +52,14 @@ public:
 	void setCamera(Camera2D* camera) {
 		m_Camera = camera;
 	}
-	void start(const Vec2& startPos);
+	void start(const Vector2f& startPos);
 	void stop();
 	ColorPath* getColorPath() {
 		return m_ColorPath;
 	}
-	Vec2Path* createSizePath() {
+	Vector2fPath* createSizePath() {
 		if ( m_SizePath == 0 ) {
-			m_SizePath = new Vec2Path;
+			m_SizePath = new Vector2fPath;
 		}
 		else {
 			m_SizePath->reset();
@@ -95,7 +95,7 @@ private:
 	ParticleEmitter* m_Emitter;
 	ParticleBuffer* m_ParticleBuffer;
 	ColorPath* m_ColorPath;
-	Vec2Path* m_SizePath;
+	Vector2fPath* m_SizePath;
 	FloatPath* m_RadialVelocityPath;
 	FloatPath* m_RotationPath;
 	uint32 m_IdCounter;

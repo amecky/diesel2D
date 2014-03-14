@@ -3,18 +3,29 @@
 #include "EmitterMesh.h"
 #include "..\lib\container\List.h"
 #include "..\io\Serializer.h"
+#include <IPath.h>
 
 namespace ds {
 
 
 struct RotationPath : public Gizmo {
 
-	FloatArray data;
+	IPath<20,float> data;
 
 	RotationPath() : Gizmo("rotation") {
 		add("rotation",&data);
 	}
 };
+
+struct SizePath : public Gizmo {
+
+	IPath<20,Vector2f> data;
+
+	SizePath() : Gizmo("size") {
+		add("size",&data);
+	}
+};
+
 
 
 struct WiggleSettings : public Gizmo {
@@ -25,6 +36,17 @@ struct WiggleSettings : public Gizmo {
 	WiggleSettings() : Gizmo("wiggle") , radius(10.0f) , amplitude(5.0f) {
 		add("radius",&radius);
 		add("amplitude",&amplitude);
+	}
+};
+
+struct TrailSettings : public Gizmo {
+
+	float distance;
+	int count;
+
+	TrailSettings() : Gizmo("trail") , distance(10.0f) , count(1) {
+		add("distance",&distance);
+		add("count",&count);
 	}
 };
 
@@ -54,7 +76,7 @@ public:
 		return static_cast<PE*>(m_Emitter);
 	}
 	void setEmitterData(ParticleEmitterData* emitterData);
-	void setPosition(const Vec2& pos) {
+	void setPosition(const Vector2f& pos) {
 		m_Position = pos;
 	}
 	const uint32 numParticles() const {
@@ -67,14 +89,14 @@ public:
 	void setCamera(Camera2D* camera) {
 		m_Camera = camera;
 	}
-	void start(const Vec2& startPos,int forcedCount = -1);
+	void start(const Vector2f& startPos,int forcedCount = -1);
 	//void stop();
 	ColorPath* getColorPath() {
 		return m_ColorPath;
 	}
-	Vec2Path* createSizePath() {
+	IPath<20,Vector2f>* createSizePath() {
 		if ( m_SizePath == 0 ) {
-			m_SizePath = new Vec2Path;
+			m_SizePath = new IPath<20,Vector2f>;
 		}
 		else {
 			m_SizePath->reset();
@@ -101,7 +123,8 @@ public:
 	//! Reloads data from a json file
 	void reload(const char* fileName);
 private:
-	Vec2 m_Position;
+	void buildTrailParticle(Particle* baseParticle);
+	Vector2f m_Position;
 	List<Particle> m_Particles;
 	uint32 m_MaxParticles;
 	uint32 m_Count;
@@ -112,9 +135,11 @@ private:
 	SpriteBatch* m_SpriteBatch;
 	EmitterMesh* m_Emitter;
 	ColorPath* m_ColorPath;
-	Vec2Path* m_SizePath;
+	//Vector2fPath* m_SizePath;
+	IPath<20,Vector2f>* m_SizePath;
 	FloatPath* m_RadialVelocityPath;
-	
+	bool m_UseTrail;
+	TrailSettings m_TrailSettings;
 	RotationPath m_RotationPath;
 	bool m_Rotating;
 

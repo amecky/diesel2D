@@ -14,7 +14,7 @@ namespace ds {
 		int createBlurShader(Renderer* renderer,int textureID);
 		int createBloomCombineShader(Renderer* renderer,int colorTextureID,int bloomTextureID);
 
-		bool setVec3(Shader& shader,const char* name,const Vec3& v);
+		bool setVector3f(Shader& shader,const char* name,const Vector3f& v);
 		bool setValue(Shader& shader,const char* name,void* data,UINT size);
 		bool setTexture(Shader& shader,const char* name,Renderer* renderer,int textureID);
 		bool setColor(Shader& shader,const char* name,const Color& color);

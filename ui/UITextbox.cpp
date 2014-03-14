@@ -15,10 +15,10 @@ UITextbox::UITextbox(UIDialog *dialog,uint32 ID,const std::string& label,const s
 
 	m_CalculatedSize.x = (float)UI::calculateTextSize(1.0f,dialog->getBitmapFont(),label);
 	m_CalculatedSize.y = 25.0f;
-	m_Dimension = Vec2(m_CalculatedSize.x + 65.0f,20.0f);
+	m_Dimension = Vector2f(m_CalculatedSize.x + 65.0f,20.0f);
 }
 
-void UITextbox::align(const Vec2& gridPosition) {	
+void UITextbox::align(const Vector2f& gridPosition) {	
 	m_Position = gridPosition;
 	m_BoxPosition.x = gridPosition.x + m_CalculatedSize.x;
 	m_BoxPosition.x += 6.0f;
@@ -33,8 +33,8 @@ void UITextbox::align(const Vec2& gridPosition) {
 	else {
 		UI::fillQuad(gridPosition.x+m_CalculatedSize.x + 10.0f,gridPosition.y,m_CalculatedSize.x,25.0f,Rect(0,260,100,25),m_Vertices);
 	}
-	UI::fillText(Vec2(gridPosition.x+5.0f,gridPosition.y+2.0f),1.0f,m_Dialog->getBitmapFont(),m_Label,Color(1.0f,1.0f,1.0f,1.0f),m_Vertices);
-	UI::fillText(Vec2(m_TextPos.x,m_TextPos.y),1.0f,m_Dialog->getBitmapFont(),m_Value,Color(1.0f,1.0f,1.0f,1.0f),m_Vertices);
+	UI::fillText(Vector2f(gridPosition.x+5.0f,gridPosition.y+2.0f),1.0f,m_Dialog->getBitmapFont(),m_Label,Color(1.0f,1.0f,1.0f,1.0f),m_Vertices);
+	UI::fillText(Vector2f(m_TextPos.x,m_TextPos.y),1.0f,m_Dialog->getBitmapFont(),m_Value,Color(1.0f,1.0f,1.0f,1.0f),m_Vertices);
 }
 
 UITextbox::~UITextbox(void) {
@@ -66,7 +66,7 @@ void UITextbox::setValue(const std::string& value) {
 	//m_Dialog->getTextNode()->setText(string::to_string(m_ID),m_TextPos,Color(1.0f,1.0f,1.0f,1.0f),"%s",m_Value.c_str());
 }
 
-bool UITextbox::isSelected(const Vec2& mousePos) {
+bool UITextbox::isSelected(const Vector2f& mousePos) {
 	Rect br = m_BoundingBox;
 	m_Selected = false;
 	if ( mousePos.x >= br.left && mousePos.x <= br.right && mousePos.y >= br.top && mousePos.y <= br.bottom ) {
@@ -77,7 +77,7 @@ bool UITextbox::isSelected(const Vec2& mousePos) {
 	return false;
 }
 
-void UITextbox::fillBuffer(const Vec2& basePosition,UIBuffer& buffer) {
+void UITextbox::fillBuffer(const Vector2f& basePosition,UIBuffer& buffer) {
 	for ( size_t i = 0; i < m_Vertices.size();++i ) {
 		buffer.add(m_Vertices[i]);
 	}

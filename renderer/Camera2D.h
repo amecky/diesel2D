@@ -8,12 +8,12 @@ class Camera2D {
 public:
 	Camera2D(void);
 	~Camera2D(void);
-	void setPosition(const Vec2& position,float scale = 1.0f);
-	Vec2 transform(const Vec2& pos);
-	Vec2 transformToWorld(const Vec2& screenPos);
+	void setPosition(const Vector2f& position,float scale = 1.0f);
+	Vector2f transform(const Vector2f& pos);
+	Vector2f transformToWorld(const Vector2f& screenPos);
 private:
 	float m_Scale;
-	Vec2 m_Position;
+	Vector2f m_Position;
 	mat3 m_Matrix;
 	mat3 m_WMatrix;
 };

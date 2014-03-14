@@ -16,7 +16,7 @@ struct ModelItem {
 	std::string reference;
 	bool active;
 	Rect boundingBox;
-	Vec2 size;
+	Vector2f size;
 };
 
 typedef std::vector<ModelItem> ModelItems;
@@ -24,11 +24,11 @@ typedef std::vector<ModelItem> ModelItems;
 public:
 	UIDropDown(UIDialog *dialog,uint32 ID,const std::string& label);
 	virtual ~UIDropDown(void) {}
-	void fillBuffer(const Vec2& basePosition,UIBuffer& buffer);
+	void fillBuffer(const Vector2f& basePosition,UIBuffer& buffer);
 	const UIControlType getType() const { 
 		return UI_DROP_DOWN; 
 	}
-	Vec2& getExtent() {
+	Vector2f& getExtent() {
 		return m_CalculatedSize;
 	}
 	std::string& getSelectedValue() {
@@ -40,16 +40,16 @@ public:
 	int getSelectedIndex() {
 		return m_Highlight;
 	}
-	bool isSelected(const Vec2& mousePos);
-	void align(const Vec2& gridPosition);	
+	bool isSelected(const Vector2f& mousePos);
+	void align(const Vector2f& gridPosition);	
 	void add(const std::string& text);
 	void update(float elapsed);
 private:
 	std::string m_Label;
-	Vec2 m_CalculatedSize;
+	Vector2f m_CalculatedSize;
 	bool m_Selected;
-	Vec2 m_BoxPosition;
-	Vec2 m_TextPosition;
+	Vector2f m_BoxPosition;
+	Vector2f m_TextPosition;
 	int m_Selection;
 	Rect m_BoundingBox;	
 	float m_Width;

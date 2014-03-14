@@ -18,11 +18,13 @@ struct ParticleEmitterData : public Gizmo {
 	float velocityVariance;
 	float ttl;
 	float ttlVariance;
-	float sizeXVariance;
-	float sizeYVariance;
+	float sizeMinVariance;
+	float sizeMaxVariance;
 	uint32 count;
 
-	ParticleEmitterData() : Gizmo("emitter_data") , ejectionPeriod(0) , ejectionVariance(0) , ejectionCounter(0) , velocity(0.0f) , velocityVariance(0.0f) , ttl(1.0f) , ttlVariance(0.0f) , sizeXVariance(0.0f) , sizeYVariance(0.0f) , count(1) {
+	ParticleEmitterData() : Gizmo("emitter_data") , ejectionPeriod(0) , ejectionVariance(0) 
+		, ejectionCounter(0) , velocity(0.0f) , velocityVariance(0.0f) 
+		, ttl(1.0f) , ttlVariance(0.0f) , sizeMinVariance(0.0f) , sizeMaxVariance(0.0f) , count(1) {
 
 		add("velocity",&velocity);
 		add("velocity_variance",&velocityVariance);
@@ -31,8 +33,8 @@ struct ParticleEmitterData : public Gizmo {
 		add("ejection_counter",&ejectionCounter);
 		add("ttl",&ttl);
 		add("ttl_variance",&ttlVariance);
-		add("size_x_variance",&sizeXVariance);
-		add("size_y_variance",&sizeYVariance);
+		add("size_min_variance",&sizeMinVariance);
+		add("size_max_variance",&sizeMaxVariance);
 		add("count",&count);
 	}
 
@@ -49,10 +51,10 @@ public:
 	virtual ~ParticleEmitter();
 	virtual void createParticles(ParticleBuffer* buffer,float forcedCount = -1) = 0;
 	virtual void update(ParticleBuffer* buffer,float elapsed);
-	void setPosition(const ds::Vec2& position) {
+	void setPosition(const Vector2f& position) {
 		m_Position = position;
 	}
-	const ds::Vec2& getPosition() const {
+	const Vector2f& getPosition() const {
 		return m_Position;
 	}
 	void emitParticles(ParticleBuffer* buffer);
@@ -67,7 +69,7 @@ public:
 	}
 protected:	
 	Particle* prepare(ParticleBuffer* buffer);
-	ds::Vec2 m_Position;
+	Vector2f m_Position;
 	ParticleEmitterData* m_Data;
 	ParticleData* m_ParticleData;
 private:

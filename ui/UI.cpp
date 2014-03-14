@@ -11,8 +11,8 @@ namespace ds {
 
 namespace UI {
 
-Vec3 getVec3(UIDialog* dialog,uint32 id1,uint32 id2,uint32 id3) {
-	Vec3 ret;
+Vector3f getVector3f(UIDialog* dialog,uint32 id1,uint32 id2,uint32 id3) {
+	Vector3f ret;
 	ret.x = getFloat(dialog,id1);
 	ret.y = getFloat(dialog,id2);
 	ret.z = getFloat(dialog,id3);	
@@ -33,7 +33,7 @@ float getFloat(UIDialog* dialog,uint32 id,float defaultValue) {
 	return defaultValue;
 }
 
-void setVec3(UIDialog* dialog,const Vec3& v,uint32 id1,uint32 id2,uint32 id3) {
+void setVector3f(UIDialog* dialog,const Vector3f& v,uint32 id1,uint32 id2,uint32 id3) {
 	setFloat(dialog,v.x,id1);
 	setFloat(dialog,v.y,id2);
 	setFloat(dialog,v.z,id3);
@@ -76,7 +76,7 @@ int calculateTextSize(float scale,BitmapFont* font,const std::string& text) {
 	return size;
 }
 
-void fillText(const Vec2& position,float scale,BitmapFont* font,const std::string& text,const Color& color,std::vector<TransformedTextureColorVertex>& vertices) {
+void fillText(const Vector2f& position,float scale,BitmapFont* font,const std::string& text,const Color& color,std::vector<TransformedTextureColorVertex>& vertices) {
 	float padding = 0.0f;
 	float x = position.x;
 	float y = position.y;

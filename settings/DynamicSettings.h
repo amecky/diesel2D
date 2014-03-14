@@ -44,18 +44,18 @@ struct FloatPath : public DynamicSettings {
 };
 
 // -------------------------------------------------------
-// Vec2Path
+// Vector2fPath
 // -------------------------------------------------------
-struct Vec2Path : public DynamicSettings {
+struct Vector2fPath : public DynamicSettings {
 
 	FloatArray x;
 	FloatArray y;
 
-	void add(float timeStep,const Vec2& v) {
+	void add(float timeStep,const Vector2f& v) {
 		x.add(timeStep,v.x);
 		y.add(timeStep,v.y);
 	} 
-	void update(float time,Vec2* v) {
+	void update(float time,Vector2f* v) {
 		v->x = x.get(time);
 		v->y = y.get(time);		
 	}

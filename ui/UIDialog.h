@@ -81,20 +81,20 @@ public:
 	}
 	virtual void onFocus() {}
 	virtual void onStateChanged(bool active) {}
-	virtual bool isSelected(const Vec2& mousePos) { 
+	virtual bool isSelected(const Vector2f& mousePos) { 
 		return false; 
 	}
 	virtual void onChar(char ascii) {}	
 	virtual const UIControlType getType() const = 0;
-	virtual void fillBuffer(const Vec2& basePosition,UIBuffer& buffer) = 0;
-	virtual Vec2& getExtent() = 0;
-	Vec2& getPosition() {
+	virtual void fillBuffer(const Vector2f& basePosition,UIBuffer& buffer) = 0;
+	virtual Vector2f& getExtent() = 0;
+	Vector2f& getPosition() {
 		return m_Position;
 	}
-	virtual void align(const Vec2& gridPosition) = 0;
+	virtual void align(const Vector2f& gridPosition) = 0;
 	virtual void update(float elapsed) {}
 protected:
-	Vec2 m_Position;
+	Vector2f m_Position;
 	UIDialog* m_Dialog;
 	uint32 m_ID;
 	
@@ -116,8 +116,8 @@ struct GridCell {
 	int gy;
 	uint32 controlID;
 	bool used;
-	Vec2 cellPos;
-	Vec2 cellSize;
+	Vector2f cellPos;
+	Vector2f cellSize;
 	UIControlAlignment alignment;
 };
 	 
@@ -128,7 +128,7 @@ typedef List<UIControl*> Items;
 typedef List<IUIEventListener*> Listeners;
 
 public:
-	UIDialog(const char* dialogName,const char* materialName,const char* bitmapFont,const char* layerName,const Vec2& pos,int gridSizeX,int gridSizeY);
+	UIDialog(const char* dialogName,const char* materialName,const char* bitmapFont,const char* layerName,const Vector2f& pos,int gridSizeX,int gridSizeY);
 	~UIDialog(void);
 	void update(float elapsedTime);
 	// mouse controller
@@ -142,7 +142,7 @@ public:
 	void deactivate();
 	const bool isActive();
 	bool containsControl(uint32 id);
-	Vec2& resize(float minSize = -1.0f);
+	Vector2f& resize(float minSize = -1.0f);
 	// handling controls
 	void addLabel(uint32 id,uint32 gridX,uint32 gridY,const std::string& label,UIControlAlignment alignment = UI_AL_LEFT);
 	void addButton(uint32 id,uint32 gridX,uint32 gridY,const std::string& label,UIControlAlignment alignment = UI_AL_LEFT);
@@ -161,8 +161,8 @@ public:
 	// event handling
 	void registerListener(IUIEventListener* listener);
 	void sendEvent(const IUIEvent& event);
-	Vec2 getAbsPos(const Vec2& relPos);
-	void setMouseOffset(const Vec2& mo) {
+	Vector2f getAbsPos(const Vector2f& relPos);
+	void setMouseOffset(const Vector2f& mo) {
 		m_MouseOffset = mo;
 	}
 	void setHeader(const char* header);
@@ -183,15 +183,15 @@ private:
 	UIControl *m_Selected;
 	bool m_Active;
 	Listeners m_Listeners;
-	Vec2 m_BasePos;
-	Vec2 m_MouseOffset;
+	Vector2f m_BasePos;
+	Vector2f m_MouseOffset;
 	Rect m_Rect;
-	Vec2 m_Size;
+	Vector2f m_Size;
 	Cells m_Cells;
 	uint32 m_GridSizeX;
 	uint32 m_GridSizeY;
 	bool m_ShowHeader;	
-	Vec2 m_HeaderSize;
+	Vector2f m_HeaderSize;
 	float m_MinSize;
 };
 

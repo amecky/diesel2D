@@ -2,8 +2,8 @@
 #include "..\math\math_types.h"
 #include <vector>
 #include "..\renderer\render_types.h"
-#include "..\nodes\SpriteBatch.h"
-#include "World.h"
+#include "..\sprites\SpriteObject.h"
+#include "..\base\GameObject.h"
 
 namespace ds {
 
@@ -13,24 +13,25 @@ namespace ds {
 struct TextEntry {
 	uint32 id;
 	std::string text;
-	Vec2 pos;
+	Vector2f pos;
 	Color color;
 	float scale;
 	bool active;
-	std::vector<Sprite> sprites;
+	std::vector<SpriteObject> sprites;
 };
 
 // -------------------------------------------------------
 // TextEntity
 // -------------------------------------------------------
-class TextEntity : public Entity {
+class TextMessage : public GameObject {
 
 typedef std::vector<TextEntry> TextEntries;
 
 public:
-	TextEntity();
-	virtual ~TextEntity() {}
-	void init(Renderer* renderer,SpriteBatch* spriteBatch,const char* fontName,int textureID,int batchID);
+	TextMessage();
+	virtual ~TextMessage() {}
+	void init() {}
+	void init(const char* fontName,int textureID);
 
 	const TextEntry& getText(int index) const {
 		return m_TextEntries[index];
@@ -38,7 +39,7 @@ public:
 	void update(float elapsed) {}
 	void updateText(uint32 id,const std::string& txt);
 	void updateIntText(uint32 id,int value,int length);
-	void setText(uint32 index,const Vec2& pos,const std::string& text,const Color& color = Color::WHITE,float scale = 1.0f) {
+	void setText(uint32 index,const Vector2f& pos,const std::string& text,const Color& color = Color::WHITE,float scale = 1.0f) {
 		TextEntry te;
 		te.pos = pos;
 		te.id = index;
@@ -58,7 +59,7 @@ public:
 			createText(te,te->text);
 		}
 	}
-	void setPosition(uint32 id,const ds::Vec2& pos) {
+	void setPosition(uint32 id,const Vector2f& pos) {
 		TextEntry* te = &m_TextEntries[id];
 		if ( te != 0 ) {
 			te->pos = pos;
@@ -69,26 +70,19 @@ public:
 		TextEntry* te = &m_TextEntries[id];
 		te->active = active;
 	}
-	Vec2 getDimension(uint32 id);
-	Vec2 calculateSize(const std::string& text,float scale = 1.0f);
+	Vector2f getDimension(uint32 id);
+	Vector2f calculateSize(const std::string& text,float scale = 1.0f);
 
 	void render();
 
-	const EntityType getType() const {
-		return ET_TEXT;
-	}
-	const int getBatchItemID() const {
-		return m_BatchID;
-	}
 private:		
 	void createText(TextEntry* textEntry,const std::string& text);
 	int m_Font;
 	int m_Total;
 	uint32 m_TextCounter;
 	TextEntries m_TextEntries;
-	SpriteBatch* m_Batch;
-	BitmapFont m_BitmapFont;
-	int m_BatchID;
+	BitmapFont* m_BitmapFont;
+
 };
 
 };

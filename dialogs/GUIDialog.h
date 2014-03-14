@@ -5,6 +5,7 @@
 #include "..\renderer\render_types.h"
 #include "..\io\Serializer.h"
 #include "..\utils\PlainTextReader.h"
+#include "..\sprites\SpriteObject.h"
 
 namespace ds {
 
@@ -27,11 +28,11 @@ struct InputField {
 
 struct GUIItem {
 	uint32 id;
-	Vec2 pos;
+	Vector2f pos;
 	bool centered;
 	Color color;
 	float scale;
-	std::vector<Sprite> sprites;
+	std::vector<SpriteObject> sprites;
 
 	GUIItem() : id(-1) , pos(0,0) , centered(true) , color(Color::WHITE) , scale(1.0f) {}
 };
@@ -48,7 +49,7 @@ struct DialogButton {
 
 struct ImageLink {
 	uint32 index;
-	Vec2 pos;
+	Vector2f pos;
 	Rect rect;
 };
 
@@ -60,9 +61,9 @@ typedef std::vector<InputField> InputFields;
 typedef std::vector<GUIItem> Items;
 
 public:
-	GUIDialog() {}
+	GUIDialog(int screenWidth,int screenHeight) : m_ScreenWidth(screenWidth) , m_ScreenHeight(screenHeight) {}
 	~GUIDialog(void);
-	void init(const char* name,const DialogID& id,SpriteBatch* spriteBatch,BitmapFont* bitmapFont);
+	void init(const char* name,const DialogID& id,Renderer* renderer,BitmapFont* bitmapFont);
 	void render();
 	void setButtonHover(const Rect& regularItem,const Rect& highlightItem);
 	
@@ -90,7 +91,7 @@ public:
 	const IdString& getHashName() const {
 		return m_HashName;
 	}
-	void updateMousePos(const ds::Vec2& mousePos);
+	void updateMousePos(const Vector2f& mousePos);
 	bool OnChar(char ascii);
 	const DialogID& getDialogID() const {
 		return m_ID;
@@ -114,7 +115,7 @@ private:
 	int findFreeID();
 	DialogID m_ID;
 	IdString m_HashName;
-	SpriteBatch* m_Batch;
+	Renderer* m_Renderer;
 	BitmapFont* m_BitmapFont;
 	Items m_Items;
 	ImageLinks m_ImageLinks;
@@ -127,6 +128,8 @@ private:
 	bool m_SupportHover;
 	int m_SelectedInput;
 	uint32 m_Index;
+	int m_ScreenWidth;
+	int m_ScreenHeight;
 };
 
 }

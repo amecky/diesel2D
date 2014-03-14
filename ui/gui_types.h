@@ -9,8 +9,8 @@ namespace ds {
 
 	struct GUICtrl {
 		GCID parent;
-		Vec2 position;
-		Vec2 dimension;
+		Vector2f position;
+		Vector2f dimension;
 		GUICtrl* next;
 		int index;
 		GUICtrl();

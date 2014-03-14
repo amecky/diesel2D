@@ -1,0 +1,498 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pipeline\PAKReader.cpp">
+      <Filter>pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="pipeline\PAKWriter.cpp">
+      <Filter>pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\FileUtils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Log.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\mtrand.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\PlainTextReader.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Profiler.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\StringUtils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Camera.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\GraphicsDevice.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Renderer.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\VertexDeclaration.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Viewport.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioBuffer.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioManager.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="base\BaseApp.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\Input.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\WindowsBase.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\DrawCounter.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="dialogs\GUIDialog.cpp">
+      <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\Sound.cpp">
+      <Filter>audio</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleBuffer.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleEmitter.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="dialogs\DialogManager.cpp">
+      <Filter>dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\buffer_types.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Color.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\TexGen.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="math\matrix.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\vector.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\GameMath.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\shader.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="nodes\SpriteBatch.cpp">
+      <Filter>nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleSystem.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\MallocAllocator.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\FreeListAllocator.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\font.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="math\FloatArray.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="base\EventStream.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\SettingsManager.cpp">
+      <Filter>settings</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Camera2D.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="world\World.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="world\CollisionManager.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\BoxEmitter.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\NewParticleSystem.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\EmitterMesh.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="world\components\BloomComponent.cpp">
+      <Filter>world\components</Filter>
+    </ClCompile>
+    <ClCompile Include="world\components\LightComponent.cpp">
+      <Filter>world\components</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\SettingsFile.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\DataBlockAllocator.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="io\FileWatcher.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\BinaryLoader.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\BinaryWriter.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="data\Gizmo.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\SpriteCollisionManager.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\SpriteObject.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\SpriteAnimation.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\SpriteObjectDescription.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\NewSpriteBatch.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\HUD.cpp">
+      <Filter>objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\TextMessage.cpp">
+      <Filter>objects</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dxstdafx.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="pipeline\PAKReader.h">
+      <Filter>pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="pipeline\PAKWriter.h">
+      <Filter>pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\FileUtils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Log.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\mtrand.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\PlainTextReader.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Profiler.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\StringUtils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Camera.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\GraphicsDevice.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Renderer.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\VertexDeclaration.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Viewport.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioManager.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioBuffer.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="base\BaseApp.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\Input.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\Settings.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\container\GridArray.h">
+      <Filter>lib\container</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\container\List.h">
+      <Filter>lib\container</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\container\String.h">
+      <Filter>lib\container</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Color.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\render_types.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\DrawCounter.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\vertex_types.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="dialogs\GUIDialog.h">
+      <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\Sound.h">
+      <Filter>audio</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\Particle.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleBuffer.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleEmitter.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="dialogs\DialogManager.h">
+      <Filter>dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\buffer_types.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\TexGen.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="math\math_types.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\GameMath.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\shader.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="nodes\SpriteBatch.h">
+      <Filter>nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\FSAllocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleSystem.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\memory_types.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\MallocAllocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\FreeListAllocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\font.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="math\FloatArray.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ScratchBuffer.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DataBuffer.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Grid.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="base\EventStream.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\DynamicSettings.h">
+      <Filter>settings</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\SettingsManager.h">
+      <Filter>settings</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Camera2D.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="world\World.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="world\CollisionManager.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\BoxEmitter.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Bitset.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\NewParticleSystem.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\EmitterMesh.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="world\components\BloomComponent.h">
+      <Filter>world\components</Filter>
+    </ClInclude>
+    <ClInclude Include="world\components\LightComponent.h">
+      <Filter>world\components</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\SettingsFile.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\GameTimer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\DataBlockAllocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="io\Serializer.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\FileWatcher.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\BinaryLoader.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\BinaryWriter.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\container\ImmutableBag.h">
+      <Filter>lib\container</Filter>
+    </ClInclude>
+    <ClInclude Include="data\Param.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="data\Gizmo.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpriteCollisionManager.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpriteData.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpriteObject.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpriteAnimation.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpriteObjectDescription.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ApplicationContext.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\NewSpriteBatch.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="base\GameObject.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\HUD.h">
+      <Filter>objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\TextMessage.h">
+      <Filter>objects</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DXUT\Optional\directx.ico" />
+    <None Include="TODO.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="nodes">
+      <UniqueIdentifier>{dab35962-c882-4f60-af86-b9abb96afe59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pipeline">
+      <UniqueIdentifier>{7ce8bb76-9ae9-4870-a394-41304dffeabb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{814ebfef-ec5e-4da4-aafd-e45a6b8858f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer">
+      <UniqueIdentifier>{75a75e51-1730-4714-a213-8e696000dcb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="audio">
+      <UniqueIdentifier>{2ac09f75-d6dd-4064-836f-8b3f76f200f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base">
+      <UniqueIdentifier>{7fc4fc7c-df17-4331-9246-f1354d5cf34c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{80da9192-27d0-4e36-b560-50768dbeea60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\container">
+      <UniqueIdentifier>{bb121fc2-ac2f-4180-af32-0e3069191923}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dialogs">
+      <UniqueIdentifier>{e5471b25-6034-4697-bf0c-5d3f5ca195f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="particles">
+      <UniqueIdentifier>{86130fce-dcee-4298-b65f-91dfdc1a6e93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{c44a0c43-890c-4d0c-a3c0-acdef8e08bc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="memory">
+      <UniqueIdentifier>{d5b703ad-3c64-4a00-91ff-acebbf3ef8bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="settings">
+      <UniqueIdentifier>{59ef4e6b-0690-450a-b4b2-575aac76f902}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="world">
+      <UniqueIdentifier>{ae22df38-8d64-4a51-b055-3d43c502066a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="world\components">
+      <UniqueIdentifier>{1d97f0c4-4969-4b32-abbd-ef47bed840fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{dfe32379-0885-4adc-8b7f-83708690abbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="io">
+      <UniqueIdentifier>{f18a0897-5410-4308-af35-93f8459b4957}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{60f9dd9d-4ebf-4c59-9f8e-781cf033ff9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sprites">
+      <UniqueIdentifier>{8d172883-66db-4af1-bda9-faab2ac576f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="objects">
+      <UniqueIdentifier>{154b76ff-d046-4d98-9f4f-5b6a10fd3864}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -20,7 +20,7 @@ typedef std::vector<ToggleAction> ToggleActions;
 public:
 	DialogManager(void);
 	~DialogManager(void);
-	void init(SpriteBatch* spriteBatch,Renderer* renderer,const char* fontName,int textureID);
+	void init(Renderer* renderer,const char* fontName,int textureID);
 	void render();
 	bool loadDialogFromJSON(const char* dialogName,const char* name,int id);
 	//
@@ -29,7 +29,7 @@ public:
 	void deactivate(const char* dialogName);
 	bool onButtonDown(int button,int x,int y,DialogID* dlgId,int* selected);
 	bool OnChar(char ascii,unsigned int keyState);
-	void updateMousePos(const Vec2& mousePos);
+	void updateMousePos(const Vector2f& mousePos);
 	GUIDialog* get(const char* dialogName);
 	void addToggleAction(const char* oldDialogName,const char* newDialogName,int buttonId);
 
@@ -38,12 +38,13 @@ public:
 private:	
 	void setActiveFlag(const char* name,bool active);	
 	void createDialog(const char* name,int id,GUIDialog* dialog);
-	SpriteBatch* m_SpriteBatch;
-	BitmapFont m_Font;
+	//SpriteBatch* m_SpriteBatch;
+	BitmapFont* m_Font;
 	bool m_Initialized;
 	Dialogs m_Dialogs;
 	uint32 m_Index;
 	ToggleActions m_ToggleActions;
+	Renderer* m_Renderer;
 };
 
 }

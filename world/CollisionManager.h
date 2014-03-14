@@ -12,8 +12,8 @@ namespace ds {
 // Collision
 // -------------------------------------------------------
 struct Collision {
-	Vec2 firstPosition;
-	Vec2 secondPosition;
+	Vector2f firstPosition;
+	Vector2f secondPosition;
 	int firstId;
 	int secondId;
 	int firstType;
@@ -34,9 +34,9 @@ class Entity;
 // CollisionObject
 // -------------------------------------------------------
 struct CollisionObject {
-	Vec2 prevPosition;
-	//Vec2 offset;
-	Vec2 extent;
+	Vector2f prevPosition;
+	//Vector2f offset;
+	Vector2f extent;
 	CDType shape;
 	int id;
 	int type;
@@ -78,12 +78,12 @@ public:
 	CollisionManager();
 	CollisionManager(const CollisionManager& orig);
 	virtual ~CollisionManager();
-	int addLine(const Vec2& startPos,const Vec2& endPos);
+	int addLine(const Vector2f& startPos,const Vector2f& endPos);
 	int addCircle(Entity* entity,float radius,int type);
 	int addBox(Entity* entity,float width,float height,int type);
 	void remove(Entity* entity);
-	//void updateLine(int id,const Vec2& startPos,const Vec2& endPos);
-	//void updateCircle(int id,const Vec2& position);
+	//void updateLine(int id,const Vector2f& startPos,const Vector2f& endPos);
+	//void updateCircle(int id,const Vector2f& position);
 	void checkIntersections();
 	void reset();
 	bool getCollision(int index,Collision& collision) const;
@@ -109,10 +109,10 @@ public:
 	}
 	void debug();
 private:
-	bool checkBoxCircle(const Vec2& p1,float w,float h,const Vec2& pos,float radius) const;
-	bool sweepTest(const Vec2& a0,const Vec2& a1,float ra,const Vec2& b0,const Vec2& b1,float rb,float* u0,float* u1);
+	bool checkBoxCircle(const Vector2f& p1,float w,float h,const Vector2f& pos,float radius) const;
+	bool sweepTest(const Vector2f& a0,const Vector2f& a1,float ra,const Vector2f& b0,const Vector2f& b1,float rb,float* u0,float* u1);
 	CollisionObject* findObject(int id);
-	bool intersectLineCircle(const Vec2& location, float radius, const Vec2& lineFrom, const Vec2& lineTo);
+	bool intersectLineCircle(const Vector2f& location, float radius, const Vector2f& lineFrom, const Vector2f& lineTo);
 	bool intersectCircleCircle(const CollisionObject* first,const CollisionObject* second);
 	void addCollision(CollisionObject* first,CollisionObject* second);
 	bool solveQuadraticFormula(float a,float b,float c,float* r1,float* r2);
@@ -130,7 +130,7 @@ namespace coll {
 
 	int getIDByType(const Collision& collision,int type);
 
-	Vec2 getPositionByType(const Collision& collision,int type);
+	Vector2f getPositionByType(const Collision& collision,int type);
 }
 
 }
