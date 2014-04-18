@@ -59,7 +59,7 @@ typedef double f64;
 typedef unsigned int IdString;
 typedef unsigned long ulong;
 
-
+const uint32 UINT32_MAX = 0xffffffffu;
 
 #if defined(DEBUG) 
 	#ifndef HR
@@ -68,7 +68,7 @@ typedef unsigned long ulong;
 #else
 	#ifndef HR
 		//#define HR(x) x;
-#define HR(x) { HRESULT hr = x ; if ( FAILED(hr) ) { char desc[1024]; sprintf(desc,"(DX) %s - %s",DXGetErrorString(hr),DXGetErrorDescription(hr));	char buf[2048];	sprintf_s(buf,"%s(%d) : Error: %s\n", __FILE__, __LINE__, desc);LOG(logERROR) << buf; }}
+#define HR(x) { HRESULT hr = x ; if ( FAILED(hr) ) { char desc[1024]; sprintf(desc,"(DX) %s - %s",DXGetErrorString(hr),DXGetErrorDescription(hr));	char buf[2048];	sprintf_s(buf,"%s(%d) : Error: %s\n", __FILE__, __LINE__, desc);LOGC(logERROR) << buf; }}
 	#endif
 #endif
 
@@ -96,3 +96,6 @@ typedef unsigned long ulong;
 #define BM_NEW(x) new(gBlockMemory->alloc(sizeof(x)))x();
 #endif
 
+#ifndef CALL_MEMBER_FN
+#define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
+#endif

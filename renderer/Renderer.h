@@ -11,6 +11,8 @@
 #include "render_types.h"
 #include "DrawCounter.h"
 #include "..\sprites\NewSpriteBatch.h"
+#include "BitmapFont.h"
+#include "Viewport.h"
 
 
 namespace ds {
@@ -127,7 +129,8 @@ public:
 	void changeRasterizerState(RasterizerState* rasterizerState);
 	void setRasterizerState(RasterizerState* rasterizerState);
 	// Bitmap Font
-	void initializeBitmapFont(BitmapFont& bitmapFont,int textureID,const Color& fillColor);
+	void initializeBitmapFont(BitmapFont& bitmapFont,int textureID,const Color& fillColor = Color(1.0f,0.0f,1.0f,1.0f));
+	BitmapFont* createBitmapFont(const char* name);
 	// render target
 	int createRenderTarget(const char* name,const Color& clearColor = Color::WHITE);
 	int createRenderTarget(const char* name,float width,float height,const Color& clearColor = Color::WHITE);
@@ -152,6 +155,7 @@ public:
 	void lockBuffer(int handleID,int vertexCount,int indexCount,float** vertexBuffer,void** indexBuffer);
 	void unlockBuffer(int handleID);	
 	int drawBuffer(int handleID,int textureID);
+	void resetBuffer(int handleID);
 	void resetBufferHandle() {
 		m_CurrentIB = -1;
 		m_CurrentVB = -1;
@@ -167,14 +171,14 @@ public:
 		return m_Hwnd;
 	}
 
-	
+	/*
 	const int getWidth() const {
 		return m_Width;
 	}
 	const int getHeight() const {
 		return m_Height;
 	}
-
+	*/
 	uint32 startShader(Shader* shader);
 	void setShaderParameter(Shader* shader,int textureID = -1);
 	void endShader(Shader* shader);
@@ -191,13 +195,23 @@ public:
 	void debug(int x,int y,const Color& color,char* format,va_list args);	
 	void showProfiler(int x,int y);
 	void showDrawCounter(int x,int y);
+	void printDrawCounter();
 
 
-	void draw(const SpriteObject& spriteObject) {
+	void draw(const Sprite& spriteObject) {
 		m_SpriteBatch->draw(spriteObject);
 	}
+	void draw(const Vector2f& pos,int textureID,const Rect& textureRect,float rotation = 0.0f,float scaleX = 1.0f,float scaleY = 1.0f,const Color& color = Color::WHITE,const Vector2f& center = Vector2f(0,0)) {
+		m_SpriteBatch->draw(pos.x,pos.y,textureID,textureRect,rotation,scaleX,scaleY,color,center);
+	}
+
+
 
 	BitmapFont* loadBitmapFont(const char* name,int textureId,const Color& fillColor = Color(1.0f,0.0f,1.0f,1.0f));
+
+	Viewport* getViewport() {
+		return m_Viewport;
+	}
 
 private:	
 	bool isFillColor(const Color& fillColor,const Color& currentColor);
@@ -214,7 +228,7 @@ private:
 	int allocateBuffer(GeoBufferType type,int vertexDefinition,int size,int& start,bool dynamic);
 	void resetDynamicBuffers();
 
-	//RenderMode m_RenderMode;	
+	Viewport* m_Viewport;
 	D3DCAPS9 m_DeviceCaps;	
 	Camera* m_Camera;	
 	mat4 matWorldViewProj;
@@ -225,11 +239,9 @@ private:
 	int mode;
 	DrawCounter* m_DrawCounter;
 	DebugRenderer* m_DebugRenderer;
-	//Assignments m_Assignments;
 	HWND m_Hwnd;
 	RenderTargets m_RenderTargets;
 	RasterizerStates m_RasterizerStates;
-	//SkyNode* m_SkyNode;
 	// new stuff
 	LPDIRECT3DSURFACE9 m_BackBuffer;	
 	RasterizerState m_RSState;

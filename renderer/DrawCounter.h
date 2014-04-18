@@ -54,6 +54,12 @@ public:
 	const int getShaders() {
 		return m_Shaders;
 	}
+	void incFlushes() {
+		++m_Flushes;
+	}
+	const int getFlushes() const {
+		return m_Flushes;
+	}
 private:
 	int m_NumPrim;
 	int m_IndexCounter;
@@ -62,6 +68,7 @@ private:
 	int m_Textures;
 	int m_Shaders;
 	uint32 m_MemorySize;
+	int m_Flushes;
 };
 
 };

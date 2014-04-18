@@ -17,7 +17,7 @@ struct SpriteDescription : public Gizmo {
 
 };
 
-class SpriteObject;
+class Sprite;
 
 class SpriteObjectDescription : public Serializer {
 
@@ -26,8 +26,8 @@ public:
 	~SpriteObjectDescription();
 	void load(const char* name);
 	void reload(const char* name);
-	void setAnimations(SpriteObject* object);
-	void prepare(ds::SpriteObject* object);
+	void setAnimations(Sprite* object);
+	void prepare(ds::Sprite* object);
 private:
 	SpriteDescription* m_SpriteDescription;
 	RotationAnimation* m_RotationPath;

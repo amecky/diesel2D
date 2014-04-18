@@ -1,10 +1,7 @@
 #include "Gizmo.h"
 
 
-Gizmo::Gizmo(const char* name) : m_Name(name) {
-	LOG(logINFO) << "Creating new Gizmo: " << name;
-}
-
+Gizmo::Gizmo(const char* name) : m_Name(name) {}
 
 Gizmo::~Gizmo(void) {
 	Params::iterator it = m_Params.begin();
@@ -15,7 +12,7 @@ Gizmo::~Gizmo(void) {
 }
 
 void Gizmo::load(Category* category) {
-	LOGC(logINFO,"Gizmo") << "loading data from " << category->getName();
+	LOGC("Gizmo") << "loading data from " << category->getName();
 	for ( size_t i = 0; i < m_Params.size(); ++i ) {
 		Param* p = m_Params[i];
 		if ( p->getType() == PT_INT ) {

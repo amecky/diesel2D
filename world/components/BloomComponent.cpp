@@ -1,8 +1,7 @@
 #include "BloomComponent.h"
+#include "..\..\renderer\shader.h"
 
 namespace ds {
-
-#include "BloomComponent.h"
 
 const int SC_X = 512.0f;
 const int SC_Y = 384.0f;
@@ -19,7 +18,7 @@ void BloomComponent::initialize(int startLayer,int baseTexture,BloomSettings* bl
 	m_Settings = bloomSettings;
 	int layer = startLayer;
 	// Bloom
-	LOG(logINFO) << "Creating Bloom rendertarget at layer: " << layer;
+	LOG << "Creating Bloom rendertarget at layer: " << layer;
 	int bloomTexture = m_World->createRenderTarget(layer);
 	int blid = m_World->createSpriteBatch(baseTexture,1024.0f,768.0f);
 	//m_World->addSpriteEntity(layer,blid,&m_BloomEntity,SC_X,SC_Y,Rect(0,0,1024,768));
@@ -32,7 +31,7 @@ void BloomComponent::initialize(int startLayer,int baseTexture,BloomSettings* bl
 	m_BlurHShader = m_Renderer->getShader(blurHShaderID);
 	setBlurEffectParameters(m_BlurHShader,1.0f/1024.0f,0.0f);
 	++layer;
-	LOG(logINFO) << "Creating horizontal blur at layer: " << layer;
+	LOG << "Creating horizontal blur at layer: " << layer;
 	int blurHTexture = m_World->createRenderTarget(layer);
 	int bhid = m_World->createSpriteBatch(blurHTexture,1024.0f,768.0f);
 	//m_World->addSpriteEntity(layer,bhid,&m_BlurHEntity,SC_X,SC_Y,Rect(0,0,1024,768));	
@@ -42,14 +41,14 @@ void BloomComponent::initialize(int startLayer,int baseTexture,BloomSettings* bl
 	m_BlurVShader = m_Renderer->getShader(blurVShaderID);
 	setBlurEffectParameters(m_BlurVShader,0.0f,1.0f/768.0f);
 	++layer;
-	LOG(logINFO) << "Creating vertical blur at layer: " << layer;
+	LOG << "Creating vertical blur at layer: " << layer;
 	int blurVTexture = m_World->createRenderTarget(layer);
 	int bvid = m_World->createSpriteBatch(blurVTexture,1024.0f,768.0f);
 	//m_World->addSpriteEntity(layer,bvid,&m_BlurVEntity,SC_X,SC_Y,Rect(0,0,1024,768));	
 	m_World->setSpriteBatchShader(bvid,blurVShaderID);
 	// Bloom combine	
 	++layer;
-	LOG(logINFO) << "Creating Bloom combine at layer: " << layer;
+	LOG << "Creating Bloom combine at layer: " << layer;
 	int bloomCombineTexture = m_World->createRenderTarget(layer);
 	int bcid = m_World->createSpriteBatch(bloomCombineTexture);
 	//m_World->addSpriteEntity(layer,bcid,&m_BloomCombineEntity,SC_X,SC_Y,Rect(0,0,1024,768));
@@ -58,7 +57,7 @@ void BloomComponent::initialize(int startLayer,int baseTexture,BloomSettings* bl
 	m_World->setSpriteBatchShader(bcid,bcShaderID);
 	// put to backbuffer
 	++layer;
-	LOG(logINFO) << "Creating Overlay at layer: " << layer;
+	LOG << "Creating Overlay at layer: " << layer;
 	int oid = m_World->createSpriteBatch(bloomCombineTexture,1024.0f,768.0f,blendState);	
 	//m_World->addSpriteEntity(layer,oid,&m_OverlayEntity,SC_X,SC_Y,Rect(0,0,1024,768));
 	*/
@@ -120,11 +119,11 @@ void BloomComponent::setBlurEffectParameters(Shader& shader,float dx, float dy) 
 	}
 	/*
 	for (int i = 0; i < SAMPLE_COUNT; i++) 	{
-		LOG(logINFO) << i << "=" << sampleWeights[i];
+		LOG << i << "=" << sampleWeights[i];
 	}
 
 	for (int i = 0; i < SAMPLE_COUNT; i++) 	{		
-		LOG(logINFO) << i << "=" << DBG_V2(sampleOffsets[i]);
+		LOG << i << "=" << DBG_V2(sampleOffsets[i]);
 	}
 	*/
 	shader::setValue(shader,"SampleWeights",&sampleWeights,sizeof(float)*SAMPLE_COUNT);

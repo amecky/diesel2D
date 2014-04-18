@@ -7,7 +7,7 @@ namespace ds {
 struct Color : public D3DXCOLOR {
 
 public:
-	Color() : D3DXCOLOR() {}
+	Color() : D3DXCOLOR(1.0f,1.0f,1.0f,1.0f) {}
 	Color(int r,int g,int b,int a);
 	Color(uchar r,uchar g,uchar b,uchar a);
 	Color(int r,int g,int b);

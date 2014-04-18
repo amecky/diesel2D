@@ -121,58 +121,9 @@ namespace ds {
 		bool scissor;
 	};
 	
-	// -------------------------------------------------------
-	// Character definition
-	// -------------------------------------------------------
-	struct CharDef {
-		uint32 ascii;
-		int startX;
-		int startY;
-		int width;
-		float u1;
-		float u2;
-		float v1;
-		float v2;
-		Rect texureRect;
-	};
 	
-	// -------------------------------------------------------
-	// Bitmap Font
-	// -------------------------------------------------------
-	struct BitmapFont {
-
-		IdString hashName;
-		uint32 startChar;
-		uint32 endChar;
-		uint32 width;
-		uint32 height;
-		uint32 padding;
-		uint32 textureSize;
-		uint32 charHeight;
-		uint32 startX;
-		uint32 startY;
-		uint32 gridHeight;		
-		List<CharDef> definitions;
-
-		BitmapFont() : hashName(0) {}
-
-		void addChar(uint32 ascii,int startX,int startY,int width) {
-			CharDef cd;
-			cd.ascii = ascii;
-			cd.startX = startX;
-			cd.startY = startY;
-			cd.width = width;
-			cd.u1 = (float)cd.startX/textureSize;
-			cd.v1 = (float)cd.startY/textureSize;
-			cd.u2 = cd.u1 + (float)cd.width/(textureSize);
-			cd.v2 = cd.v1 + ((float)charHeight)/(textureSize);
-			cd.texureRect = Rect(static_cast<float>(startY),static_cast<float>(startX),static_cast<float>(width),static_cast<float>(charHeight));
-			definitions.append(cd);
-		}
-		const CharDef& getCharDef(char c) const {
-			return definitions[(int)c-startChar];
-		}
-	};
+	
+	
 
 	// -------------------------------------------------------
 	// Texture
@@ -255,27 +206,7 @@ namespace ds {
 		LPDIRECT3DSURFACE9 surface;
 		LPD3DXRENDERTOSURFACE rts;
 	};
-
-	// -------------------------------------------------------
-	// Sprite
-	// -------------------------------------------------------
-	/*
-	struct Sprite {
-		Vector2f position;
-		float rotation;
-		Vector2f center;
-		float scaleX;
-		float scaleY;
-		Color color;
-		Rect textureRect;
-
-		Sprite() :position(0,0) , rotation(0.0f) , center(0,0) , scaleX(1.0f) , scaleY(1.0f) , color(Color::WHITE) , textureRect(0,0,32,32) {			
-		}
-		Sprite(int x,int y,const Rect tr,float rot = 0.0f, float sx = 1.0f,float sy = 1.0f,const Color& clr = Color::WHITE, const Vector2f& cntr = Vector2f(0.0f,0.0f)) 
-			: position(Vector2f(x,y)) , textureRect(tr) , rotation(rot) , scaleX(sx) , scaleY(sy) , center(cntr) , color(clr) {}
-		Sprite(const Vector2f& pos,const Rect tr) : position(pos) , textureRect(tr) , rotation(0.0f) , scaleX(1.0f) , scaleY(1.0f) , center(0,0) , color(Color::WHITE) {}
-	};
-	*/
+	
 	// -------------------------------------------------------
 	// Debug message
 	// -------------------------------------------------------

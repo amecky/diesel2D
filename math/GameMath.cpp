@@ -232,9 +232,9 @@ namespace ds {
 		if ( v1 != v2 ) {
 			Vector2f vn1 = normalize(v1);
 			Vector2f vn2 = normalize(v2);
-			//LOG(logINFO) << "vn1 " << DBG_V2(vn1) << " vn2 " << DBG_V2(vn2);
+			//LOG << "vn1 " << DBG_V2(vn1) << " vn2 " << DBG_V2(vn2);
 			float dt = dot(vn1,vn2);		
-			//LOG(logINFO) << "dot " << dt;
+			//LOG << "dot " << dt;
 			if ( dt < -1.0f ) {
 				dt = -1.0f;
 			}
@@ -242,13 +242,13 @@ namespace ds {
 				dt = 1.0f;
 			}
 			float tmp = acos(dt);
-			//LOG(logINFO) << "acos " << RADTODEG(tmp);
+			//LOG << "acos " << RADTODEG(tmp);
 			float crs = cross(vn1,vn2);
-			//LOG(logINFO) << "cross " << crs;
+			//LOG << "cross " << crs;
 			if ( crs < 0.0f ) {
 				tmp = TWO_PI - tmp;
 			}
-			//LOG(logINFO) << "new acos " << RADTODEG(tmp);
+			//LOG << "new acos " << RADTODEG(tmp);
 			return tmp;		
 		}
 		else {
@@ -258,7 +258,7 @@ namespace ds {
 
 	float getTargetAngle(const Vector2f& v1,const Vector2f& v2) {	
 		Vector2f diff = v2 - v1;
-		//LOG(logINFO) << "diff " << DBG_V2(diff);
+		//LOG << "diff " << DBG_V2(diff);
 		float angle = getAngle(V2_RIGHT,diff);// + PI;// + D3DX_PI;
 		if ( angle >= TWO_PI ) {
 			angle -= TWO_PI;

@@ -45,15 +45,16 @@ namespace vector {
 
 	
 	void addRadial(Vector2f& v,float radius,float angle) {
-		v.x += radius * cos(angle);
-		v.y += radius * sin(angle);
+		v.x += radius * math::fastCos(angle);
+		v.y += radius * math::fastSin(angle);
 	}
 
 	Vector2f calucateRadial(const Vector2f& v,float radius,float angle) {
 		Vector2f ret;
-		float ra = math::reflect(angle);
-		ret.x = v.x + radius * cos(ra);
-		ret.y = v.y + radius * sin(ra);
+		//float ra = math::reflect(angle);
+		float ra = angle;
+		ret.x = v.x + radius * math::fastCos(ra);
+		ret.y = v.y + radius * math::fastSin(ra);
 		return ret;
 	}
 
@@ -78,6 +79,12 @@ namespace vector {
 		else {
 			return 0.0f;
 		}
+	}
+
+	Vector2f getRadialVelocity(float angle,float velocity) {
+		float vx = math::fastCos(angle) * velocity;
+		float vy = math::fastSin(angle) * velocity;
+		return Vector2f(vx,vy);
 	}
 	
 }

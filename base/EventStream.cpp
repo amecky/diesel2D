@@ -33,6 +33,20 @@ void EventStream::add(int type,void* p, size_t size) {
 	}
 }
 
+void EventStream::add(int type) {
+	if ( m_Count < MAX_EVENTS) {
+		EventHeader header;
+		header.id = m_Count;
+		header.size = 0;
+		header.type = type;
+		char* data = m_Data + m_Index;
+		memcpy(data,&header,EVENT_HEADER_SIZE);		
+		m_Mapping[m_Count] = m_Index;
+		m_Index += EVENT_HEADER_SIZE;
+		++m_Count;
+	}
+}
+
 const bool EventStream::get(int index,void* p) const {
 	if ( index < 0 || index >= m_Count ) {
 		return false;

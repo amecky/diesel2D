@@ -1,0 +1,11 @@
+syntax: glob
+.svn/entries
+.svn
+*.obj
+Debug/*
+Diesel/*
+Release/*
+delete_me/*
+ipch/*
+Diesel.sdf
+Diesel.opensdf

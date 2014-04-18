@@ -17,6 +17,7 @@ void DrawCounter::reset() {
 	m_Textures = 0;
 	m_DrawCalls = 0;
 	m_Shaders = 0;	
+	m_Flushes = 0;
 }
 
 void DrawCounter::addIndices(int indCounter) {

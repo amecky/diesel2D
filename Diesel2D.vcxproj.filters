@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="pipeline\PAKReader.cpp">
-      <Filter>pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="pipeline\PAKWriter.cpp">
-      <Filter>pipeline</Filter>
-    </ClCompile>
     <ClCompile Include="utils\FileUtils.cpp">
       <Filter>utils</Filter>
     </ClCompile>
@@ -64,12 +58,6 @@
     <ClCompile Include="audio\Sound.cpp">
       <Filter>audio</Filter>
     </ClCompile>
-    <ClCompile Include="particles\ParticleBuffer.cpp">
-      <Filter>particles</Filter>
-    </ClCompile>
-    <ClCompile Include="particles\ParticleEmitter.cpp">
-      <Filter>particles</Filter>
-    </ClCompile>
     <ClCompile Include="dialogs\DialogManager.cpp">
       <Filter>dialogs</Filter>
     </ClCompile>
@@ -78,9 +66,6 @@
     </ClCompile>
     <ClCompile Include="utils\Color.cpp">
       <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="renderer\TexGen.cpp">
-      <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="math\matrix.cpp">
       <Filter>math</Filter>
@@ -93,12 +78,6 @@
     </ClCompile>
     <ClCompile Include="renderer\shader.cpp">
       <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="nodes\SpriteBatch.cpp">
-      <Filter>nodes</Filter>
-    </ClCompile>
-    <ClCompile Include="particles\ParticleSystem.cpp">
-      <Filter>particles</Filter>
     </ClCompile>
     <ClCompile Include="memory\MallocAllocator.cpp">
       <Filter>memory</Filter>
@@ -115,23 +94,8 @@
     <ClCompile Include="base\EventStream.cpp">
       <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="settings\SettingsManager.cpp">
-      <Filter>settings</Filter>
-    </ClCompile>
     <ClCompile Include="renderer\Camera2D.cpp">
       <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="world\World.cpp">
-      <Filter>world</Filter>
-    </ClCompile>
-    <ClCompile Include="world\CollisionManager.cpp">
-      <Filter>world</Filter>
-    </ClCompile>
-    <ClCompile Include="particles\BoxEmitter.cpp">
-      <Filter>particles</Filter>
-    </ClCompile>
-    <ClCompile Include="particles\NewParticleSystem.cpp">
-      <Filter>particles</Filter>
     </ClCompile>
     <ClCompile Include="particles\EmitterMesh.cpp">
       <Filter>particles</Filter>
@@ -141,9 +105,6 @@
     </ClCompile>
     <ClCompile Include="world\components\LightComponent.cpp">
       <Filter>world\components</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\SettingsFile.cpp">
-      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="memory\DataBlockAllocator.cpp">
       <Filter>memory</Filter>
@@ -163,9 +124,6 @@
     <ClCompile Include="sprites\SpriteCollisionManager.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
-    <ClCompile Include="sprites\SpriteObject.cpp">
-      <Filter>sprites</Filter>
-    </ClCompile>
     <ClCompile Include="sprites\SpriteAnimation.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
@@ -181,16 +139,46 @@
     <ClCompile Include="objects\TextMessage.cpp">
       <Filter>objects</Filter>
     </ClCompile>
+    <ClCompile Include="particles\ParticleSystem.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\HUDConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\AssetCompiler.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\GUIConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\DialogConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\BitmapFontConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\BitmapFont.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\ParticleSystemConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\SpriteConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\Sprite.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleManager.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\ParticleManagerConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="pipeline\PAKReader.h">
-      <Filter>pipeline</Filter>
-    </ClInclude>
-    <ClInclude Include="pipeline\PAKWriter.h">
-      <Filter>pipeline</Filter>
-    </ClInclude>
     <ClInclude Include="utils\FileUtils.h">
       <Filter>utils</Filter>
     </ClInclude>
@@ -269,19 +257,10 @@
     <ClInclude Include="particles\Particle.h">
       <Filter>particles</Filter>
     </ClInclude>
-    <ClInclude Include="particles\ParticleBuffer.h">
-      <Filter>particles</Filter>
-    </ClInclude>
-    <ClInclude Include="particles\ParticleEmitter.h">
-      <Filter>particles</Filter>
-    </ClInclude>
     <ClInclude Include="dialogs\DialogManager.h">
       <Filter>dialogs</Filter>
     </ClInclude>
     <ClInclude Include="renderer\buffer_types.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer\TexGen.h">
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="math\math_types.h">
@@ -299,14 +278,8 @@
     <ClInclude Include="renderer\shader.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="nodes\SpriteBatch.h">
-      <Filter>nodes</Filter>
-    </ClInclude>
     <ClInclude Include="memory\FSAllocator.h">
       <Filter>memory</Filter>
-    </ClInclude>
-    <ClInclude Include="particles\ParticleSystem.h">
-      <Filter>particles</Filter>
     </ClInclude>
     <ClInclude Include="memory\memory_types.h">
       <Filter>memory</Filter>
@@ -335,29 +308,11 @@
     <ClInclude Include="base\EventStream.h">
       <Filter>base</Filter>
     </ClInclude>
-    <ClInclude Include="settings\DynamicSettings.h">
-      <Filter>settings</Filter>
-    </ClInclude>
-    <ClInclude Include="settings\SettingsManager.h">
-      <Filter>settings</Filter>
-    </ClInclude>
     <ClInclude Include="renderer\Camera2D.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="world\World.h">
-      <Filter>world</Filter>
-    </ClInclude>
-    <ClInclude Include="world\CollisionManager.h">
-      <Filter>world</Filter>
-    </ClInclude>
-    <ClInclude Include="particles\BoxEmitter.h">
-      <Filter>particles</Filter>
-    </ClInclude>
     <ClInclude Include="math\Bitset.h">
       <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="particles\NewParticleSystem.h">
-      <Filter>particles</Filter>
     </ClInclude>
     <ClInclude Include="particles\EmitterMesh.h">
       <Filter>particles</Filter>
@@ -367,9 +322,6 @@
     </ClInclude>
     <ClInclude Include="world\components\LightComponent.h">
       <Filter>world\components</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\SettingsFile.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="utils\GameTimer.h">
       <Filter>utils</Filter>
@@ -401,9 +353,6 @@
     <ClInclude Include="sprites\SpriteCollisionManager.h">
       <Filter>sprites</Filter>
     </ClInclude>
-    <ClInclude Include="sprites\SpriteObject.h">
-      <Filter>sprites</Filter>
-    </ClInclude>
     <ClInclude Include="sprites\SpriteAnimation.h">
       <Filter>sprites</Filter>
     </ClInclude>
@@ -425,18 +374,63 @@
     <ClInclude Include="objects\TextMessage.h">
       <Filter>objects</Filter>
     </ClInclude>
+    <ClInclude Include="particles\ParticleSystem.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\HUDConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\AssetCompiler.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\Converter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\GUIConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\DialogConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\BitmapFontConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\BitmapFont.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\ParticleSystemConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\SpriteConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\DynamicSettings.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\Sprite.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\CompositeSprite.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpritesObject.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleManager.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\ParticleManagerConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\container\dVector.h">
+      <Filter>lib\container</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico" />
     <None Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="nodes">
-      <UniqueIdentifier>{dab35962-c882-4f60-af86-b9abb96afe59}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="pipeline">
-      <UniqueIdentifier>{7ce8bb76-9ae9-4870-a394-41304dffeabb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="utils">
       <UniqueIdentifier>{814ebfef-ec5e-4da4-aafd-e45a6b8858f5}</UniqueIdentifier>
     </Filter>
@@ -467,17 +461,11 @@
     <Filter Include="memory">
       <UniqueIdentifier>{d5b703ad-3c64-4a00-91ff-acebbf3ef8bc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="settings">
-      <UniqueIdentifier>{59ef4e6b-0690-450a-b4b2-575aac76f902}</UniqueIdentifier>
-    </Filter>
     <Filter Include="world">
       <UniqueIdentifier>{ae22df38-8d64-4a51-b055-3d43c502066a}</UniqueIdentifier>
     </Filter>
     <Filter Include="world\components">
       <UniqueIdentifier>{1d97f0c4-4969-4b32-abbd-ef47bed840fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="resources">
-      <UniqueIdentifier>{dfe32379-0885-4adc-8b7f-83708690abbf}</UniqueIdentifier>
     </Filter>
     <Filter Include="io">
       <UniqueIdentifier>{f18a0897-5410-4308-af35-93f8459b4957}</UniqueIdentifier>
@@ -490,6 +478,9 @@
     </Filter>
     <Filter Include="objects">
       <UniqueIdentifier>{154b76ff-d046-4d98-9f4f-5b6a10fd3864}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="compiler">
+      <UniqueIdentifier>{fcbfebaa-fe95-4080-a20b-7f0f2d6b1828}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

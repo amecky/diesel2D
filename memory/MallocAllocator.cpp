@@ -31,12 +31,12 @@ MallocAllocator::MallocAllocator() : m_TotalAllocated(0) {
 
 
 MallocAllocator::~MallocAllocator() {
-	LOGC(logINFO,"MallocAllocator") << "Removing MallocAllocator - allocations: " << m_TotalAllocated;
+	LOGC("MallocAllocator") << "Removing MallocAllocator - allocations: " << m_TotalAllocated;
 	assert ( m_TotalAllocated == 0 );
 }
 
 void * MallocAllocator::allocate( uint32 size, uint32 align) {
-	LOGC(logINFO,"MallocAllocator") << "Allocating size " << size << " align " << align;
+	LOGC("MallocAllocator") << "Allocating size " << size << " align " << align;
 	const uint32 ts = size + align + sizeof(Header);
 	Header *h = (Header *)malloc(ts);
 	void *p = data_pointer(h, align);

@@ -4,6 +4,7 @@
 #include "..\utils\font.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\io\FileWatcher.h"
+#include "..\compiler\Converter.h"
 
 namespace ds {
 
@@ -38,7 +39,7 @@ uint32 GUIDialog::addImage(int x,int y,const Rect& textureRect,bool centered) {
 		p.x = m_ScreenWidth * 0.5f;
 	}
 	GUIItem item;
-	SpriteObject sp;
+	Sprite sp;
 	sp.setPosition(p);
 	sp.setTextureRect(textureRect);
 	sp.setColor(Color::WHITE);
@@ -153,7 +154,7 @@ int GUIDialog::onButton(int button,int x,int y,bool down) {
 // -------------------------------------------------------
 bool GUIDialog::OnChar(char ascii) {
 	if ( m_Active && !m_InputFields.empty() && m_SelectedInput != -1 ) {
-		LOG(logINFO) << "dialog char " << (int)ascii;
+		LOG << "dialog char " << (int)ascii;
 		for ( size_t i = 0; i < m_InputFields.size(); ++i ) {
 			InputField* input = &m_InputFields[i];
 			if ( input->id == m_SelectedInput ) {
@@ -294,64 +295,54 @@ int GUIDialog::findFreeID() {
 	return m_Items.size();
 }
 
-// -------------------------------------------------------
-// Load
-// -------------------------------------------------------
-void GUIDialog::load(const char* fileName) {
-	char buffer[256];
-	sprintf(buffer,"content\\dialogs\\%s.json",fileName);
-	JSONReader reader;
-	if ( reader.parse(buffer) ) {		
-		loadDialogFromJSON(reader);		
-		gFileWatcher->registerFile(buffer,this);
-	}
-}
-
-void GUIDialog::reload(const char* fileName) {
-	JSONReader reader;
-	if ( reader.parse(fileName) ) {	
-		clear();
-		loadDialogFromJSON(reader);		
-	}
-}
-
-// -------------------------------------------------------
-// Internal load dialog from json file
-// -------------------------------------------------------
-void GUIDialog::loadDialogFromJSON(JSONReader& reader) {
-	std::vector<Category*> categories = reader.getCategories();
-	for ( size_t i = 0; i < categories.size(); ++i ) {
-		Category* c = categories[i];
-		if ( c->getName() == "image" ) {
+void GUIDialog::load(BinaryLoader* loader) {
+	clear();
+	while ( loader->openChunk() == 0 ) {	
+		if ( loader->getChunkID() == CHNK_DLG_IMAGE ) {
 			Rect r;
-			c->getRect("rect",&r);
-			Vector2f p = c->getVector2f("pos");
-			bool centered = true;
-			c->getBool("centered",&centered);
+			loader->read(&r);
+			Vector2f p;
+			loader->read(&p);
+			int cnt = 0;
+			loader->read(&cnt);
+			bool centered = false;
+			if ( cnt == 1 ) {
+				centered = true;
+			}
 			addImage(p.x,p.y,r,centered);
 		}
-		if ( c->getName() == "button" ) {
-			int id = c->getInt(0,"id");
+		else if ( loader->getChunkID() == CHNK_DLG_BUTTON ) {
+			int id = 0;
+			loader->read(&id);
 			Rect r;
-			c->getRect("rect",&r);
-			Vector2f p = c->getVector2f("pos");
-			std::string txt = c->getProperty("text");
-			// FIXME: read centered
+			loader->read(&r);
+			Vector2f p;
+			loader->read(&p);
+			std::string txt;
+			loader->read(txt);			
 			addButton(id,p.y,txt,r);
 		}
-		if ( c->getName() == "text" ) {
-			int id = c->getInt(0,"id");
-			Vector2f p = c->getVector2f("pos");
+		else if ( loader->getChunkID() == CHNK_DLG_TEXT ) {
+			int id = 0;
+			loader->read(&id);
+			Vector2f pos;
+			loader->read(&pos);
 			float scale = 1.0f;
-			c->getFloat("scale",&scale);
-			std::string txt = c->getProperty("text");
+			loader->read(&scale);
+			std::string str;
+			loader->read(str);
 			Color clr = Color::WHITE;
-			c->getColor("color",&clr);
-			bool centered = true;
-			c->getBool("centered",&centered);
-			addText(id,p.x,p.y,txt,clr,scale,centered);
-		}
-	}
+			loader->read(&clr);
+			int cnt = 0;
+			bool centered = false;
+			loader->read(&cnt);
+			if ( cnt == 1 ) {
+				centered = true;
+			}			
+			addText(id,pos.x,pos.y,str,clr,scale,centered);
+		}		
+		loader->closeChunk();
+	}	
 }
 
 }

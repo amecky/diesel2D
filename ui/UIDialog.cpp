@@ -11,7 +11,7 @@ namespace ds {
 // =======================================================
 // The dialog implementation
 // =======================================================
-UIDialog::UIDialog(const char* dialogName,const char* materialName,const char* bitmapFont,const char* layerName,const Vector2f& pos,int gridSizeX,int gridSizeY) 
+UIDialog::UIDiaLOGC(const char* dialogName,const char* materialName,const char* bitmapFont,const char* layerName,const Vector2f& pos,int gridSizeX,int gridSizeY) 
 	: Node(dialogName,materialName,true)
 	, m_BasePos(pos) 
 	, m_ShowHeader(false)
@@ -43,7 +43,7 @@ UIDialog::UIDialog(const char* dialogName,const char* materialName,const char* b
 // -----------------------------------------------
 //
 // -----------------------------------------------
-UIDialog::~UIDialog(void) {
+UIDialog::~UIDiaLOGC(void) {
 	m_Items.deleteContents();
 }
 
@@ -122,7 +122,7 @@ void UIDialog::OnButtonUp(int button) {
 		for ( size_t i = 0; i < m_Items.num(); ++i ) {
 			if ( m_Items[i]->isSelected(mousePos) ) {				
 				m_Selected = m_Items[i];
-				LOGC(logINFO,"UIDialog") << "Selected item " << m_Selected->getID();
+				LOGC("UIDialog") << "Selected item " << m_Selected->getID();
 				m_Items[i]->onFocus();
 			}
 		}

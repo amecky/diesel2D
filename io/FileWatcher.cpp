@@ -15,26 +15,33 @@ FileWatcher::~FileWatcher() {
 }
 
 void FileWatcher::update() {
-#ifdef DEBUG
-	for ( size_t i = 0; i < m_WatchList.size(); ++i ) {
-		FileWatch* watch = &m_WatchList[i];
-		if ( file::compareFileTime(watch->filename,watch->fileTime)) {
-			LOGC(logINFO,"FileWatcher") << "Reloading file: " << watch->filename;		
-			watch->serializer->reload(watch->filename);
-			file::getFileTime(watch->filename,watch->fileTime);
-		}
-	}
-#endif
 }
 
 void FileWatcher::registerFile(const char* fileName,Serializer* serializer) {
 #ifdef DEBUG
-	LOGC(logINFO,"FileWatcher") << "Registering file " << fileName << " to be monitored";	
+	LOGC("FileWatcher") << "Registering file " << fileName << " to be monitored";	
 	if ( !contains(fileName)) {
 		FileWatch watch;
 		IdString hash = string::murmur_hash(fileName);
 		watch.hashName = hash;
 		strcpy(watch.filename,fileName);
+		strcpy(watch.otherName,fileName);
+		watch.serializer = serializer;
+		file::getFileTime(fileName,watch.fileTime);
+		m_WatchList.push_back(watch);
+	}
+#endif
+}
+
+void FileWatcher::registerFile(const char* fileName,const char* otherName,Serializer* serializer) {
+#ifdef DEBUG
+	LOGC("FileWatcher") << "Registering file " << fileName << " to be monitored";	
+	if ( !contains(fileName)) {
+		FileWatch watch;
+		IdString hash = string::murmur_hash(fileName);
+		watch.hashName = hash;
+		strcpy(watch.filename,fileName);
+		strcpy(watch.otherName,otherName);
 		watch.serializer = serializer;
 		file::getFileTime(fileName,watch.fileTime);
 		m_WatchList.push_back(watch);

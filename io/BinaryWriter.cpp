@@ -62,16 +62,11 @@ uint32 BinaryWriter::startChunk(uint32 id, uint32 version) {
 void BinaryWriter::closeChunk() {
     if (m_Stream) {
         int pos = ftell(m_Stream);
-        //printf("new pos %d\n",pos);
         int length = pos - m_StartPos;
-        //printf("length %d\n",length);
         fseek(m_Stream, m_StartPos + 8, SEEK_SET);
-
         if (fwrite(&length, sizeof ( int), 1, m_Stream) != 1) {
             m_ErrorCode = IO_WRITE_ERROR;
-            //return m_ui32Error;
         }
-
         fseek(m_Stream, pos, SEEK_SET);
     }
 }
@@ -83,6 +78,55 @@ uint32 BinaryWriter::write(int value) {
         }
     return IO_OK;
 }
+
+uint32 BinaryWriter::write(uint32 value) {
+	if (fwrite(&value, sizeof ( uint32), 1, m_Stream) != 1) {
+		m_ErrorCode = IO_WRITE_ERROR;
+		return m_ErrorCode;
+	}
+	return IO_OK;
+}
+
+uint32 BinaryWriter::write(float value) {
+	if (fwrite(&value, sizeof ( float), 1, m_Stream) != 1) {
+		m_ErrorCode = IO_WRITE_ERROR;
+		return m_ErrorCode;
+	}
+	return IO_OK;
+}
+
+uint32 BinaryWriter::write(const Vector2f& v) {
+	fwrite(&v.x, sizeof (float), 1, m_Stream);
+	fwrite(&v.y, sizeof (float), 1, m_Stream);
+	return IO_OK;
+}
+
+uint32 BinaryWriter::write(const std::string& v) {
+	int length = v.length();
+	write(length);
+	for ( int i = 0; i < length; ++i ) {
+		char c = v[i] - 32;
+		fwrite(&c, sizeof (char), 1, m_Stream);
+	}	
+	return IO_OK;
+}
+
+uint32 BinaryWriter::write(const ds::Color& v) {
+	fwrite(&v.r, sizeof (float), 1, m_Stream);
+	fwrite(&v.g, sizeof (float), 1, m_Stream);
+	fwrite(&v.b, sizeof (float), 1, m_Stream);
+	fwrite(&v.a, sizeof (float), 1, m_Stream);
+	return IO_OK;
+}
+
+uint32 BinaryWriter::write(const ds::Rect& r) {
+	fwrite(&r.top, sizeof (float), 1, m_Stream);
+	fwrite(&r.left, sizeof (float), 1, m_Stream);
+	fwrite(&r.bottom, sizeof (float), 1, m_Stream);
+	fwrite(&r.right, sizeof (float), 1, m_Stream);
+	return IO_OK;
+}
+
 
 void BinaryWriter::close() {
     if (m_Stream) {

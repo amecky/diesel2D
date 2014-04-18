@@ -1,5 +1,6 @@
 #pragma once
-#include "..\math\math_types.h"
+#include "Vector.h"
+//#include "..\math\math_types.h"
 
 namespace ds {
 
@@ -23,6 +24,13 @@ public:
 	const int getHeight() const { 
 		return m_Height; 
 	}
+	float getPositionX() {
+		return m_Position.x;
+	}
+	float getPositionY() {
+		return m_Position.y;
+	}
+
 private:
 	Vector2f m_Position;
 	Vector2f m_Delta;

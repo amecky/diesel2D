@@ -40,10 +40,13 @@ public:
 	std::string getProperty(const std::string& name) {
 		return m_Properties[name];
 	}
-	Vector2f getVector2f(const std::string& name) {
-		float x = getFloat(0,name);
-		float y = getFloat(1,name);
-		return Vector2f(x,y);
+	Vector2f getVector2f(const std::string& name,const Vector2f& defaultValue = Vector2f(1.0f,1.0f)) {
+		if ( hasProperty(name)) {
+			float x = getFloat(0,name);
+			float y = getFloat(1,name);
+			return Vector2f(x,y);
+		}
+		return defaultValue;
 	}
 	void getVector2f(const std::string& name,Vector2f* ret) {
 		if ( hasProperty(name)) {
@@ -62,13 +65,16 @@ void getIdString(const std::string& name,IdString* ret) {
 		float z = getFloat(2,name);
 		return Vector3f(x,y,z);
 	}
-	ds::Color getColor(const std::string& name) {
-		assert(getElementCount(name) == 4);
-		int r = getInt(0,name);
-		int g = getInt(1,name);
-		int b = getInt(2,name);
-		int a = getInt(3,name);
-		return ds::Color(r,g,b,a);
+	ds::Color getColor(const std::string& name,const ds::Color& defaultValue = ds::Color::WHITE) {
+		if ( hasProperty(name)) {
+			assert(getElementCount(name) == 4);
+			int r = getInt(0,name);
+			int g = getInt(1,name);
+			int b = getInt(2,name);
+			int a = getInt(3,name);
+			return ds::Color(r,g,b,a);
+		}
+		return defaultValue;
 	}
 
 	void getColor(const std::string& name,ds::Color* color) {
@@ -151,6 +157,18 @@ void getIdString(const std::string& name,IdString* ret) {
 			*ret = getFloat(0,name);
 		}
 	}
+	float getFloat(const std::string& name,float defaultValue) {
+		if ( hasProperty(name)) {
+			return getFloat(0,name);
+		}
+		return defaultValue;
+	}
+	uint32 getUInt32(const std::string& name,uint32 defaultValue) {
+		if ( hasProperty(name)) {
+			return static_cast<uint32>(getInt(0,name));
+		}
+		return defaultValue;
+	}
 	float getFloat(int index,const std::string& name) {
 		std::string s = m_Properties[name];
 		std::vector<std::string> values = ds::string::split(s);
@@ -163,6 +181,12 @@ void getIdString(const std::string& name,IdString* ret) {
 		if ( hasProperty(name)) {
 			*value = getInt(0,name);
 		}
+	}
+	int getInt(const std::string& name,int defaultValue) {
+		if ( hasProperty(name)) {
+			return getInt(0,name);
+		}
+		return defaultValue;
 	}
 	void getInt(const std::string& name,uint32* value) {
 		if ( hasProperty(name)) {
@@ -186,21 +210,6 @@ private:
 	std::string m_Name;
 	std::map<std::string,std::string> m_Properties;
 	std::vector<Category*> m_Children;
-};
-
-class PlainTextReader {
-
-public:
-	PlainTextReader();
-	virtual ~PlainTextReader() {
-		delete m_Root;
-	}
-	bool readFile(const char* fileName);
-	Category* getRoot() {
-		return m_Root;
-	}
-private:
-	Category* m_Root;
 };
 
 // -------------------------------------------------------
@@ -228,136 +237,3 @@ private:
 	std::vector<Category*> m_Categories;
 };
 
-// -------------------------------------------------------
-// Settings reader
-// -------------------------------------------------------
-class SettingsReader {
-
-typedef std::map<std::string,std::string> Settings;
-
-public:
-	SettingsReader();
-	~SettingsReader();
-	bool parse(const char* fileName);
-	std::string& getValue(const std::string& name);
-	void getNames(std::vector<std::string>& names);
-	float getRandomFloat(const char* name);
-	template<class T> T get(const std::string& name,const T& defaultValue) {
-		if ( m_Settings.find(name) == m_Settings.end() ) {
-			return defaultValue;
-		}
-		std::string s = m_Settings[name];
-		T t;
-		std::istringstream ist(s);
-		ist >> t;
-		return t;
-	}
-private:
-	Settings m_Settings;
-};
-
-// -------------------------------------------------------
-// NewSettingsReader
-// -------------------------------------------------------
-const std::string EMPTY = "EMPTY";
-
-class NewSettingsReader {
-
-struct Setting {
-	char name[20];
-	IdString hash;
-	std::string value;
-};
-
-typedef std::vector<Setting> Settings;
-
-public:
-	NewSettingsReader() {}
-	~NewSettingsReader() {}
-	bool parse(const char* fileName);
-	bool contains(const char* name) {
-		return find(name) != 0;
-	}
-	const std::string& getString(const char* name) {
-		Setting* setting = find(name);
-		if ( setting != 0 ) {
-			return setting->value;
-		}
-		return EMPTY;
-	}
-	void get(const char* first,const char* second,ds::FloatArray* array) {
-		Setting* firstSetting = find(first);
-		Setting* secondSetting = find(second);
-		//LOG(logINFO) << "first " << firstSetting->value;
-		//LOG(logINFO) << "second " << secondSetting->value;
-		if ( firstSetting != 0 && secondSetting != 0 ) {
-			array->reset();
-			std::vector<std::string> firstEntries;
-			ds::string::split(firstSetting->value,firstEntries,' ');
-			std::vector<std::string> secondEntries;
-			ds::string::split(secondSetting->value,secondEntries,' ');
-			if ( firstEntries.size() == secondEntries.size() ) {
-				for ( size_t i = 0; i < firstEntries.size(); ++i ) {
-					float x = convert<float>(firstEntries[i]);
-					float t = convert<float>(secondEntries[i]);
-					array->add(t,x);
-				}
-			}
-			else {
-				LOGC(logINFO,"NewSettingsReader") << "Found uneven settings for: " << first << " and " << second;
-			}
-		}
-		else {
-			LOGC(logINFO,"NewSettingsReader") << "Cannot find matching settings for: " << first << " and " << second;
-		}
-	}
-	void get(const char* name,float* value) {
-		Setting* set = find(name);
-		if ( set != 0 ) {		
-			if ( set->value.find("[") != std::string::npos ) {
-				std::string nv = set->value.substr(1,set->value.length()-2);
-				std::vector<std::string> entries;
-				ds::string::split(nv,entries,'-');
-				float min = convert<float>(entries[0]);
-				float max = convert<float>(entries[1]);
-				*value = ds::math::random(min,max);
-			}
-			else {
-				get<float>(name,value);
-			}
-		}		
-	}
-	template<class T>
-	void get(const char* name,T* value) {
-		Setting* set = find(name);
-		if ( set != 0 ) {					
-			T t;
-			std::istringstream ist(set->value);
-			ist >> t;
-			*value = t;			
-		}		
-	}
-	size_t num() {
-		return m_Settings.size();
-	}
-private:
-	Setting* NewSettingsReader::find(const char* name) {
-		IdString hash = ds::string::murmur_hash(name);
-		for ( size_t i = 0; i < m_Settings.size(); ++i ) {
-			Setting* set = &m_Settings[i];
-			if ( set->hash == hash ) {
-				return set;
-			}
-		}
-		LOGC(logINFO,"NewSettingsReader") << "Sorry - but " << name << " was not found";
-		return 0;
-	}
-	template<class T>
-	T convert(const std::string& value) {
-		T t;
-		std::istringstream ist(value);
-		ist >> t;
-		return t;
-	}
-	Settings m_Settings;
-};

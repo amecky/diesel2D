@@ -1,4 +1,5 @@
 #include "LightComponent.h"
+#include "..\..\renderer\shader.h"
 
 namespace ds {
 
@@ -15,8 +16,8 @@ LightComponent::~LightComponent(void) {
 // Initialize
 // -------------------------------------------------------
 void LightComponent::initialize(int startLayer,int colorRT,int normalRT,float ambient,const Color& ambientColor) {
-	m_ScreenW = m_Renderer->getWidth();
-	m_ScreenH = m_Renderer->getHeight();
+	m_ScreenW = m_Renderer->getViewport()->getWidth();
+	m_ScreenH = m_Renderer->getViewport()->getHeight();
 	float centerX = m_ScreenW * 0.5f;
 	float centerY = m_ScreenH * 0.5f;
 

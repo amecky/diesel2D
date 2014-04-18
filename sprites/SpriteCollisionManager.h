@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "SpriteObject.h"
+#include "Sprite.h"
 
 const int COLL_SIZE = 32;
 const int COLL_BUFFER_MAX = 1000;
@@ -28,7 +28,7 @@ struct SpriteCollisionObject {
 	Vector2f extent;
 	int id;
 	int type;
-	SpriteObject* sprite;
+	Sprite* sprite;
 };
 
 // -------------------------------------------------------
@@ -65,8 +65,8 @@ typedef std::vector<IgnoreCollision> Ignores;
 public:
 	SpriteCollisionManager();	
 	virtual ~SpriteCollisionManager();
-	int add(SpriteObject* sprite,int type);
-	void remove(SpriteObject* sprite,int type);
+	int add(Sprite* sprite,int type);
+	void remove(Sprite* sprite,int type);
 	int checkIntersections();
 	void reset();
 	bool getCollision(int index,SpriteCollision& collision) const;
@@ -106,6 +106,8 @@ private:
 namespace coll {
 
 	bool containsType(const SpriteCollision& collision,int type);
+
+	bool matches(const SpriteCollision& collision,int firstType,int secondType);
 
 	int getIDByType(const SpriteCollision& collision,int type);
 

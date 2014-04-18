@@ -37,10 +37,10 @@ void DataBlockAllocator::freeMemory() {
 }
 
 void DataBlockAllocator::debug() {
-	LOG(logINFO) << "---- DataBlockAllocator ----";
+	LOG << "---- DataBlockAllocator ----";
 	MemoryBlock* current = m_Current;
 	while ( current ) {
-		LOG(logINFO) << "Size: " << current->index << " elements: " << current->elements;
+		LOG << "Size: " << current->index << " elements: " << current->elements;
 		current = current->next;
 	}
 }

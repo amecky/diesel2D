@@ -1,11 +1,9 @@
 #pragma once
 #include "..\renderer\Renderer.h"
 #include <vector>
-#include "..\nodes\SpriteBatch.h"
 #include "..\renderer\render_types.h"
 #include "..\io\Serializer.h"
-#include "..\utils\PlainTextReader.h"
-#include "..\sprites\SpriteObject.h"
+#include "..\sprites\Sprite.h"
 
 namespace ds {
 
@@ -32,7 +30,7 @@ struct GUIItem {
 	bool centered;
 	Color color;
 	float scale;
-	std::vector<SpriteObject> sprites;
+	std::vector<Sprite> sprites;
 
 	GUIItem() : id(-1) , pos(0,0) , centered(true) , color(Color::WHITE) , scale(1.0f) {}
 };
@@ -101,16 +99,8 @@ public:
 		m_ImageLinks.clear();
 		m_Buttons.clear();
 	}
-
-	//! Loads data from a json file
-	/*
-		\param filename the name of the json file include directories
-	*/
-	void load(const char* fileName);	
-	//! Reloads data from a json file
-	void reload(const char* fileName);
+	void load(BinaryLoader* loader);
 private:
-	void loadDialogFromJSON(JSONReader& reader);
 	GUIItem* findByID(int id);
 	int findFreeID();
 	DialogID m_ID;

@@ -78,8 +78,8 @@ private:
 class NewUIDialog : public ScreenQuad {
 
 public:
-	NewUIDialog(const char* name,const char* materialName);
-	virtual ~NewUIDialog() {}
+	NewUIDiaLOGC(const char* name,const char* materialName);
+	virtual ~NewUIDiaLOGC() {}
 	void loadContent(ResManager& resourceManager) {}
 	void update(float elapsed);
 	void addTextbox(const Vector2f& pos);

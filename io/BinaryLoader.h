@@ -8,6 +8,8 @@
 #ifndef BINARYLOADER_H
 #define	BINARYLOADER_H
 #include "BinaryWriter.h"
+#include <Vector.h>
+#include "..\utils\Color.h"
 
 class BinaryLoader {
     
@@ -65,6 +67,11 @@ public:
     }
     void read(float* value);
     void read(int* value);
+	void read(uint32* value);
+	void read(Vector2f* value);
+	void read(ds::Color* value);
+	void read(ds::Rect* value);
+	void read(std::string& str);
     /*
      * Reads data into buffer
      * 
@@ -73,7 +80,7 @@ public:
      * 
      * Returns: IO_OK if successfull or any error code
      */
-    uint32 read(void* buffer,uint32 size);
+    uint32 readBuffer(void* buffer,uint32 size);
     /*
      * Reset the internal file pointer to the beginning
      */

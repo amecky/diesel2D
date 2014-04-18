@@ -57,7 +57,7 @@ void SpriteCollisionManager::reset() {
 // -------------------------------------------------------
 // Add circle
 // -------------------------------------------------------
-int SpriteCollisionManager::add(SpriteObject* sprite,int type) {
+int SpriteCollisionManager::add(Sprite* sprite,int type) {
     int idx = m_Counter;
     SpriteCollisionObject* co = new SpriteCollisionObject;
     co->prevPosition = sprite->getPosition();
@@ -74,7 +74,7 @@ int SpriteCollisionManager::add(SpriteObject* sprite,int type) {
 // -------------------------------------------------------
 // Remove
 // -------------------------------------------------------
-void SpriteCollisionManager::remove(SpriteObject* entity,int type) {
+void SpriteCollisionManager::remove(Sprite* entity,int type) {
 	std::vector<SpriteCollisionObject*>::iterator it = m_Objects.begin();
 	while ( it != m_Objects.end() ) {
 		if ( (*it)->sprite->getID() == entity->getID() && (*it)->type == type ) {
@@ -107,7 +107,7 @@ int SpriteCollisionManager::checkIntersections() {
 			for ( std::size_t j = 0; j < m_Objects.size(); ++j ) {
 				SpriteCollisionObject* checkObject = m_Objects[j];   
 				if ( checkObject->sprite->isActive() && !equals(object,checkObject)) {
-					if ( !shouldIgnore(object->type,checkObject->type)) {
+					if ( !shouldIgnore(object->type,checkObject->type) && object->type != checkObject->type ) {
 						if ( intersectCircleCircle(object,checkObject)) {
 							if ( addCollision(object,checkObject) ) {
 								++ret;
@@ -168,7 +168,7 @@ SpriteCollisionObject* SpriteCollisionManager::findObject(int id) {
 void SpriteCollisionManager::debug() {
 	for ( std::size_t i = 0; i < m_Objects.size(); ++i ) {
 		SpriteCollisionObject* object = m_Objects[i];
-		LOG(logINFO) << i << " id: " << object->id << " entity-id: " << object->sprite->getID() << " type: " << object->type << " active: " << object->sprite->isActive() << " position: " << DBG_V2(object->sprite->getPosition()) << " radius: " << object->extent.x;
+		LOG << i << " id: " << object->id << " entity-id: " << object->sprite->getID() << " type: " << object->type << " active: " << object->sprite->isActive() << " position: " << DBG_V2(object->sprite->getPosition()) << " radius: " << object->extent.x;
 	}
 }
 
@@ -176,6 +176,15 @@ namespace coll {
 
 	bool containsType(const SpriteCollision& collision,int type) {
 		return collision.firstType == type || collision.secondType == type;
+	}
+
+	bool matches(const SpriteCollision& collision,int firstType,int secondType) {
+		if ( collision.firstType == firstType || collision.secondType == firstType ) {
+			if ( collision.firstType == secondType || collision.secondType == secondType ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	int getIDByType(const SpriteCollision& collision,int type) {

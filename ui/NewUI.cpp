@@ -101,7 +101,7 @@ void NewUITextbox::fillBuffer(const Vector2f& parentPosition,ScreenQuad& screenQ
 // ---------------------------------------------------------------
 //
 // ---------------------------------------------------------------
-NewUIDialog::NewUIDialog(const char* name,const char* materialName)
+NewUIDialog::NewUIDiaLOGC(const char* name,const char* materialName)
 	: ScreenQuad(name,materialName,512,true) {
 	m_Position = Vector2f(10,10);
 	m_Size = Vector2f(200,200);

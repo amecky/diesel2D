@@ -1,5 +1,5 @@
 #include "SpriteObjectDescription.h"
-#include "SpriteObject.h"
+#include "Sprite.h"
 
 namespace ds {
 
@@ -50,7 +50,7 @@ void SpriteObjectDescription::load(const char* name) {
 void SpriteObjectDescription::reload(const char* name) {
 	JSONReader reader;
 	if ( reader.parse(name)) {
-		LOG(logINFO) << "found valid file";
+		LOG << "found valid file";
 		std::vector<Category*> categories = reader.getCategories();
 		for ( size_t i = 0; i < categories.size(); ++i ) {
 			Category* c = categories[i];
@@ -82,7 +82,7 @@ void SpriteObjectDescription::reload(const char* name) {
 	}
 }
 
-void SpriteObjectDescription::setAnimations(SpriteObject* object) {
+void SpriteObjectDescription::setAnimations(Sprite* object) {
 	if ( m_RotationPath != 0 ) {
 		object->add(m_RotationPath);
 	}
@@ -94,7 +94,7 @@ void SpriteObjectDescription::setAnimations(SpriteObject* object) {
 	}
 }
 
-void SpriteObjectDescription::prepare(SpriteObject* object) {
+void SpriteObjectDescription::prepare(Sprite* object) {
 	if ( m_SpriteDescription != 0 ) {
 		object->setTextureRect(m_SpriteDescription->textureRect);
 	}

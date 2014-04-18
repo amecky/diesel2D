@@ -14,13 +14,13 @@ Viewport::~Viewport() {
 }
 
 void Viewport::setDimension(int width,int height) {
-	LOGC(logINFO,"Viewport") << "Setting dimension to " << width << "x" << height;
+	LOGC("Viewport") << "Setting dimension to " << width << "x" << height;
 	m_Width = width;
 	m_Height = height;
 	m_MaxX = m_Width;// - gEngine->getWidth();
 	m_MaxY = m_Height;// - gEngine->getHeight();
 	m_Delta = Vector2f(m_MaxX,m_MaxY);
-	LOGC(logINFO,"Viewport") << "Delta x: " << m_MaxX<< " y:" << m_MaxY;
+	LOGC("Viewport") << "Delta x: " << m_MaxX<< " y:" << m_MaxY;
 }
 
 void Viewport::setPosition(int x,int y) {

@@ -33,14 +33,14 @@ void * FreeListAllocator::allocate( uint32 size, uint32 align /*= DEFAULT_ALIGN 
 	p = data + size;
 	// Reached the end of the buffer, wrap around to the beginning.
 	if (p > m_End) {
-		LOG(logERROR) << "Allocator exhausted";
+		LOGE << "Allocator exhausted";
 		return 0;
 	}
 	fill(h, data, p - (char *)h);
 	m_Allocate = p;
 	++m_NumAllocations;
 	m_MemoryUsed += h->size;
-	//LOG(logINFO) << "allocated " << size << " header size " << h->size;
+	//LOG << "allocated " << size << " header size " << h->size;
 	return data;
 }
 
@@ -76,7 +76,7 @@ void FreeListAllocator::deallocate( void *p ) {
 		return;
 	}
 	if (p < m_Begin || p >= m_End ) {
-		LOG(logERROR) << "Deallocation outside our memory";
+		LOGE << "Deallocation outside our memory";
 		return;
 	}
 
@@ -88,7 +88,7 @@ void FreeListAllocator::deallocate( void *p ) {
 		--pd;
 	Header* h = (Header *)pd - 1;
 
-	//LOGC(logINFO,"FreeListAllocator") << "deallocating : " << h->size;
+	//LOGC("FreeListAllocator") << "deallocating : " << h->size;
 	m_MemoryUsed -= h->size;
 	assert((h->size & 0x80000000u) == 0);
 	h->size = h->size | 0x80000000u;
@@ -101,7 +101,7 @@ void FreeListAllocator::deallocate( void *p ) {
 
 		m_Free += h->size & 0x7fffffffu;
 		if (m_Free == m_End) {
-			LOG(logERROR) << "Buffer exhausted";
+			LOGE << "Buffer exhausted";
 		}
 	}
 

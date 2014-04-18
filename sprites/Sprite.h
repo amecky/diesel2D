@@ -3,19 +3,19 @@
 #include "..\math\math_types.h"
 #include "Vector.h"
 #include "..\utils\Color.h"
-#include "..\nodes\SpriteBatch.h"
+#include "..\io\Serializer.h"
 
 namespace ds {
 
 class SpriteAnimation;
 
-class SpriteObject {
+class Sprite : public Serializer {
 
 typedef std::vector<SpriteAnimation*> Animations;
 
 public:
-	SpriteObject();
-	virtual ~SpriteObject(void);
+	Sprite();
+	virtual ~Sprite(void);
 	void update(float elapsed);
 	void add(SpriteAnimation* animation) {
 		m_Animations.push_back(animation);
@@ -81,6 +81,11 @@ public:
 		m_Size = size;
 		setPosition(m_Position);
 	}
+	void setScale(float sx,float sy) {
+		m_Size.x = sx;
+		m_Size.y = sy;
+		setPosition(m_Position);
+	}
 	const Vector2f& getScale() const {
 		return m_Size;
 	}
@@ -109,6 +114,13 @@ public:
 	const int getTextureID() const {
 		return m_TextureID;
 	}
+	void setUserValue(int userValue) {
+		m_UserValue = userValue;
+	}
+	const int getUserValue() const {
+		return m_UserValue;
+	}
+	void load(BinaryLoader* loader);
 private:	
 	float m_Timer;
 	int m_TextureID;
@@ -129,6 +141,7 @@ private:
 	float delay;
 	float dimX;
 	float dimY;
+	int m_UserValue;
 
 
 };

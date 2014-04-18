@@ -5,18 +5,10 @@
 
 namespace ds {
 
-struct DynamicSettings {
-
-	DynamicSettings() {}
-	virtual ~DynamicSettings() {}
-	virtual void load(NewSettingsReader& reader) = 0;
-
-};
-
 // -------------------------------------------------------
 // FloatPath
 // -------------------------------------------------------
-struct FloatPath : public DynamicSettings {
+struct FloatPath {
 
 	FloatArray array;
 
@@ -32,9 +24,7 @@ struct FloatPath : public DynamicSettings {
 	int size() {
 		return array.size();
 	}
-	void load(NewSettingsReader& reader) {
-		reader.get("v_steps","t_steps",&array);
-	}
+	
 	void setInterpolationMode(const PathInterpolation& interpolation) {
 		array.setInterpolationMode(interpolation);
 	}
@@ -46,7 +36,7 @@ struct FloatPath : public DynamicSettings {
 // -------------------------------------------------------
 // Vector2fPath
 // -------------------------------------------------------
-struct Vector2fPath : public DynamicSettings {
+struct Vector2fPath {
 
 	FloatArray x;
 	FloatArray y;
@@ -66,10 +56,7 @@ struct Vector2fPath : public DynamicSettings {
 	int size() {
 		return x.size();
 	}
-	void load(NewSettingsReader& reader) {
-		reader.get("steps_x","steps_t",&x);
-		reader.get("steps_y","steps_t",&y);
-	}
+	
 	void setInterpolationMode(const PathInterpolation& interpolation) {
 		x.setInterpolationMode(interpolation);
 		y.setInterpolationMode(interpolation);
@@ -83,7 +70,7 @@ struct Vector2fPath : public DynamicSettings {
 // -------------------------------------------------------
 // ColorPath
 // -------------------------------------------------------
-struct ColorPath : public DynamicSettings {
+struct ColorPath {
 
 	FloatArray red;
 	FloatArray green;
@@ -112,13 +99,7 @@ struct ColorPath : public DynamicSettings {
 		blue.reset();
 		alpha.reset();
 	}
-	void load(NewSettingsReader& reader) {
-		reader.get("r_array","t_steps",&red);
-		reader.get("g_array","t_steps",&green);
-		reader.get("b_array","t_steps",&blue);
-		reader.get("a_array","t_steps",&alpha);		
-	}
-
+	
 	void setInterpolationMode(const PathInterpolation& interpolation) {
 		red.setInterpolationMode(interpolation);
 		green.setInterpolationMode(interpolation);

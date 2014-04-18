@@ -2,7 +2,7 @@
 #include "..\math\math_types.h"
 #include <vector>
 #include "..\renderer\render_types.h"
-#include "..\sprites\SpriteObject.h"
+#include "..\sprites\Sprite.h"
 #include "..\base\GameObject.h"
 
 namespace ds {
@@ -17,7 +17,7 @@ struct TextEntry {
 	Color color;
 	float scale;
 	bool active;
-	std::vector<SpriteObject> sprites;
+	std::vector<Sprite> sprites;
 };
 
 // -------------------------------------------------------

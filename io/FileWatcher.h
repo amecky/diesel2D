@@ -10,6 +10,7 @@ class FileWatcher {
 struct FileWatch {
 	IdString hashName;
 	char filename[256];
+	char otherName[256];
 	Serializer* serializer;
 	FILETIME fileTime;
 };
@@ -20,6 +21,7 @@ public:
 	FileWatcher(void);
 	~FileWatcher(void);
 	void registerFile(const char* fileName,Serializer* serializer);
+	void registerFile(const char* fileName,const char* name,Serializer* serializer);
 	void update();
 	bool contains(const char* fileName);
 private:

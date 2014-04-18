@@ -91,7 +91,7 @@ void GUILabel::setText() {
 		ch.index = m_Buffer->create(dimX,dimY,m_Position,Rect(0,0,0,0),1024.0f);
 		ch.dimX = padding;
 		ch.dimY = dimY;
-		LOG(logINFO) << "char dim " << ch.dimX << " / " << ch.dimY;
+		LOG << "char dim " << ch.dimX << " / " << ch.dimY;
 		m_Buffer->setTextureCoordinates(ch.index,cd.u1,cd.v1,cd.u2,cd.v2);
 		m_Buffer->update(ch.index,Vector2f(x,y));
 		m_Chars.push_back(ch);				
@@ -124,7 +124,7 @@ GUINode::GUINode(const char* name,const char* material,const char* bitmapFont) :
 	/*
 	Material* mtrl = gEngine->getResourceManager().getMaterialByName(material);
 	if ( mtrl != 0 ) {
-		LOG(logINFO) << "material: " << mtrl->getTexture(0)->getName();
+		LOG << "material: " << mtrl->getTexture(0)->getName();
 		ResourceHandle mh = gEngine->getResourceManager().findByName(material,RS_MATERIAL);
 		if ( gEngine->getResourceManager().contains("GUIShader",RS_SHADER) ) {
 			ResourceHandle sh = gEngine->getResourceManager().findByName("GUIShader",RS_SHADER);
@@ -232,7 +232,7 @@ void GUINode::update(float elapsed) {
 				}
 			}
 			else {
-				LOG(logINFO) << "Found but cannot find control";
+				LOG << "Found but cannot find control";
 			}
 		}
 		*/

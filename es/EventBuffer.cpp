@@ -43,7 +43,7 @@ const int EventBuffer::size() const {
 void EventBuffer::getData(int idx,void* p,int size) {
 	char *ptr = (char *) p;
 	EventHeader* header = &m_Indices[idx];
-	LOG(logINFO) << "getData : offset: " << header->offset << " size: " << header->size;
+	LOG << "getData : offset: " << header->offset << " size: " << header->size;
 	char* data = m_Data + header->offset;
 	int to_read = header->size;
 	//assert( index < MAX_EB_SIZE);
@@ -59,7 +59,7 @@ void EventBuffer::debug() {
 	for ( int i = 0; i < 256; ++i ) {
 		EventHeader* header = &m_Indices[i];
 		if ( header->offset != -1 ) {
-			LOG(logINFO) << i << " : type: " << header->type << " offset: " << header->offset << " size: " << header->size;
+			LOG << i << " : type: " << header->type << " offset: " << header->offset << " size: " << header->size;
 		}
 	}
 }

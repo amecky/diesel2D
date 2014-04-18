@@ -6,7 +6,7 @@
 NewProfiler* gProfiler;
 
 NewProfiler::NewProfiler() : m_Ticks(0) {
-	LOGC(logINFO,"Profiler") << "creating new profiler";
+	LOGC("Profiler") << "creating new profiler";
 	QueryPerformanceFrequency(&m_Frequency);
 	//m_Frames.assureSize(20);
 }
@@ -144,7 +144,8 @@ void NewProfiler::reset() {
 
 void NewProfiler::print() {
 	float total = 0.0f;
-	//for ( size_t i = 0; i < m_Frames.num(); ++i ) {
+	LOG << "Profiler";
+	LOG << "-------------------------------------------------";
 	for ( size_t i = 0; i < m_Frames.size(); ++i ) {
 		ProfileFrame* frame = &m_Frames[i];
 		if ( frame->valid && frame->level == 0 ) {
@@ -152,27 +153,29 @@ void NewProfiler::print() {
 			total = frame->accumulator;
 		}
 	}
-	LOGC(logINFO,"NewProfiler") << "Percentage | BeginCalls | Accumulator | Frame";		
+	LOG << "Percent | C | Accu      | Frame";		
 	for ( size_t i = 0; i < m_Frames.size(); ++i ) {
 		ProfileFrame* frame = &m_Frames[i];		
 		if ( frame->beginCalls > 0 ) {
 			float percentage = frame->accumulator / total * 100.0f;
-			LOGC(logINFO,"NewProfiler") << formatPercentage(percentage) << "% | " << frame->beginCalls << " | " << formatDuration(frame->accumulator) << " | " << formatName(frame);	
+			LOG << formatPercentage(percentage) << "% | " << frame->beginCalls << " | " << formatDuration(frame->accumulator) << " | " << formatName(frame);	
 		}
 	}
-	LOGC(logINFO,"NewProfiler") << "---- history -------";
+	/*
+	LOGC("NewProfiler") << "---- history -------";
 	for ( uint32 i = 0; i < m_History.num(); ++i ) {
 		ProfileHistory* ph = &m_History[i];
 		if ( ph->level == 0 ) {
 			total = ph->average;
 		}
 	}
-	LOGC(logINFO,"NewProfiler") << "Percentage | Average | Min | Max | Name";			
+	LOGC("NewProfiler") << "Percentage | Average | Min | Max | Name";			
 	for ( uint32 i = 0; i < m_History.num(); ++i ) {
 		ProfileHistory* ph = &m_History[i];
 		float percentage = ph->average / total * 100.0f;
-		LOGC(logINFO,"NewProfiler") << formatPercentage(percentage) << "% | " << formatDuration(ph->average) << " | " << formatDuration(ph->min) << " | " << formatDuration(ph->max) << " | " << ph->name;			
+		LOGC("NewProfiler") << formatPercentage(percentage) << "% | " << formatDuration(ph->average) << " | " << formatDuration(ph->min) << " | " << formatDuration(ph->max) << " | " << ph->name;			
 	}
+	*/
 }
 
 void NewProfiler::show(int x,int y,ds::Renderer* renderer) {
@@ -193,7 +196,7 @@ void NewProfiler::show(int x,int y,ds::Renderer* renderer) {
 		tx = tx +70.0f + ph->level * 5.0f;
 		renderer->debug(tx,ty,ph->name);
 		ty += 20.0f;
-		//LOGC(logINFO,"NewProfiler") << formatPercentage(percentage) << "% | " << formatDuration(ph->average) << " | " << formatDuration(ph->min) << " | " << formatDuration(ph->max) << " | " << ph->name;			
+		//LOGC("NewProfiler") << formatPercentage(percentage) << "% | " << formatDuration(ph->average) << " | " << formatDuration(ph->min) << " | " << formatDuration(ph->max) << " | " << ph->name;			
 	}
 }
 
@@ -272,6 +275,9 @@ void NewProfiler::stopCollectData(const char* name) {
 			time.QuadPart = stop.QuadPart - data->started.QuadPart;
 			data->data[data->counter] = LIToSecs(time);
 			++data->counter;
+			if ( data->counter > MAX_PROFILE_DATA ) {
+				data->counter = 0;
+			}
 		}
 	}
 }
@@ -280,17 +286,21 @@ void NewProfiler::stopCollectData(const char* name) {
 // -------------------------------------------------------
 void NewProfiler::printCollectedData(const char* name) {
 	IdString hash = ds::string::murmur_hash(name);	
+	float total = 0.0f;
 	for ( uint32 i = 0; i < m_ProfileData.num(); ++i ) {
 		ProfileData* data = &m_ProfileData[i];
 		if ( data->hash == hash ) {
-			LOG(logINFO) << "Collected data for " << name << " - entries " << data->counter;
+			LOG << "---- Collected data for " << name << " - entries " << data->counter;
 			int start = data->counter - 10;
 			if ( start < 0 ) {
 				start = 0;
 			}
 			for ( int i = start; i < data->counter; ++i ) {
-				LOG(logINFO) << i << " : " << data->data[i] * 1000.0;
+				LOG << i << " : " << data->data[i] * 1000.0;
+				total += data->data[i];
 			}
 		}
 	}
+	float average = total / 10.0f;
+	LOG << "Average: " << average;
 }

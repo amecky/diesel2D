@@ -1,0 +1,73 @@
++ Render commands
+------------------------------------------------
+
++ DrawCounter
+------------------------------------------------
+- add state changes
+- add vertex and pixel shader changes
+- add nice background border (like console)
+
++ Memory usage
+------------------------------------------------
+- calculate rendertarget
+- texture size
+- vertex and index buffer size
+- show memory usage 
+
++ Profiler
+------------------------------------------------
+- add nice background
+
++ Render pipeline
+------------------------------------------------
+- get drawcounter per stage
+- calculate time
+- show diagram
+
++ Stopwatch
+------------------------------------------------
+- add countdown timer -> when done send out defined event
+
++ TVar
+------------------------------------------------
+x include Vector3f
+x include Vector2f
+- include Rect
+x include String -> getValue()
+- save TVar to text file at the end of game if TVAR_ARCHIVE is set
+- build TVarConverter
+- read TVars at startup
+- save TVar to JSON file format
+- reload TVars
+- use internal TVAR so different vars with the same name can share value
+
+------------------------------------------------
+ DONE
+------------------------------------------------
+
++ World
+------------------------------------------------
+x rewrite it completely
+x used fixed arrays
+x fix name mapping - use hash
+
++ General
+------------------------------------------------
+x in debug mode add key mappings: 
+x F1 -> debug world
+x F2 -> show profile
+x F3 -> toggle draw counter
+x F4 -> toggle onscreen profiler
+x F5 -> debug engine output
+x F6 -> debug active nodes
+x F7 -> render debug output
+
++ Render pipeline
+------------------------------------------------
+x read "stages" file and convert it
+x build RenderPipelineDeclaration
+x create pipeline in Renderer
+x change Renderer to use pipeline
+x remove rendertarget from ResManager
+x build rendertarget if needed by pipeline
+x include geometry and alpha stage

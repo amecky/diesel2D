@@ -101,11 +101,11 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam){
 			ShowWindow(hwnd, SW_SHOW);
 			break;
 		case WM_CLOSE:
-			LOG(logINFO) << "WM_CLOSE";
+			LOG << "WM_CLOSE";
 			app->shutdown();
 			break;
 		case WM_DESTROY:
-			LOG(logINFO) << "WM_DESTROY";
+			LOG << "WM_DESTROY";
 			PostQuitMessage(0);
 			break;
 		default:

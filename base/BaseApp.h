@@ -4,14 +4,16 @@
 #include "..\renderer\Renderer.h"
 #include "..\utils\mtrand.h"
 #include "..\dialogs\DialogManager.h"
-#include "..\world\World.h"
 #include "..\audio\AudioManager.h"
 #include "GameObject.h"
 #include "..\sprites\SpriteCollisionManager.h"
+#include "..\compiler\AssetCompiler.h"
+#include "..\particles\ParticleManager.h"
 
 namespace ds {
 
 class GameStateManager;
+class ParticleSystem;
 
 struct GameTime {
 	float elapsed;
@@ -94,6 +96,7 @@ public:
 	}	
 	template<class S>
 	void createGameObject(S* obj);
+	void createParticleSystem(const char* fileName,int textureID,ParticleSystem* entity,int maxParticles,int blendState = -1);
 protected:
 	void initializeGUI();
 	virtual const char* getTitle() = 0;
@@ -106,6 +109,7 @@ protected:
 	Renderer* renderer;
 	DialogManager gui;
 	AudioManager* audio;
+	AssetCompiler assets;
 	HINSTANCE hInstance;
 	HWND m_hWnd;
 	bool m_Active;
@@ -115,10 +119,9 @@ protected:
 	bool m_Fullscreen;
 	GameTime m_GameTime;
 	Color m_ClearColor;
-	World m_World;
+	ParticleManager* particles;
 	SpriteCollisionManager* m_CollisionManager;
 private:
-	
 	Vector2f m_MousePos;
 	DWORD m_CurTime;
 	float g_fElapsedTime;
@@ -136,6 +139,8 @@ template<class S>
 void BaseApp::createGameObject(S* obj) {
 	obj->setRenderer(renderer);
 	obj->setCollisionManager(m_CollisionManager);
+	obj->setParticleManager(particles);
+	obj->setAssetCompiler(&assets);
 	obj->init();
 	obj->GameObject::setActive(true);
 	m_GameObjects.push_back(obj);

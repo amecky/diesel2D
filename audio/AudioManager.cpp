@@ -14,7 +14,7 @@ AudioManager::AudioManager(void) {
 // -------------------------------------------------------
 AudioManager::~AudioManager(void) {
 	for ( uint32 i = 0; i < m_AudioBuffers.num();++i ) {
-		LOGC(logINFO,"AudioManager") << "removing sound " << m_AudioBuffers[i].name;
+		LOGC("AudioManager") << "removing sound " << m_AudioBuffers[i].name;
 		delete m_AudioBuffers[i].buffer;
 	}
 	SAFE_RELEASE( m_pDS );
@@ -24,9 +24,9 @@ AudioManager::~AudioManager(void) {
 // Initializes AudioManager
 // -------------------------------------------------------
 bool AudioManager::initialize(HWND hWnd) {	
-	LOGC(logINFO,"AudioManager") << "Initialize";
+	LOGC("AudioManager") << "Initialize";
 	if(m_Initialized) {
-		LOGC(logERROR,"AudioManager") << "Already initialized";
+		LOGEC("AudioManager") << "Already initialized";
 		return true;
 	}
 	m_Initialized=false;
@@ -37,18 +37,18 @@ bool AudioManager::initialize(HWND hWnd) {
 
 	// Create IDirectSound using the primary sound device
 	if( FAILED( hr = DirectSoundCreate8( NULL, &m_pDS, NULL ) ) ) {
-		LOGC(logERROR,"AudioManager") << "Failed to create direct sound";
+		LOGEC("AudioManager") << "Failed to create direct sound";
 		return false;
 	}
 
 	// Set DirectSound coop level 
 	if( FAILED( hr = m_pDS->SetCooperativeLevel( hWnd, DSSCL_PRIORITY) ) ) {
-		LOGC(logERROR,"AudioManager") << "Failed to set cooperative level";
+		LOGEC("AudioManager") << "Failed to set cooperative level";
 		return false;
 	}
 	//if( !setPrimaryBufferFormat( 8, 44100, 16 ) )
 	if( !setPrimaryBufferFormat( 2, 22050, 16 ) ) {
-		LOGC(logERROR,"AudioManager") << "Failed to set primary buffer format";
+		LOGEC("AudioManager") << "Failed to set primary buffer format";
 		return false;
 	}	
 	m_Initialized = true;
@@ -75,7 +75,7 @@ bool AudioManager::setPrimaryBufferFormat(DWORD dwPrimaryChannels,DWORD dwPrimar
 	dsbd.lpwfxFormat   = NULL;
 
 	if( FAILED( hr = m_pDS->CreateSoundBuffer( &dsbd, &pDSBPrimary, NULL ) ) ) {
-		LOG(logERROR) << "Error while creating sound buffer";
+		LOGEC("AudioManager") << "Error while creating sound buffer";
 		return false;
 	}
 
@@ -89,7 +89,7 @@ bool AudioManager::setPrimaryBufferFormat(DWORD dwPrimaryChannels,DWORD dwPrimar
 	wfx.nAvgBytesPerSec = (DWORD) (wfx.nSamplesPerSec * wfx.nBlockAlign);
 
 	if( FAILED( hr = pDSBPrimary->SetFormat(&wfx) ) ) {
-		LOGC(logERROR,"AudioManager") << "Error while setting format";
+		LOGEC("AudioManager") << "Error while setting format";
 		return false;
 	}
 
@@ -104,7 +104,7 @@ bool AudioManager::setPrimaryBufferFormat(DWORD dwPrimaryChannels,DWORD dwPrimar
 bool AudioManager::createAudioBuffer(Sound* sound) {
 	LPDIRECTSOUNDBUFFER sampleHandle;
 	if ( sound == NULL ) {
-		LOG(logERROR) <<  "No sound available";
+		LOGEC("AudioManager") <<  "No sound available";
 		return false;
 	}
     DSBUFFERDESC dsbd;
@@ -115,7 +115,7 @@ bool AudioManager::createAudioBuffer(Sound* sound) {
     dsbd.lpwfxFormat     = const_cast<WAVEFORMATEX *>(sound->GetFormat());
 	HRESULT hr;
     if( FAILED( hr = m_pDS->CreateSoundBuffer( &dsbd, &sampleHandle, NULL ) ) ) {
-		LOGC(logERROR,"AudioManager") <<  "Failed to create soundbuffer";
+		LOGEC("AudioManager") <<  "Failed to create soundbuffer";
         return false;
     }
 
@@ -125,7 +125,7 @@ bool AudioManager::createAudioBuffer(Sound* sound) {
 	as.hash = string::murmur_hash(sound->getName());
 	strncpy(as.name,sound->getName(),32);
 	m_AudioBuffers.append(as);
-	LOGC(logINFO,"AudioManager") << "adding audio sound with hash " << as.hash;
+	LOGC("AudioManager") << "adding audio sound with hash " << as.hash;
 	//audioBuffers[soundName] = audioBuffer;	
 	return true;
 }
@@ -186,13 +186,13 @@ void AudioManager::loadSound(const char* name) {
 	char fileName[256];
 	sprintf(fileName,"content\\sounds\\%s.wav",name);
 	Sound *s = new Sound(name);
-	LOGC(logINFO,"AudioManager") << "loading sound " << fileName;
+	LOGC("AudioManager") << "loading sound " << fileName;
 	int ret = s->loadWavFile(fileName);
 	if ( ret > 0 ) {		
 		createAudioBuffer(s);		
 	}
 	else {
-		LOGC(logERROR,"AudioManager") << "Unable to load wav file";
+		LOGEC("AudioManager") << "Unable to load wav file";
 	}
 	delete s;
 }

@@ -46,7 +46,7 @@ int Sound::loadWavFile(const char* filename) {
   ZeroMemory(&mmioinfo,sizeof(MMIOINFO));
   hmfr = mmioOpenA(const_cast<char *>(filename), &mmioinfo, MMIO_READ|MMIO_ALLOCBUF);
   if( hmfr == NULL) {
-	  LOGC(logERROR,"Sound") << "Cannot open file " << filename;
+	  LOGEC("Sound") << "Cannot open file " << filename;
 	  return NULL;
   }
   //descend into the RIFF
@@ -54,7 +54,7 @@ int Sound::loadWavFile(const char* filename) {
   if(mmioDescend(hmfr, &parent, NULL, MMIO_FINDRIFF)){
     mmioClose(hmfr, 0); 
 	//not a wave file
-	LOGC(logERROR,"Sound") << "Not a valid wav " << filename;
+	LOGEC("Sound") << "Not a valid wav " << filename;
 	return NULL;
   }
 
@@ -63,7 +63,7 @@ int Sound::loadWavFile(const char* filename) {
   if(mmioDescend(hmfr, &child, &parent, 0)){
     mmioClose(hmfr, 0); 
 	//file has no fmt chunk
-	LOGC(logERROR,"Sound") << "file has no fmt chunk " << filename;
+	LOGEC("Sound") << "file has no fmt chunk " << filename;
 	return NULL;
   }
 
@@ -71,7 +71,7 @@ int Sound::loadWavFile(const char* filename) {
   if(mmioRead(hmfr, (char*)&m_WavFormatEx, sizeof(m_WavFormatEx)) != sizeof(m_WavFormatEx)){
     mmioClose(hmfr, 0); 
 	//unable to read fmt chunk
-	LOGC(logERROR,"Sound") << "unable to read fmt chunk " << filename;
+	LOGEC("Sound") << "unable to read fmt chunk " << filename;
 	return NULL;
   }
 
@@ -79,7 +79,7 @@ int Sound::loadWavFile(const char* filename) {
   if(m_WavFormatEx.wFormatTag != WAVE_FORMAT_PCM){
     mmioClose(hmfr, 0); 
 	//WAVE file is not PCM format
-	LOGC(logERROR,"Sound") << "WAVE file is not PCM format " << filename;
+	LOGEC("Sound") << "WAVE file is not PCM format " << filename;
 	return NULL;
   }
 
@@ -106,7 +106,7 @@ int Sound::loadWavFile(const char* filename) {
     //data read failed
     mmioClose(hmfr, 0); 
 	delete [] m_PCMBuffer; 
-	LOGC(logERROR,"Sound") << "Data read failed " << filename;
+	LOGEC("Sound") << "Data read failed " << filename;
 	return NULL;
   }
 
@@ -122,7 +122,7 @@ int Sound::loadWavFile(const char* filename) {
 }
 
 bool Sound::parseWave(FILE *fd) {
-	LOGC(logINFO,"Sound") << "Parsing wave";
+	LOGC("Sound") << "Parsing wave";
 	DWORD file = 0; 
 	DWORD fileEnd = 0; 
 	
@@ -135,7 +135,7 @@ bool Sound::parseWave(FILE *fd) {
 	// The first 4 bytes of a valid .wav file is 'R','I','F','F'
 	fread(&type, 1, sizeof(DWORD), fd);
 	if( type != mmioFOURCC('R', 'I', 'F', 'F')) {
-		LOGC(logERROR,"Sound") <<"File does not start with RIFE - no valid file";
+		LOGEC("Sound") <<"File does not start with RIFE - no valid file";
 		return false;	
 	}
 	
@@ -144,7 +144,7 @@ bool Sound::parseWave(FILE *fd) {
 							// 'W','A','V','E' for a legal .wav file
 
 	if(type != mmioFOURCC('W', 'A', 'V', 'E')) {
-		LOGC(logERROR,"Sound") <<"It is not a WAV file";
+		LOGEC("Sound") <<"It is not a WAV file";
 		return false;		//not a WAV
 	}
 
@@ -173,7 +173,7 @@ bool Sound::parseWave(FILE *fd) {
 		switch(type)  {
 			case mmioFOURCC('f', 'a', 'c', 't'):
 			{
-				LOGC(logERROR,"Sound") << "This wav file is compressed.  We don't handle compressed wav at this time";
+				LOGEC("Sound") << "This wav file is compressed.  We don't handle compressed wav at this time";
 				break;
 			}
 

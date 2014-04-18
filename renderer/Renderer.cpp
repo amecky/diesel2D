@@ -22,8 +22,8 @@ namespace ds {
 // The scene manager implementation
 //-----------------------------------------------
 Renderer::Renderer(HWND hWnd,const Settings& settings) : m_Hwnd(hWnd) {
-	LOG(logINFO) << "RenderDevice::RenderDevice";
-	LOG(logINFO) << "Preparing internal structs";
+	LOG << "RenderDevice::RenderDevice";
+	LOG << "Preparing internal structs";
 	// vertex declarations
 	for ( int i = 0; i < MAX_VERDECLS; ++i) {
 		m_VDStructs[i].vertexSize = 0;
@@ -59,6 +59,11 @@ Renderer::Renderer(HWND hWnd,const Settings& settings) : m_Hwnd(hWnd) {
 	device = new GraphicsDevice(hWnd,settings);	
 	m_Width = settings.width;
 	m_Height = settings.height;
+
+	m_Viewport = new Viewport(settings.width,settings.height);
+	int centerX = settings.width / 2;
+	int centerY = settings.height / 2;
+	m_Viewport->setPosition(centerX,centerY);
 	// the camera
     float aspect = (float)settings.width / (float)settings.height;
 	m_Camera = new Camera(settings.width,settings.height);
@@ -83,14 +88,14 @@ Renderer::Renderer(HWND hWnd,const Settings& settings) : m_Hwnd(hWnd) {
 	//m_PostProcessing = settings.postProcessing;	
 
 	m_DefaultBS = createBlendState(BL_SRC_ALPHA,BL_ONE_MINUS_SRC_ALPHA,true);
-	LOG(logINFO) << "default blendstate " << m_DefaultBS;
+	LOG << "default blendstate " << m_DefaultBS;
 	m_CurrentBS = -1;
 	createBasicVertexDeclarations();
 	m_DrawCounter = new DrawCounter;
 	device->get()->GetRenderTarget(0,&m_BackBuffer);
 	char buffer[128];
 	sprintf(buffer,"Backbuffer 0x%p",m_BackBuffer);
-	LOGC(logINFO,"Renderer") << "Address of " << buffer;
+	LOGC("Renderer") << "Address of " << buffer;
 	// create default buffers
 	createVertexBuffer(PT_TRI,VD_TTC,4096,true);
 	createVertexBuffer(PT_TRI,VD_PTC,4096,true);
@@ -107,43 +112,43 @@ Renderer::Renderer(HWND hWnd,const Settings& settings) : m_Hwnd(hWnd) {
 
 
 Renderer::~Renderer(void) {	
-	LOG(logINFO) << "destructing Renderer";		
+	LOG << "destructing Renderer";		
 	delete m_SpriteBatch;
 	m_RenderTargets.deleteContents();
 	m_RasterizerStates.deleteContents();
-	LOGC(logINFO,"Renderer") << "Releasing textures";
+	LOGC("Renderer") << "Releasing textures";
 	for ( int i = 0; i < MAX_TEXTURES; ++i ) {
 		if ( m_Textures[i].flags != 0 ) {
 			SAFE_RELEASE(m_Textures[i].texture);
 		}
 	}
-	LOGC(logINFO,"Renderer") << "Releasing vertex declarations";
+	LOGC("Renderer") << "Releasing vertex declarations";
 	for ( int i = 0; i < MAX_VERDECLS; ++i) {
 		if ( m_VDStructs[i].vertexSize != 0 ) {
 			delete m_VDStructs[i].declaration;
 		}
 	}
-	LOGC(logINFO,"Renderer") << "Releasing shaders";
+	LOGC("Renderer") << "Releasing shaders";
 	for ( int i = 0; i < MAX_SHADERS; ++i ) {
 		if ( m_Shaders[i].flag != 0 ) {
 			delete m_Shaders[i].constants;
 			SAFE_RELEASE(m_Shaders[i].m_FX);
 		}
 	}
-	LOGC(logINFO,"Renderer") << "Releasing Rendertargets";
+	LOGC("Renderer") << "Releasing Rendertargets";
 	for ( uint32 i = 0; i < m_RenderTargets.num(); ++i ) {
 		RenderTarget* rt = m_RenderTargets[i];
 		//SAFE_RELEASE(rt->texture);
 		SAFE_RELEASE(rt->surface);
 		SAFE_RELEASE(rt->rts);
 	}
-	LOGC(logINFO,"Renderer") << "Releasing fonts";
+	LOGC("Renderer") << "Releasing fonts";
 	for ( int i = 0; i < MAX_SYSTEM_FONTS; ++i ) {
 		if ( m_Fonts[i].flag != 0 ) {
 			SAFE_RELEASE(m_Fonts[i].font);
 		}
 	}
-	LOGC(logINFO,"Renderer") << "Releasing buffers";
+	LOGC("Renderer") << "Releasing buffers";
 	for ( int i = 0; i < MAX_BUFFERS; ++i ) {
 		SAFE_RELEASE(m_Buffers[i].vertexBuffer);
 		SAFE_RELEASE(m_Buffers[i].indexBuffer);
@@ -152,6 +157,7 @@ Renderer::~Renderer(void) {
 	delete m_DrawCounter;
 	delete m_Camera;
 	delete device;		
+	delete m_Viewport;
 }
 
 // -------------------------------------------------------
@@ -182,10 +188,11 @@ bool Renderer::beginRendering(const Color& clearColor) {
 		set2DCameraOn();
 		m_SpriteBatch->prepare();
 		m_SpriteBatch->begin();
+		m_SpriteBatch->setBlendState(m_DefaultBS);
 		return true;
 	}
 	else {
-		LOG(logERROR) << "cannot begin scene";
+		LOGEC("Renderer") << "cannot begin scene";
 	}	
 	return false;
 }
@@ -384,7 +391,7 @@ void Renderer::debug() {
 	for ( int i = 0; i< MAX_BUFFERS; ++i ) {
 		if ( m_Buffers[i].used != 0 ) {
 			GeometryBuffer* buffer = &m_Buffers[i];		
-			LOGC(logINFO,"Renderer") << "GeometryBuffer - size: " << buffer->size << " vertexDefinition: " << buffer->vertexDefinition << " primitive type: " << buffer->primitiveType << " dynamic: " << (buffer->dynamic == 0 ? false : true);
+			LOGC("Renderer") << "GeometryBuffer - size: " << buffer->size << " vertexDefinition: " << buffer->vertexDefinition << " primitive type: " << buffer->primitiveType << " dynamic: " << (buffer->dynamic == 0 ? false : true);
 		}
 	}
 }
@@ -442,11 +449,11 @@ int Renderer::createBlendState(int srcRGB,int srcAlpha,int dstRGB,int dstAlpha,b
 		bs->alphaRef = 0;
 		bs->separateAlpha = separateAlpha;
 		bs->flag = 1;
-		LOGC(logINFO,"Renderer") << "created new blendstate - id: " << id;
+		LOGC("Renderer") << "created new blendstate - id: " << id;
 		return id;
 	}
 	else {
-		LOGC(logERROR,"Renderer") << "No more free slots for BlendStates available";
+		LOGEC("Renderer") << "No more free slots for BlendStates available";
 		return -1;
 	}
 }
@@ -498,24 +505,7 @@ void Renderer::changeBlendState(int id) {
 		}
 	}
 	m_CurrentBS = id;
-		/*
-		int mask = ALL;
-		if (blendState != BS_NONE){
-			mask = blendStates[blendState].mask;
-		}
-
-		if (mask != currentMask){
-			dev->SetRenderState(D3DRS_COLORWRITEENABLE, currentMask = mask);
-		}
-		*/
-		//m_CurrentBlendState = newState;
-		//}
-		/*
-		if (sampleMask != currentSampleMask){
-			dev->SetRenderState(D3DRS_MULTISAMPLEMASK, sampleMask);
-			currentSampleMask = sampleMask;
-		}
-		*/
+	//m_SpriteBatch->setBlendState(id);		
 }
 
 // ---------------------------------------------------------------------
@@ -523,6 +513,7 @@ void Renderer::changeBlendState(int id) {
 // ---------------------------------------------------------------------
 void Renderer::setBlendState(int id) {
 	if ( id != m_CurrentBS ) {
+		m_SpriteBatch->flush();
 		const BlendState& newState = m_BlendStates[id];
 		LPDIRECT3DDEVICE9 dev = device->get();
 		if (!newState.blendEnable){
@@ -540,7 +531,7 @@ void Renderer::setBlendState(int id) {
 			dev->SetRenderState(D3DRS_ALPHAREF, (DWORD)newState.alphaRef);
 			dev->SetRenderState(D3DRS_ALPHAFUNC,newState.alphaFunc);
 		}
-		m_CurrentBS = id;
+		m_CurrentBS = id;		
 	}
 }
 
@@ -609,11 +600,11 @@ int Renderer::createMaterial(const char* name,int textureID) {
 		mtrl->textures[0] = textureID;
 		mtrl->textureAtlas = 0;
 		mtrl->flag = 1;
-		LOGC(logINFO,"Renderer") << "new material " << name << " with textureID " << textureID << " created";
+		LOGC("Renderer") << "new material " << name << " with textureID " << textureID << " created";
 		return id;
 	}
 	else {
-		LOGC(logERROR,"Renderer") << "No more free material slots available";
+		LOGEC("Renderer") << "No more free material slots available";
 		return -1;
 	}
 }
@@ -754,17 +745,17 @@ int Renderer::loadTexture(const char* dirName,const char* name) {
 		D3DXIMAGE_INFO imageInfo;
 		char fileName[256];
 		sprintf(fileName,"%s\\%s.png",dirName,name);
-		LOGC(logINFO,"Renderer") << "Trying to load texture " << fileName;
+		LOGC("Renderer") << "Trying to load texture " << fileName;
 		HR(D3DXCreateTextureFromFileEx(device->get(),fileName, 0, 0, 1, 0,
 			D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL,&tr->texture));
 		tr->texture->SetPrivateData(WKPDID_D3DDebugObjectName,name,strlen( name ) - 1,0);
 		tr->width = imageInfo.Width;
 		tr->height = imageInfo.Height;		
-		LOGC(logINFO,"Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
+		LOGC("Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
 		return id;
 	}
 	else {
-		LOGC(logERROR,"Renderer") << "No more texture slots available";
+		LOGEC("Renderer") << "No more texture slots available";
 		return -1;
 	}
 }
@@ -785,17 +776,17 @@ int Renderer::loadTexture(const char* name) {
 		D3DXIMAGE_INFO imageInfo;
 		char fileName[256];
 		sprintf(fileName,"content\\textures\\%s.png",name);
-		LOGC(logINFO,"Renderer") << "Trying to load texture " << fileName;
+		LOGC("Renderer") << "Trying to load texture " << fileName;
 		HR(D3DXCreateTextureFromFileEx(device->get(),fileName, 0, 0, 1, 0,
 			D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL,&tr->texture));
 		tr->texture->SetPrivateData(WKPDID_D3DDebugObjectName,name,strlen( name ) - 1,0);
 		tr->width = imageInfo.Width;
 		tr->height = imageInfo.Height;		
-		LOGC(logINFO,"Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
+		LOGC("Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
 		return id;
 	}
 	else {
-		LOGC(logERROR,"Renderer") << "No more texture slots available";
+		LOGEC("Renderer") << "No more texture slots available";
 		return -1;
 	}
 	*/
@@ -817,52 +808,52 @@ int Renderer::loadTextureWithColorKey(const char* name,const Color& color) {
 
 		char fileName[256];
 		sprintf(fileName,"content\\textures\\%s.png",name);
-		LOGC(logINFO,"Renderer") << "Trying to load texture " << fileName;
+		LOGC("Renderer") << "Trying to load texture " << fileName;
 		HR(D3DXCreateTextureFromFileEx(device->get(),fileName, 0, 0, 1, 0,
 			D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, color, &imageInfo, NULL,&tr->texture));
 
 		tr->width = imageInfo.Width;
 		tr->height = imageInfo.Height;		
-		LOGC(logINFO,"Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
+		LOGC("Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
 		return id;
 	}
 	else {
-		LOGC(logERROR,"Renderer") << "No more texture slots available";
+		LOGEC("Renderer") << "No more texture slots available";
 		return -1;
 	}
+}
+
+BitmapFont* Renderer::createBitmapFont(const char* name) {
+	IdString hash = string::murmur_hash(name);
+	for ( int i = 0; i < MAX_SYSTEM_FONTS; ++i ) {
+		if ( m_BitmapFonts[i].getHashName() == hash ) {
+			LOG << "Found already loaded font " << name;
+			return &m_BitmapFonts[i];
+		}
+	}
+	LOG << "Created bitmap font " << name;
+	BitmapFont* font = &m_BitmapFonts[m_BFCounter];	
+	font->setHashName(hash);
+	++m_BFCounter;
+	return font;	
+	//return 0;
 }
 
 BitmapFont* Renderer::loadBitmapFont(const char* name,int textureId,const Color& fillColor) {
 	IdString hash = string::murmur_hash(name);
 	for ( int i = 0; i < MAX_SYSTEM_FONTS; ++i ) {
-		if ( m_BitmapFonts[i].hashName == hash ) {
-			LOG(logINFO) << "Found already loaded font " << name;
+		if ( m_BitmapFonts[i].getHashName() == hash ) {
+			LOG << "Found already loaded font " << name;
 			return &m_BitmapFonts[i];
 		}
 	}
-	LOG(logINFO) << "Loading bitmap font " << name;
+	LOG << "Loading bitmap font " << name;
 	BitmapFont* font = &m_BitmapFonts[m_BFCounter];	
-	char fileName[256];
-	sprintf(fileName,"content\\resources\\%s.settings",name);
-	NewSettingsReader reader;
-	if ( reader.parse(fileName)) {
-		font->hashName = hash;
-		reader.get<uint32>("start_char",&font->startChar);
-		reader.get<uint32>("end_char",&font->endChar);
-		reader.get<uint32>("char_height",&font->charHeight);
-		reader.get<uint32>("grid_height",&font->gridHeight);
-		reader.get<uint32>("start_x",&font->startX);
-		reader.get<uint32>("start_y",&font->startY);
-		reader.get<uint32>("width",&font->width);
-		reader.get<uint32>("height",&font->height);
-		reader.get<uint32>("padding",&font->padding);
-		reader.get<uint32>("texture_size",&font->textureSize);				
-		assert(font->textureSize != 0 );
-		initializeBitmapFont(*font,textureId,fillColor);
-		++m_BFCounter;
-		return font;
-	}
-	return 0;
+	
+	initializeBitmapFont(*font,textureId,fillColor);
+	++m_BFCounter;
+	return font;	
+	//return 0;
 }
 // -------------------------------------------------------
 // Create a bitmap font
@@ -872,10 +863,10 @@ void Renderer::initializeBitmapFont(BitmapFont& bitmapFont,int textureID,const C
 	assert(textureID < MAX_TEXTURES);
 	Texture* texture = &m_Textures[textureID];
 	HR(texture->texture->LockRect(0,&lockedRect,NULL,0));		
-	uint32 x = bitmapFont.startX + bitmapFont.padding - 1;
-	uint32 y = bitmapFont.startY + bitmapFont.padding;
-	uint32 ascii = bitmapFont.startChar;
-	Color c = getColor(lockedRect,x,y,bitmapFont.textureSize);
+	uint32 x = bitmapFont.getStartX() + bitmapFont.getPadding() - 1;
+	uint32 y = bitmapFont.getStartY() + bitmapFont.getPadding();
+	uint32 ascii = bitmapFont.getStartChar();
+	Color c = getColor(lockedRect,x,y,bitmapFont.getTextureSize());
 	bool running = true;
 	bool isChar = false;
 	int charStartedX = 0;
@@ -883,31 +874,28 @@ void Renderer::initializeBitmapFont(BitmapFont& bitmapFont,int textureID,const C
 	int charCount = 0;
 	while ( running ) {
 		++x;
-		if ( x > (bitmapFont.startX + bitmapFont.width) ) {
-			x = bitmapFont.startX + bitmapFont.padding - 1;
-			y += bitmapFont.padding + bitmapFont.gridHeight;// - 1;
+		if ( x > (bitmapFont.getStartX() + bitmapFont.getWidth()) ) {
+			x = bitmapFont.getStartX() + bitmapFont.getPadding() - 1;
+			y += bitmapFont.getPadding() + bitmapFont.getGridHeight();// - 1;
 			isChar = false;
-			//LOG(logINFO) << "chars added " << charCount << " - moving to next line";
 			charCount = 0;			
 		}
-		if ( y >= (bitmapFont.startY + bitmapFont.height) ) {
+		if ( y >= (bitmapFont.getStartY() + bitmapFont.getHeight()) ) {
 			running = false;
 		}
 		if ( y >= texture->height ) {
 			running = false;
 		}
 		if ( running ) {
-			c = getColor(lockedRect,x,y,bitmapFont.textureSize);
+			c = getColor(lockedRect,x,y,bitmapFont.getTextureSize());
 			if ( !isFillColor(fillColor,c) && !isChar ) {
 				isChar = true;
 				charStartedX = x;
 				charStartedY = y;				
-				//LOGC(logINFO,"FontParser") << "scanning next line at " << x << " " << y;
 			}
 			else if ( isFillColor(fillColor,c) && isChar ) {
 				isChar = false;
 				int width = x - charStartedX - 1;
-				//LOG(logINFO) << "char: " << (char)ascii << " pos " << charStartedX << " " << charStartedY << " width " << width;
 				++charCount;			
 				bitmapFont.addChar(ascii,charStartedX+1,charStartedY,width);
 				++ascii;
@@ -916,7 +904,6 @@ void Renderer::initializeBitmapFont(BitmapFont& bitmapFont,int textureID,const C
 		}
 	}
 	HR(texture->texture->UnlockRect(0));	
-	//font::debug(bitmapFont);
 }
 
 ID3DXFont* Renderer::getInternalSystemFont(int fontID) {
@@ -927,7 +914,7 @@ ID3DXFont* Renderer::getInternalSystemFont(int fontID) {
 // Loads system font
 // -------------------------------------------------------
 int Renderer::loadSystemFont(const char* name,const char* fontName,int size,bool bold) {
-	LOGC(logINFO,"Renderer") << "Loading font " << fontName << " size " << size;
+	LOGC("Renderer") << "Loading font " << fontName << " size " << size;
 	int id = -1;
 	for ( int i = 0 ; i < MAX_SYSTEM_FONTS; ++i ) {
 		if ( m_Fonts[i].flag == 0 && id == -1 ) {
@@ -953,7 +940,7 @@ int Renderer::loadSystemFont(const char* name,const char* fontName,int size,bool
 		return id;	
 	}
 	else {
-		LOGC(logERROR,"Renderer") << "No more free slots for system fonts available";
+		LOGEC("Renderer") << "No more free slots for system fonts available";
 		return -1;
 	}
 }
@@ -1096,7 +1083,7 @@ int Renderer::createShaderFromText(const char* buffer,const char* techName) {
 		ID3DXBuffer* errors = 0;
 		D3DXCreateEffect(device->get(), buffer, dwBufferSize,0, 0, SHADER_FLAGS, 0, &shader->m_FX, &errors);
 		if ( errors != 0 ) {
-			LOGC(logERROR,"Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
+			LOGEC("Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
 			return -1;
 		}
 		initializeShader(id,techName);
@@ -1121,16 +1108,16 @@ int Renderer::loadShader(const char* fxName,const char* techName) {
 		HRESULT hr = D3DXCreateEffectFromFileA(device->get(), fileName,0, 0, SHADER_FLAGS, 0, &shader->m_FX, &errors);
 		//if ( hr != S_OK && errors != 0 ) {
 		if ( errors != 0 ) {
-			LOGC(logERROR,"Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
+			LOGEC("Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
 			return -1;
 		}
 		
-		LOGC(logINFO,"Renderer") << "Shader created";
+		LOGC("Renderer") << "Shader created";
 		initializeShader(id,techName);
 		return id;
 	}
 	else {
-		LOGC(logERROR,"Renderer") << "Cannot load shader - No more free slots available";
+		LOGEC("Renderer") << "Cannot load shader - No more free slots available";
 		return -1;
 	}
 }
@@ -1143,17 +1130,17 @@ void Renderer::initializeShader(int id,const char* techName) {
 	UINT nc = effectDesc.Parameters;
 	shader->constants = new ShaderConstant[nc];
 	shader->constantCount = nc;
-	LOGC(logINFO,"Renderer") << "Got Description - number of parameters: " << nc;
+	LOGC("Renderer") << "Got Description - number of parameters: " << nc;
 	for ( UINT i = 0; i < effectDesc.Parameters;++i ) {
 		D3DXHANDLE hParam = shader->m_FX->GetParameter( NULL, i );
 		D3DXPARAMETER_DESC pDesc;
 		// get parameter description
 		shader->m_FX->GetParameterDesc( hParam, &pDesc );
-		LOGC(logINFO,"Renderer") << "Parameter : " << pDesc.Name << " Type: " << pDesc.Type;
+		LOGC("Renderer") << "Parameter : " << pDesc.Name << " Type: " << pDesc.Type;
 		shader->constants[i].handle = hParam;
 		shader->constants[i].name = string::murmur_hash(pDesc.Name);
 	}
-	LOGC(logINFO,"Renderer") << "Shader finally loaded";
+	LOGC("Renderer") << "Shader finally loaded";
 	shader->flag = 1;
 }
 // -------------------------------------------------------
@@ -1217,7 +1204,7 @@ int Renderer::createRenderTarget(const char* name,const Color& clearColor) {
 			D3DPOOL_DEFAULT,
 			&renderTarget->texture,
 			NULL);
-		LOGC(logINFO,"Renderer") << "Rendertarget created - texture id: " << id << " width: " << m_Width << " height: " << m_Height;
+		LOGC("Renderer") << "Rendertarget created - texture id: " << id << " width: " << m_Width << " height: " << m_Height;
 		Texture* t = &m_Textures[id];
 		t->height = m_Height;
 		t->width = m_Width;
@@ -1228,7 +1215,7 @@ int Renderer::createRenderTarget(const char* name,const Color& clearColor) {
 		return id;
 	}
 	else {
-		LOG(logERROR) << "Cannot create rendertarget - No more texture slots available";
+		LOGEC("Renderer") << "Cannot create rendertarget - No more texture slots available";
 		return -1;
 	}	
 }
@@ -1258,7 +1245,7 @@ int Renderer::createRenderTarget(const char* name,float width,float height,const
 			D3DPOOL_DEFAULT,
 			&renderTarget->texture,
 			NULL);
-		LOGC(logINFO,"Renderer") << "Rendertarget created - texture id: " << id << " width: " << width << " height: " <<height;
+		LOGC("Renderer") << "Rendertarget created - texture id: " << id << " width: " << width << " height: " <<height;
 		Texture* t = &m_Textures[id];
 		t->height = height;
 		t->width = width;
@@ -1269,7 +1256,7 @@ int Renderer::createRenderTarget(const char* name,float width,float height,const
 		return id;
 	}
 	else {
-		LOG(logERROR) << "Cannot create rendertarget - No more texture slots available";
+		LOGEC("Renderer") << "Cannot create rendertarget - No more texture slots available";
 		return -1;
 	}	
 }
@@ -1296,7 +1283,7 @@ int Renderer::createVertexBuffer(PrimitiveType primitiveType,int vertexDefinitio
 		int vertexSize = vd.vertexSize;	
 		D3DPOOL pool = dynamic ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED; 
 		DWORD usage = dynamic ? D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY; 			
-		LOGC(logINFO,"Renderer") << "creating new vertex buffer - size: " << size << " vertexDefinition: " << vertexDefinition << " vertexSize: " << vertexSize << " dynamic: " << (dynamic == 0 ? false : true);
+		LOGC("Renderer") << "creating new vertex buffer - size: " << size << " vertexDefinition: " << vertexDefinition << " vertexSize: " << vertexSize << " dynamic: " << (dynamic == 0 ? false : true);
 		HR(device->get()->CreateVertexBuffer( size * vertexSize,usage,0 ,pool, &m_Buffers[id].vertexBuffer, NULL ))
 	}
 	return id;
@@ -1322,7 +1309,7 @@ int Renderer::createIndexBuffer(int size,bool dynamic) {
 		D3DPOOL pool = dynamic ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED; 
 		DWORD usage = dynamic ? D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY; 			
 		HR(device->get()->CreateIndexBuffer( size * sizeof(WORD),usage,D3DFMT_INDEX16,pool,&m_Buffers[id].indexBuffer,NULL));	
-		LOGC(logINFO,"Renderer") << "new IndexBuffer created size: " << size << " dynamic: " << (dynamic == 0 ? false : true);
+		LOGC("Renderer") << "new IndexBuffer created size: " << size << " dynamic: " << (dynamic == 0 ? false : true);
 	}
 	return id;
 }
@@ -1349,7 +1336,7 @@ int Renderer::createQuadIndexBuffer(uint32 maxQuads) {
 		D3DPOOL pool = dynamic ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED; 
 		DWORD usage = dynamic ? D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC : D3DUSAGE_WRITEONLY; 			
 		HR(device->get()->CreateIndexBuffer( indices * sizeof(WORD),usage,D3DFMT_INDEX16,pool,&m_Buffers[id].indexBuffer,NULL));	
-		LOGC(logINFO,"Renderer") << "new IndexBuffer created size: " << indices << " dynamic: " << (dynamic == 0 ? false : true);
+		LOGC("Renderer") << "new IndexBuffer created size: " << indices << " dynamic: " << (dynamic == 0 ? false : true);
 		WORD* indexBuffer;
 		HR(m_Buffers[id].indexBuffer->Lock( 0, indices * sizeof(WORD), ( void** )&indexBuffer, 0 ));
 
@@ -1391,11 +1378,21 @@ int Renderer::createBufferHandle(PrimitiveType primType,int vertexDefinition,Geo
 		handle->bufferType = bufferType;
 		handle->dynamic = dynamic;
 		handle->vertexDefinition = vertexDefinition;
-		LOGC(logINFO,"Renderer") << "buffer handle created - id: " << id << " bufferType: " << bufferType << " vertexDefinition: " << vertexDefinition << " dynamic: " << dynamic;
+		LOGC("Renderer") << "buffer handle created - id: " << id << " bufferType: " << bufferType << " vertexDefinition: " << vertexDefinition << " dynamic: " << dynamic;
 	}
 	return id;
 }
 
+// ---------------------------------------------------------
+// Unlock buffers
+// ---------------------------------------------------------
+void Renderer::resetBuffer(int handleID) {
+	assert(handleID < MAX_BUFFER_HANDLES);
+	GeoBufferHandle* handle = &m_BufferHandles[handleID];
+	assert(handle->used != 0);
+	m_Buffers[handle->iBufferRef.bufferIdx].size = 0;		
+	m_Buffers[handle->vBufferRef.bufferIdx].size = 0;			
+}
 // ---------------------------------------------------------
 // Reset dynamic buffers
 // ---------------------------------------------------------
@@ -1416,23 +1413,23 @@ int Renderer::allocateBuffer(GeoBufferType type,int vertexDefinition,int size,in
 	for ( int i = 0; i < MAX_BUFFERS; ++i ) {
 		GeometryBuffer* gb = &m_Buffers[i];
 		if ( gb->type == type && gb->dynamic == dynamic && ( vertexDefinition == -1 || gb->vertexDefinition == vertexDefinition ) ) {
-			//LOG(logINFO) << "found matching buffer - id: " << i;
+			//LOG << "found matching buffer - id: " << i;
 			uint32 current = gb->size;
 			if ( (current + size) < gb->maxSize ) {
 				start = gb->size;
 				gb->size += size;
-				//LOG(logINFO) << "setting start " << start << " new size is " << gb->size;
+				//LOG << "setting start " << start << " new size is " << gb->size;
 				return i;
 			}
 		}
 	}
-	LOGC(logERROR,"Renderer") << "Cannot find buffer with enough space";
-	LOGC(logERROR,"Renderer") << "Requested - type: " << type << " vertex definition: " << vertexDefinition << " size: " << size << " dynamic: " << dynamic;
+	LOGEC("Renderer") << "Cannot find buffer with enough space";
+	LOGEC("Renderer") << "Requested - type: " << type << " vertex definition: " << vertexDefinition << " size: " << size << " dynamic: " << dynamic;
 	for ( int i = 0; i < MAX_BUFFERS; ++i ) {
 		GeometryBuffer* gb = &m_Buffers[i];
 		if ( gb->used != 0 ) {
 			int free = gb->maxSize - gb->size;
-			LOGC(logERROR,"Renderer") << "Buffer " << i << " buffer type: " << gb->type << " size: " << gb->size << " free: " << free << " max: " << gb->maxSize << " prim type: " << gb->primitiveType << " dynamic: " << gb->dynamic;
+			LOGEC("Renderer") << "Buffer " << i << " buffer type: " << gb->type << " size: " << gb->size << " free: " << free << " max: " << gb->maxSize << " prim type: " << gb->primitiveType << " dynamic: " << gb->dynamic;
 		}
 	}
 	return -1;
@@ -1442,7 +1439,7 @@ int Renderer::allocateBuffer(GeoBufferType type,int vertexDefinition,int size,in
 // Lock buffers
 // ---------------------------------------------------------
 void Renderer::lockBuffer(int handleID,int vertexCount,int indexCount,float** vertexBuffer,void** indexBuffer) {
-	//LOG(logINFO) << " --- Lock Buffer ----";
+	//LOG << " --- Lock Buffer ----";
 	assert(handleID < MAX_BUFFER_HANDLES);
 	GeoBufferHandle* handle = &m_BufferHandles[handleID];
 	assert(handle->used != 0);
@@ -1453,7 +1450,7 @@ void Renderer::lockBuffer(int handleID,int vertexCount,int indexCount,float** ve
 		handle->iBufferRef.count = indexCount;
 		//if ( handle->iBufferRef.bufferIdx == -1 ) {
 			handle->iBufferRef.bufferIdx = allocateBuffer(GBT_INDEX,-1,indexCount,handle->iBufferRef.start,handle->dynamic);
-			//LOG(logINFO) << "IndexBuffer - start " << handle->iBufferRef.start << " count " << indexCount;
+			//LOG << "IndexBuffer - start " << handle->iBufferRef.start << " count " << indexCount;
 		//}
 		assert(handle->iBufferRef.bufferIdx != -1 );
 		DWORD flag = 0;
@@ -1469,7 +1466,7 @@ void Renderer::lockBuffer(int handleID,int vertexCount,int indexCount,float** ve
 		handle->vBufferRef.count = vertexCount;
 		//if ( handle->vBufferRef.bufferIdx == -1 ) {
 			handle->vBufferRef.bufferIdx = allocateBuffer(GBT_VERTEX,handle->vertexDefinition,vertexCount,handle->vBufferRef.start,handle->dynamic);
-			//LOG(logINFO) << "VertexBuffer - idx: " << handle->vBufferRef.bufferIdx << " start " << handle->vBufferRef.start << " count " << vertexCount;
+			//LOG << "VertexBuffer - idx: " << handle->vBufferRef.bufferIdx << " start " << handle->vBufferRef.start << " count " << vertexCount;
 		//}
 		assert(handle->vBufferRef.bufferIdx != -1 );
 		DWORD flag = 0;
@@ -1510,7 +1507,7 @@ int Renderer::drawBuffer(int handleID,int textureID) {
 	assert(handle->used != 0);
 	int vDef = m_Buffers[handle->vBufferRef.bufferIdx].vertexDefinition;
 	assert( vDef >= 0 );
-	//LOG(logINFO) << "vDef " << vDef << " current " << m_CurrentVD;
+	//LOG << "vDef " << vDef << " current " << m_CurrentVD;
 	if ( m_CurrentVD != vDef ) {
 		m_CurrentVD = vDef;
 		device->get()->SetVertexDeclaration(m_VDStructs[vDef].declaration->get());
@@ -1621,9 +1618,21 @@ void Renderer::showProfiler(int x,int y) {
 
 void Renderer::showDrawCounter(int x,int y) {
 	int ty = y;
-	debug(x,ty,ds::Color(1.0f,1.0f,1.0f,1.0f),"DrawCounter IDX: %d Vertices: %d Sprites: %d",m_DrawCounter->getIndexCounter(),m_DrawCounter->getPrimitiveCounter(),m_DrawCounter->getSpriteCounter());
+	debug(x,ty,ds::Color(1.0f,1.0f,1.0f,1.0f),"DrawCounter IDX: %d Vertices: %d Sprites: %d Flushes: %d",m_DrawCounter->getIndexCounter(),m_DrawCounter->getPrimitiveCounter(),m_DrawCounter->getSpriteCounter(),m_DrawCounter->getFlushes());
 	ty += 20;
 	debug(x,ty,ds::Color(1.0f,1.0f,1.0f,1.0f),"DrawCalls: %d Textures: %d Shaders: %d",m_DrawCounter->getDrawCalls(),m_DrawCounter->getTextures(),m_DrawCounter->getShaders());
+}
+
+void Renderer::printDrawCounter() {
+	LOG << "DrawCounter";
+	LOG << "-------------------------------------------";
+	LOG << "Indices:   " << m_DrawCounter->getIndexCounter();
+	LOG << "Vertices:  " << m_DrawCounter->getPrimitiveCounter();
+	LOG << "Sprites:   " << m_DrawCounter->getSpriteCounter();
+	LOG << "Flushes:   " << m_DrawCounter->getFlushes();
+	LOG << "DrawCalls: " << m_DrawCounter->getDrawCalls();
+	LOG << "Textures:  " << m_DrawCounter->getTextures();
+	LOG << "Shaders:   " << m_DrawCounter->getShaders();
 }
 
 };

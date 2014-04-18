@@ -35,10 +35,10 @@ GraphicsDevice::GraphicsDevice(HWND hWnd,const Settings& settings) {
 	if(SUCCEEDED(pD3D->CheckDeviceMultiSampleType(D3DADAPTER_DEFAULT,D3DDEVTYPE_HAL,d3ddm.Format,true,D3DMULTISAMPLE_NONMASKABLE,&total))) {
 		m_pp.MultiSampleType = D3DMULTISAMPLE_NONMASKABLE;
 		m_pp.MultiSampleQuality = total - 1;
-		LOG(logINFO) << "multi sample is supported - quality level " << total -1;
+		LOG << "multi sample is supported - quality level " << total -1;
 	}
 	else {
-		LOG(logINFO) << "NO multi sample is supported";
+		LOG << "NO multi sample is supported";
 		m_pp.MultiSampleType        = D3DMULTISAMPLE_NONE;
 		m_pp.MultiSampleQuality     = 0;
 	}
@@ -90,7 +90,7 @@ GraphicsDevice::GraphicsDevice(HWND hWnd,const Settings& settings) {
 
 
 GraphicsDevice::~GraphicsDevice() {
-	LOG(logINFO) << "Releasing GraphicsDevice";
+	LOG << "Releasing GraphicsDevice";
 	if( pd3dDevice != NULL ) {
         pd3dDevice->Release();
 	}
@@ -100,16 +100,16 @@ GraphicsDevice::~GraphicsDevice() {
 }
 
 void GraphicsDevice::writeInfo(const Settings& settings,const std::string& info) {
-	LOG(logINFO) << "Hardware informations";
-	LOG(logINFO) << "Maximum primitives: " << m_DeviceCaps.MaxPrimitiveCount;
-	LOG(logINFO) << "Vertex shader version: " <<((m_DeviceCaps.VertexShaderVersion>>8)&0xFF) << "." << ((m_DeviceCaps.VertexShaderVersion>>0)&0xFF);
-	LOG(logINFO) << "Pixel shader version: " << ((m_DeviceCaps.PixelShaderVersion>>8)&0xFF) << "." << ((m_DeviceCaps.PixelShaderVersion>>0)&0xFF);
-	LOG(logINFO) << "Settings";
-	LOG(logINFO) << "Format: " << info;
-	LOG(logINFO) << "Width: " << settings.width;
-	LOG(logINFO) << "Height " << settings.height;
-	LOG(logINFO) << "Mode: " << settings.mode;
-	LOG(logINFO) << "Synched: " << settings.synched;
+	LOG << "Hardware informations";
+	LOG << "Maximum primitives: " << m_DeviceCaps.MaxPrimitiveCount;
+	LOG << "Vertex shader version: " <<((m_DeviceCaps.VertexShaderVersion>>8)&0xFF) << "." << ((m_DeviceCaps.VertexShaderVersion>>0)&0xFF);
+	LOG << "Pixel shader version: " << ((m_DeviceCaps.PixelShaderVersion>>8)&0xFF) << "." << ((m_DeviceCaps.PixelShaderVersion>>0)&0xFF);
+	LOG << "Settings";
+	LOG << "Format: " << info;
+	LOG << "Width: " << settings.width;
+	LOG << "Height " << settings.height;
+	LOG << "Mode: " << settings.mode;
+	LOG << "Synched: " << settings.synched;
 }
 
 // ---------------------------------------------------

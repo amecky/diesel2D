@@ -16,5 +16,7 @@ namespace ds {
 
 		float getAngle(const Vector2f& v1,const Vector2f& v2);
 
+		Vector2f getRadialVelocity(float angle,float velocity);
+
 	}
 }

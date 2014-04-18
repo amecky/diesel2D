@@ -11,7 +11,7 @@ AudioBuffer::AudioBuffer(LPDIRECTSOUNDBUFFER sample, Sound *sound) {
 	this->sound = sound;
 	bool ret = FillBufferWithSound();
 	if ( !ret ) {
-		LOGC(logERROR,"AudioBuffer") <<"Failed to fill buffer with sound";
+		LOGEC("AudioBuffer") <<"Failed to fill buffer with sound";
 	}
 }
 
@@ -44,7 +44,7 @@ bool AudioBuffer::FillBufferWithSound() {
     DWORD   dwWavDataRead        = 0;    // Amount of data read from the wav file 
 
 	if( m_Sample == NULL ) {
-		LOGC(logERROR,"AudioBuffer") << "No sample!";
+		LOGEC("AudioBuffer") << "No sample!";
         return false;
 	}
 
@@ -58,7 +58,7 @@ bool AudioBuffer::FillBufferWithSound() {
                                  &pDSLockedBuffer, &dwDSLockedBufferSize, 
                                  NULL, NULL, 0L );
 	if ( hr != S_OK ) {
-		LOGC(logERROR,"AudioBuffer") <<"Failed to lock sample buffer";
+		LOGEC("AudioBuffer") <<"Failed to lock sample buffer";
 		return false;
 	}     
 

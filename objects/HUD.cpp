@@ -4,6 +4,7 @@
 #include "..\utils\Log.h"
 #include "..\utils\StringUtils.h"
 #include "..\utils\PlainTextReader.h"
+#include "..\compiler\HUDConverter.h"
 
 namespace ds {
 
@@ -11,7 +12,7 @@ HUD::HUD() : GameObject() {}
 
 
 HUD::~HUD() {
-	LOG(logINFO) << "Destructing HUDEntity";	
+	LOG << "Destructing HUDEntity";	
 }
 
 void HUD::init(int textureID,const char* fontName) {
@@ -117,7 +118,7 @@ void HUD::addImage(int id,int x,int y,const Rect& texturRect,const Color& color,
 	hi->entryID = createEntry(Vector2f(x,y),scale,color);
 	hi->id = id;
 	HUDEntry* entry = &m_HUDEntries[hi->entryID];
-	SpriteObject sp;
+	Sprite sp;
 	sp.setPosition(Vector2f(x,y));
 	sp.setTextureRect(texturRect);
 	sp.setColor(color);
@@ -270,76 +271,37 @@ int HUD::createEntry(const Vector2f& pos,float scale,const ds::Color& color) {
 	return id;
 }
 
-void HUD::load(const char* name) {
-	char buffer[256];
-	sprintf(buffer,"content\\resources\\%s.json",name);
-	JSONReader reader;
-	if ( reader.parse(buffer) ) {
-		std::vector<Category*> categories = reader.getCategories();
-		for ( size_t i = 0; i < categories.size(); ++i ) {
-			Category* c = categories[i];			
-			if ( c->getName() != "hud" ) {
-				int id = c->getInt(0,"id");
-				Vector2f pos = c->getVector2f("position");			
-				Color clr = Color::WHITE;
-				c->getColor("color",&clr);
-				float scale = 1.0f;
-				c->getFloat("scale",&scale);
-				if ( c->getName() == "counter" ) {				
-					int length = 6;
-					c->getInt("length",&length);
-					addCounter(id,pos.x,pos.y,length,0,clr,scale);
-				}
-				else if ( c->getName() == "timer" ) {
-					addTimer(id,pos.x,pos.y,clr,scale);
-				}
-				else if ( c->getName() == "text" ) {
-					addText(id,pos.x,pos.y,c->getProperty("text"),clr,scale);
-				}
-				else if ( c->getName() == "image" ) {
-					Rect rect;
-					c->getRect("rect",&rect);
-					addImage(id,pos.x,pos.y,rect,clr,scale);
-				}
-			}
-		}		
-		gFileWatcher->registerFile(buffer,this);
-	}
-}
-
-void HUD::reload(const char* fileName) {
-	JSONReader reader;
-	if ( reader.parse(fileName) ) {
-		clear();
-		std::vector<Category*> categories = reader.getCategories();
-		for ( size_t i = 0; i < categories.size(); ++i ) {
-			Category* c = categories[i];			
-			if ( c->getName() != "hud" ) {
-				int id = c->getInt(0,"id");
-				Vector2f pos = c->getVector2f("position");			
-				Color clr = Color::WHITE;
-				c->getColor("color",&clr);
-				float scale = 1.0f;
-				c->getFloat("scale",&scale);
-				if ( c->getName() == "counter" ) {				
-					int length = 6;
-					c->getInt("length",&length);
-					addCounter(id,pos.x,pos.y,length,0,clr,scale);
-				}
-				else if ( c->getName() == "timer" ) {
-					addTimer(id,pos.x,pos.y,clr,scale);
-				}
-				else if ( c->getName() == "text" ) {
-					addText(id,pos.x,pos.y,c->getProperty("text"),clr,scale);
-				}
-				else if ( c->getName() == "image" ) {
-					Rect rect;
-					c->getRect("rect",&rect);
-					addImage(id,pos.x,pos.y,rect,clr,scale);
-				}
-			}
-		}		
-	}
+void HUD::load(BinaryLoader* loader) {	
+	clear();
+	while ( loader->openChunk() == 0 ) {
+		int id = 0;
+		loader->read(&id);
+		Vector2f pos;
+		loader->read(&pos);
+		Color clr(255,255,255,255);
+		loader->read(&clr);
+		float scale = 1.0f;
+		loader->read(&scale);
+		if ( loader->getChunkID() == 1 ) {							
+			int length = 6;
+			loader->read(&length);
+			addCounter(id,pos.x,pos.y,length,0,clr,scale);
+		}
+		else if ( loader->getChunkID() == 2 ) {							
+			addTimer(id,pos.x,pos.y,clr,scale);
+		}
+		else if ( loader->getChunkID() == 3 ) {							
+			std::string str;
+			loader->read(str);
+			addText(id,pos.x,pos.y,str,clr,scale);
+		}
+		else if ( loader->getChunkID() == 4 ) {	
+			Rect rect;
+			loader->read(&rect);
+			addImage(id,pos.x,pos.y,rect,clr,scale);
+		}
+		loader->closeChunk();
+	}		
 }
 
 }

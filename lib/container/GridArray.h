@@ -25,7 +25,7 @@ public:
 	}
 	~GridArray() {
 		if ( m_Data != 0 ) {
-			LOG(logINFO) << "deleting data of grid array";
+			LOG << "deleting data of grid array";
 			delete[] m_Data;
 		}
 	}

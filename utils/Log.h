@@ -12,8 +12,6 @@
 #include <string>
 #include <stdio.h>
 
-enum LogLevel {logERROR, logWARNING, logINFO, logDEBUG};
-
 class LogOutputHandler {
 
 public:
@@ -39,12 +37,12 @@ class Log {
 public:
     Log();    
     virtual ~Log();
-    std::ostringstream& get(LogLevel level = logINFO);
-	std::ostringstream& get(const std::string& category,LogLevel level = logINFO);
-    static LogLevel& reportingLevel();
-	static LogOutputHandler& handler();
-    static std::string toString(LogLevel level);
-    static LogLevel fromString(const std::string& level);
+    std::ostringstream& get();
+	std::ostringstream& error();
+	std::ostringstream& get(const std::string& category);    
+	std::ostringstream& get(const char *file, const unsigned long line);    
+	std::ostringstream& error(const std::string& category);   
+	static LogOutputHandler& handler();        
 protected:
     std::ostringstream os;		
 private:
@@ -60,15 +58,13 @@ private:
 #define LG \
 	Log().get()
 
-#define LOG(level) \
-    if (level > FILELOG_MAX_LEVEL) ;\
-    else if (level > Log::reportingLevel() ) ; \
-    else Log().get(level)
+#define LOG Log().get()
+#define LOGE Log().error()
 
-#define LOGC(level,category) \
-	if (level > FILELOG_MAX_LEVEL) ;\
-	else if (level > Log::reportingLevel() ) ; \
-	else Log().get(category,level)
+#define LOGC(category) Log().get(category)
+#define LOGEC(category) Log().error(category)
+
+#define ELOG Log().get(__FILE__,__LINE__)
 
 #endif	/* LOG_H */
 

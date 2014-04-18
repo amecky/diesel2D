@@ -3,7 +3,7 @@
 
 
 EntityManager::~EntityManager() {
-	LOGC(logINFO,"EntityManager") << "Destructing entity manager";
+	LOGC("EntityManager") << "Destructing entity manager";
 	Components::iterator cit = m_Components.begin();
 	while ( cit != m_Components.end()) {
 		//delete (*cit);
@@ -23,7 +23,7 @@ EntityManager::~EntityManager() {
 // -------------------------------------------------------
 uint32 EntityManager::createEntity() {
 	uint32 ret = m_Index;
-	LOG(logINFO) << "new entity " << ret;
+	LOG << "new entity " << ret;
 	m_Entities.push_back(ret);
 	++m_Index;
 	return ret;
@@ -63,7 +63,7 @@ void EntityManager::render() {
 // Remove
 // -------------------------------------------------------
 void EntityManager::remove(const Entity& entity) {
-	LOG(logINFO) << "marking to remove entity " << entity;
+	LOG << "marking to remove entity " << entity;
 	m_DeleteEntities.push_back(entity);
 }
 
@@ -74,7 +74,7 @@ void EntityManager::cleanup() {
 	DeleteEntities::iterator dit = m_DeleteEntities.begin();
 	while ( dit != m_DeleteEntities.end()) {
 		Entity entity = *dit;
-		LOG(logINFO) << "remove entity " << entity;
+		LOG << "remove entity " << entity;
 		for ( size_t i = 0; i < m_Systems.size(); ++i ) {
 			m_Systems[i]->remove(entity);
 			m_Systems[i]->removeData(entity);

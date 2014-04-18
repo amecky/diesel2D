@@ -1,5 +1,4 @@
 #pragma once
-#include "..\World.h"
 #include "..\..\renderer\render_types.h"
 #include "..\..\base\GameObject.h"
 
@@ -7,7 +6,7 @@ namespace ds {
 
 const int SAMPLE_COUNT = 15;
 
-struct BloomSettings : public DynamicSettings {
+struct BloomSettings  {
 
 	float bloomThreshold;
 	float bloomIntensity;
@@ -16,13 +15,15 @@ struct BloomSettings : public DynamicSettings {
 	float originalSaturation;
 	float blurAmount;
 
-	void load(NewSettingsReader& reader) {
+	void load() {
+		/*
 		reader.get<float>("bloom_threshold",&bloomThreshold);
 		reader.get<float>("bloom_intensity",&bloomIntensity);
 		reader.get<float>("original_intensity",&originalIntensity);
 		reader.get<float>("bloom_saturation",&bloomSaturation);
 		reader.get<float>("original_saturation",&originalSaturation);
 		reader.get<float>("blur_amount",&blurAmount);
+		*/
 	}
 };
 

@@ -3,7 +3,7 @@
 #include "..\renderer\Renderer.h"
 #include "..\utils\GameTimer.h"
 #include "..\io\Serializer.h"
-#include "..\sprites\SpriteObject.h"
+#include "..\sprites\Sprite.h"
 #include "..\base\GameObject.h"
 
 namespace ds {
@@ -12,7 +12,7 @@ const int MAX_COUNTER = 16;
 const int MAX_TIMER = 8;
 const int MAX_HUD_IMAGES = 64;
 
-class HUD : public GameObject , public Serializer{
+class HUD : public GameObject , public Serializer {
 
 struct HUDEntry {
 	uint32 id;
@@ -20,7 +20,7 @@ struct HUDEntry {
 	ds::Color color;
 	float scale;
 	int flag;
-	std::vector<SpriteObject> sprites;
+	std::vector<Sprite> sprites;
 };
 
 struct HUDImage {
@@ -118,13 +118,9 @@ public:
 	GameTimer* getTimer(int id);
 	//! Clears all elements	 
 	void clear();
-	//! Loads data from a json file
-	/*
-		\param filename the name of the json file include directories
-	*/
-	void load(const char* fileName);	
-	//! Reloads data from a json file
-	void reload(const char* fileName);
+
+	void load(BinaryLoader* loader);	
+
 private:	
 	int createEntry(const Vector2f& pos,float scale = 1.0f,const ds::Color& color = ds::Color::WHITE);
 	void createText(HUDEntry* entry,const std::string& text,bool clear = true);

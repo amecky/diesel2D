@@ -17,6 +17,7 @@ public:
 	EventStream();    
 	virtual ~EventStream();
 	void reset();
+	void add(int type);
 	void add(int type,void* p,size_t size);
 	const bool get(int index,void* p) const;
 	const int getType(int index) const;

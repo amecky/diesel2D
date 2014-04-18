@@ -31,18 +31,37 @@ Log::Log() {}
 
 Log::Log(const Log& orig) {}
 
-std::ostringstream& Log::get(LogLevel level) {
+std::ostringstream& Log::get() {
     os << NowTime();
-    os << " [" << toString(level) << "] : ";
-    os << std::string(level > logDEBUG ? level - logDEBUG : 0, '\t');
+    os << " : ";
     return os;
 }
 
-std::ostringstream& Log::get(const std::string& category,LogLevel level) {
+std::ostringstream& Log::get(const char *file, const unsigned long line) {
 	os << NowTime();
-	os << " [" << toString(level) << "] -";
+	os << " : [";
+	os << file;
+	os << " : ";
+	os << line;
+	os << "] ";
+	return os;
+}
+std::ostringstream& Log::error() {
+	os << NowTime();
+	os << " [ERROR] : ";
+	return os;
+}
+
+std::ostringstream& Log::error(const std::string& category) {
+	os << NowTime();
+	os << " [ERROR] : ";
 	os << " [" << category << "] : ";
-	os << std::string(level > logDEBUG ? level - logDEBUG : 0, '\t');
+	return os;
+}
+
+std::ostringstream& Log::get(const std::string& category) {
+	os << NowTime();
+	os << " [" << category << "] : ";
 	return os;
 }
 
@@ -52,32 +71,9 @@ Log::~Log() {
 	handler().write(os.str());
 }
 
-LogLevel& Log::reportingLevel() {
-    static LogLevel reportingLevel = logDEBUG;
-    return reportingLevel;
-}
-
 LogOutputHandler& Log::handler() {
 	static FileOutputHandler coh;
 	return coh;	
-}
-
-std::string Log::toString(LogLevel level) {
-    static const char* const buffer[] = {"ERROR", "WARNING", "INFO", "DEBUG"};
-    return buffer[level];
-}
-
-LogLevel Log::fromString(const std::string& level) {
-    if (level == "DEBUG")
-        return logDEBUG;
-    if (level == "INFO")
-        return logINFO;
-    if (level == "WARNING")
-        return logWARNING;
-    if (level == "ERROR")
-        return logERROR;
-    Log().get(logWARNING) << "Unknown logging level '" << level << "'. Using INFO level as default.";
-    return logINFO;
 }
 
 std::string Log::NowTime() {

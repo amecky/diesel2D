@@ -11,10 +11,13 @@ BinaryLoader::BinaryLoader() : m_Stream(0) {
     m_CurrentHeader = new ChunkHeader();
 }
 
-BinaryLoader::BinaryLoader(const BinaryLoader& orig) {
+BinaryLoader::BinaryLoader(const BinaryLoader& orig) {	
 }
 
 BinaryLoader::~BinaryLoader() {
+	if ( m_CurrentHeader != 0 ) {
+		delete m_CurrentHeader;
+	}
     close();
 }
 
@@ -68,12 +71,48 @@ uint32 BinaryLoader::openChunk() {
 }
 
 void BinaryLoader::read(float* value) {
-    read(value,sizeof(float));    
+    readBuffer(value,sizeof(float));    
+}
+
+void BinaryLoader::read(Vector2f* value) {
+	readBuffer(&value->x,sizeof(float));    
+	readBuffer(&value->y,sizeof(float));    
+}
+
+void BinaryLoader::read(ds::Color* value) {
+	readBuffer(&value->r,sizeof(float));    
+	readBuffer(&value->g,sizeof(float));    
+	readBuffer(&value->b,sizeof(float));    
+	readBuffer(&value->a,sizeof(float));    
+}
+
+void BinaryLoader::read(ds::Rect* value) {
+	readBuffer(&value->top,sizeof(float));    
+	readBuffer(&value->left,sizeof(float));    
+	readBuffer(&value->bottom,sizeof(float));    
+	readBuffer(&value->right,sizeof(float));    
 }
 
 void BinaryLoader::read(int* value) {
-    read(value,sizeof(int));    
+    readBuffer(value,sizeof(int));    
 }
+
+void BinaryLoader::read(uint32* value) {
+	readBuffer(value,sizeof(uint32));    
+}
+
+void BinaryLoader::read(std::string& str) {
+	int length = 0;
+	read(&length);
+	char c;
+	str.clear();
+	for ( int i = 0; i < length; ++i ) {
+		readBuffer(&c,sizeof(char));    
+		char f = c + 32;
+		str += f;
+	}
+}
+
 
 // ------------------------------------------------------
 // Close chunk
@@ -106,7 +145,7 @@ void BinaryLoader::reset() {
 // ------------------------------------------------------
 // Read 
 // ------------------------------------------------------
-uint32 BinaryLoader::read(void* buffer, uint32 size) {
+uint32 BinaryLoader::readBuffer(void* buffer, uint32 size) {
     if ( m_Stream == 0 ) {
         m_ErrorCode = IO_NO_STREAM;
         return m_ErrorCode;

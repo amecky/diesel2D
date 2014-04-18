@@ -1,6 +1,7 @@
-#include "SpriteObject.h"
+#include "Sprite.h"
 #include "..\math\GameMath.h"
 #include "SpriteAnimation.h"
+#include "..\compiler\Converter.h"
 
 namespace ds {
 
@@ -10,12 +11,12 @@ const float WO_VP_ARRAY[] = {
 	0.5f,-0.5f, -0.5f,-0.5f
 };
 
-SpriteObject::SpriteObject() : m_Timer(0.0f) , m_Active(true) , m_Radius(0.0f) , m_Position(0.0f,0.0f) 
+Sprite::Sprite() : m_Timer(0.0f) , m_Active(true) , m_Radius(0.0f) , m_Position(0.0f,0.0f) 
 	, m_Index(0) , m_ID(0) , m_Color(255,255,255,255) , m_Angle(0.0f) , m_Size(1.0f,1.0f) , dimX(10.0f) , dimY(10.0f) 
-	, m_Velocity(0.0f,0.0f) , m_Target(0.0f,0.0f) , m_TextureID(0) {
+	, m_Velocity(0.0f,0.0f) , m_Target(0.0f,0.0f) , m_TextureID(0) , timer(0.0f) , delay(0.0f) , m_UserValue(0) {
 }
 
-void SpriteObject::setTextureRect(const Rect& r,int textureID) {
+void Sprite::setTextureRect(const Rect& r,int textureID) {
 	float u1,u2,v1,v2;
 	math::getTextureCoordinates(r,1024,&u1,&v1,&u2,&v2);
 	dimX = r.width();
@@ -28,17 +29,17 @@ void SpriteObject::setTextureRect(const Rect& r,int textureID) {
 	m_TextureID = textureID;
 }
 
-void SpriteObject::update(float elapsed) {
+void Sprite::update(float elapsed) {
 	m_Timer += elapsed;
 	for ( size_t i = 0; i < m_Animations.size(); ++i ) {
 		m_Animations[i]->update(m_Timer,this);
 	}
 }
 
-SpriteObject::~SpriteObject(void) {
+Sprite::~Sprite(void) {
 }
 
-void SpriteObject::setPosition(const Vector2f& pos) {
+void Sprite::setPosition(const Vector2f& pos) {
 	m_Position = pos;
 	Vector2f cor = m_Position;
 	Vector2f p(0,0);
@@ -51,6 +52,26 @@ void SpriteObject::setPosition(const Vector2f& pos) {
 		m_Vertices[i].z = 0.0f;
 	}	
 
+}
+
+void Sprite::load(BinaryLoader* loader) {
+	while ( loader->openChunk() == 0 ) {		
+		if ( loader->getChunkID() == CHNK_SPRITE ) {		
+			loader->read(&m_TextureID);
+			Vector2f pos;
+			loader->read(&pos);
+			Rect r;
+			loader->read(&r);
+			setTextureRect(r,m_TextureID);
+			loader->read(&m_Size);
+			loader->read(&m_Color);
+			float rotation = 0.0f;
+			loader->read(&rotation);
+			m_Angle = DEGTORAD(rotation);
+			setPosition(pos);			
+		}
+		loader->closeChunk();
+	}		
 }
 
 }

@@ -1,12 +1,8 @@
 #include "NewSpriteBatch.h"
 #include "..\renderer\vertex_types.h"
 #include "..\utils\Profiler.h"
-//#include "..\utils\PlainTextReader.h"
-//#include "..\pipeline\PAKReader.h"
-//#include "..\pipeline\PAKWriter.h"
-//#include "..\utils\FileUtils.h"
 #include "..\renderer\shader.h"
-#include "..\sprites\SpriteObject.h"
+#include "..\sprites\Sprite.h"
 #include "..\renderer\Renderer.h"
 #include "..\utils\Log.h"
 #include "..\math\GameMath.h"
@@ -32,18 +28,11 @@ NewSpriteBatch::NewSpriteBatch(Renderer* renderer) : m_Renderer(renderer)
 	m_BufferSize = QUAD_SIZE * m_MaxVertices + INDEX_SIZE * m_MaxIndices;
 	m_StartIndices = QUAD_SIZE * m_MaxVertices;
 	m_DataBuffer = new char[m_BufferSize];
-
-	//Vector2f textureSize = m_Renderer->getTextureSize(textureID);
-	//m_TextureWidth = textureSize.x;
-	//m_TextureHeight = textureSize.y;
-	m_BlendState = m_Renderer->getDefaultBlendState();
 	m_Handle = renderer->createBufferHandle(PT_TRI,VD_PTC,GBT_BOTH,true);
-	LOGC(logINFO,"SpriteBatch") << "creating new SpriteBatch - buffer size " << m_BufferSize << " start index buffer " << m_StartIndices;
+	LOGC("SpriteBatch") << "creating new SpriteBatch - buffer size " << m_BufferSize << " start index buffer " << m_StartIndices;
 	m_ShaderID = shader::createPTCShader(m_Renderer,-1);
-	//LOGC(logINFO,"SpriteBatch") << "tw " << m_TextureWidth << " th " << m_TextureHeight;
-	LOGC(logINFO,"SpriteBatch") << "max vertices: " << m_MaxVertices;
+	LOGC("SpriteBatch") << "max vertices: " << m_MaxVertices;
 	// fill up all indices
-
 	char* indexBuffer = m_DataBuffer + m_StartIndices;
 	for ( uint32 i = 0; i < MAX_QUADS;++i ) {
 		(*(uint32*)indexBuffer) = i * 4 + 0;
@@ -63,7 +52,7 @@ NewSpriteBatch::NewSpriteBatch(Renderer* renderer) : m_Renderer(renderer)
 
 
 NewSpriteBatch::~NewSpriteBatch() {
-	LOGC(logINFO,"SpriteBatch") << "destructing SpriteBatch";	
+	LOGC("SpriteBatch") << "destructing SpriteBatch";	
 	delete m_DataBuffer;
 }
 
@@ -74,16 +63,15 @@ void NewSpriteBatch::draw(float x,float y,int textureID,const Rect& textureRect,
 	draw(Vector2f(x,y),textureID,textureRect,rotation,scaleX,scaleY,color,center);	
 }
 
-void NewSpriteBatch::draw(const SpriteObject& spriteObject) {
+void NewSpriteBatch::draw(const Sprite& spriteObject) {
 	if ( spriteObject.isActive()) {
 		if ( (m_VertexCounter + 4) >= m_MaxVertices || spriteObject.getTextureID() != m_CurrentTextureID ) {
 			m_CurrentTextureID = spriteObject.getTextureID();
-			end();
-			begin();
+			flush();
 		}
 		char* buffer = m_DataBuffer + QUAD_SIZE * m_Index;
-		float cx = m_Renderer->getWidth() * 0.5f;
-		float cy = m_Renderer->getHeight() * 0.5f;
+		float cx = m_Renderer->getViewport()->getPositionX();
+		float cy = m_Renderer->getViewport()->getPositionY();
 		const Color& clr = spriteObject.getColor();
 		for ( int i = 0; i < 4; ++i ) {		
 			(*(SpritePlane*)buffer).v[i].uv = spriteObject.getUV(i);
@@ -103,8 +91,12 @@ void NewSpriteBatch::draw(const SpriteObject& spriteObject) {
 // -------------------------------------------------------
 void NewSpriteBatch::draw(const Vector2f& pos,int textureID,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vector2f& center) {
 	if ( m_VertexCounter < m_MaxVertices ) {
+		if ( (m_VertexCounter + 4) >= m_MaxVertices || textureID != m_CurrentTextureID ) {
+			m_CurrentTextureID = textureID;
+			flush();
+		}
 		float u1,v1,u2,v2;
-		ds::math::getTextureCoordinates(textureRect,m_TextureWidth,m_TextureHeight,&u1,&v1,&u2,&v2,true);
+		ds::math::getTextureCoordinates(textureRect,1024,1024,&u1,&v1,&u2,&v2,true);
 		float dimX = textureRect.width();
 		float dimY = textureRect.height();
 		float dx = dimX * 0.5f;
@@ -116,7 +108,7 @@ void NewSpriteBatch::draw(const Vector2f& pos,int textureID,const Rect& textureR
 		(*(SpritePlane*)buffer).v[3].uv = Vector2f(u1,v2);
 
 		Vector2f cor = pos;
-		cor = cor - Vector2f(m_Renderer->getWidth() * 0.5f,m_Renderer->getHeight() * 0.5f);
+		cor = cor - m_Renderer->getViewport()->getPosition();
 		Vector2f p(0,0);
 		for ( int i = 0; i < 4; ++i ) {
 			p.x = VP_ARRAY[i * 2] * dimX;
@@ -133,7 +125,13 @@ void NewSpriteBatch::draw(const Vector2f& pos,int textureID,const Rect& textureR
 	}
 }
 
-
+void NewSpriteBatch::setBlendState(int blendState) {
+	if ( blendState != m_CurrentBlendState ) {
+		//LOG << "swicthing bs " << blendState;
+		flush();
+		//m_CurrentBlendState = blendState;
+	}
+}
 // -------------------------------------------------------
 // Begin
 // -------------------------------------------------------
@@ -184,8 +182,10 @@ void NewSpriteBatch::end() {
 		m_Renderer->setCurrentShader(m_ShaderID);
 		m_Renderer->setTexture(m_CurrentTextureID,0);
 		m_Renderer->setTexture(m_ShaderID,"gTex",m_CurrentTextureID);
-		m_Renderer->setBlendState(m_BlendState);
+		//m_Renderer->setBlendState(m_CurrentBlendState);
 		m_Renderer->drawBuffer(m_Handle,m_CurrentTextureID);
+		m_Renderer->resetBuffer(m_Handle);
+		m_Renderer->getDrawCounter().incFlushes();
 		PR_END("SpriteBatch")
 	}	
 }

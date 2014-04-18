@@ -31,7 +31,7 @@ void UIButton::align(const Vector2f& gridPosition) {
 	float x = gridPosition.x + 8.0f;
 	int complete = (int)m_CalculatedSize.x / 84;	
 	int rest = m_CalculatedSize.x - complete * 84;
-	LOG(logINFO) << "----------- size " << m_CalculatedSize.x << " complete " << complete << " rest " << rest;
+	LOG << "----------- size " << m_CalculatedSize.x << " complete " << complete << " rest " << rest;
 	for ( int i = 0; i < complete; ++i ) {
 		UI::fillQuad(x,gridPosition.y,m_CalculatedSize.x,25.0f,Rect(120,268,84,25),m_Vertices);
 		x += 84.0f;

@@ -5,23 +5,28 @@ namespace ds {
 // -------------------------------------------------------
 // RingEmitterMesh - getPoint
 // -------------------------------------------------------
-void RingEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,bool random) {
-	float angle = m_Settings->startAngle + ds::math::random(-m_Settings->startVariance,m_Settings->startVariance);
+void RingEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,float* angle,bool random) {
+	float myAngle = m_Settings->startAngle + ds::math::random(-m_Settings->startVariance,m_Settings->startVariance);
 	float step = 360.0f / static_cast<float>(total);
 	int idx = index;
 	if ( random ) {
 		idx = math::random(0,total);
 	}
-	angle += step * idx;
-	float ang = angle + math::random(-step * m_Settings->angleVariance,step * m_Settings->angleVariance);
+	myAngle += step * idx;
+	//float ang = angle + math::random(-step * m_Settings->angleVariance,step * m_Settings->angleVariance);
+	float ang = myAngle + myAngle * math::random(-m_Settings->angleVariance,m_Settings->angleVariance);
 	int radius = m_Settings->radius + math::random(-m_Settings->radiusVariance,m_Settings->radiusVariance);
 	float rad = static_cast<float>(radius);
 	position.x = rad * cos(DEGTORAD(ang));
-	position.y = rad * sin(DEGTORAD(ang));		
+	position.y = rad * sin(DEGTORAD(ang));	
+	if ( m_Settings->normalVariance != 0.0f ) {
+		ang = ang + ang * math::random(-m_Settings->normalVariance,m_Settings->normalVariance);
+	}
+	*angle = DEGTORAD(ang);
 	normal = normalize(math::getRadialVelocity(ang,1.0f));
 }
 
-void PointEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,bool random) {
+void PointEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,float* angle,bool random) {
 	position = Vector2f(0,0);
 	normal = Vector2f(0,0);
 }
@@ -58,7 +63,7 @@ BoxEmitterMesh::BoxEmitterMesh(BoxEmitterSettings* settings) : EmitterMesh() , m
 	}	
 }
 
-void BoxEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,bool random) {
+void BoxEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,float* angle,bool random) {
 	BoxEntry* current = m_Entries;
 	int idx = index;
 	if ( idx >= m_Max ) {
@@ -69,20 +74,21 @@ void BoxEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vecto
 	normal = current->normal;
 }
 
-void ConeEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,bool random) {
-	float angle = m_Settings->startAngle;
+void ConeEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,float* angle,bool random) {
+	float myAngle = m_Settings->startAngle;
 	float diff = m_Settings->endAngle - m_Settings->startAngle;
 	if ( diff < 0.0f ) {
 		diff += 360.0f;
 	}
 	float step = diff / static_cast<float>(total);
-	angle += step * index;
+	myAngle += step * index;
 
-	float ang = angle + math::random(-step * m_Settings->angleVariance,step * m_Settings->angleVariance);
+	float ang = myAngle + math::random(-step * m_Settings->angleVariance,step * m_Settings->angleVariance);
 	int radius = m_Settings->radius + math::random(-m_Settings->radiusVariance,m_Settings->radiusVariance);
 	float rad = static_cast<float>(radius);
 	position.x = rad * cos(DEGTORAD(ang));
 	position.y = rad * sin(DEGTORAD(ang));
+	*angle = DEGTORAD(ang);
 	normal = normalize(math::getRadialVelocity(ang,1.0f));	
 }
 

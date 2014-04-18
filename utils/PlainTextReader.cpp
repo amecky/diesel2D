@@ -3,57 +3,6 @@
 #include "StringUtils.h"
 #include "Log.h"
 #include "StringUtils.h"
-
-PlainTextReader::PlainTextReader() : m_Root(0) {
-}
-
-bool PlainTextReader::readFile(const char* fileName) {
-	std::vector<std::string> file;
-	std::string line;
-	file.clear();
-	std::stack<Category*> stack;
-	std::ifstream infile(fileName, std::ios_base::in);
-	while (getline(infile, line, '\n')) {
-		file.push_back(line);
-	}
-	int braces = 0;
-	for (size_t i = 0; i < file.size(); ++i) {
-		line = file[i];
-		if (line.find('{') != std::string::npos) {
-			std::string::size_type pos = line.find('{');
-			std::string name = line.substr(0, pos);
-			ds::string::trim(name);
-			if (m_Root == 0) {
-				m_Root = new Category(name);
-				stack.push(m_Root);
-			}
-			else {
-				Category* c = stack.top();
-				Category* cat = new Category(name);
-				c->addCategory(cat);
-				stack.push(cat);
-			}
-			++braces;
-		}
-		else if (line.find('}') != std::string::npos) {
-			stack.pop();
-			--braces;
-		} else {
-			std::string::size_type pos = line.find(':');
-			if (pos != std::string::npos) {
-				Category* c = stack.top();
-				std::string name = line.substr(0, pos);
-				ds::string::trim(name);
-				std::string value = line.substr(pos+1);
-				ds::string::trim(value);
-				c->addProperty(name,value);
-				stack.top() = c;
-			}
-		}
-	}
-	return true;
-}
-
 // ------------------------------------------
 // JSON reader
 // ------------------------------------------
@@ -99,7 +48,7 @@ bool JSONReader::parse(const char* fileName) {
 	FILE *fp = fopen(fileName, "rb");
 	char* text;
 	if (fp) {
-		LOGC(logINFO,"JSONReader") << "Parsing " << fileName;
+		LOGC("JSONReader") << "Parsing " << fileName;
 		fseek(fp, 0, SEEK_END);
 		int size = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
@@ -124,7 +73,7 @@ bool JSONReader::parse(const char* fileName) {
 					}
 				}
 			}
-			else if ( *ptr == '{' ) {
+			else if ( *ptr == '{' && name != 0 ) {
 				Category* c = new Category(name);
 				if ( !stack.empty() ) {
 					Category* parent = stack.top();
@@ -141,7 +90,9 @@ bool JSONReader::parse(const char* fileName) {
 			else if ( *ptr == '}' ) {
 				--bracketCounter;
 				++ptr;
-				stack.pop();
+				if ( !stack.empty() ) {
+					stack.pop();
+				}
 				naming = true;
 			}
 			else if ( *ptr == '"' ) {
@@ -182,92 +133,6 @@ bool JSONReader::parse(const char* fileName) {
 		return true;
 	}
 	return false;
-}
-
-// ------------------------------------------
-// Settings reader
-// ------------------------------------------
-SettingsReader::SettingsReader() {
-}
-
-SettingsReader::~SettingsReader() {
-}
-
-bool SettingsReader::parse(const char* fileName) {
-	LOGC(logINFO,"SettingsReader") << "parsing file: " << fileName;
-	std::string line;
-	std::ifstream infile(fileName, std::ios_base::in);
-	std::vector<std::string> entries;
-	while (getline(infile, line, '\n')) {
-		if (line.find('#') == std::string::npos) {
-			entries.clear();
-			ds::string::split(line,entries,'=');
-			if ( entries.size() == 2 ) {
-				std::string name = entries[0];
-				ds::string::trim(name);
-				std::string value = entries[1];
-				ds::string::trim(value);
-				m_Settings[name] = value;
-			}
-			else {
-				LOGC(logINFO,"SettingsReader") << "Split returned wrong number of entries: " << line;
-			}
-		}
-	}
-	infile.close();
-	return true;
-}
-
-void SettingsReader::getNames(std::vector<std::string>& names) {
-	names.clear();
-	Settings::iterator it = m_Settings.begin();
-	while ( it != m_Settings.end() ) {
-		names.push_back(it->first);
-		++it;
-	}
-}
-
-std::string& SettingsReader::getValue(const std::string& name) {
-	return m_Settings[name];
-}
-
-// -------------------------------------------------------
-// NewSettingsReader
-// -------------------------------------------------------
-bool NewSettingsReader::parse(const char* fileName) {
-	LOGC(logINFO,"NewSettingsReader") << "parsing file: " << fileName;
-	std::string line;
-	std::ifstream infile(fileName, std::ios_base::in);
-	if ( infile) {
-		std::vector<std::string> entries;
-		while (getline(infile, line, '\n')) {
-			if (line.find('#') == std::string::npos) {
-				entries.clear();
-				ds::string::split(line,entries,'=');
-				if ( entries.size() == 2 ) {
-					std::string name = entries[0];
-					ds::string::trim(name);
-					std::string value = entries[1];
-					ds::string::trim(value);
-					Setting set;
-					// FIXME: make sure name is only 20 chars
-					strcpy(set.name,name.c_str());
-					set.hash = ds::string::murmur_hash(name.c_str());
-					set.value = value;
-					m_Settings.push_back(set);
-				}
-				else {
-					LOGC(logINFO,"NewSettingsReader") << "NewSplit returned wrong number of entries: " << line;
-				}
-			}
-		}
-		infile.close();
-		return true;
-	}
-	else {
-		LOGC(logINFO,"NewSettingsReader") << "Cannot find file: " << fileName;
-		return false;
-	}
 }
 
 

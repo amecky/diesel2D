@@ -6,6 +6,7 @@
 #include "..\memory\DataBlockAllocator.h"
 #include "..\io\FileWatcher.h"
 #include "..\utils\FileUtils.h"
+#include "..\particles\ParticleSystem.h"
 
 namespace ds {
 
@@ -34,6 +35,7 @@ BaseApp::BaseApp() {
 	audio = new AudioManager;
 	m_Fullscreen = false;
 	m_CollisionManager = new SpriteCollisionManager();
+	particles = new ParticleManager;
 	//m_DialogBatch = 0;
 }
 
@@ -41,10 +43,8 @@ BaseApp::BaseApp() {
 // Destructor
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
-	LOGC(logINFO,"BaseApp") << "Destructing all elements";
-	//if ( m_DialogBatch != 0 ) {
-		//delete m_DialogBatch;
-	//}
+	LOGC("BaseApp") << "Destructing all elements";
+	delete particles;
 	delete m_CollisionManager;
 	delete gProfiler;
 	delete audio;
@@ -58,7 +58,7 @@ BaseApp::~BaseApp() {
 // Init
 // -------------------------------------------------------
 void BaseApp::init() {
-	LOGC(logINFO,"BaseApp") << "----------------- Init ----------------------";
+	LOGC("BaseApp") << "----------------- Init ----------------------";
 	Settings settings;
 	settings.fullscreen = m_Fullscreen;
 	settings.height = m_Height;
@@ -67,45 +67,28 @@ void BaseApp::init() {
 	settings.mode = 1;
 	settings.postProcessing = false;
 	renderer = new Renderer(m_hWnd,settings);   
-	m_World.init(renderer);
 	audio->initialize(m_hWnd);
+	particles->setRenderer(renderer);
+	particles->setAssetCompiler(&assets);
 	initialize();		
 	/*
-	LOGC(logINFO,"BaseApp") << "-> loading gui.json";
+	LOGC("BaseApp") << "-> loading gui.json";
 	if ( file::fileExists("content\\resources\\gui.json")) {
-		LOGC(logINFO,"BaseApp") << "There is a gui file";
+		LOGC("BaseApp") << "There is a gui file";
 		initializeGUI();
 	}
 	*/
-	LOGC(logINFO,"BaseApp") << "----------------- Init ----------------------";
-	LOGC(logINFO,"BaseApp") << "------------ Loading content  ---------------";
+	LOGC("BaseApp") << "----------------- Init ----------------------";
+	LOGC("BaseApp") << "------------ Loading content  ---------------";
 	loadContent();
-	LOGC(logINFO,"BaseApp") << "------------ Loading content  ---------------";
+	LOGC("BaseApp") << "------------ Loading content  ---------------";
 	m_Loading = false;
 }
 
 void BaseApp::initializeGUI() {
-	JSONReader reader;
-	if ( reader.parse("content\\resources\\gui.json") ) {		
-		Category* cat = reader.getCategory("gui");
-		if ( cat != 0 ) {
-			int textureID = cat->getInt(0,"texture_id");
-			std::string font = cat->getProperty("font");
-			int maxQuads = 1024;
-			cat->getInt("max_quads",&maxQuads);
-			gui.init(renderer,font.c_str(),textureID);
-		}
-		std::vector<Category*> categories = reader.getCategories();
-		for ( size_t i = 0; i < categories.size(); ++i ) {
-			Category* c = categories[i];
-			if ( c->getName() != "gui" ) {
-				int id = c->getInt(0,"id");
-				LOGC(logINFO,"BaseAPP") << "dialog: " << c->getName() << " id: " << id;
-				gui.loadDialogFromJSON(c->getName().c_str(),c->getProperty("file").c_str(),id);
-			}
-		}		
-	}
-	
+	gui.setRenderer(renderer);
+	gui.setAssetCompiler(&assets);
+	assets.load("content\\resources","gui",&gui,CVT_GUI);	
 }
 // -------------------------------------------------------
 // Creates the window
@@ -123,7 +106,7 @@ void BaseApp::createWindow() {
 
 	if (!m_hWnd) 	{
 		DWORD dw = GetLastError(); 
-		LOGC(logINFO,"BaseApp") << "Failed to created window";
+		LOGC("BaseApp") << "Failed to created window";
 		//ErrorExit(TEXT("CreateWindow"));
 		ExitProcess(dw); 
 	}
@@ -134,7 +117,7 @@ void BaseApp::createWindow() {
 	SetWindowPos( m_hWnd, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, 
 		SWP_NOZORDER | SWP_NOMOVE  );
 
-	LOG(logINFO) << "window rect " << rect.top << " " << rect.left << " " << rect.bottom << " " << rect.right;
+	LOG << "window rect " << rect.top << " " << rect.left << " " << rect.bottom << " " << rect.right;
 	ShowWindow( m_hWnd, SW_SHOW );
 	UpdateWindow( m_hWnd );
 
@@ -145,7 +128,7 @@ void BaseApp::createWindow() {
 	m_wp.length = sizeof( WINDOWPLACEMENT );
 	GetWindowPlacement( m_hWnd, &m_wp );	
 
-	LOGC(logINFO,"Framework") << "window created";
+	LOGC("Framework") << "window created";
 }
 
 // -------------------------------------------------------
@@ -184,7 +167,9 @@ void BaseApp::buildFrame() {
 	m_CollisionManager->reset();
 	PR_START("MAIN")
 	PR_START("FILEWATCHER")
-	gFileWatcher->update();
+#ifdef DEBUG
+	assets.update();
+#endif
 	PR_END("FILEWATCHER")
 	renderer->getDrawCounter().reset();
 	renderer->clearDebugMessages();
@@ -222,23 +207,25 @@ void BaseApp::buildFrame() {
 	}
 	PR_START("UPDATE")
 	gui.updateMousePos(getMousePos());
-	PR_START("World-update-GameObjects")
+	PR_START("GameObjects::update")
 	//if ( !m_Paused ) {
 		for ( size_t i = 0; i < m_GameObjects.size(); ++i ) {
 			GameObject* obj = m_GameObjects[i];
-			if (obj->isActive()) {
-				obj->resetEvents();
+			obj->resetEvents();
+			if (obj->isActive()) {				
 				obj->update(m_GameTime.elapsed);
 			}
 		}
 	//}
-	PR_END("World-update-GameObjects")
+	PR_END("GameObjects::update")
+	PR_START("Game::update")
 	update(m_GameTime);
+	particles->update(m_GameTime.elapsed);
+	PR_END("Game::update")
 	int collisions = m_CollisionManager->checkIntersections();
 	if ( collisions > 0 ) {
 		handleCollisions();
 	}
-	m_World.update(m_GameTime.elapsed);
 	PR_END("UPDATE")
 	PR_START("RENDER")
 	renderer->beginRendering(m_ClearColor);	
@@ -251,7 +238,7 @@ void BaseApp::buildFrame() {
 	PR_START("DEBUG_RENDER")
 #ifdef DEBUG		
 	if ( m_DebugInfo.showDrawCounter ) {
-		int y = renderer->getHeight() - 80;
+		int y = renderer->getViewport()->getHeight() - 80;
 		renderer->showDrawCounter(10,y);
 	}
 	if ( m_DebugInfo.showProfiler ) {
@@ -265,6 +252,7 @@ void BaseApp::buildFrame() {
 	PR_END("MAIN")
 	if ( m_DebugInfo.printProfiler ) {
 		m_DebugInfo.printProfiler = false;
+		renderer->printDrawCounter();
 		gProfiler->print();
 	}	
 }
@@ -327,5 +315,15 @@ void BaseApp::sendKeyUp(WPARAM virtualKey) {
 	m_KeyStates.keyReleased = virtualKey;
 }
 
+void BaseApp::createParticleSystem(const char* fileName,int textureID,ParticleSystem* entity,int maxParticles,int blendState) {
+	entity->setRenderer(renderer);
+	entity->setMaxParticles(maxParticles);
+	entity->setBlendState(blendState);
+	entity->setTextureID(textureID);
+	entity->init();
+	assets.load("content\\resources",fileName,entity,CVT_PARTICLESYSTEM);
+	//entity->load(fileName);	
+	m_GameObjects.push_back(entity);
+}
 
 }

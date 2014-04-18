@@ -11,7 +11,7 @@ UILabel::UILabel(UIDialog *dialog,uint32 ID,const std::string& label) : UIContro
 	//m_Dialog->getTextNode()->calculateSize(string::to_string(m_ID),m_CalculatedSize);
 	m_CalculatedSize.x = (float)UI::calculateTextSize(1.0f,dialog->getBitmapFont(),label);
 	m_CalculatedSize.y = 25.0f;
-	LOG(logINFO) << "------- Label " << ID << " size " << m_CalculatedSize.x << " " << m_CalculatedSize.y;
+	LOG << "------- Label " << ID << " size " << m_CalculatedSize.x << " " << m_CalculatedSize.y;
 
 }
 

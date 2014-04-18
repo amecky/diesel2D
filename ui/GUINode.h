@@ -49,10 +49,10 @@ public:
 		return m_Parent;
 	}
 	virtual void onMouseOver() {
-		LOG(logINFO) << "Control " << m_CtrlIndex << " mouse over";
+		LOG << "Control " << m_CtrlIndex << " mouse over";
 	}
 	virtual void onMouseOut() {
-		LOG(logINFO) << "Control " << m_CtrlIndex << " mouse out";
+		LOG << "Control " << m_CtrlIndex << " mouse out";
 	}
 protected:
 	bool isInside(const Vector2f& pos);

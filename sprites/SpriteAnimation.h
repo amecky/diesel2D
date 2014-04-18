@@ -3,7 +3,7 @@
 
 namespace ds {
 
-class SpriteObject;
+class Sprite;
 // -------------------------------------------------------
 // SpriteAnimation
 // -------------------------------------------------------
@@ -12,7 +12,7 @@ class SpriteAnimation {
 public:
 	SpriteAnimation(void);
 	~SpriteAnimation(void);
-	virtual void update(float t,SpriteObject* object) = 0;
+	virtual void update(float t,Sprite* object) = 0;
 };
 
 // -------------------------------------------------------
@@ -25,7 +25,7 @@ public:
 		add("color",&data);
 	}
 	virtual ~ColorAnimation() {}
-	void update(float t,SpriteObject* object);
+	void update(float t,Sprite* object);
 protected:
 	IPath<20,Color> data;
 };
@@ -40,7 +40,7 @@ public:
 		add("scale",&data);
 	}
 	virtual ~ScaleAnimation() {}
-	void update(float t,SpriteObject* object);
+	void update(float t,Sprite* object);
 protected:
 	IPath<20,Vector2f> data;
 };
@@ -55,7 +55,7 @@ public:
 		add("rotation",&data);
 	}
 	virtual ~RotationAnimation() {}
-	void update(float t,SpriteObject* object);
+	void update(float t,Sprite* object);
 protected:
 	IPath<20,float> data;
 };

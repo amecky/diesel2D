@@ -71,7 +71,7 @@ namespace file {
 			FindClose(hFind);
 		}
 		else {
-			LOG(logERROR) << "cannot find directory " << dir;
+			LOGE << "cannot find directory " << dir;
 		}
 	}
 
@@ -117,7 +117,7 @@ void FileUtils::listDirectory(const std::string& dir,std::vector<std::string>& f
 		FindClose(hFind);
 	}
 	else {
-		LOG(logERROR) << "cannot find directory " << dir.c_str();
+		LOGE << "cannot find directory " << dir.c_str();
 	}
 }
 
@@ -140,7 +140,7 @@ std::vector<std::string> FileUtils::listDirectory(const std::string& dir) {
 		FindClose(hFind);
 	}
 	else {
-		LOG(logERROR) << "cannot find directory " << dir.c_str();
+		LOGE << "cannot find directory " << dir.c_str();
 	}
 	return files;
 }

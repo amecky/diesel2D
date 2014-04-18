@@ -1,5 +1,4 @@
 #pragma once
-#include "..\World.h"
 #include "..\..\base\GameObject.h"
 
 namespace ds {
@@ -13,7 +12,7 @@ struct Light {
 	bool active;
 };
 
-class LightComponent : public GameObject, public Entity {
+class LightComponent : public GameObject {
 
 typedef std::vector<Light> Lights;
 
@@ -21,10 +20,7 @@ public:
 	LightComponent(void);
 	~LightComponent(void);
 	void update(float elapsed);
-	void init() {}
-	const EntityType getType() const {
-		return ET_CUSTOM;
-	}
+	void init() {}	
 	void draw();
 	void initialize(int startLayer,int colorRT,int normalRT,float ambient,const Color& ambientColor);
 	int addLight(const Vector3f& position,float radius,const Color& color,float specular,float strength = 1.0f);

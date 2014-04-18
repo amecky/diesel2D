@@ -3,6 +3,7 @@
 #include "..\utils\font.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\utils\FileUtils.h"
+#include "..\compiler\Converter.h"
 
 namespace ds {
 
@@ -26,9 +27,7 @@ DialogManager::~DialogManager(void) {
 // -------------------------------------------------------
 // Init
 // -------------------------------------------------------
-void DialogManager::init(Renderer* renderer,const char* fontName,int textureID) {
-	//m_SpriteBatch = spriteBatch;
-	m_Renderer = renderer;
+void DialogManager::init(const char* fontName,int textureID) {
 	m_Font = m_Renderer->loadBitmapFont(fontName,textureID);	
 	m_Initialized = true;
 }
@@ -69,9 +68,11 @@ void DialogManager::deactivate(const char* dialogName) {
 // -------------------------------------------------------
 void DialogManager::setActiveFlag(const char* name,bool active) {
 	IdString hashName = string::murmur_hash(name);
+	bool found = false;
 	for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
 		GUIDialog* dlg = m_Dialogs[i];
 		if ( dlg->getHashName() == hashName ) {
+			found = true;
 			if ( active ) {
 				dlg->activate();
 			}
@@ -79,6 +80,9 @@ void DialogManager::setActiveFlag(const char* name,bool active) {
 				dlg->deactivate();
 			}
 		}
+	}
+	if ( !found ) {
+		LOGEC("DialogManager") << "Cannot activate/deactivate '" << name << "'";
 	}
 }
 
@@ -178,19 +182,33 @@ bool DialogManager::OnChar(char ascii,unsigned int keyState) {
 	return false;
 }
 
-bool DialogManager::loadDialogFromJSON(const char* dialogName,const char* name,int id) {
-	char buffer[256];
-	sprintf(buffer,"content\\dialogs\\%s.json",name);
-	if ( file::fileExists(buffer)) {
-		GUIDialog* dialog = new GUIDialog(m_Renderer->getWidth(),m_Renderer->getHeight());
-		createDialog(dialogName,id,dialog);
-		dialog->load(name);
-		return true;
-	}	
-	else {
-		LOG(logINFO) << "File '" << name << "' not found";
-	}
-	return false;
+void DialogManager::load(BinaryLoader* loader) {
+	while ( loader->openChunk() == 0 ) {		
+		if ( loader->getChunkID() == CHNK_GUI ) {	
+			int textureID = 0;
+			loader->read(&textureID);
+			std::string str;
+			loader->read(str);
+			int max = 1024;
+			loader->read(&max);
+			init(str.c_str(),textureID);
+		}	
+		else if ( loader->getChunkID() == CHNK_DLG_DEF ) {	
+			std::string dialogName;
+			loader->read(dialogName);
+			int id = 0;
+			loader->read(&id);
+			std::string file;
+			loader->read(file);
+
+			GUIDialog* dialog = new GUIDialog(m_Renderer->getViewport()->getWidth(),m_Renderer->getViewport()->getHeight());
+			LOGC("DialogManager") << "Creating new dialog: " << dialogName;
+			createDialog(dialogName.c_str(),id,dialog);
+			m_AssetCompiler->load("content\\dialogs",file.c_str(),dialog,CVT_DIALOG);
+
+		}	
+		loader->closeChunk();
+	}		
 }
 
 }

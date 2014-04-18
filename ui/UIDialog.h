@@ -74,7 +74,7 @@ class UIDialog;
 class UIControl {
 
 public:
-	UIControl(UIDialog *dialog,uint32 ID) : m_Dialog(dialog) , m_ID(ID) {}
+	UIControl(UIDialog *dialog,uint32 ID) : m_DiaLOGC(dialog) , m_ID(ID) {}
 	virtual ~UIControl(void) {};
 	const uint32 getID() const { 
 		return m_ID; 
@@ -128,8 +128,8 @@ typedef List<UIControl*> Items;
 typedef List<IUIEventListener*> Listeners;
 
 public:
-	UIDialog(const char* dialogName,const char* materialName,const char* bitmapFont,const char* layerName,const Vector2f& pos,int gridSizeX,int gridSizeY);
-	~UIDialog(void);
+	UIDiaLOGC(const char* dialogName,const char* materialName,const char* bitmapFont,const char* layerName,const Vector2f& pos,int gridSizeX,int gridSizeY);
+	~UIDiaLOGC(void);
 	void update(float elapsedTime);
 	// mouse controller
 	void OnButtonDown(int button) {}
