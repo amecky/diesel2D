@@ -9,6 +9,8 @@
 #include "..\sprites\SpriteCollisionManager.h"
 #include "..\compiler\AssetCompiler.h"
 #include "..\particles\ParticleManager.h"
+#include "..\ecs\World.h"
+#include "..\ecs\SpriteRenderSystem.h"
 
 namespace ds {
 
@@ -98,6 +100,8 @@ public:
 	void createGameObject(S* obj);
 	void createParticleSystem(const char* fileName,int textureID,ParticleSystem* entity,int maxParticles,int blendState = -1);
 protected:
+	World world;
+	void loadSprites();
 	void initializeGUI();
 	virtual const char* getTitle() = 0;
 	virtual void OnButtonDown(int button,int x,int y) {}
@@ -121,6 +125,7 @@ protected:
 	Color m_ClearColor;
 	ParticleManager* particles;
 	SpriteCollisionManager* m_CollisionManager;
+	SpriteRenderSystem* m_SpriteRenderer;
 private:
 	Vector2f m_MousePos;
 	DWORD m_CurTime;
@@ -132,6 +137,7 @@ private:
 	ButtonState m_ButtonState;
 	MTRand_open rand;		
 	GameObjects m_GameObjects;
+	
 	
 }; 
 

@@ -120,10 +120,6 @@ namespace ds {
 		bool multiSample;
 		bool scissor;
 	};
-	
-	
-	
-	
 
 	// -------------------------------------------------------
 	// Texture
@@ -155,56 +151,21 @@ namespace ds {
 	};
 
 	// -------------------------------------------------------
-	// Material 
-	// -------------------------------------------------------
-	struct Material {
-		IdString name;
-		Color diffuse;
-		Color ambient;
-		Color specular;
-		Color emissive;
-		float specularPower;
-		int shader;
-		int textures[5];
-		int textureAtlas;
-		int flag;
-		Material() {
-			textureAtlas = -1;
-			shader = -1;
-			for ( int i = 0; i < 5; ++i ) {
-				textures[i] = -1;
-			}
-		}
-		const bool hasTextures() const {
-			for ( int i =0; i < 5; ++i ) {
-				if ( textures[i] != -1 ) {
-					return true;
-				}
-			}
-			return false;
-		}
-	};
-
-	// -------------------------------------------------------
-	// Font
-	// -------------------------------------------------------
-	struct SystemFont {
-		IdString name;
-		int size;
-		bool bold;
-		ID3DXFont* font;
-		int flag;
-	};
-
-	// -------------------------------------------------------
 	// Render target
 	// -------------------------------------------------------
 	struct RenderTarget {
-		IdString name;		
+		int flag;
 		Color clearColor;
 		LPDIRECT3DTEXTURE9 texture;
 		LPDIRECT3DSURFACE9 surface;
 		LPD3DXRENDERTOSURFACE rts;
+
+		RenderTarget() : flag(0) , clearColor(Color(0,0,0,255)) ,texture(0) , surface(0) , rts(0) {}
+
+		~RenderTarget() {
+			SAFE_RELEASE(surface);
+			SAFE_RELEASE(rts);
+		}
 	};
 	
 	// -------------------------------------------------------

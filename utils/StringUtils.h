@@ -27,6 +27,15 @@ IdString murmur_hash(const void * key, int len, unsigned int seed);
 
 void formatDateTime(std::string& str);
 
+bool isDigit(const char c);
+
+bool isWhitespace(const char c);
+
+float strtof(const char* p,char** endPtr);
+
+bool isCharacter(const char p);
+
+
 template <class T>
 inline std::string to_string (const T& t) {
 	std::stringstream ss;

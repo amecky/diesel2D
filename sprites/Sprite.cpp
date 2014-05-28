@@ -13,12 +13,26 @@ const float WO_VP_ARRAY[] = {
 
 Sprite::Sprite() : m_Timer(0.0f) , m_Active(true) , m_Radius(0.0f) , m_Position(0.0f,0.0f) 
 	, m_Index(0) , m_ID(0) , m_Color(255,255,255,255) , m_Angle(0.0f) , m_Size(1.0f,1.0f) , dimX(10.0f) , dimY(10.0f) 
-	, m_Velocity(0.0f,0.0f) , m_Target(0.0f,0.0f) , m_TextureID(0) , timer(0.0f) , delay(0.0f) , m_UserValue(0) {
+	, m_Velocity(0.0f,0.0f) , m_Target(0.0f,0.0f) , m_TextureID(0) , delay(0.0f) , m_UserValue(0) , m_Elapsed(0.0f) {
 }
-
+/*
 void Sprite::setTextureRect(const Rect& r,int textureID) {
 	float u1,u2,v1,v2;
+
 	math::getTextureCoordinates(r,1024,&u1,&v1,&u2,&v2);
+	dimX = r.width();
+	dimY = r.height();
+	m_UV[0] = Vector2f(u1,v1);
+	m_UV[1] = Vector2f(u2,v1);
+	m_UV[2] = Vector2f(u2,v2);
+	m_UV[3] = Vector2f(u1,v2);
+	setPosition(m_Position);
+	m_TextureID = textureID;
+}
+*/
+void Sprite::setTextureRect(const Rect& r,int textureWidth,int textureHeight,int textureID) {
+	float u1,u2,v1,v2;
+	math::getTextureCoordinates(r,textureWidth,textureHeight,&u1,&v1,&u2,&v2);
 	dimX = r.width();
 	dimY = r.height();
 	m_UV[0] = Vector2f(u1,v1);
@@ -62,7 +76,7 @@ void Sprite::load(BinaryLoader* loader) {
 			loader->read(&pos);
 			Rect r;
 			loader->read(&r);
-			setTextureRect(r,m_TextureID);
+			setTextureRect(r,1024,1024,m_TextureID);
 			loader->read(&m_Size);
 			loader->read(&m_Color);
 			float rotation = 0.0f;
@@ -72,6 +86,29 @@ void Sprite::load(BinaryLoader* loader) {
 		}
 		loader->closeChunk();
 	}		
+}
+
+void Sprite::prepare(const SpriteDescription& description) {
+	setActive(true);
+	setTextureRect(description.textureRect);
+	setAngle(description.angle);
+	setScale(description.scale);			
+	setColor(description.color);
+	setIndex(description.index);
+	setUserValue(description.userValue);
+	setRadius(description.radius);
+	setVelocity(description.velocity);
+	setPosition(description.position);
+	resetTimer();
+}
+
+void Sprite::run(Script& script) {
+	script.context.connect("position",&m_Position);
+	script.context.connect("scale",&m_Size);
+	script.context.connect("elapsed",&m_Elapsed);
+	script.context.connect("timer",&m_Timer);
+	script.run();
+	setPosition(m_Position);
 }
 
 }

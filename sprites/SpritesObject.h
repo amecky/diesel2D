@@ -7,7 +7,7 @@ namespace ds {
 // -------------------------------------------------------
 // SpritesObject - container of sprites
 // -------------------------------------------------------
-template<int Size>
+template<int Size,int CollisionType = -1>
 class SpritesObject : public GameObject {
 
 public:
@@ -28,6 +28,27 @@ public:
 		int idx = findFreeSprite();
 		if ( idx != -1 ) {
 			return &m_Sprites[idx];		
+		}
+		return 0;
+	}
+
+	Sprite* activateByDescription(int descriptionID) {
+		int idx = findFreeSprite();
+		if ( idx != -1 ) {
+			Sprite* sp = &m_Sprites[idx];		
+			const SpriteDescription& description = m_Renderer->getSpriteDescription(descriptionID);
+			sp->setActive(true);
+			sp->setTextureRect(description.textureRect);
+			sp->setAngle(description.angle);
+			sp->setScale(description.scale);			
+			sp->setColor(description.color);
+			sp->setIndex(description.index);
+			sp->setUserValue(description.userValue);
+			sp->setRadius(description.radius);
+			sp->setVelocity(description.velocity);
+			sp->setPosition(description.position);
+			sp->resetTimer();
+			return sp;
 		}
 		return 0;
 	}
@@ -112,6 +133,54 @@ public:
 	// Virtual update sprite method
 	// -------------------------------------------------------
 	virtual void updateSprite(Sprite* sprite,float elapsed) = 0;
+
+	void pushAway(Sprite* sprite,const Vector2f& pos,float minDistance,float push = 1.5f) {
+		Vector2f diff = pos - sprite->getPosition();
+		float dist = distance(pos,sprite->getPosition());
+		float normDist = minDistance - dist;
+		Vector2f nd = normalize(diff);
+		nd *= -1.0f;
+		if ( dist < minDistance ) {				
+			normDist *= push;
+			Vector2f hp = sprite->getPosition();
+			hp += nd * normDist;
+			sprite->setPosition(hp);
+		}
+	}
+
+	void moveAndBounce(Sprite* sprite,float elapsed,const Rect& rect,bool calculateAngle = false) {
+		Vector2f p = sprite->getPosition();
+		Vector2f v = sprite->getVelocity();
+		p += v * elapsed;
+		if ( p.x < rect.left || p.x > rect.right ) {
+			v.x *= -1.0f;
+			sprite->setVelocity(v);
+			p += v * elapsed;
+			if ( calculateAngle ) {
+				float angle = ds::math::getAngle(Vector2f(1,0),v);
+				sprite->setAngle(angle);
+			}
+		}
+		if ( p.y < rect.top || p.y > rect.bottom ) {
+			v.y *= -1.0f;
+			sprite->setVelocity(v);
+			p += v * elapsed;
+			if ( calculateAngle ) {
+				float angle = ds::math::getAngle(Vector2f(1,0),v);
+				sprite->setAngle(angle);
+			}
+		}
+		sprite->setPosition(p);
+	}
+	void addCollider(Sprite* sprite,float radius) {
+		assert(CollisionType != -1);
+		sprite->setRadius(radius);
+		m_CollisionManager->add(sprite,CollisionType);
+	}
+	void removeCollider(Sprite* sprite) {
+		assert(CollisionType != -1);
+		m_CollisionManager->remove(sprite,CollisionType);
+	}
 
 private:
 	// -------------------------------------------------------

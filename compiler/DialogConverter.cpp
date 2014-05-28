@@ -39,11 +39,14 @@ void DialogConverter::convert(const char* fileName) {
 				c->getRect("rect",&r);
 				Vector2f p = c->getVector2f("pos");
 				std::string txt = c->getProperty("text");
+				Color clr = Color::WHITE;
+				c->getColor("text_color",&clr);
 				writer.startChunk(CHNK_DLG_BUTTON,1);
 				writer.write(id);
 				writer.write(r);
 				writer.write(p);
 				writer.write(txt);				
+				writer.write(clr);
 				writer.closeChunk();	
 			}
 			if ( c->getName() == "text" ) {

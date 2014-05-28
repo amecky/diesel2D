@@ -7,32 +7,33 @@
 
 namespace ds {
 
-struct SpriteDescription : public Gizmo {
+struct SpriteDescription {
 
-	ds::Rect textureRect;
-
-	SpriteDescription() : Gizmo("settings") {
-		add("texture_rect",&textureRect);
-	}
+	uint32 id;
+	int textureID;
+	Vector2f position;
+	Rect textureRect;
+	float angle;
+	Vector2f velocity;
+	float radius;
+	int index;
+	Color color;
+	Vector2f scale;
+	int userValue;
 
 };
 
-class Sprite;
-
-class SpriteObjectDescription : public Serializer {
+class SpriteDescriptionManager : public Serializer {
 
 public:
-	SpriteObjectDescription() : m_RotationPath(0) , m_ScalePath(0) , m_ColorPath(0) , m_SpriteDescription(0) {}
-	~SpriteObjectDescription();
-	void load(const char* name);
-	void reload(const char* name);
-	void setAnimations(Sprite* object);
-	void prepare(ds::Sprite* object);
+	SpriteDescriptionManager() {}
+	~SpriteDescriptionManager() {}
+	void load(BinaryLoader* loader);
+	const SpriteDescription& get(int id) const {
+		return m_Descriptions[id];
+	}
 private:
-	SpriteDescription* m_SpriteDescription;
-	RotationAnimation* m_RotationPath;
-	ScaleAnimation* m_ScalePath;
-	ColorAnimation* m_ColorPath;
+	SpriteDescription m_Descriptions[64];
 };
 
 }

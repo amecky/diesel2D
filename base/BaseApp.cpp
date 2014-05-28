@@ -7,6 +7,7 @@
 #include "..\io\FileWatcher.h"
 #include "..\utils\FileUtils.h"
 #include "..\particles\ParticleSystem.h"
+#include "..\sprites\SpriteObjectDescription.h"
 
 namespace ds {
 
@@ -44,6 +45,7 @@ BaseApp::BaseApp() {
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
 	LOGC("BaseApp") << "Destructing all elements";
+	delete m_SpriteRenderer;
 	delete particles;
 	delete m_CollisionManager;
 	delete gProfiler;
@@ -67,6 +69,8 @@ void BaseApp::init() {
 	settings.mode = 1;
 	settings.postProcessing = false;
 	renderer = new Renderer(m_hWnd,settings);   
+	m_SpriteRenderer = new SpriteRenderSystem(renderer);
+	world.setSpriteRenderer(m_SpriteRenderer);
 	audio->initialize(m_hWnd);
 	particles->setRenderer(renderer);
 	particles->setAssetCompiler(&assets);
@@ -83,6 +87,15 @@ void BaseApp::init() {
 	loadContent();
 	LOGC("BaseApp") << "------------ Loading content  ---------------";
 	m_Loading = false;
+}
+
+// -------------------------------------------------------
+// Load sprites
+// -------------------------------------------------------
+void BaseApp::loadSprites() {
+	SpriteDescriptionManager* sdm = new SpriteDescriptionManager;
+	assets.load("sprites",sdm,CVT_SPRITES_DESCRIPTION);
+	renderer->setDescriptionManager(sdm);
 }
 
 void BaseApp::initializeGUI() {
@@ -220,6 +233,7 @@ void BaseApp::buildFrame() {
 	PR_END("GameObjects::update")
 	PR_START("Game::update")
 	update(m_GameTime);
+	world.update(m_GameTime.elapsed);
 	particles->update(m_GameTime.elapsed);
 	PR_END("Game::update")
 	int collisions = m_CollisionManager->checkIntersections();

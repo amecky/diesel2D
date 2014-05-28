@@ -158,6 +158,59 @@ IdString murmur_hash(const void * key, int len, unsigned int seed) {
 	return h;
 }
 
+bool isDigit(const char c) {
+	return ( c >= '0' && c <= '9' );
+}
+
+bool isWhitespace(const char c) {
+	if ( c == ' ' || c == '\t' || c == '\r' || c == '\n' ) {
+		return true;
+	}
+	return false;
+}
+
+float strtof(const char* p,char** endPtr) {
+	while (isWhitespace(*p)) {
+		++p;
+	}
+	float value = 0.0f;
+	float dec = 1.0f;
+	float frac = 0.0f;
+	while ( isDigit(*p)) {
+		value *= 10.0f;
+		value = value + (*p - '0');
+		++p;
+	}
+	if ( *p == '.' ) {
+		++p;
+		while ( isDigit(*p)) {
+			frac *= 10.0f;
+			frac = frac + (*p - '0');
+			dec *= 10.0f;
+			++p;
+		}
+		value = value + ( frac / dec );
+	}
+	if (endPtr) {
+		*endPtr = (char *)(p);
+	}
+	return value;
+}
+
+bool isCharacter(const char p) {
+	if ( p >= 'a' && p <= 'z') {
+		return true;
+	}
+	else if (p >= 'A' && p <= 'Z') {
+		return true;
+	}
+	else if ( p == '_' || isDigit(p) ) {
+		return true;
+	}
+	return false;
+}
+
+
 }
 
 }

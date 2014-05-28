@@ -100,9 +100,6 @@
     <ClCompile Include="particles\EmitterMesh.cpp">
       <Filter>particles</Filter>
     </ClCompile>
-    <ClCompile Include="world\components\BloomComponent.cpp">
-      <Filter>world\components</Filter>
-    </ClCompile>
     <ClCompile Include="world\components\LightComponent.cpp">
       <Filter>world\components</Filter>
     </ClCompile>
@@ -128,9 +125,6 @@
       <Filter>sprites</Filter>
     </ClCompile>
     <ClCompile Include="sprites\SpriteObjectDescription.cpp">
-      <Filter>sprites</Filter>
-    </ClCompile>
-    <ClCompile Include="sprites\NewSpriteBatch.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
     <ClCompile Include="objects\HUD.cpp">
@@ -174,6 +168,36 @@
     </ClCompile>
     <ClCompile Include="compiler\ParticleManagerConverter.cpp">
       <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\BloomComponent.cpp">
+      <Filter>objects</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\SpriteBatch.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\SpritesDescriptionConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\ScriptConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ScriptVM.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\Tokenizer.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs\CollisionSystem.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs\SpriteRenderSystem.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs\World.cpp">
+      <Filter>ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="ecs\Blueprint.cpp">
+      <Filter>ecs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -317,9 +341,6 @@
     <ClInclude Include="particles\EmitterMesh.h">
       <Filter>particles</Filter>
     </ClInclude>
-    <ClInclude Include="world\components\BloomComponent.h">
-      <Filter>world\components</Filter>
-    </ClInclude>
     <ClInclude Include="world\components\LightComponent.h">
       <Filter>world\components</Filter>
     </ClInclude>
@@ -361,9 +382,6 @@
     </ClInclude>
     <ClInclude Include="base\ApplicationContext.h">
       <Filter>base</Filter>
-    </ClInclude>
-    <ClInclude Include="sprites\NewSpriteBatch.h">
-      <Filter>sprites</Filter>
     </ClInclude>
     <ClInclude Include="base\GameObject.h">
       <Filter>base</Filter>
@@ -425,6 +443,63 @@
     <ClInclude Include="lib\container\dVector.h">
       <Filter>lib\container</Filter>
     </ClInclude>
+    <ClInclude Include="objects\BloomComponent.h">
+      <Filter>objects</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpriteBatch.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\SpritesDescriptionConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\ScriptConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ScriptVM.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\Tokenizer.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\Script.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="data\DataTranslator.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DataArray.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\Actor.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\Animations.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\CollisionSystem.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\ControllerBehaviors.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\LifecycleBehaviors.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\MoveBehaviors.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\SpriteRenderSystem.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\World.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\Blueprint.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="data\DynamicSettings.h">
+      <Filter>data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico" />
@@ -481,6 +556,12 @@
     </Filter>
     <Filter Include="compiler">
       <UniqueIdentifier>{fcbfebaa-fe95-4080-a20b-7f0f2d6b1828}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="script">
+      <UniqueIdentifier>{f5116c61-182b-405c-95ec-8389dba62434}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ecs">
+      <UniqueIdentifier>{78a42f98-d454-4702-8275-944d42677625}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

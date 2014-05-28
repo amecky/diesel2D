@@ -54,6 +54,14 @@ void ParticleSystemConverter::convert(const char* fileName) {
 				writer.write(c->getFloat("normal_variance",0.0f));				
 				writer.closeChunk();
 			}	
+			else if ( c->getName() == "box_emitter" ) {		
+				writer.startChunk(CHNK_BOX_EMITTER,1);
+				writer.write(c->getInt("width",10));
+				writer.write(c->getInt("height",10));
+				writer.write(c->getInt("size",10));
+				writer.write(c->getFloat("angle_variance",0.0f));
+				writer.closeChunk();
+			}	
 			else if ( c->getName() == "size") {			
 				std::vector<std::string> propertyNames;
 				c->getPropertyNames(propertyNames);

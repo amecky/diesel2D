@@ -31,6 +31,9 @@ void PointEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vec
 	normal = Vector2f(0,0);
 }
 
+// -------------------------------------------------------
+// BoxEmitter
+// -------------------------------------------------------
 BoxEmitterMesh::BoxEmitterMesh(BoxEmitterSettings* settings) : EmitterMesh() , m_Settings(settings) {
 	Vector2f pos;
 	float xp = 0.0f;
@@ -63,6 +66,9 @@ BoxEmitterMesh::BoxEmitterMesh(BoxEmitterSettings* settings) : EmitterMesh() , m
 	}	
 }
 
+// -------------------------------------------------------
+// BoxEmitter getPoint
+// -------------------------------------------------------
 void BoxEmitterMesh::getPoint(uint32 index,uint32 total,Vector2f& position,Vector2f& normal,float* angle,bool random) {
 	BoxEntry* current = m_Entries;
 	int idx = index;

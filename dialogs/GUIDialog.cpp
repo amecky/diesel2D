@@ -320,7 +320,9 @@ void GUIDialog::load(BinaryLoader* loader) {
 			loader->read(&p);
 			std::string txt;
 			loader->read(txt);			
-			addButton(id,p.y,txt,r);
+			Color c;
+			loader->read(&c);
+			addButton(id,p.y,txt,r,c);
 		}
 		else if ( loader->getChunkID() == CHNK_DLG_TEXT ) {
 			int id = 0;

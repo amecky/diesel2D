@@ -49,7 +49,7 @@ namespace vector {
 		v.y += radius * math::fastSin(angle);
 	}
 
-	Vector2f calucateRadial(const Vector2f& v,float radius,float angle) {
+	Vector2f calculateRadial(const Vector2f& v,float radius,float angle) {
 		Vector2f ret;
 		//float ra = math::reflect(angle);
 		float ra = angle;

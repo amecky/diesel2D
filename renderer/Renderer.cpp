@@ -9,6 +9,7 @@
 #include <d3dcommon.h>
 #include "..\math\matrix.h"
 #include "..\utils\font.h"
+#include "shader.h"
 
 namespace ds {
 
@@ -34,18 +35,11 @@ Renderer::Renderer(HWND hWnd,const Settings& settings) : m_Hwnd(hWnd) {
 		m_Textures[i].flags = 0;
 		m_Textures[i].name = 0;
 	}
-	for ( int i = 0; i < MAX_MATERIALS; ++i ) {
-		m_Materials[i].flag = -1;
-	}
 	for ( int i = 0; i < MAX_SHADERS; ++i ) {
 		m_Shaders[i].flag = 0;
 		m_Shaders[i].m_FX = 0;
 	}
 	m_BMCounter = 0;
-	m_AtlasCounter = 0;
-	for ( int i = 0; i < MAX_SYSTEM_FONTS; ++i ) {
-		m_Fonts[i].flag = 0;
-	}
 	for ( int i = 0; i < MAX_BLENDSTATES; ++i ) {
 		m_BlendStates[i].flag = 0;
 	}
@@ -86,7 +80,7 @@ Renderer::Renderer(HWND hWnd,const Settings& settings) : m_Hwnd(hWnd) {
 	//m_OverlayNode = 0;
 
 	//m_PostProcessing = settings.postProcessing;	
-
+	m_DefaultShaderID = shader::createPTCShader(this,-1);
 	m_DefaultBS = createBlendState(BL_SRC_ALPHA,BL_ONE_MINUS_SRC_ALPHA,true);
 	LOG << "default blendstate " << m_DefaultBS;
 	m_CurrentBS = -1;
@@ -104,17 +98,17 @@ Renderer::Renderer(HWND hWnd,const Settings& settings) : m_Hwnd(hWnd) {
 	createVertexBuffer(PT_TRI,VD_TTC,4096);
 	createIndexBuffer(6144);
 	// prepare debug
-	m_DebugFont = loadSystemFont("Verdana","Verdana",10,false);
+	loadSystemFont("Verdana","Verdana",10,false);
 	D3DXCreateSprite( device->get(), &m_DebugSprite );
 	m_BFCounter = 0;
-	m_SpriteBatch = new NewSpriteBatch(this);
+	m_SpriteBatch = new SpriteBatch(this);
+	m_DescriptionManager = 0;
 }
 
 
 Renderer::~Renderer(void) {	
 	LOG << "destructing Renderer";		
 	delete m_SpriteBatch;
-	m_RenderTargets.deleteContents();
 	m_RasterizerStates.deleteContents();
 	LOGC("Renderer") << "Releasing textures";
 	for ( int i = 0; i < MAX_TEXTURES; ++i ) {
@@ -135,19 +129,8 @@ Renderer::~Renderer(void) {
 			SAFE_RELEASE(m_Shaders[i].m_FX);
 		}
 	}
-	LOGC("Renderer") << "Releasing Rendertargets";
-	for ( uint32 i = 0; i < m_RenderTargets.num(); ++i ) {
-		RenderTarget* rt = m_RenderTargets[i];
-		//SAFE_RELEASE(rt->texture);
-		SAFE_RELEASE(rt->surface);
-		SAFE_RELEASE(rt->rts);
-	}
-	LOGC("Renderer") << "Releasing fonts";
-	for ( int i = 0; i < MAX_SYSTEM_FONTS; ++i ) {
-		if ( m_Fonts[i].flag != 0 ) {
-			SAFE_RELEASE(m_Fonts[i].font);
-		}
-	}
+	LOGC("Renderer") << "Releasing system font";
+	SAFE_RELEASE(m_SystemFont);
 	LOGC("Renderer") << "Releasing buffers";
 	for ( int i = 0; i < MAX_BUFFERS; ++i ) {
 		SAFE_RELEASE(m_Buffers[i].vertexBuffer);
@@ -158,6 +141,9 @@ Renderer::~Renderer(void) {
 	delete m_Camera;
 	delete device;		
 	delete m_Viewport;
+	if ( m_DescriptionManager != 0 ) {
+		delete m_DescriptionManager;
+	}
 }
 
 // -------------------------------------------------------
@@ -177,6 +163,7 @@ bool Renderer::beginRendering(const Color& clearColor) {
 	m_CurrentVD = -1;
 	m_CurrentShader = -1;
 	m_CurrentBS = -1;
+	m_CurrentRT = -1;
 	for ( int i = 0; i < 5; ++i ) {
 		m_CurrentTextures[i] = -1;
 	}
@@ -189,6 +176,7 @@ bool Renderer::beginRendering(const Color& clearColor) {
 		m_SpriteBatch->prepare();
 		m_SpriteBatch->begin();
 		m_SpriteBatch->setBlendState(m_DefaultBS);
+		m_SpriteBatch->setShader(m_DefaultShaderID);
 		return true;
 	}
 	else {
@@ -208,6 +196,7 @@ void Renderer::clear() {
 // End rendering
 // -------------------------------------------------------
 void Renderer::endRendering() {
+	m_SpriteBatch->flush();
 	m_SpriteBatch->end();
 	resetDynamicBuffers();
 	device->get()->EndScene();
@@ -257,37 +246,38 @@ void Renderer::set2DCameraOff() {
 // -------------------------------------------------------
 // Set render target
 // -------------------------------------------------------
-void Renderer::setRenderTarget(const char* name) {
-	bool found = false;
-	IdString hash = string::murmur_hash(name);
-	for ( uint32 i = 0; i < m_RenderTargets.num(); ++i ) {
-		RenderTarget* rt = m_RenderTargets[i];
-		if ( rt->name == hash ) {
-			device->get()->EndScene();
-			rt->rts->BeginScene( rt->surface, NULL );
-			device->get()->SetRenderTarget(0,rt->surface);			
-			//HR(getDevice()->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, m_ClearColor, 1.0f, 0 ));
-			HR(device->get()->Clear( 0, NULL, D3DCLEAR_TARGET,rt->clearColor, 1.0f, 0 ));
-			m_UsedRTs = 1;
-			found = true;
-		}
+void Renderer::setRenderTarget(uint32 id) {
+	//LOG << ">> set RT " << id << " current " << m_CurrentRT;
+	RenderTarget* rt = &m_RenderTargets[id];
+	assert(rt->flag == 1);
+	m_SpriteBatch->flush();
+	if ( m_CurrentRT != -1 ) {
+		RenderTarget* activeRT = &m_RenderTargets[m_CurrentRT];
+		activeRT->rts->EndScene(0);
 	}
-	assert(found);
+	else {
+		device->get()->EndScene();
+	}
+	rt->rts->BeginScene( rt->surface, NULL );
+	m_CurrentRT = id;
+	device->get()->SetRenderTarget(0,rt->surface);			
+	HR(device->get()->Clear( 0, NULL, D3DCLEAR_TARGET,rt->clearColor, 1.0f, 0 ));
+	m_UsedRTs = 1;
 }
 // -------------------------------------------------------
 // restore backbuffer
 // -------------------------------------------------------
-void Renderer::restoreBackBuffer(const char* name) {	
-	IdString hash = string::murmur_hash(name);
-	for ( uint32 i = 0; i < m_RenderTargets.num(); ++i ) {
-		RenderTarget* rt = m_RenderTargets[i];
-		if ( rt->name == hash ) {
-			rt->rts->EndScene(0);
-		}
-	}
+void Renderer::restoreBackBuffer(uint32 id) {	
+	//LOG << "restore RT " << id << " current " << m_CurrentRT;
+	assert(m_CurrentRT != -1);
+	RenderTarget* rt = &m_RenderTargets[m_CurrentRT];
+	assert(rt->flag == 1);
+	m_SpriteBatch->flush();
+	rt->rts->EndScene(0);
+	m_CurrentRT = -1;
 	device->get()->BeginScene();
+	//FIXME: clear buffer
 	device->get()->SetRenderTarget(0,m_BackBuffer);
-
 	if ( m_UsedRTs > 0 ) {
 		for ( int i = 1; i < m_UsedRTs; ++i ) {
 			device->get()->SetRenderTarget(i,NULL);
@@ -336,55 +326,6 @@ DWORD Renderer::getRenderState(D3DRENDERSTATETYPE rs) {
 		device->get()->GetRenderState(rs,&cachedValue);
 	}
 	return cachedValue;
-}
-
-// -------------------------------------------------------
-// Set shader to material
-// -------------------------------------------------------
-void Renderer::setShader(int materialID,int shaderID) {
-	assert(materialID < MAX_MATERIALS);
-	Material* mtrl = &m_Materials[materialID];
-	if ( mtrl->flag != 0 ) {
-		mtrl->shader = shaderID;
-	}
-}
-// -------------------------------------------------------
-// Check if material has a shader applied
-// -------------------------------------------------------
-bool Renderer::hasShader(int mtrlID) {
-	assert(mtrlID < MAX_MATERIALS);
-	Material* mtrl = &m_Materials[mtrlID];
-	if ( mtrl->flag != 0 && mtrl->shader != -1 ) {
-		return true;
-	}
-	return false;
-}
-
-// -------------------------------------------------------
-// Applies material
-// -------------------------------------------------------
-void Renderer::applyMaterial(int mtrlID) {
-	assert(mtrlID < MAX_MATERIALS);
-	Material* mtrl = &m_Materials[mtrlID];
-	if ( mtrl->flag != 0 ) {
-		IDirect3DDevice9 * pDevice = device->get();
-		for ( size_t i = 0; i < 5; ++i ) {
-			// check if we have a texture at this slot
-			if ( mtrl->textures[i] != -1 ) {
-				if ( m_CurrentTextures[i] != mtrl->textures[i] ) {
-					m_CurrentTextures[i] = mtrl->textures[i];
-					setTexture(mtrl->textures[i],i);
-				}
-			}		
-			else {
-				// check if we had a texture set before
-				if ( m_CurrentTextures[i] != -1 ) {
-					HR(device->get()->SetTexture( i, 0));	
-					m_CurrentTextures[i] = -1;
-				}
-			}
-		}
-	}
 }
 
 void Renderer::debug() {	
@@ -579,45 +520,6 @@ void Renderer::changeRasterizerState(RasterizerState* rasterizerState) {
 }
 
 // -------------------------------------------------------
-// Find free material slot
-// -------------------------------------------------------
-int Renderer::findFreeMaterialSlot() {
-	for ( int i = 0; i < MAX_MATERIALS; ++i ) {
-		if ( m_Materials[i].flag == -1 ) {
-			return i;
-		}
-	}
-	return -1;
-}
-// -------------------------------------------------------
-// Creates a new material
-// -------------------------------------------------------
-int Renderer::createMaterial(const char* name,int textureID) {
-	int id = findFreeMaterialSlot();
-	if ( id != -1 ) {
-		Material* mtrl = &m_Materials[id];
-		mtrl->name = string::murmur_hash(name);
-		mtrl->textures[0] = textureID;
-		mtrl->textureAtlas = 0;
-		mtrl->flag = 1;
-		LOGC("Renderer") << "new material " << name << " with textureID " << textureID << " created";
-		return id;
-	}
-	else {
-		LOGEC("Renderer") << "No more free material slots available";
-		return -1;
-	}
-}
-
-// -------------------------------------------------------
-// Set texture atlas to material
-// -------------------------------------------------------
-void Renderer::setTextureAtlas(int materialID,int textureAtlasID) {
-	assert(materialID < MAX_MATERIALS);
-	assert(textureAtlasID < m_AtlasCounter);
-	m_Materials[materialID].textureAtlas = textureAtlasID;
-}
-// -------------------------------------------------------
 // 
 // -------------------------------------------------------
 LPDIRECT3DTEXTURE9 Renderer::getDirectTexture(int textureID) {
@@ -628,9 +530,10 @@ LPDIRECT3DTEXTURE9 Renderer::getDirectTexture(int textureID) {
 // Set the requested texture
 // -------------------------------------------------------
 void Renderer::setTexture(int textureID,int index) {
-	assert(textureID < MAX_TEXTURES);
-	Texture* tr = &m_Textures[textureID];	
-	if ( tr->flags != 0 ) {
+	if ( m_CurrentTextures[index] != textureID ) {
+		assert(textureID < MAX_TEXTURES);
+		Texture* tr = &m_Textures[textureID];	
+		assert ( tr->flags != 0 );
 		m_CurrentTextures[index] = textureID;
 		IDirect3DDevice9 * pDevice = device->get();
 		HR(pDevice->SetTexture( index, tr->texture));	
@@ -638,6 +541,12 @@ void Renderer::setTexture(int textureID,int index) {
 		HR(pDevice->SetSamplerState(index, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
 		HR(pDevice->SetSamplerState(index, D3DSAMP_MIPFILTER, D3DTEXF_POINT ));
 		m_DrawCounter->addTexture();
+		/*
+		if ( m_CurrentShader != -1 ) {
+			setTexture(m_CurrentShader,"gTex",textureID);
+		}
+		*/
+		m_SpriteBatch->setTextureID(textureID);
 	}
 }
 // -------------------------------------------------------
@@ -748,7 +657,7 @@ int Renderer::loadTexture(const char* dirName,const char* name) {
 		LOGC("Renderer") << "Trying to load texture " << fileName;
 		HR(D3DXCreateTextureFromFileEx(device->get(),fileName, 0, 0, 1, 0,
 			D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL,&tr->texture));
-		tr->texture->SetPrivateData(WKPDID_D3DDebugObjectName,name,strlen( name ) - 1,0);
+		//tr->texture->SetPrivateData(WKPDID_D3DDebugObjectName,name,strlen( name ) - 1,0);
 		tr->width = imageInfo.Width;
 		tr->height = imageInfo.Height;		
 		LOGC("Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
@@ -765,31 +674,6 @@ int Renderer::loadTexture(const char* dirName,const char* name) {
 // -------------------------------------------------------
 int Renderer::loadTexture(const char* name) {
 	return loadTexture("content\\textures",name);
-	/*
-	int id = findFreeTextureSlot();
-	if ( id != -1 ) {
-		Texture* tr = &m_Textures[id];
-		tr->name = string::murmur_hash(name);
-		tr->flags = 1;
-		int lw = D3DX_DEFAULT;
-		int lh = D3DX_DEFAULT;		
-		D3DXIMAGE_INFO imageInfo;
-		char fileName[256];
-		sprintf(fileName,"content\\textures\\%s.png",name);
-		LOGC("Renderer") << "Trying to load texture " << fileName;
-		HR(D3DXCreateTextureFromFileEx(device->get(),fileName, 0, 0, 1, 0,
-			D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL,&tr->texture));
-		tr->texture->SetPrivateData(WKPDID_D3DDebugObjectName,name,strlen( name ) - 1,0);
-		tr->width = imageInfo.Width;
-		tr->height = imageInfo.Height;		
-		LOGC("Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
-		return id;
-	}
-	else {
-		LOGEC("Renderer") << "No more texture slots available";
-		return -1;
-	}
-	*/
 }
 
 // -------------------------------------------------------
@@ -825,7 +709,7 @@ int Renderer::loadTextureWithColorKey(const char* name,const Color& color) {
 
 BitmapFont* Renderer::createBitmapFont(const char* name) {
 	IdString hash = string::murmur_hash(name);
-	for ( int i = 0; i < MAX_SYSTEM_FONTS; ++i ) {
+	for ( int i = 0; i < MAX_FONTS; ++i ) {
 		if ( m_BitmapFonts[i].getHashName() == hash ) {
 			LOG << "Found already loaded font " << name;
 			return &m_BitmapFonts[i];
@@ -841,7 +725,7 @@ BitmapFont* Renderer::createBitmapFont(const char* name) {
 
 BitmapFont* Renderer::loadBitmapFont(const char* name,int textureId,const Color& fillColor) {
 	IdString hash = string::murmur_hash(name);
-	for ( int i = 0; i < MAX_SYSTEM_FONTS; ++i ) {
+	for ( int i = 0; i < MAX_FONTS; ++i ) {
 		if ( m_BitmapFonts[i].getHashName() == hash ) {
 			LOG << "Found already loaded font " << name;
 			return &m_BitmapFonts[i];
@@ -906,43 +790,24 @@ void Renderer::initializeBitmapFont(BitmapFont& bitmapFont,int textureID,const C
 	HR(texture->texture->UnlockRect(0));	
 }
 
-ID3DXFont* Renderer::getInternalSystemFont(int fontID) {
-	assert(fontID < MAX_SYSTEM_FONTS);
-	return m_Fonts[fontID].font;
+ID3DXFont* Renderer::getSystemFont() {	
+	return m_SystemFont;
 }
 // -------------------------------------------------------
 // Loads system font
 // -------------------------------------------------------
-int Renderer::loadSystemFont(const char* name,const char* fontName,int size,bool bold) {
+void Renderer::loadSystemFont(const char* name,const char* fontName,int size,bool bold) {
 	LOGC("Renderer") << "Loading font " << fontName << " size " << size;
-	int id = -1;
-	for ( int i = 0 ; i < MAX_SYSTEM_FONTS; ++i ) {
-		if ( m_Fonts[i].flag == 0 && id == -1 ) {
-			id = i;
-		}
+	UINT type = FW_NORMAL;
+	if ( bold ) {
+		type = FW_BOLD;
 	}
-	if ( id != -1 ) {
-		SystemFont* f = &m_Fonts[id];		
-		UINT type = FW_NORMAL;
-		if ( bold ) {
-			type = FW_BOLD;
-		}
-		HDC hDC = GetDC(m_Hwnd);
-		int nHeight = -MulDiv(size, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-		HR(D3DXCreateFontA(device->get(),nHeight,0,type,0,false,DEFAULT_CHARSET,
-			DEFAULT_QUALITY,ANTIALIASED_QUALITY,
-			DEFAULT_PITCH|FF_DONTCARE,
-			fontName,&f->font));
-		f->bold = bold;
-		f->name = string::murmur_hash(name);
-		f->size = size;		
-		f->flag = 1;
-		return id;	
-	}
-	else {
-		LOGEC("Renderer") << "No more free slots for system fonts available";
-		return -1;
-	}
+	HDC hDC = GetDC(m_Hwnd);
+	int nHeight = -MulDiv(size, GetDeviceCaps(hDC, LOGPIXELSY), 72);
+	HR(D3DXCreateFontA(device->get(),nHeight,0,type,0,false,DEFAULT_CHARSET,
+		DEFAULT_QUALITY,ANTIALIASED_QUALITY,
+		DEFAULT_PITCH|FF_DONTCARE,
+		fontName,&m_SystemFont));	
 }
 // -------------------------------------------------------
 // Checks if color is fill color
@@ -1062,6 +927,7 @@ void Renderer::setTexture(int shaderID,const char* handleName,int textureID) {
 
 void Renderer::setCurrentShader(int shaderID) {
 	m_CurrentShader = shaderID;
+	m_SpriteBatch->setShader(shaderID);
 }
 // -------------------------------------------------------
 // Find free shader slot
@@ -1182,12 +1048,12 @@ void Renderer::createBasicVertexDeclarations() {
 // ---------------------------------------------------------
 // Creates a render target and returns the attached texture
 // ---------------------------------------------------------
-int Renderer::createRenderTarget(const char* name,const Color& clearColor) {
-	int id = findFreeTextureSlot();
-	if ( id != -1 ) {
-		RenderTarget* renderTarget = new RenderTarget;
+int Renderer::createRenderTarget(uint32 id,const Color& clearColor) {
+	int tid = findFreeTextureSlot();
+	if ( tid != -1 ) {
+		RenderTarget* renderTarget = &m_RenderTargets[id];
+		assert(renderTarget->flag == 0);
 		renderTarget->clearColor = clearColor;
-		renderTarget->name = string::murmur_hash(name);		
 		D3DXCreateRenderToSurface( device->get(),
 			m_Width, 
 			m_Height,
@@ -1204,15 +1070,15 @@ int Renderer::createRenderTarget(const char* name,const Color& clearColor) {
 			D3DPOOL_DEFAULT,
 			&renderTarget->texture,
 			NULL);
-		LOGC("Renderer") << "Rendertarget created - texture id: " << id << " width: " << m_Width << " height: " << m_Height;
-		Texture* t = &m_Textures[id];
+		LOGC("Renderer") << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << m_Width << " height: " << m_Height;
+		Texture* t = &m_Textures[tid];
 		t->height = m_Height;
 		t->width = m_Width;
 		t->flags = 1;
 		t->texture = renderTarget->texture;
 		renderTarget->texture->GetSurfaceLevel(0,&renderTarget->surface);		
-		m_RenderTargets.append(renderTarget);
-		return id;
+		renderTarget->flag = 1;
+		return tid;
 	}
 	else {
 		LOGEC("Renderer") << "Cannot create rendertarget - No more texture slots available";
@@ -1223,11 +1089,11 @@ int Renderer::createRenderTarget(const char* name,const Color& clearColor) {
 // ---------------------------------------------------------
 // Creates a render target and returns the attached texture
 // ---------------------------------------------------------
-int Renderer::createRenderTarget(const char* name,float width,float height,const Color& clearColor) {
-	int id = findFreeTextureSlot();
-	if ( id != -1 ) {
-		RenderTarget* renderTarget = new RenderTarget;
-		renderTarget->name = string::murmur_hash(name);		
+int Renderer::createRenderTarget(uint32 id,float width,float height,const Color& clearColor) {
+	int tid = findFreeTextureSlot();
+	if ( tid != -1 ) {
+		RenderTarget* renderTarget = &m_RenderTargets[id];
+		assert(renderTarget->flag == 0);
 		renderTarget->clearColor = clearColor;
 		D3DXCreateRenderToSurface( device->get(),
 			width, 
@@ -1245,15 +1111,15 @@ int Renderer::createRenderTarget(const char* name,float width,float height,const
 			D3DPOOL_DEFAULT,
 			&renderTarget->texture,
 			NULL);
-		LOGC("Renderer") << "Rendertarget created - texture id: " << id << " width: " << width << " height: " <<height;
-		Texture* t = &m_Textures[id];
+		LOGC("Renderer") << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << width << " height: " <<height;
+		Texture* t = &m_Textures[tid];
 		t->height = height;
 		t->width = width;
 		t->flags = 1;
 		t->texture = renderTarget->texture;
 		renderTarget->texture->GetSurfaceLevel(0,&renderTarget->surface);		
-		m_RenderTargets.append(renderTarget);
-		return id;
+		renderTarget->flag = 1;
+		return tid;
 	}
 	else {
 		LOGEC("Renderer") << "Cannot create rendertarget - No more texture slots available";
@@ -1559,7 +1425,7 @@ int Renderer::drawBuffer(int handleID,int textureID) {
 void Renderer::drawDebugMessages() {
 	if ( m_DebugMessages.num() > 0 ) {
 		IDirect3DDevice9 * pDevice = device->get();
-		ID3DXFont *font = getInternalSystemFont(m_DebugFont);
+		ID3DXFont *font = getSystemFont();
 		if ( font != 0 ) {
 			RECT font_rect;	
 			m_DebugSprite->Begin( D3DXSPRITE_ALPHABLEND );

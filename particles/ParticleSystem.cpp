@@ -1,6 +1,7 @@
 #include "ParticleSystem.h"
 #include "..\io\FileWatcher.h"
 #include "..\compiler\Converter.h"
+#include "..\utils\Profiler.h"
 
 namespace ds {
 
@@ -40,6 +41,7 @@ ParticleSystem::~ParticleSystem(void) {
 // Update
 // -------------------------------------------------------
 void ParticleSystem::update(float elapsed) {
+	PR_START("ParticleSystem::update")
 	int low = 0;
 	int high = m_Count - 1;
 	bool upwards = true;
@@ -117,6 +119,7 @@ void ParticleSystem::update(float elapsed) {
 			}
 		}
 	}
+	PR_END("ParticleSystem::update")
 }
 
 void ParticleSystem::buildTrailParticle(Particle* baseParticle) {
@@ -137,6 +140,7 @@ void ParticleSystem::buildTrailParticle(Particle* baseParticle) {
 // Draw
 // -------------------------------------------------------
 void ParticleSystem::render() {
+	PR_START("ParticleSystem::render")
 	if ( m_Count > 0 ) {		
 		Color color = Color::WHITE;
 		Vector2f size(0,0);	
@@ -158,6 +162,7 @@ void ParticleSystem::render() {
 			m_Renderer->draw(pp,m_TextureID,m_ParticleData->textureRect,p->rotation,sizeX,sizeY,color);
 		}
 	}
+	PR_END("ParticleSystem::render")
 }
 
 // -------------------------------------------------------
@@ -262,6 +267,12 @@ void ParticleSystem::load(BinaryLoader* loader) {
 			RingEmitterSettings* emitterSettings = new RingEmitterSettings;
 			emitterSettings->load(loader);
 			RingEmitterMesh* emitter = new RingEmitterMesh(emitterSettings);
+			setEmitter(emitter);			
+		}	
+		else if ( loader->getChunkID() == CHNK_BOX_EMITTER ) {	
+			BoxEmitterSettings* emitterSettings = new BoxEmitterSettings;
+			emitterSettings->load(loader);
+			BoxEmitterMesh* emitter = new BoxEmitterMesh(emitterSettings);
 			setEmitter(emitter);			
 		}	
 		else if ( loader->getChunkID() == CHNK_PARTICLE_SIZE ) {			

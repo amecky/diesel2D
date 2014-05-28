@@ -1,4 +1,4 @@
-#include "NewSpriteBatch.h"
+#include "SpriteBatch.h"
 #include "..\renderer\vertex_types.h"
 #include "..\utils\Profiler.h"
 #include "..\renderer\shader.h"
@@ -12,7 +12,7 @@ namespace ds {
 const uint32 QUAD_SIZE = 144;
 const uint32 INDEX_SIZE = 4;
 const uint32 PTC_SIZE = 36;
-const uint32 MAX_QUADS = 512;
+const uint32 MAX_QUADS = 1000;
 
 const float VP_ARRAY[] = {
 	-0.5f,0.5f, 0.5f,0.5f, 
@@ -21,7 +21,7 @@ const float VP_ARRAY[] = {
 // ------------------------------------------------------------
 //
 // ------------------------------------------------------------
-NewSpriteBatch::NewSpriteBatch(Renderer* renderer) : m_Renderer(renderer) 
+SpriteBatch::SpriteBatch(Renderer* renderer) : m_Renderer(renderer) 
 	, m_VertexCounter(0) , m_Index(0) , m_Rendering(false) , m_CurrentTextureID(-1) {
 	m_MaxVertices = 4 * MAX_QUADS;
 	m_MaxIndices = 6 * MAX_QUADS;
@@ -30,7 +30,7 @@ NewSpriteBatch::NewSpriteBatch(Renderer* renderer) : m_Renderer(renderer)
 	m_DataBuffer = new char[m_BufferSize];
 	m_Handle = renderer->createBufferHandle(PT_TRI,VD_PTC,GBT_BOTH,true);
 	LOGC("SpriteBatch") << "creating new SpriteBatch - buffer size " << m_BufferSize << " start index buffer " << m_StartIndices;
-	m_ShaderID = shader::createPTCShader(m_Renderer,-1);
+	//m_ShaderID = shader::createPTCShader(m_Renderer,-1);
 	LOGC("SpriteBatch") << "max vertices: " << m_MaxVertices;
 	// fill up all indices
 	char* indexBuffer = m_DataBuffer + m_StartIndices;
@@ -51,7 +51,7 @@ NewSpriteBatch::NewSpriteBatch(Renderer* renderer) : m_Renderer(renderer)
 }
 
 
-NewSpriteBatch::~NewSpriteBatch() {
+SpriteBatch::~SpriteBatch() {
 	LOGC("SpriteBatch") << "destructing SpriteBatch";	
 	delete m_DataBuffer;
 }
@@ -59,11 +59,11 @@ NewSpriteBatch::~NewSpriteBatch() {
 // -------------------------------------------------------
 // Draw
 // -------------------------------------------------------
-void NewSpriteBatch::draw(float x,float y,int textureID,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vector2f& center) {
+void SpriteBatch::draw(float x,float y,int textureID,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vector2f& center) {
 	draw(Vector2f(x,y),textureID,textureRect,rotation,scaleX,scaleY,color,center);	
 }
 
-void NewSpriteBatch::draw(const Sprite& spriteObject) {
+void SpriteBatch::draw(const Sprite& spriteObject) {
 	if ( spriteObject.isActive()) {
 		if ( (m_VertexCounter + 4) >= m_MaxVertices || spriteObject.getTextureID() != m_CurrentTextureID ) {
 			m_CurrentTextureID = spriteObject.getTextureID();
@@ -89,7 +89,7 @@ void NewSpriteBatch::draw(const Sprite& spriteObject) {
 // -------------------------------------------------------
 // Draw
 // -------------------------------------------------------
-void NewSpriteBatch::draw(const Vector2f& pos,int textureID,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vector2f& center) {
+void SpriteBatch::draw(const Vector2f& pos,int textureID,const Rect& textureRect,float rotation,float scaleX,float scaleY,const Color& color,const Vector2f& center) {
 	if ( m_VertexCounter < m_MaxVertices ) {
 		if ( (m_VertexCounter + 4) >= m_MaxVertices || textureID != m_CurrentTextureID ) {
 			m_CurrentTextureID = textureID;
@@ -125,9 +125,8 @@ void NewSpriteBatch::draw(const Vector2f& pos,int textureID,const Rect& textureR
 	}
 }
 
-void NewSpriteBatch::setBlendState(int blendState) {
+void SpriteBatch::setBlendState(int blendState) {
 	if ( blendState != m_CurrentBlendState ) {
-		//LOG << "swicthing bs " << blendState;
 		flush();
 		//m_CurrentBlendState = blendState;
 	}
@@ -135,7 +134,7 @@ void NewSpriteBatch::setBlendState(int blendState) {
 // -------------------------------------------------------
 // Begin
 // -------------------------------------------------------
-void NewSpriteBatch::begin() {
+void SpriteBatch::begin() {
 	m_Index = 0;
 	m_VertexCounter = 0;
 	m_Rendering = true;
@@ -143,7 +142,7 @@ void NewSpriteBatch::begin() {
 // -------------------------------------------------------
 // Prepare buffer
 // -------------------------------------------------------
-void NewSpriteBatch::prepareBuffer() {
+void SpriteBatch::prepareBuffer() {
 	if ( m_VertexCounter > 0 ) {
 		WORD* ib;
 		PTCVertex* vb;
@@ -172,10 +171,17 @@ void NewSpriteBatch::prepareBuffer() {
 	
 }
 
+void SpriteBatch::setTextureID(int textureID) {
+	if ( textureID != m_CurrentTextureID ) {
+		flush();
+	}
+	m_CurrentTextureID = textureID;
+}
+
 // -------------------------------------------------------
 // Draw
 // -------------------------------------------------------
-void NewSpriteBatch::end() {
+void SpriteBatch::end() {
 	if ( m_VertexCounter > 0 ) {
 		PR_START("SpriteBatch")	
 		prepareBuffer();

@@ -230,10 +230,16 @@
     <ClCompile Include="compiler\HUDConverter.cpp" />
     <ClCompile Include="compiler\ParticleManagerConverter.cpp" />
     <ClCompile Include="compiler\ParticleSystemConverter.cpp" />
+    <ClCompile Include="compiler\ScriptConverter.cpp" />
     <ClCompile Include="compiler\SpriteConverter.cpp" />
+    <ClCompile Include="compiler\SpritesDescriptionConverter.cpp" />
     <ClCompile Include="data\Gizmo.cpp" />
     <ClCompile Include="dialogs\DialogManager.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
+    <ClCompile Include="ecs\Blueprint.cpp" />
+    <ClCompile Include="ecs\CollisionSystem.cpp" />
+    <ClCompile Include="ecs\SpriteRenderSystem.cpp" />
+    <ClCompile Include="ecs\World.cpp" />
     <ClCompile Include="io\BinaryLoader.cpp" />
     <ClCompile Include="io\BinaryWriter.cpp" />
     <ClCompile Include="io\FileWatcher.cpp" />
@@ -246,6 +252,7 @@
     <ClCompile Include="memory\MallocAllocator.cpp" />
     <ClCompile Include="audio\AudioBuffer.cpp" />
     <ClCompile Include="audio\AudioManager.cpp" />
+    <ClCompile Include="objects\BloomComponent.cpp" />
     <ClCompile Include="objects\HUD.cpp" />
     <ClCompile Include="objects\TextMessage.cpp" />
     <ClCompile Include="particles\EmitterMesh.cpp" />
@@ -260,7 +267,9 @@
     <ClCompile Include="renderer\shader.cpp" />
     <ClCompile Include="renderer\VertexDeclaration.cpp" />
     <ClCompile Include="renderer\Viewport.cpp" />
-    <ClCompile Include="sprites\NewSpriteBatch.cpp" />
+    <ClCompile Include="script\ScriptVM.cpp" />
+    <ClCompile Include="script\Tokenizer.cpp" />
+    <ClCompile Include="sprites\SpriteBatch.cpp" />
     <ClCompile Include="sprites\SpriteAnimation.cpp" />
     <ClCompile Include="sprites\SpriteCollisionManager.cpp" />
     <ClCompile Include="sprites\Sprite.cpp" />
@@ -276,7 +285,6 @@
     <ClCompile Include="utils\PlainTextReader.cpp" />
     <ClCompile Include="utils\StringUtils.cpp" />
     <ClCompile Include="base\BaseApp.cpp" />
-    <ClCompile Include="world\components\BloomComponent.cpp" />
     <ClCompile Include="world\components\LightComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -293,11 +301,24 @@
     <ClInclude Include="compiler\HUDConverter.h" />
     <ClInclude Include="compiler\ParticleManagerConverter.h" />
     <ClInclude Include="compiler\ParticleSystemConverter.h" />
+    <ClInclude Include="compiler\ScriptConverter.h" />
     <ClInclude Include="compiler\SpriteConverter.h" />
+    <ClInclude Include="compiler\SpritesDescriptionConverter.h" />
+    <ClInclude Include="data\DataTranslator.h" />
+    <ClInclude Include="data\DynamicSettings.h" />
     <ClInclude Include="data\Gizmo.h" />
     <ClInclude Include="data\Param.h" />
     <ClInclude Include="dialogs\DialogManager.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
+    <ClInclude Include="ecs\Actor.h" />
+    <ClInclude Include="ecs\Animations.h" />
+    <ClInclude Include="ecs\Blueprint.h" />
+    <ClInclude Include="ecs\CollisionSystem.h" />
+    <ClInclude Include="ecs\ControllerBehaviors.h" />
+    <ClInclude Include="ecs\LifecycleBehaviors.h" />
+    <ClInclude Include="ecs\MoveBehaviors.h" />
+    <ClInclude Include="ecs\SpriteRenderSystem.h" />
+    <ClInclude Include="ecs\World.h" />
     <ClInclude Include="io\BinaryLoader.h" />
     <ClInclude Include="io\BinaryWriter.h" />
     <ClInclude Include="io\FileWatcher.h" />
@@ -307,6 +328,7 @@
     <ClInclude Include="lib\container\ImmutableBag.h" />
     <ClInclude Include="lib\container\List.h" />
     <ClInclude Include="lib\container\String.h" />
+    <ClInclude Include="lib\DataArray.h" />
     <ClInclude Include="lib\DataBuffer.h" />
     <ClInclude Include="lib\Grid.h" />
     <ClInclude Include="lib\ScratchBuffer.h" />
@@ -324,6 +346,7 @@
     <ClInclude Include="audio\AudioBuffer.h" />
     <ClInclude Include="audio\AudioManager.h" />
     <ClInclude Include="base\BaseApp.h" />
+    <ClInclude Include="objects\BloomComponent.h" />
     <ClInclude Include="objects\HUD.h" />
     <ClInclude Include="objects\TextMessage.h" />
     <ClInclude Include="particles\DynamicSettings.h" />
@@ -343,8 +366,11 @@
     <ClInclude Include="renderer\vertex_types.h" />
     <ClInclude Include="renderer\Viewport.h" />
     <ClInclude Include="base\Input.h" />
+    <ClInclude Include="script\Script.h" />
+    <ClInclude Include="script\ScriptVM.h" />
+    <ClInclude Include="script\Tokenizer.h" />
     <ClInclude Include="sprites\CompositeSprite.h" />
-    <ClInclude Include="sprites\NewSpriteBatch.h" />
+    <ClInclude Include="sprites\SpriteBatch.h" />
     <ClInclude Include="sprites\SpriteAnimation.h" />
     <ClInclude Include="sprites\SpriteCollisionManager.h" />
     <ClInclude Include="sprites\Sprite.h" />
@@ -362,7 +388,6 @@
     <ClInclude Include="utils\PlainTextReader.h" />
     <ClInclude Include="utils\StringUtils.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="world\components\BloomComponent.h" />
     <ClInclude Include="world\components\LightComponent.h" />
   </ItemGroup>
   <ItemGroup>

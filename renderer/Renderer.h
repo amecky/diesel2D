@@ -10,9 +10,10 @@
 #include "..\utils\Color.h"
 #include "render_types.h"
 #include "DrawCounter.h"
-#include "..\sprites\NewSpriteBatch.h"
+#include "..\sprites\SpriteBatch.h"
 #include "BitmapFont.h"
 #include "Viewport.h"
+#include "..\sprites\SpriteObjectDescription.h"
 
 
 namespace ds {
@@ -23,13 +24,12 @@ namespace ds {
 // -------------------------------------------------------	
 const int MAX_VERDECLS       = 12;
 const int MAX_TEXTURES       = 256;
-const int MAX_MATERIALS      = 256;
-const int MAX_ATLAS          = 10;
 const int MAX_SHADERS        = 128;
-const int MAX_SYSTEM_FONTS   = 6;
 const int MAX_BLENDSTATES    = 10;
 const int MAX_BUFFERS        = 256;
 const int MAX_BUFFER_HANDLES = 256;
+const int MAX_FONTS          = 16;
+const int MAX_RENDER_TARGETS = 32;
 // -------------------------------------------------------
 // Vertex declaration types
 // -------------------------------------------------------
@@ -45,27 +45,21 @@ struct VDStruct {
 	VertexDeclaration* declaration;
 };
 
+// -------------------------------------------------------
+// Renderer
+// -------------------------------------------------------
 class Renderer {
 
 typedef std::map<D3DRENDERSTATETYPE,DWORD> RenderStates;
-typedef List<RenderTarget*> RenderTargets;
 typedef List<RasterizerState*> RasterizerStates;
 typedef List<DebugMessage> DebugMessages;
 
 public:
 	Renderer(HWND hWnd,const Settings& settings);
 	~Renderer();
-	/*
-	LPDIRECT3DDEVICE9 getDevice() { return device->get();}
-	GraphicsDevice* getGraphicsDevice() {
-		return device;
-	}
-	*/
 	// basic rendering methods
 	bool beginRendering(const Color& clearColor);
 	void endRendering();	
-	//bool Windowed;
-	//bool rendering;
 	void setWorldMatrix(const mat4& world);
 	const mat4& getWVPMatrix() const { 
 		return matWorldViewProj; 
@@ -87,7 +81,6 @@ public:
 	void getRenderStates();
 	void setRenderState(D3DRENDERSTATETYPE rs,DWORD value);
 	DWORD getRenderState(D3DRENDERSTATETYPE rs);
-	//RenderMode getRenderMode() { return m_RenderMode; }
 	void setupMatrices();
 	
 	void debug();
@@ -103,6 +96,9 @@ public:
 	int createShaderFromText(const char* buffer,const char* techName);
 	void setTexture(int shaderID,const char* handleName,int textureID);
 	void setCurrentShader(int shaderID);
+	int getCurrentShaderID() {
+		return m_CurrentShader;
+	}
 	// Textures
 	int createTexture(int width,int height);
 	int loadTexture(const char* name);
@@ -115,15 +111,8 @@ public:
 	void unlockTexture(int id);
 	void fillTexture(int id,const Vector2f& pos,int sizeX,int sizeY,Color* colors);
 	Vector2f getTextureSize(int idx);
-	// Materials
-	int createMaterial(const char* name,int textureID = -1);
-	void applyMaterial(int mtrlID);
-	bool hasShader(int mtrlID);
-	void setShader(int materialID,int shaderID);
-	void setTextureAtlas(int materialID,int textureAtlasID);
-	// System fonts
-	int loadSystemFont(const char* name,const char* fontName,int size,bool bold);
-	ID3DXFont* getInternalSystemFont(int fontID);
+	// System fonts	
+	ID3DXFont* getSystemFont();
 	
 	RasterizerState* createRasterizerState(const char* name,int cullMode,int fillMode,bool multiSample = true,bool scissor = true);
 	void changeRasterizerState(RasterizerState* rasterizerState);
@@ -132,10 +121,10 @@ public:
 	void initializeBitmapFont(BitmapFont& bitmapFont,int textureID,const Color& fillColor = Color(1.0f,0.0f,1.0f,1.0f));
 	BitmapFont* createBitmapFont(const char* name);
 	// render target
-	int createRenderTarget(const char* name,const Color& clearColor = Color::WHITE);
-	int createRenderTarget(const char* name,float width,float height,const Color& clearColor = Color::WHITE);
-	void setRenderTarget(const char* name);
-	void restoreBackBuffer(const char* name);
+	int createRenderTarget(uint32 id,const Color& clearColor = Color::WHITE);
+	int createRenderTarget(uint32 id,float width,float height,const Color& clearColor = Color::WHITE);
+	void setRenderTarget(uint32 id);
+	void restoreBackBuffer(uint32 id);
 	// blend states
 	int createBlendState(int srcAlpha,int dstAlpha,bool alphaEnabled);
 	int createBlendState(int srcRGB,int srcAlpha,int dstRGB,int dstAlpha,bool alphaEnabled = true,bool separateAlpha = false);
@@ -170,19 +159,9 @@ public:
 	HWND getHWND() {
 		return m_Hwnd;
 	}
-
-	/*
-	const int getWidth() const {
-		return m_Width;
-	}
-	const int getHeight() const {
-		return m_Height;
-	}
-	*/
 	uint32 startShader(Shader* shader);
 	void setShaderParameter(Shader* shader,int textureID = -1);
 	void endShader(Shader* shader);
-
 	// debug messages
 	void clearDebugMessages() {
 		m_DebugMessages.clear();
@@ -205,15 +184,19 @@ public:
 		m_SpriteBatch->draw(pos.x,pos.y,textureID,textureRect,rotation,scaleX,scaleY,color,center);
 	}
 
-
-
 	BitmapFont* loadBitmapFont(const char* name,int textureId,const Color& fillColor = Color(1.0f,0.0f,1.0f,1.0f));
 
 	Viewport* getViewport() {
 		return m_Viewport;
 	}
-
+	const SpriteDescription& getSpriteDescription(int id) const {
+		return m_DescriptionManager->get(id);
+	}
+	void setDescriptionManager(SpriteDescriptionManager* descriptionManager) {
+		m_DescriptionManager = descriptionManager;
+	}
 private:	
+	void loadSystemFont(const char* name,const char* fontName,int size,bool bold);
 	bool isFillColor(const Color& fillColor,const Color& currentColor);
 	void setTransformations();
 	void handleRenderTargets();
@@ -227,7 +210,7 @@ private:
 	void initializeShader(int id,const char* techName);
 	int allocateBuffer(GeoBufferType type,int vertexDefinition,int size,int& start,bool dynamic);
 	void resetDynamicBuffers();
-
+	SpriteDescriptionManager* m_DescriptionManager;
 	Viewport* m_Viewport;
 	D3DCAPS9 m_DeviceCaps;	
 	Camera* m_Camera;	
@@ -240,7 +223,6 @@ private:
 	DrawCounter* m_DrawCounter;
 	DebugRenderer* m_DebugRenderer;
 	HWND m_Hwnd;
-	RenderTargets m_RenderTargets;
 	RasterizerStates m_RasterizerStates;
 	// new stuff
 	LPDIRECT3DSURFACE9 m_BackBuffer;	
@@ -252,15 +234,16 @@ private:
 	// all data structs
 	VDStruct m_VDStructs[MAX_VERDECLS];
 	Texture m_Textures[MAX_TEXTURES];
-	Material m_Materials[MAX_MATERIALS];
 	Shader m_Shaders[MAX_SHADERS];
-	int m_AtlasCounter;
 	int m_BMCounter;
-	SystemFont m_Fonts[MAX_SYSTEM_FONTS];
+	ID3DXFont* m_SystemFont;
 	BlendState m_BlendStates[MAX_BLENDSTATES];
 	GeometryBuffer m_Buffers[MAX_BUFFERS];
 	GeoBufferHandle m_BufferHandles[MAX_BUFFER_HANDLES];
-	BitmapFont m_BitmapFonts[MAX_SYSTEM_FONTS];
+	BitmapFont m_BitmapFonts[MAX_FONTS];
+	RenderTarget m_RenderTargets[MAX_RENDER_TARGETS];
+	int m_DefaultShaderID;
+	int m_CurrentRT;
 	int m_BFCounter;
 	int m_CurrentIB;
 	int m_CurrentVB;
@@ -271,9 +254,7 @@ private:
 	// debug
 	DebugMessages m_DebugMessages;
 	LPD3DXSPRITE m_DebugSprite;
-	int m_DebugFont;
-
-	NewSpriteBatch* m_SpriteBatch;
+	SpriteBatch* m_SpriteBatch;
 };
 
 };

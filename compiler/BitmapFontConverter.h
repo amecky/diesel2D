@@ -9,6 +9,7 @@ public:
 	BitmapFontConverter() : Converter("BitmapFontConverter") {}
 	~BitmapFontConverter() {}
 	void convert(const char* fileName);
+
 };
 
 }

@@ -109,18 +109,20 @@ private:
 // -------------------------------------------------------
 // BoxEmitterSettings
 // -------------------------------------------------------
-struct BoxEmitterSettings : public Gizmo {
+struct BoxEmitterSettings {
 
 	int width;
 	int height;
 	int size;	
 	float angleVariance;
 
-	BoxEmitterSettings() : Gizmo("box_emitter") , width(10) , height(10) , size(2) , angleVariance(0.0f) {
-		add("width",&width);
-		add("height",&height);
-		add("size",&size);
-		add("angle_variance",&angleVariance);	
+	BoxEmitterSettings() : width(10) , height(10) , size(2) , angleVariance(0.0f) {}
+
+	void load(BinaryLoader* loader) {
+		loader->read(&width);
+		loader->read(&height);
+		loader->read(&size);
+		loader->read(&angleVariance);
 	}
 
 };

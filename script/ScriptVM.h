@@ -1,0 +1,358 @@
+#pragma once
+#include <cstring>
+#include "..\dxstdafx.h"
+#include <vector>
+#include "..\utils\StringUtils.h"
+#include <Vector.h>
+#include "..\utils\Color.h"
+// ---------------------------------------------------
+// OpCode
+// ---------------------------------------------------
+enum OpCode {OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_SIN,OP_COS,OP_ASSIGN,OP_NEW_VEC2,OP_RND,OP_PRINT};
+
+// -------------------------------------------------------
+// Variable types
+// -------------------------------------------------------
+enum VarType {DT_INT,DT_FLOAT,DT_VEC2,DT_VEC3,DT_COLOR,DT_UNKNOWN};
+
+// -------------------------------------------------------
+// Type declaration
+// -------------------------------------------------------
+struct TypeDeclaration {
+
+	
+
+	TypeDeclaration() : hash(0) , type(DT_UNKNOWN) {}
+	TypeDeclaration(const char* name,VarType type) : type(type) {
+		hash = ds::string::murmur_hash(name);
+	}
+
+	VarType type;
+	uint32 hash;
+
+};
+// ---------------------------------------------------
+// Token
+// ---------------------------------------------------
+struct Token {
+
+	enum TokenType {UNKNOWN,OPEN,SEMICOLON,CLOSE,ASSIGN,SUB,ADD,DIV,MUL,NAME,FUNCTION,FLOAT,CONSTANT,DECLARATION,EXTERN,SYMBOL};
+
+	Token() : type(UNKNOWN) , id(0) {}      
+	Token(TokenType type) : type(type) , id(0) {}
+	Token(TokenType type,float value) : type(type) , value(value) {}
+	Token(TokenType type,uint32 id) : type(type) , id(id) {}
+
+	TokenType type;
+	union {
+		uint32 id;
+		float value;
+	};
+};
+
+// -------------------------------------------------------
+// Symbol
+// -------------------------------------------------------
+struct Symbol {
+	uint32 hash;
+	union {
+		int* ival;
+		float* value;
+		Vector2f* v2;
+		Vector3f* v3;
+		ds::Color* c;
+	};
+	VarType type;
+};
+
+// -------------------------------------------------------
+// Stack item
+// -------------------------------------------------------
+struct StackItem {
+
+	VarType type;
+	float values[4];
+
+	StackItem() : type(DT_FLOAT) {
+		for ( int i = 0; i < 4; ++i ) {
+			values[i] = 0.0f;
+		}
+	}
+
+	StackItem(float v) : type(DT_FLOAT) {
+		values[0] = v;
+	}
+
+	StackItem(const Vector2f& v) : type(DT_VEC2) {
+		values[0] = v.x;
+		values[1] = v.y;
+	}
+	StackItem(const Symbol& symbol) {
+		type = symbol.type;
+		switch ( symbol.type ) {
+			case DT_FLOAT:
+				values[0] = *symbol.value;
+				break;
+			case DT_VEC2:
+				values[0] = symbol.v2->x;
+				values[1] = symbol.v2->y;
+				break;
+			case DT_INT:
+				values[0] = static_cast<float>(*symbol.ival);
+				break;
+		}
+	}
+};
+
+
+// ---------------------------------------------------
+// Stack
+// ---------------------------------------------------
+class Stack {
+
+public:
+	Stack() : m_Size(0) , m_Capacity(64) {
+		for ( int i = 0; i < 64; ++i ) {
+			m_Data[i] = 0.0f;
+		}
+	}
+	~Stack() {}
+	const StackItem get(uint32 id) const {
+		return m_Data[id];
+	}
+	void push(float v) {
+		assert( m_Size != m_Capacity );
+		StackItem item(v);
+		m_Data[m_Size++] = item;
+	}
+	void push(int v) {
+		assert( m_Size != m_Capacity );
+		StackItem item(static_cast<float>(v));
+		item.type = DT_INT;
+		m_Data[m_Size++] = item;
+	}
+	void push(const Vector2f& v) {
+		assert( m_Size != m_Capacity );
+		StackItem item(v);
+		m_Data[m_Size++] = item;
+	}
+	void push(const Symbol& symbol) {
+		StackItem item(symbol);
+		m_Data[m_Size++] = item;
+	}
+	StackItem pop() {
+		assert(m_Size > 0);
+		return m_Data[--m_Size];
+	}
+	Vector2f popVec2() {
+		StackItem item = pop();
+		assert(item.type == DT_VEC2);
+		return Vector2f(item.values[0],item.values[1]);
+	}
+	const uint32 size() const {
+		return m_Size;
+	}
+private:
+	StackItem m_Data[64];
+	uint32 m_Size;
+	uint32 m_Capacity;
+};	
+
+
+// -------------------------------------------------------
+// Functions
+// -------------------------------------------------------
+typedef void (*scriptFunctionPointer) (Stack& stack);
+
+void scriptAddOperation(Stack& stack);
+void scriptNewVec2(Stack& stack);
+void scriptAssign(Stack& stack);
+void scriptRandom(Stack& stack);
+void scriptMul(Stack& stack);
+void scriptDiv(Stack& stack);
+void scriptPrint(Stack& stack);
+void scriptSin(Stack& stack);
+void scriptCos(Stack& stack);
+// ---------------------------------------------------
+// Function
+// ---------------------------------------------------
+struct Function {
+
+	OpCode opCode;
+	int precedence;
+	int arity;
+	uint32 hash;
+	const char* name;
+	scriptFunctionPointer functionPtr;
+
+	Function() {}
+	Function(const char* name,OpCode opCode,int precedence,int arity,scriptFunctionPointer ptr) : name(name) , opCode(opCode) , precedence(precedence) , arity(arity) , functionPtr(ptr) {
+		hash = ds::string::murmur_hash(name,strlen(name),0);
+	}
+
+};
+
+// -------------------------------------------------------
+// Script block
+// -------------------------------------------------------
+struct ScriptBlock {
+
+	uint32 byteCode[64];
+	uint32 bytes;
+	uint32 assignmentID;
+
+};
+
+// ---------------------------------------------------
+// Script context
+// ---------------------------------------------------
+class ScriptContext {
+
+	
+
+	struct FloatValue {
+
+		uint32 hash;
+		float values[4];
+		VarType type;
+
+		FloatValue() : hash(0) {}
+
+		FloatValue(const char* name,float v) {
+			hash = ds::string::murmur_hash(name,strlen(name),0);
+			type = DT_FLOAT;
+			values[0] = v;
+		}
+		FloatValue(const char* name,Vector2f v) {
+			hash = ds::string::murmur_hash(name,strlen(name),0);
+			type = DT_VEC2;
+			values[0] = v.x;
+			values[1] = v.y;
+		}
+	};    
+
+	struct ConstantValue {
+
+		uint32 hash;
+		float value;
+
+		ConstantValue() : hash(0) , value(0.0f) {}
+
+		ConstantValue(const char* name,float v) : value(v) {
+			hash = ds::string::murmur_hash(name,strlen(name),0);
+		}
+	};    
+
+typedef std::vector<Function> Functions;
+typedef std::vector<ConstantValue> Constants;
+typedef std::vector<TypeDeclaration> Declarations;
+typedef std::vector<Symbol> Symbols;
+
+public:
+	ScriptContext();
+	virtual ~ScriptContext();
+	// symbols
+	uint32 addSymbol(IdString hash,VarType type);
+	uint32 connect(const char* name,float* v);
+	uint32 connect(const char* name,Vector2f* v);
+	const VarType& getSymbolType(uint32 idx) const {
+		return m_Symbols[idx].type;
+	}
+	const IdString& getSymbolHash(uint32 idx) const {
+		return m_Symbols[idx].hash;
+	}
+	const Symbol& getSymbol(uint32 id) const {
+		return m_Symbols[id];
+	}
+	void setSymbolData(uint32 id,const StackItem& item);
+	// variables
+	uint32 addVariable(const char* name,float value);
+	uint32 addVariable(IdString hash,float value);
+	uint32 addVariable(const char* name,Vector2f v);
+	uint32 addVariable(IdString hash,Vector2f v);
+	uint32 addVariable(IdString hash,int v);
+	uint32 addVariable(const char* name,int v);
+
+	const VarType& getVariableType(uint32 id) const {
+		return m_Variables[id].type;
+	}
+	const VarType& getDeclarationType(uint32 id) const {
+		return m_Declarations[id].type;
+	}
+	const uint32 numConstants() const {
+		return m_Constants.size();
+	}
+	const FloatValue* getVariables() const {
+		return &m_Variables[0];
+	}
+	const ConstantValue* getConstants() const {
+		return &m_Constants[0];
+	}
+	Token findToken(const char* s,int len) const;
+	const char* translate(const Token& token) const;
+	const Function& getFunction(uint32 id) const {
+		return m_Functions[id];
+	}
+	const bool hasFunction(const char* s,int len) const;
+	uint32 add(float value) {
+		uint32 idx = m_DataIndex;
+		m_Data[idx] = value;
+		++m_DataIndex;
+		return idx;
+	}
+	const IdString getVariableHash(uint32 idx) const {
+		return m_Variables[idx].hash;
+	}
+	const float getVariable(uint32 idx) const {
+		return m_Variables[idx].values[0];
+	}
+	const Vector2f getVec2Variable(uint32 idx) const {
+		return Vector2f(m_Variables[idx].values[0],m_Variables[idx].values[1]);
+	}
+	const int getIntVariable(uint32 idx) const {
+		return static_cast<int>(m_Variables[idx].values[0]);
+	}
+	void setVariable(uint32 idx,float v) {
+		m_Variables[idx].values[0] = v;
+	}
+	void setVariable(uint32 idx,int v) {
+		m_Variables[idx].values[0] = static_cast<float>(v);
+	}
+	void setVariable(uint32 idx,const Vector2f& v) {
+		m_Variables[idx].values[0] = v.x;
+		m_Variables[idx].values[1] = v.y;
+	}
+	const float getData(uint32 idx) const {
+		return m_Data[idx];
+	}
+	void setData(uint32 idx,float v) {
+		m_Data[idx] = v;
+	}
+	const char* translateFunction(uint32 id) const;
+	const float getConstant(uint32 id) const {
+		return m_Constants[id].value;
+	}
+	const TypeDeclaration& getDeclaration(uint32 id) const {
+		return m_Declarations[id];
+	}
+	const uint32 numVariables() const {
+		return m_VariableIndex;
+	}
+	const uint32 numData() const {
+		return m_DataIndex;
+	}
+	const uint32 numSymbols() const {
+		return m_Symbols.size();
+	}
+	void reset();
+private:
+	IdString externHash;
+	uint32 m_DataIndex;
+	float m_Data[256];
+	Constants m_Constants;
+	FloatValue m_Variables[256];
+	uint32 m_VariableIndex;
+	Functions m_Functions;
+	Declarations m_Declarations;
+	Symbols m_Symbols;
+};

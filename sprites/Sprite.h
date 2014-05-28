@@ -4,6 +4,8 @@
 #include "Vector.h"
 #include "..\utils\Color.h"
 #include "..\io\Serializer.h"
+#include "SpriteObjectDescription.h"
+#include "..\script\Script.h"
 
 namespace ds {
 
@@ -26,7 +28,8 @@ public:
 	void resetTimer() {
 		m_Timer = 0.0f;
 	}
-	void setTextureRect(const Rect& r,int textureID = 0);
+	//void setTextureRect(const Rect& r,int textureID = 0);
+	void setTextureRect(const Rect& r,int textureWidth = 1024,int textureHeight = 1024,int textureID = 0);
 	void setActive(bool active) {
 		m_Active = active;
 	}
@@ -90,6 +93,7 @@ public:
 		return m_Size;
 	}
 	void tick(float elapsed) {
+		m_Elapsed = elapsed;
 		m_Timer += elapsed;
 	}
 	void move(float elapsed) {
@@ -120,7 +124,15 @@ public:
 	const int getUserValue() const {
 		return m_UserValue;
 	}
+	uint32 getLayer() const {
+		return m_Layer;
+	}
+	void setLayer(uint32 layer) {
+		m_Layer = layer;
+	}
 	void load(BinaryLoader* loader);
+	void prepare(const SpriteDescription& description);
+	void run(Script& script);
 private:	
 	float m_Timer;
 	int m_TextureID;
@@ -137,12 +149,13 @@ private:
 	Vector2f m_Size;
 	Color m_Color;
 	bool m_Active;
-	float timer;
+	float m_Elapsed;
+	//float timer;
 	float delay;
 	float dimX;
 	float dimY;
 	int m_UserValue;
-
+	uint32 m_Layer;
 
 };
 
