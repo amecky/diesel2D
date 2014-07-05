@@ -14,7 +14,7 @@ namespace ds {
 // -------------------------------------------------------
 // Dynamic Settings
 // -------------------------------------------------------
-class DynamicSettings {
+struct DynamicSettings {
 
 struct DataDefinition {
 
@@ -25,7 +25,7 @@ struct DataDefinition {
 
 typedef std::vector<DataDefinition> Definitions;
 
-public:
+
 	DynamicSettings() : numIntMembers(0) , numFloatMembers(0) {}
 	~DynamicSettings() {}
 	// -------------------------------------------------------
@@ -285,8 +285,10 @@ public:
 	// -------------------------------------------------------
 	// save binary chunk
 	// -------------------------------------------------------
-	void saveChunk(BinaryWriter& writer,uint32 chunkID) {
-		writer.startChunk(chunkID,1);
+	void saveChunk(BinaryWriter& writer,uint32 chunkID,bool append = false) {
+		if ( !append ) {
+			writer.startChunk(chunkID,1);
+		}
 		for ( size_t i = 0; i < m_Definitions.size(); ++i ) {
 			DataDefinition& def = m_Definitions[i];
 			switch ( def.type ) {
@@ -307,7 +309,9 @@ public:
 				break;
 			}
 		}
-		writer.closeChunk();
+		if ( !append ) {
+			writer.closeChunk();
+		}
 	}
 	// -------------------------------------------------------
 	// Read binary file
@@ -401,7 +405,7 @@ public:
 			}
 		}
 	}
-private:
+
 	// -------------------------------------------------------
 	// internal find
 	// -------------------------------------------------------

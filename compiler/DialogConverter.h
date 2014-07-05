@@ -8,7 +8,11 @@ class DialogConverter : public Converter {
 public:
 	DialogConverter() : Converter("DialogConverter") {}
 	~DialogConverter() {}
-	void convert(const char* fileName);
+	void convert(JSONReader& reader,BinaryWriter& writer);
+
+	const char* getResourceDirectory() {
+		return "content\\dialogs";
+	}
 };
 
 }

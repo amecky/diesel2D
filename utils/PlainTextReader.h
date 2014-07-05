@@ -16,15 +16,15 @@
 // -------------------------------------------------------
 // Category
 // -------------------------------------------------------
-class Category {
+class OldCategory {
 
 typedef std::map<std::string,std::string> PropertyMap;
-typedef std::vector<Category*>::iterator CategoryIterator;
+typedef std::vector<OldCategory*>::iterator CategoryIterator;
 
 public:
-	Category(const std::string& name) : m_Name(name) { }
-	~Category() {
-		std::cout << "deleting category " << m_Name << std::endl;
+	OldCategory(const std::string& name) : m_Name(name) { }
+	~OldCategory() {
+		//std::cout << "deleting category " << m_Name << std::endl;
 		CategoryIterator it = m_Children.begin();
 		while ( it != m_Children.end() ) {
 			delete *(it);
@@ -139,10 +139,10 @@ void getIdString(const std::string& name,IdString* ret) {
 	bool hasProperty(const std::string& name) const {
 		return m_Properties.find(name) != m_Properties.end();
 	}
-	void addCategory(Category* cat) {
+	void addCategory(OldCategory* cat) {
 		m_Children.push_back(cat);
 	}
-	std::vector<Category*>& getChildren() {
+	std::vector<OldCategory*>& getChildren() {
 		return m_Children;
 	}
 	void getPropertyNames(std::vector<std::string>& propertyNames) {
@@ -209,6 +209,256 @@ void getIdString(const std::string& name,IdString* ret) {
 private:
 	std::string m_Name;
 	std::map<std::string,std::string> m_Properties;
+	std::vector<OldCategory*> m_Children;
+};
+
+// -------------------------------------------------------
+// Category
+// -------------------------------------------------------
+class Category {
+
+struct SectionEntry {
+	IdString hash;
+	std::string name;
+	std::string value;
+};
+
+typedef std::vector<SectionEntry> Entries;
+
+public:
+	Category(const std::string& name) : m_Name(name) { }
+	~Category() {
+		std::vector<Category*>::iterator it = m_Children.begin();
+		while ( it != m_Children.end() ) {
+			delete *(it);
+			it = m_Children.erase(it);
+		}
+	}
+	
+	const std::string& getName() const {
+		return m_Name;
+	}
+
+	void addProperty(const std::string& name,const std::string& value) {
+		SectionEntry entry;
+		entry.hash = ds::string::murmur_hash(name.c_str());
+		entry.value = value;
+		entry.name = name;
+		m_Entries.push_back(entry);
+	}
+
+	void getPropertyNames(std::vector<std::string>& propertyNames) {
+		for ( size_t i = 0; i < m_Entries.size(); ++i ) {
+			propertyNames.push_back(m_Entries[i].name);
+		}
+	}
+
+	std::string getProperty(const std::string& name) {
+		std::string ret;
+		getProperty(name,ret);
+		return ret;		
+	}
+
+	bool getProperty(const std::string& name,std::string& ret) {
+		IdString hash = ds::string::murmur_hash(name.c_str());
+		for ( size_t i = 0; i < m_Entries.size(); ++i ) {
+			if ( m_Entries[i].hash == hash ) {
+				ret = m_Entries[i].value;
+				return true;
+			}
+		}
+		return false;
+	}
+	Vector2f getVector2f(const std::string& name,const Vector2f& defaultValue = Vector2f(1.0f,1.0f)) {
+		if ( hasProperty(name)) {
+			float x = getFloat(0,name);
+			float y = getFloat(1,name);
+			return Vector2f(x,y);
+		}
+		return defaultValue;
+	}
+	void getVector2f(const std::string& name,Vector2f* ret) {
+		if ( hasProperty(name)) {
+			ret->x = getFloat(0,name);
+			ret->y = getFloat(1,name);
+		}
+	}
+	void getIdString(const std::string& name,IdString* ret) {
+		if ( hasProperty(name)) {
+			std::string s;
+			getProperty(name,s);
+			*ret = ds::string::murmur_hash(s.c_str());
+		}
+	}
+	Vector3f getVector3f(const std::string& name) {
+		float x = getFloat(0,name);
+		float y = getFloat(1,name);
+		float z = getFloat(2,name);
+		return Vector3f(x,y,z);
+	}
+	ds::Color getColor(const std::string& name,const ds::Color& defaultValue = ds::Color::WHITE) {
+		if ( hasProperty(name)) {
+			assert(getElementCount(name) == 4);
+			int r = getInt(0,name);
+			int g = getInt(1,name);
+			int b = getInt(2,name);
+			int a = getInt(3,name);
+			return ds::Color(r,g,b,a);
+		}
+		return defaultValue;
+	}
+
+	void getColor(const std::string& name,ds::Color* color) {
+		if ( hasProperty(name)) {
+			assert(getElementCount(name) == 4);
+			int r = getInt(0,name);
+			int g = getInt(1,name);
+			int b = getInt(2,name);
+			int a = getInt(3,name);
+			color->r = static_cast<float>(r) / 255.0f;
+			color->g = static_cast<float>(g) / 255.0f;
+			color->b = static_cast<float>(b) / 255.0f;
+			color->a = static_cast<float>(a) / 255.0f;
+		}
+	}
+	ds::Rect getRect(const std::string& name) {
+		float top = static_cast<float>(getInt(0,name));
+		float left = static_cast<float>(getInt(1,name));
+		float width = static_cast<float>(getInt(2,name));
+		float height = static_cast<float>(getInt(3,name));
+		return ds::Rect(top,left,width,height);
+	}
+	void getRect(const std::string& name,ds::Rect* rect) {
+		if ( hasProperty(name)) {
+			rect->top = static_cast<float>(getInt(0,name));
+			rect->left = static_cast<float>(getInt(1,name));
+			rect->right = rect->left + static_cast<float>(getInt(2,name));
+			rect->bottom = rect->top + static_cast<float>(getInt(3,name));
+		}		
+	}
+	bool getBool(const std::string& name,bool defaultValue) {
+		if ( hasProperty(name)) {
+			std::string s;
+			getProperty(name,s);
+			if ( s == "true") {
+				return true;
+			}
+			return false;
+		}
+		else {
+			return defaultValue;
+		}		
+	}
+	void getBool(const std::string& name,bool* ret) {
+		if ( hasProperty(name)) {
+			std::string s;
+			getProperty(name,s);
+			if ( s == "true") {
+				*ret = true;
+			}
+			*ret = false;
+		}		
+	}
+	
+	template<class T> T read(const std::string& name,const T& defaultValue) {
+		if ( m_Properties.find(name) == m_Properties.end() ) {
+			return defaultValue;
+		}
+		std::string s = m_Properties[name];
+		T t;
+		std::istringstream ist(s);
+		ist >> t;
+		return t;
+	}	
+	
+	bool hasProperty(const std::string& name) const {
+		IdString hash = ds::string::murmur_hash(name.c_str());
+		for ( size_t i = 0; i < m_Entries.size(); ++i ) {
+			if ( m_Entries[i].hash == hash ) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	void addCategory(Category* cat) {
+		m_Children.push_back(cat);
+	}
+	
+	std::vector<Category*>& getChildren() {
+		return m_Children;
+	}
+
+	Category* getChild(const std::string& name) {
+		for ( size_t i = 0; i < m_Children.size(); ++i ) {
+			if ( m_Children[i]->getName() == name ) {
+				return m_Children[i];
+			}
+		}
+		return 0;
+	}
+	
+	void getFloat(const std::string& name,float* ret) {
+		if ( hasProperty(name)) {
+			*ret = getFloat(0,name);
+		}
+	}
+	float getFloat(const std::string& name,float defaultValue) {
+		if ( hasProperty(name)) {
+			return getFloat(0,name);
+		}
+		return defaultValue;
+	}
+	uint32 getUInt32(const std::string& name,uint32 defaultValue) {
+		if ( hasProperty(name)) {
+			return static_cast<uint32>(getInt(0,name));
+		}
+		return defaultValue;
+	}
+	float getFloat(int index,const std::string& name) {
+		std::string s;
+		getProperty(name,s);
+		std::vector<std::string> values = ds::string::split(s);
+		float v;
+		std::istringstream ist(values[index]);
+		ist >> v;
+		return v;
+	}
+	void getInt(const std::string& name,int* value) {
+		if ( hasProperty(name)) {
+			*value = getInt(0,name);
+		}
+	}
+	int getInt(const std::string& name,int defaultValue) {
+		if ( hasProperty(name)) {
+			return getInt(0,name);
+		}
+		return defaultValue;
+	}
+	void getInt(const std::string& name,uint32* value) {
+		if ( hasProperty(name)) {
+			*value = static_cast<uint32>(getInt(0,name));
+		}
+	}
+	int getInt(int index,const std::string& name) {
+		std::string s;
+		getProperty(name,s);
+		std::vector<std::string> values = ds::string::split(s);
+		int v;
+		std::istringstream ist(values[index]);
+		ist >> v;
+		return v;
+	}
+	int getElementCount(const std::string& name) {
+		std::string s;
+		getProperty(name,s);
+		std::vector<std::string> values = ds::string::split(s);
+		return values.size();
+	}
+private:
+	Entries m_Entries;
+	std::string m_Name;
+	//std::map<std::string,std::string> m_Properties;
 	std::vector<Category*> m_Children;
 };
 

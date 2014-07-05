@@ -10,7 +10,6 @@
 #include "..\compiler\AssetCompiler.h"
 #include "..\particles\ParticleManager.h"
 #include "..\ecs\World.h"
-#include "..\ecs\SpriteRenderSystem.h"
 
 namespace ds {
 
@@ -125,7 +124,6 @@ protected:
 	Color m_ClearColor;
 	ParticleManager* particles;
 	SpriteCollisionManager* m_CollisionManager;
-	SpriteRenderSystem* m_SpriteRenderer;
 private:
 	Vector2f m_MousePos;
 	DWORD m_CurTime;
@@ -147,6 +145,8 @@ void BaseApp::createGameObject(S* obj) {
 	obj->setCollisionManager(m_CollisionManager);
 	obj->setParticleManager(particles);
 	obj->setAssetCompiler(&assets);
+	obj->setWorld(&world);
+	obj->setAudioManager(audio);
 	obj->init();
 	obj->GameObject::setActive(true);
 	m_GameObjects.push_back(obj);

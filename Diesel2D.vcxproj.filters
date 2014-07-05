@@ -190,14 +190,32 @@
     <ClCompile Include="ecs\CollisionSystem.cpp">
       <Filter>ecs</Filter>
     </ClCompile>
-    <ClCompile Include="ecs\SpriteRenderSystem.cpp">
-      <Filter>ecs</Filter>
-    </ClCompile>
     <ClCompile Include="ecs\World.cpp">
       <Filter>ecs</Filter>
     </ClCompile>
     <ClCompile Include="ecs\Blueprint.cpp">
       <Filter>ecs</Filter>
+    </ClCompile>
+    <ClCompile Include="collision\BroadPhaseDetector.cpp">
+      <Filter>collision</Filter>
+    </ClCompile>
+    <ClCompile Include="collision\CollisionDetectionSystem.cpp">
+      <Filter>collision</Filter>
+    </ClCompile>
+    <ClCompile Include="collision\NarrowPhaseDetector.cpp">
+      <Filter>collision</Filter>
+    </ClCompile>
+    <ClCompile Include="collision\SpatialHashingBroadPhaseDetector.cpp">
+      <Filter>collision</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\BlueprintConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\NewParticleSystemConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\ShaderConverter.cpp">
+      <Filter>compiler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -488,9 +506,6 @@
     <ClInclude Include="ecs\MoveBehaviors.h">
       <Filter>ecs</Filter>
     </ClInclude>
-    <ClInclude Include="ecs\SpriteRenderSystem.h">
-      <Filter>ecs</Filter>
-    </ClInclude>
     <ClInclude Include="ecs\World.h">
       <Filter>ecs</Filter>
     </ClInclude>
@@ -499,6 +514,45 @@
     </ClInclude>
     <ClInclude Include="data\DynamicSettings.h">
       <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\BlockDataArray.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="collision\BroadPhaseDetector.h">
+      <Filter>collision</Filter>
+    </ClInclude>
+    <ClInclude Include="collision\CollisionDetectionSystem.h">
+      <Filter>collision</Filter>
+    </ClInclude>
+    <ClInclude Include="collision\CollisionTypes.h">
+      <Filter>collision</Filter>
+    </ClInclude>
+    <ClInclude Include="collision\NarrowPhaseDetector.h">
+      <Filter>collision</Filter>
+    </ClInclude>
+    <ClInclude Include="collision\SpatialHashingBroadPhaseDetector.h">
+      <Filter>collision</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\BlueprintConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\BehaviorSettings.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs\ActorArray.h">
+      <Filter>ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleModifier.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\NewParticleSystemConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleEmitter.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\ShaderConverter.h">
+      <Filter>compiler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -562,6 +616,9 @@
     </Filter>
     <Filter Include="ecs">
       <UniqueIdentifier>{78a42f98-d454-4702-8275-944d42677625}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="collision">
+      <UniqueIdentifier>{1492ec9b-a315-4461-848e-c935a447e4e4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

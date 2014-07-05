@@ -8,8 +8,11 @@ class BitmapFontConverter : public Converter {
 public:
 	BitmapFontConverter() : Converter("BitmapFontConverter") {}
 	~BitmapFontConverter() {}
-	void convert(const char* fileName);
+	void convert(JSONReader& reader,BinaryWriter& writer);
 
+	const char* getResourceDirectory() {
+		return "content\\resources";
+	}
 };
 
 }

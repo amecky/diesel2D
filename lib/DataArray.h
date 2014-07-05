@@ -44,7 +44,9 @@ struct DataArray {
 	}
 
 	U& get(ID id) {
+		assert( id != UINT_MAX );
 		unsigned short index = indices[id & INDEX_MASK].index;
+		assert(index != USHRT_MAX);
 		return objects[index];
 	}
 

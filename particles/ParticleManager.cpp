@@ -45,7 +45,7 @@ void ParticleManager::load(BinaryLoader* loader) {
 			system->setBlendState(m_BlendState);
 			system->setTextureID(m_TextureID);
 			system->init();
-			m_AssetCompiler->load("content\\resources",file.c_str(),system,CVT_PARTICLESYSTEM);
+			m_AssetCompiler->load(file.c_str(),system,CVT_PARTICLESYSTEM);
 			m_Systems.push_back(system);
 			++m_Counter;
 		}

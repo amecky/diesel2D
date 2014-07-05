@@ -1,5 +1,6 @@
 #pragma once
 #include "math_types.h"
+#include "..\utils\Color.h"
 /*!
  * \class FloatArray
  * 
@@ -57,7 +58,7 @@ public:
 	/*
 	 * \return number of elements
 	*/
-	int size() {
+	const int size() const {
 		return m_Count;
 	}
 	//! Returns the timestep value at the given index
@@ -95,6 +96,103 @@ private:
 	PathLoopMode m_LoopMode;
 	PathInterpolation m_Interpolation;
 	int m_Count;
+};
+
+// -------------------------------------------------------
+// ColorPath
+// -------------------------------------------------------
+struct ColorPath {
+
+	FloatArray red;
+	FloatArray green;
+	FloatArray blue;
+	FloatArray alpha;
+
+	void add(float timeStep,const Color& color) {
+		red.add(timeStep,color.r);
+		green.add(timeStep,color.g);
+		blue.add(timeStep,color.b);
+		alpha.add(timeStep,color.a);
+	} 
+	void update(float time,Color* color) {
+		float norm = alpha.get(time);
+		color->r = red.get(time) * norm;
+		color->g = green.get(time) * norm;
+		color->b = blue.get(time) * norm;
+		color->a = norm;		
+	}
+	const float getTimeStep(int idx) const {
+		return red.key(idx);
+	}
+	const Color getColor(int idx) const {
+		return Color(red.value(idx),green.value(idx),blue.value(idx),alpha.value(idx));
+	}
+	const int size() const {
+		return red.size();
+	}
+	void reset() {
+		red.reset();
+		green.reset();
+		blue.reset();
+		alpha.reset();
+	}
+
+	void setInterpolationMode(const PathInterpolation& interpolation) {
+		red.setInterpolationMode(interpolation);
+		green.setInterpolationMode(interpolation);
+		blue.setInterpolationMode(interpolation);
+		alpha.setInterpolationMode(interpolation);
+	}
+	void setLoopMode(const PathLoopMode& loopMode) {
+		red.setLoopMode(loopMode);
+		green.setLoopMode(loopMode);
+		blue.setLoopMode(loopMode);
+		alpha.setLoopMode(loopMode);
+	}
+
+};
+
+// -------------------------------------------------------
+// Vector2fPath
+// -------------------------------------------------------
+struct Vector2fPath {
+
+	FloatArray x;
+	FloatArray y;
+
+	void add(float timeStep,const Vector2f& v) {
+		x.add(timeStep,v.x);
+		y.add(timeStep,v.y);
+	} 
+	void update(float time,Vector2f* v) {
+		v->x = x.get(time);
+		v->y = y.get(time);		
+	}
+	void reset() {
+		x.reset();
+		y.reset();
+	}
+
+	const int size() const {
+		return x.size();
+	}
+
+	const float getTimeStep(int idx) const {
+		return x.key(idx);
+	}
+
+	const Vector2f getVec2(int idx) const {
+		return Vector2f(x.value(idx),y.value(idx));
+	}
+	
+	void setInterpolationMode(const PathInterpolation& interpolation) {
+		x.setInterpolationMode(interpolation);
+		y.setInterpolationMode(interpolation);
+	}
+	void setLoopMode(const PathLoopMode& loopMode) {
+		x.setLoopMode(loopMode);
+		y.setLoopMode(loopMode);
+	}
 };
 
 }

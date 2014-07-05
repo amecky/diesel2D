@@ -45,7 +45,6 @@ BaseApp::BaseApp() {
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
 	LOGC("BaseApp") << "Destructing all elements";
-	delete m_SpriteRenderer;
 	delete particles;
 	delete m_CollisionManager;
 	delete gProfiler;
@@ -69,11 +68,12 @@ void BaseApp::init() {
 	settings.mode = 1;
 	settings.postProcessing = false;
 	renderer = new Renderer(m_hWnd,settings);   
-	m_SpriteRenderer = new SpriteRenderSystem(renderer);
-	world.setSpriteRenderer(m_SpriteRenderer);
+	world.setRenderer(renderer);
+	world.setAssetCompiler(&assets);
 	audio->initialize(m_hWnd);
 	particles->setRenderer(renderer);
 	particles->setAssetCompiler(&assets);
+	assets.setWorld(&world);
 	initialize();		
 	/*
 	LOGC("BaseApp") << "-> loading gui.json";
@@ -101,7 +101,7 @@ void BaseApp::loadSprites() {
 void BaseApp::initializeGUI() {
 	gui.setRenderer(renderer);
 	gui.setAssetCompiler(&assets);
-	assets.load("content\\resources","gui",&gui,CVT_GUI);	
+	assets.load("gui",&gui,CVT_GUI);	
 }
 // -------------------------------------------------------
 // Creates the window
@@ -335,7 +335,7 @@ void BaseApp::createParticleSystem(const char* fileName,int textureID,ParticleSy
 	entity->setBlendState(blendState);
 	entity->setTextureID(textureID);
 	entity->init();
-	assets.load("content\\resources",fileName,entity,CVT_PARTICLESYSTEM);
+	assets.load(fileName,entity,CVT_PARTICLESYSTEM);
 	//entity->load(fileName);	
 	m_GameObjects.push_back(entity);
 }

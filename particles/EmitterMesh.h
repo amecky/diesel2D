@@ -2,6 +2,9 @@
 #include "..\utils\PlainTextReader.h"
 #include "..\data\Gizmo.h"
 #include "..\io\BinaryLoader.h"
+#include "Particle.h"
+#include "..\io\BinaryWriter.h"
+#include "..\data\DataTranslator.h"
 
 namespace ds {
 

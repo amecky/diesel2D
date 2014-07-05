@@ -12,13 +12,9 @@ namespace ds {
 class BoundingRectBehavior : public Behavior {
 
 public:
-	BoundingRectBehavior() : m_BoundingRect(0,0,1024,768) {
-		m_Settings.add("bounding_rect",&m_BoundingRect);
-	}
-	BoundingRectBehavior(const Rect& r) : m_BoundingRect(r) {
-		m_Settings.add("bounding_rect",&m_BoundingRect);
-	}
+	BoundingRectBehavior() : m_BoundingRect(0,0,1024,768) {}
 	virtual ~BoundingRectBehavior() {}
+	
 	void update(Actor& actor,float elapsed) {
 		Vector2f pos = actor.position;
 		if ( pos.x < m_BoundingRect.left || pos.x > m_BoundingRect.right ) {
@@ -28,8 +24,13 @@ public:
 			actor.alive = false;
 		}
 	}
+
 	void setBoundingRect(const ds::Rect& boundingRect) {
 		m_BoundingRect = boundingRect;
+	}
+	
+	const char* getName() const {
+		return "BoundingRectBehavior";
 	}
 private:
 	ds::Rect m_BoundingRect;
@@ -38,25 +39,46 @@ private:
 // -------------------------------------------------------
 // Fixed lifetime
 // -------------------------------------------------------
-class FixedLifetimeBehavior : public Behavior {
+struct FixedLifetimeData {
+
+	ID id;
+	ID actorID;
+	float ttl;
+
+	FixedLifetimeData() : ttl(1.0f) {
+		//add("ttl",&ttl);
+	}
+};
+
+class FixedLifetimeBehavior : public AbstractBehavior<FixedLifetimeData> {
 
 public:
-	FixedLifetimeBehavior() : m_TTL(1.0f) {
-		m_Settings.add("ttl",&m_TTL);
-	}
-	FixedLifetimeBehavior(float ttl) : m_TTL(ttl) {
-		m_Settings.add("ttl",&m_TTL);
+	FixedLifetimeBehavior() : AbstractBehavior<FixedLifetimeData>() {
+		m_Translator.add("ttl",&FixedLifetimeData::ttl);
 	}
 	virtual ~FixedLifetimeBehavior() {}
+	
+	void init(const Actor& actor,ID definitionID) {
+		FixedLifetimeData& def = m_Definitions.get(definitionID);
+		FixedLifetimeData& data = getData(actor);
+		data.ttl = def.ttl;
+	}
+
 	void update(Actor& actor,float elapsed) {
-		if ( actor.timer >= m_TTL ) {
+		FixedLifetimeData& data = getData(actor);
+		if ( actor.timer >= data.ttl ) {
 			actor.alive = false;
 		}
 	}
-	void setTimeToLive(float ttl) {
-		m_TTL = ttl;
+
+	void setTimeToLive(const Actor& actor,float ttl) {
+		FixedLifetimeData& data = getData(actor);
+		data.ttl = ttl;
 	}
-private:
-	float m_TTL;
+
+	const char* getName() const {
+		return "FixedLifetimeBehavior";
+	}
+
 };
 }

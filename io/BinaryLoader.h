@@ -10,6 +10,7 @@
 #include "BinaryWriter.h"
 #include <Vector.h>
 #include "..\utils\Color.h"
+#include "..\math\FloatArray.h"
 
 class BinaryLoader {
     
@@ -70,6 +71,8 @@ public:
 	void read(uint32* value);
 	void read(Vector2f* value);
 	void read(ds::Color* value);
+	void read(ds::ColorPath* value);
+	void read(ds::Vector2fPath* value);
 	void read(ds::Rect* value);
 	void read(std::string& str);
     /*
@@ -78,7 +81,7 @@ public:
      * buffer - the buffer that will be filled
      * size - the number of bytes to read
      * 
-     * Returns: IO_OK if successfull or any error code
+     * Returns: IO_OK if successfully or any error code
      */
     uint32 readBuffer(void* buffer,uint32 size);
     /*

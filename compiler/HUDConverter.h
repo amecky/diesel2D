@@ -8,7 +8,11 @@ class HUDConverter : public Converter {
 public:
 	HUDConverter(void);
 	~HUDConverter(void);
-	void convert(const char* fileName);
+	void convert(JSONReader& reader,BinaryWriter& writer);
+
+	const char* getResourceDirectory() {
+		return "content\\resources";
+	}
 };
 
 }

@@ -318,185 +318,92 @@ void ParticleSystem::load(BinaryLoader* loader) {
 		loader->closeChunk();
 	}		
 }
-/*
-void ParticleSystem::load(const char* fileName) {
-	ParticleData* particleData = new ParticleData;
-	ParticleEmitterData* emitterData = new ParticleEmitterData;	
-	m_Rotating = false;
-	m_UseWiggle = false;
-	m_UseTrail = false;
-	char buffer[256];
-	sprintf(buffer,"content\\resources\\%s.json",fileName);
-	JSONReader reader;
-	if ( reader.parse(buffer) ) {
-		LOG << "Particle file found";
-		std::vector<Category*> categories = reader.getCategories();
-		for ( size_t i = 0; i < categories.size(); ++i ) {
-			Category* c = categories[i];
-			if ( c->getName() == "particle_data" ) {
-				particleData->load(c);
-				setParticleData(particleData);
-			}
-			if ( c->getName() == "emitter_data" ) {				
-				emitterData->load(c);				
-				setEmitterData(emitterData);
-			}
-		}		
-		for ( size_t i = 0; i < categories.size(); ++i ) {
-			Category* c = categories[i];
-			if ( c->getName() == "size") {			
-				createSizePath();
-				std::vector<std::string> propertyNames;
-				c->getPropertyNames(propertyNames);
-				for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-					float timeStep = std::stof(propertyNames[i].c_str());
-					m_SizePath->add(timeStep,c->getVector2f(propertyNames[i]));
-				}
-			}
-			if ( c->getName() == "color") {
-				std::vector<std::string> propertyNames;
-				m_ColorPath->reset();
-				c->getPropertyNames(propertyNames);
-				for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-					float timeStep = std::stof(propertyNames[i].c_str());
-					Color clr = Color::WHITE;
-					c->getColor(propertyNames[i],&clr);
-					m_ColorPath->add(timeStep,clr);
-				}
-			}
-			if ( c->getName() == "radial_velocity") {
-				createRadialVelocityPath();
-				std::vector<std::string> propertyNames;
-				c->getPropertyNames(propertyNames);
-				for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-					float timeStep = std::stof(propertyNames[i].c_str());
-					float value = 1.0f;
-					c->getFloat(propertyNames[i],&value);
-					m_RadialVelocityPath->add(timeStep,value);
-				}
-			}	
-			if ( c->getName() == "wiggle" ) {
-				m_UseWiggle = true;
-				m_WiggleSettings.load(c);
-			}
-			if ( c->getName() == "trail" ) {
-				m_UseTrail = true;
-				m_TrailSettings.load(c);
-			}
-			if ( c->getName() == "rotation") {	
-				m_Rotating = true;
-				m_RotationPath.load(c);				
-			}	
-			if ( c->getName() == "ring_emitter") {			
-				RingEmitterSettings* emitterSettings = new RingEmitterSettings;
-				emitterSettings->load(c);
-				RingEmitterMesh* emitter = new RingEmitterMesh(emitterSettings);
-				setEmitter(emitter);
-			}		
-			if ( c->getName() == "box_emitter") {			
-				BoxEmitterSettings* emitterSettings = new BoxEmitterSettings;
-				emitterSettings->load(c);
-				BoxEmitterMesh* emitter = new BoxEmitterMesh(emitterSettings);
-				setEmitter(emitter);
-			}	
-			if ( c->getName() == "cone_emitter") {			
-				ConeEmitterSettings* emitterSettings = new ConeEmitterSettings;
-				emitterSettings->load(c);
-				ConeEmitterMesh* emitter = new ConeEmitterMesh(emitterSettings);
-				setEmitter(emitter);
-			}	
-			if ( c->getName() == "point_emitter") {						
-				PointEmitterMesh* emitter = new PointEmitterMesh();
-				setEmitter(emitter);
-			}		
+
+void NewParticleSystem::load(BinaryLoader* loader) {
+	clear();
+	while ( loader->openChunk() == 0 ) {	
+		// modifiers
+		if ( loader->getChunkID() == 100 ) {	
+			ParticleTimeModifier* modifier = new ParticleTimeModifier;
+			modifier->load(loader);
+			addModifier(modifier);
 		}
-		gFileWatcher->registerFile(buffer,this);
-	}
+		else if ( loader->getChunkID() == 101 ) {	
+			ParticlePositionModifier* modifier = new ParticlePositionModifier;
+			modifier->load(loader);
+			addModifier(modifier);
+		}
+		else if ( loader->getChunkID() == 102 ) {	
+			LinearColorModifier* modifier = new LinearColorModifier;
+			modifier->load(loader);
+			addModifier(modifier);
+		}
+		else if ( loader->getChunkID() == 103 ) {	
+			LinearSizeModifier* modifier = new LinearSizeModifier;
+			modifier->load(loader);
+			addModifier(modifier);
+		}
+		else if ( loader->getChunkID() == 104 ) {	
+			PerpendicularMoveModifier* modifier = new PerpendicularMoveModifier;
+			modifier->load(loader);
+			addModifier(modifier);
+		}
+		else if ( loader->getChunkID() == 105 ) {	
+			ColorPathModifier* modifier = new ColorPathModifier;
+			modifier->load(loader);
+			addModifier(modifier);
+		}
+		else if ( loader->getChunkID() == 106 ) {	
+			DampingVelocityModifier* modifier = new DampingVelocityModifier;
+			modifier->load(loader);
+			addModifier(modifier);
+		}
+		else if ( loader->getChunkID() == 107 ) {	
+			SizePathModifier* modifier = new SizePathModifier;
+			modifier->load(loader);
+			addModifier(modifier);
+		}
+		else if ( loader->getChunkID() == 108 ) {	
+			VelocityRotationModifier* modifier = new VelocityRotationModifier;
+			addModifier(modifier);
+		}
+		// generators
+		else if ( loader->getChunkID() == 200 ) {	
+			RingGenerator* generator = new RingGenerator;
+			generator->load(loader);
+			addGenerator(generator);
+		}
+		else if ( loader->getChunkID() == 201 ) {	
+			ParticleRandomGenerator* generator = new ParticleRandomGenerator;
+			generator->load(loader);
+			addGenerator(generator);
+		}
+		else if ( loader->getChunkID() == 202 ) {
+			LifetimeGenerator* generator = new LifetimeGenerator;
+			generator->load(loader);
+			addGenerator(generator);
+		}
+		else if ( loader->getChunkID() == 203 ) {
+			RadialVelocityGenerator* generator = new RadialVelocityGenerator;
+			generator->load(loader);
+			addGenerator(generator);
+		}
+		else if ( loader->getChunkID() == 204 ) {
+			SizeGenerator* generator = new SizeGenerator;
+			generator->load(loader);
+			addGenerator(generator);
+		}
+		else if ( loader->getChunkID() == 300 ) {
+			ParticleEmitterData& data = m_Emitter.getEmitterData();
+			loader->read(&data.count);
+		}
+		else if ( loader->getChunkID() == 400 ) {
+			loader->read(&m_Data.id);
+			loader->read(&m_Data.textureID);
+			loader->read(&m_Data.textureRect);
+		}
+		loader->closeChunk();
+	}		
 }
 
-void ParticleSystem::reload(const char* fileName) {
-	JSONReader reader;
-	if ( reader.parse(fileName) ) {
-		m_Rotating = false;
-		m_UseWiggle = false;
-		m_UseTrail = false;
-		LOG << "Reloading particle file " << fileName;
-		// FIXME: set default colors if not found
-		// FIXME: set default size path if not found		
-		std::vector<Category*> categories = reader.getCategories();
-		for ( size_t i = 0; i < categories.size(); ++i ) {
-			Category* c = categories[i];
-			if ( c->getName() == "particle_data" ) {
-				m_ParticleData->load(c);
-			}
-			if ( c->getName() == "emitter_data" ) {				
-				m_EmitterData->load(c);			
-				setEmitterData(m_EmitterData);
-			}		
-			if ( c->getName() == "size") {	
-				createSizePath();
-				std::vector<std::string> propertyNames;
-				c->getPropertyNames(propertyNames);
-				for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-					float timeStep = std::stof(propertyNames[i].c_str());
-					m_SizePath->add(timeStep,c->getVector2f(propertyNames[i]));
-				}
-			}
-			if ( c->getName() == "color") {
-				m_ColorPath->reset();
-				std::vector<std::string> propertyNames;				
-				c->getPropertyNames(propertyNames);
-				for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-					float timeStep = std::stof(propertyNames[i].c_str());
-					Color clr = Color::WHITE;
-					c->getColor(propertyNames[i],&clr);
-					m_ColorPath->add(timeStep,clr);
-				}
-			}
-			if ( c->getName() == "radial_velocity") {
-				createRadialVelocityPath();
-				std::vector<std::string> propertyNames;
-				c->getPropertyNames(propertyNames);
-				for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-					float timeStep = std::stof(propertyNames[i].c_str());
-					float value = 1.0f;
-					c->getFloat(propertyNames[i],&value);
-					m_RadialVelocityPath->add(timeStep,value);
-				}
-			}	
-			if ( c->getName() == "wiggle" ) {
-				m_UseWiggle = true;
-				m_WiggleSettings.load(c);
-			}
-			if ( c->getName() == "trail" ) {
-				m_UseTrail = true;
-				m_TrailSettings.load(c);
-			}
-			if ( c->getName() == "rotation") {				
-				m_Rotating = true;
-				m_RotationPath.load(c);
-			}	
-			if ( c->getName() == "ring_emitter") {			
-				RingEmitterMesh* emitter = getEmitter<RingEmitterMesh>();
-				RingEmitterSettings* emitterSettings = emitter->getSettings();
-				emitterSettings->load(c);
-			}		
-			if ( c->getName() == "box_emitter") {			
-				BoxEmitterMesh* emitter = getEmitter<BoxEmitterMesh>();
-				BoxEmitterSettings* emitterSettings = emitter->getSettings();
-				emitterSettings->load(c);
-			}	
-			if ( c->getName() == "cone_emitter") {			
-				ConeEmitterMesh* emitter = getEmitter<ConeEmitterMesh>();
-				ConeEmitterSettings* emitterSettings = emitter->getSettings();
-				emitterSettings->load(c);
-			}	
-			if ( c->getName() == "point_emitter") {						
-				//PointEmitterMesh* emitter = new PointEmitterMesh();
-				//setEmitter(emitter);
-			}		
-		}
-	}
-}
-*/
 }

@@ -17,7 +17,42 @@ const uint32 CVT_PARTICLEMANAGER     = 6;
 const uint32 CVT_BLOOM_COMPONENT     = 7;
 const uint32 CVT_SPRITES_DESCRIPTION = 8;
 const uint32 CVT_SCRIPT              = 9;
+const uint32 CVT_BLUEPRINT           = 10;
+const uint32 CVT_NPS                 = 11;
 
+class World;
+
+// -------------------------------------------------------
+// Asset database
+// -------------------------------------------------------
+class AssetDB {
+
+struct AssetDBEntry {
+
+	char fileName[256];
+	FILETIME fileTime;
+
+};
+
+typedef std::vector<AssetDBEntry> Entries;
+
+public:
+	AssetDB() {}
+	~AssetDB() {}
+	void readDB();
+	void saveDB();
+	void add(const char* name,FILETIME fileTime);
+	void update(const char* name,FILETIME fileTime);
+	bool hasChanged(const char* fileName);
+	bool contains(const char* fileName);
+private:
+	
+	Entries m_Entries;
+};
+
+// -------------------------------------------------------
+// Asset compiler
+// -------------------------------------------------------
 class AssetCompiler {
 
 struct FileWatch {
@@ -26,6 +61,7 @@ struct FileWatch {
 	Serializer* serializer;
 	FILETIME fileTime;
 	uint32 type;
+	IdString hash;
 };
 
 struct ScriptWatch {
@@ -43,17 +79,18 @@ public:
 	AssetCompiler();
 	~AssetCompiler();
 	void update();
-	uint32 registerConverter(Converter* converter);
-	void load(const char* dir,const char* fileName,Serializer* serializer,uint32 type);
+	uint32 registerConverter(Converter* converter);	
 	void load(const char* fileName,Serializer* serializer,uint32 type);
 	void loadScript(const char* fileName,Script* script);
 	uint32 getConvertedID(const char* name);
+	void setWorld(World* world);
 private:
 	uint32 m_CustomIndex;
 	void reload(FileWatch* watch);
 	ConverterMapping m_Mapping;
 	WatchList m_WatchList;
 	ScriptWatchList m_ScriptWatchList;
+	AssetDB m_Database;
 };
 
 }

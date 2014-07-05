@@ -43,6 +43,27 @@ namespace vector {
 		return Vector2f(xt,yt);
 	}
 
+	Vector3f srt(const Vector3f& v,const Vector3f& u,float scaleX,float scaleY,float rotation) {
+		float sx = u.x * scaleX;
+		float sy = u.y * scaleY;
+
+		// rotation clock wise
+		//float xt = cosf(rotation) * sx + sinf(rotation) * sy;
+		//float yt = -sinf(rotation) * sx + cosf(rotation) * sy;
+
+		// rotation counter clock wise
+		//float xt = cosf(rotation) * sx - sinf(rotation) * sy;
+		//float yt = sinf(rotation) * sx + cosf(rotation) * sy;
+
+		float xt = math::fastCos(rotation) * sx - math::fastSin(rotation) * sy;
+		float yt = math::fastSin(rotation) * sx + math::fastCos(rotation) * sy;
+
+		xt += v.x;
+		yt += v.y;
+
+		return Vector3f(xt,yt,v.z);
+	}
+
 	
 	void addRadial(Vector2f& v,float radius,float angle) {
 		v.x += radius * math::fastCos(angle);

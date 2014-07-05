@@ -119,6 +119,34 @@ uint32 BinaryWriter::write(const ds::Color& v) {
 	return IO_OK;
 }
 
+uint32 BinaryWriter::write(const ds::ColorPath& v) {
+	int size = v.size();
+	fwrite(&size,sizeof(int),1,m_Stream);
+	for ( int i = 0;i < size; ++i ) {
+		float ts = v.getTimeStep(i);
+		fwrite(&ts,sizeof(float),1,m_Stream);
+		ds::Color c = v.getColor(i);
+		fwrite(&c.r, sizeof (float), 1, m_Stream);
+		fwrite(&c.g, sizeof (float), 1, m_Stream);
+		fwrite(&c.b, sizeof (float), 1, m_Stream);
+		fwrite(&c.a, sizeof (float), 1, m_Stream);
+	}
+	return IO_OK;
+}
+
+uint32 BinaryWriter::write(const ds::Vector2fPath& v) {
+	int size = v.size();
+	fwrite(&size,sizeof(int),1,m_Stream);
+	for ( int i = 0;i < size; ++i ) {
+		float ts = v.getTimeStep(i);
+		fwrite(&ts,sizeof(float),1,m_Stream);
+		Vector2f c = v.getVec2(i);
+		fwrite(&c.x, sizeof (float), 1, m_Stream);
+		fwrite(&c.y, sizeof (float), 1, m_Stream);
+	}
+	return IO_OK;
+}
+
 uint32 BinaryWriter::write(const ds::Rect& r) {
 	fwrite(&r.top, sizeof (float), 1, m_Stream);
 	fwrite(&r.left, sizeof (float), 1, m_Stream);

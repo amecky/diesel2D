@@ -12,7 +12,7 @@ ScriptConverter::ScriptConverter() : Converter("ScriptConverter") {
 ScriptConverter::~ScriptConverter(void) {
 }
 
-void ScriptConverter::convert(const char* fileName) {
+void ScriptConverter::convert(JSONReader& reader,BinaryWriter& writer) {
 }
 
 }

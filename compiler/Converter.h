@@ -1,5 +1,7 @@
 #pragma once
 #include "..\utils\StringUtils.h"
+#include "..\utils\PlainTextReader.h"
+#include "..\io\BinaryWriter.h"
 
 namespace ds {
 
@@ -31,10 +33,34 @@ public:
 		m_HashName = string::murmur_hash(name);
 	}
 	virtual ~Converter() {}
-	virtual void convert(const char* fileName) = 0;
+
+	void convert(const char* fileName) {
+		char buffer[256];
+		sprintf(buffer,"%s\\%s.json",getResourceDirectory(),fileName);
+		LOG << "loading file: " << buffer;
+		char out[256];
+		IdString dataName = string::murmur_hash(buffer);
+		sprintf(out,"data\\%u",dataName);
+		LOG << "writing to: " << out;
+		BinaryWriter writer;
+		int signature[] = {0,8,15};
+		writer.open(out,signature,3);
+		JSONReader reader;
+		if ( reader.parse(buffer) ) {
+			convert(reader,writer);
+			writer.close();
+		}
+		else {
+			LOGEC("Converter") << "Cannot parse " << fileName;
+		}
+	}
+
 	const IdString& getHashName() const {
 		return m_HashName;
 	}
+
+	virtual void convert(JSONReader& reader,BinaryWriter& writer) = 0;
+	virtual const char* getResourceDirectory()  = 0;
 private:
 	IdString m_HashName;
 };

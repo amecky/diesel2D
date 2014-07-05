@@ -8,7 +8,11 @@ class ScriptConverter : public Converter {
 public:
 	ScriptConverter(void);
 	~ScriptConverter(void);
-	void convert(const char* fileName);
+	void convert(JSONReader& reader,BinaryWriter& writer);
+
+	const char* getResourceDirectory() {
+		return "content\\resources";
+	}
 };
 
 }

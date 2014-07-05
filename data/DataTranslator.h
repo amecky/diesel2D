@@ -13,7 +13,7 @@ namespace ds {
 // -------------------------------------------------------
 // Data types
 // -------------------------------------------------------
-enum DataType {DTR_INT,DTR_FLOAT,DTR_VEC2,DTR_RECT,DTR_COLOR,DTR_UNKNOWN};
+enum DataType {DTR_INT,DTR_FLOAT,DTR_VEC2,DTR_RECT,DTR_COLOR,DTR_COLOR_PATH,DTR_VEC2_PATH,DTR_UNKNOWN};
 
 // -------------------------------------------------------
 // DataTranslator
@@ -36,6 +36,8 @@ public:
 	typedef Vector2f T::*Vec2Member;
 	typedef Rect T::*RectMember;
 	typedef Color T::*ColorMember;
+	typedef ColorPath T::*ColorPathMember;
+	typedef Vector2fPath T::*Vec2PathMember;
 	// -------------------------------------------------------
 	// add int member
 	// -------------------------------------------------------
@@ -75,6 +77,22 @@ public:
 		unsigned idx = m_ColorMembers.size();
 		m_ColorMembers.push_back(colorMember);
 		addDefinition(name,idx,DTR_COLOR);
+	}
+	// -------------------------------------------------------
+	// add Color path member
+	// -------------------------------------------------------
+	void add(const char* name,ColorPathMember colorPathMember) {
+		unsigned idx = m_ColorPathMembers.size();
+		m_ColorPathMembers.push_back(colorPathMember);
+		addDefinition(name,idx,DTR_COLOR_PATH);
+	}
+	// -------------------------------------------------------
+	// add vector2f path member
+	// -------------------------------------------------------
+	void add(const char* name,Vec2PathMember vec2PathMember) {
+		unsigned idx = m_Vec2PathMembers.size();
+		m_Vec2PathMembers.push_back(vec2PathMember);
+		addDefinition(name,idx,DTR_VEC2_PATH);
 	}
 	// -------------------------------------------------------
 	// set int value
@@ -172,6 +190,44 @@ public:
 		return defaultValue;
 	}
 	// -------------------------------------------------------
+	// set color path value
+	// -------------------------------------------------------
+	void set(const char* name,const ColorPath& value,T* t) {
+		const DataDefinition* def = find(name,DTR_COLOR_PATH);
+		if ( def != 0 ) {
+			t->*m_ColorPathMembers[def->index] = value;
+		}
+	}
+	// -------------------------------------------------------
+	// get Rect value
+	// -------------------------------------------------------
+	const ColorPath& get(const char* name,T* t,const ColorPath& defaultValue) const {
+		const DataDefinition* def = find(name,DTR_COLOR_PATH);
+		if ( def != 0 ) {
+			return t->*m_ColorPathMembers[def->index];
+		}
+		return defaultValue;
+	}
+	// -------------------------------------------------------
+	// set vec2 path value
+	// -------------------------------------------------------
+	void set(const char* name,const Vector2fPath& value,T* t) {
+		const DataDefinition* def = find(name,DTR_VEC2_PATH);
+		if ( def != 0 ) {
+			t->*m_Vec2PathMembers[def->index] = value;
+		}
+	}
+	// -------------------------------------------------------
+	// get Rect value
+	// -------------------------------------------------------
+	const Vector2fPath& get(const char* name,T* t,const Vector2fPath& defaultValue) const {
+		const DataDefinition* def = find(name,DTR_VEC2_PATH);
+		if ( def != 0 ) {
+			return t->*m_Vec2PathMembers[def->index];
+		}
+		return defaultValue;
+	}
+	// -------------------------------------------------------
 	// contains
 	// -------------------------------------------------------
 	bool contains(const char* name) {
@@ -237,6 +293,12 @@ public:
 					case DTR_COLOR:
 						set(def.name,c->getColor(def.name,Color::WHITE),t);
 						break;
+					case DTR_COLOR_PATH:
+						set(def.name,getColorPathValues(c),t);
+						break;
+					case DTR_VEC2_PATH:
+						set(def.name,getVec2PathValues(c),t);
+						break;
 				}
 			}
 			
@@ -273,6 +335,12 @@ public:
 				case DTR_COLOR:
 					set(def.name,category->getColor(def.name,Color::WHITE),t);
 					break;
+				case DTR_COLOR_PATH:
+					set(def.name,getColorPathValues(category),t);
+					break;
+				case DTR_VEC2_PATH:
+					set(def.name,getVec2PathValues(category),t);
+					break;
 			}
 		}
 	}
@@ -291,8 +359,10 @@ public:
 	// -------------------------------------------------------
 	// save binary chunk
 	// -------------------------------------------------------
-	void saveChunk(BinaryWriter& writer,uint32 chunkID,T* t) {
-		writer.startChunk(chunkID,1);
+	void saveChunk(BinaryWriter& writer,uint32 chunkID,T* t,bool append = false) {
+		if ( !append ) {
+			writer.startChunk(chunkID,1);
+		}
 		for ( size_t i = 0; i < m_Definitions.size(); ++i ) {
 			DataDefinition& def = m_Definitions[i];
 			switch ( def.type ) {
@@ -311,9 +381,21 @@ public:
 			case DTR_RECT:
 				writer.write(get(def.name,t,Rect(0,0,100,100)));
 				break;
+			case DTR_COLOR_PATH: {
+					ColorPath p;
+					writer.write(get(def.name,t,p));
+				}
+				break;
+			case DTR_VEC2_PATH: {
+					Vector2fPath p;
+					writer.write(get(def.name,t,p));
+				}
+				break;
 			}
 		}
-		writer.closeChunk();
+		if ( !append ) {
+			writer.closeChunk();
+		}
 	}
 	// -------------------------------------------------------
 	// Read binary file
@@ -353,8 +435,20 @@ public:
 									set(def.name,tmp,t);
 								}
 								break;
+							case DTR_COLOR_PATH: {
+									ColorPath tmp;
+									loader.read(&tmp);
+									set(def.name,tmp,t);
+								}
+								break;
 							case DTR_RECT: {
 									Rect tmp(0,0,0,0);
+									loader.read(&tmp);
+									set(def.name,tmp,t);
+								}
+								break;
+							case DTR_VEC2_PATH: {
+									Vector2fPath tmp;
 									loader.read(&tmp);
 									set(def.name,tmp,t);
 								}
@@ -404,10 +498,85 @@ public:
 						set(def.name,tmp,t);
 					}
 					break;
+				case DTR_COLOR_PATH: {
+						ColorPath tmp;
+						loader.read(&tmp);
+						set(def.name,tmp,t);
+					}
+					break;
+				case DTR_VEC2_PATH: {
+						Vector2fPath tmp;
+						loader.read(&tmp);
+						set(def.name,tmp,t);
+					}
+					break;
 			}
 		}
 	}
 private:
+	ColorPath getColorPathValues(Category* category) {
+		ColorPath path;
+		std::vector<std::string> propertyNames;
+		category->getPropertyNames(propertyNames);
+		Color value(1.0f,1.0f,1.0f,1.0f);
+		for ( size_t i = 0; i < propertyNames.size(); ++i ) {
+			if ( propertyNames[i] == "loop_mode" ) {
+				// PLM_ZERO,PLM_LAST,PLM_LOOP
+				path.setLoopMode(PLM_LOOP);
+			}
+			else if ( propertyNames[i] == "interpolation" ) {
+				// PI_LINEAR,PI_STEP,PI_CUBIC
+				std::string inMode = category->getProperty("interpolation");
+				if ( inMode == "PI_STEP") {
+					path.setInterpolationMode(PI_STEP);
+				}
+				else if ( inMode == "PI_CUBIC") {
+					path.setInterpolationMode(PI_CUBIC);
+				}
+			}
+			else {
+				float timeStep = 0.0f;
+				std::istringstream ist(propertyNames[i]);
+				ist >> timeStep;
+				category->getColor(propertyNames[i],&value);
+				path.add(timeStep,value);
+			}
+		}
+		return path;
+	}
+
+	Vector2fPath getVec2PathValues(Category* category) {
+		Vector2fPath path;
+		std::vector<std::string> propertyNames;
+		category->getPropertyNames(propertyNames);
+		Vector2f value;
+		for ( size_t i = 0; i < propertyNames.size(); ++i ) {
+			if ( propertyNames[i] == "loop_mode" ) {
+				// PLM_ZERO,PLM_LAST,PLM_LOOP
+				path.setLoopMode(PLM_LOOP);
+			}
+			else if ( propertyNames[i] == "interpolation" ) {
+				// PI_LINEAR,PI_STEP,PI_CUBIC
+				std::string inMode = category->getProperty("interpolation");
+				if ( inMode == "PI_STEP") {
+					path.setInterpolationMode(PI_STEP);
+				}
+				else if ( inMode == "PI_CUBIC") {
+					path.setInterpolationMode(PI_CUBIC);
+				}
+			}
+			else {
+				float timeStep = 0.0f;
+				std::istringstream ist(propertyNames[i]);
+				ist >> timeStep;
+				category->getVector2f(propertyNames[i],&value);
+				path.add(timeStep,value);
+			}
+		}
+		return path;
+	}
+
+
 	// -------------------------------------------------------
 	// internal find
 	// -------------------------------------------------------
@@ -437,6 +606,8 @@ private:
 	std::vector<Vec2Member> m_Vec2Members;
 	std::vector<RectMember> m_RectMembers;
 	std::vector<ColorMember> m_ColorMembers;
+	std::vector<ColorPathMember> m_ColorPathMembers;
+	std::vector<Vec2PathMember> m_Vec2PathMembers;
 	Definitions m_Definitions;
 	const static DataType unknownType = DTR_UNKNOWN;
 };

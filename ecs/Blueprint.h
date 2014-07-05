@@ -4,56 +4,68 @@
 #include "..\utils\Color.h"
 #include "..\data\DataTranslator.h"
 #include "Actor.h"
+#include "..\io\Serializer.h"
 
 
 namespace ds {
 
+// -------------------------------------------------------
+// collider definition
+// -------------------------------------------------------
 struct ColliderDefinition {
 
 	float radius;
+	bool used;
+
+	ColliderDefinition() : radius(0.0f) , used(false) {}
 };
 
-struct SpriteDefinition {
-
-	int layer;
-	Rect textureRect;
-	float angle;
-	Vector2f scale;
-	Color color;
-
-};
-
+// -------------------------------------------------------
+// actor definition
+// -------------------------------------------------------
 struct ActorDefinition {
 
 	Vector2f position;
 	float angle;
 	int type;
+	int layer;
+	Rect textureRect;
+	Vector2f scale;
+	Color color;
+};
+
+// -------------------------------------------------------
+// Behavior definition
+// -------------------------------------------------------
+struct BehaviorDefinition {
+
+	int index;
+	ID definitionID;
 
 };
 
 class World;
+// -------------------------------------------------------
+// Blueprint
+// -------------------------------------------------------
+class Blueprint : public Serializer {
 
-class Blueprint {
-
-typedef std::vector<std::string> BehaviorNames;
-typedef std::vector<std::string> AnimationNames;
+typedef std::vector<uint32> Behaviors;
+typedef std::vector<BehaviorDefinition> BehaviorDefinitions;
 
 public:
-	Blueprint(void);
+	Blueprint(World* world);
 	~Blueprint(void);
-	void load(const char* name,World* world);
+	virtual void load( BinaryLoader* loader );
 	ID initialize(World* world);
 private:
-	Animation* createAnimation(const std::string& name);
-	Behavior* createBehavior(const std::string& name);
 	DataTranslator<ActorDefinition> m_ActorTranslator;
 	ActorDefinition m_ActorDefinition;
-	SpriteDefinition* m_SpriteDefinition;
-	DataTranslator<SpriteDefinition> m_SpriteTranslator;
-	ColliderDefinition* m_ColliderDefinition;
+	ColliderDefinition m_ColliderDefinition;
 	DataTranslator<ColliderDefinition> m_ColliderTranslator;
-	BehaviorNames m_BehaviorNames;
-	AnimationNames m_AnimationNames;
+	Behaviors m_Behaviors;
+	World* m_World;
+	BehaviorDefinitions m_BehaviorDefinitions;
 };
 
 }

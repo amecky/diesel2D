@@ -9,33 +9,47 @@
 
 namespace ds {
 
-class WASDControllerBehavior : public Behavior {
+struct WASDControllerData {
+
+	ID id;
+	ID actorID;
+	float velocity;
+	bool rotate;
+
+	WASDControllerData() : velocity(100.0f) , rotate(false) {
+		//add("velocity",&velocity);
+		//add("rotate",&rotate);
+	}
+};
+
+class WASDControllerBehavior : public AbstractBehavior<WASDControllerData> {
 
 public:
-	WASDControllerBehavior() : Behavior() , m_Velocity(0.0f) , m_Rotate(false) , m_FollowPosition(0,0) {}
-	WASDControllerBehavior(float velocity,bool rotate = false) : Behavior() , m_Velocity(velocity) , m_Rotate(rotate) , m_FollowPosition(0,0) {}
+	WASDControllerBehavior() : AbstractBehavior<WASDControllerData>() {}
 	virtual ~WASDControllerBehavior() {}
+
 	void update(Actor& actor,float elapsed) {
+		WASDControllerData& data = getData(actor);
 		Vector2f pos = actor.position;
 		bool moved = false;
 		if( GetAsyncKeyState('W') & 0x8000 ) {
-			pos.y += m_Velocity * elapsed;
+			pos.y += data.velocity * elapsed;
 			moved = true;
 		}
 		if( GetAsyncKeyState('S') & 0x8000 ) {
-			pos.y -= m_Velocity * elapsed;
+			pos.y -= data.velocity * elapsed;
 			moved = true;
 		}
 		if( GetAsyncKeyState('A') & 0x8000 ) {
-			pos.x -= m_Velocity * elapsed;
+			pos.x -= data.velocity * elapsed;
 			moved = true;
 		}
 		if( GetAsyncKeyState('D') & 0x8000 ) {
-			pos.x += m_Velocity * elapsed;
+			pos.x += data.velocity * elapsed;
 			moved = true;
 		}		
 		float angle = 0.0f;
-		if ( m_Rotate ) {
+		if ( data.rotate ) {
 			actor.angle = ds::math::getTargetAngle(pos,m_FollowPosition);
 		}
 		if ( moved ) {
@@ -44,17 +58,22 @@ public:
 		}
 		
 	}
-	void setVelocity(float velocity) {
-		m_Velocity = velocity;
+	
+	void setVelocity(const Actor& actor,float velocity,bool rotate = false) {
+		WASDControllerData& data = getData(actor);
+		data.velocity = velocity;
+		data.rotate = rotate;
 	}
+
 	void setFollowPosition(const Vector2f& followPosition) {
 		m_FollowPosition = followPosition;
-		m_Rotate = true;
+	}
+	
+	const char* getName() const {
+		return "WASDControllerBehavior";
 	}
 private:
-	float m_Velocity;
 	Vector2f m_FollowPosition;
-	bool m_Rotate;
 };
 
 // -------------------------------------------------------
@@ -63,13 +82,9 @@ private:
 class ADControllerBehavior : public Behavior {
 
 public:
-	ADControllerBehavior() : Behavior() , m_Velocity(0.0f) , m_Rotate(false) , m_FollowPosition(0,0) {
-		m_Settings.add("velocity",&m_Velocity);
-	}
-	ADControllerBehavior(float velocity) : Behavior() , m_Velocity(velocity) , m_Rotate(false) , m_FollowPosition(0,0) {
-		m_Settings.add("velocity",&m_Velocity);
-	}
+	ADControllerBehavior() : Behavior() {}
 	virtual ~ADControllerBehavior() {}
+
 	void update(Actor& actor,float elapsed) {
 		Vector2f pos = actor.position;
 		bool moved = false;
@@ -90,6 +105,10 @@ public:
 			//angle = ds::math::getTargetAngle(Vector2f(1,0),pos);
 		}
 
+	}
+	
+	const char* getName() const {
+		return "ADControllerBehavior";
 	}
 private:
 	float m_Velocity;

@@ -60,6 +60,12 @@ public:
 	const int getFlushes() const {
 		return m_Flushes;
 	}
+	void addParticles(int particles) {
+		m_Particles += particles;
+	}
+	const int getParticles() const {
+		return m_Particles;
+	}
 private:
 	int m_NumPrim;
 	int m_IndexCounter;
@@ -69,6 +75,7 @@ private:
 	int m_Shaders;
 	uint32 m_MemorySize;
 	int m_Flushes;
+	int m_Particles;
 };
 
 };

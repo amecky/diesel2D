@@ -15,7 +15,11 @@ class BloomComponentConverter : public Converter {
 public:
 	BloomComponentConverter(void);
 	~BloomComponentConverter(void);
-	void convert(const char* fileName);
+	void convert(JSONReader& reader,BinaryWriter& writer);
+
+	const char* getResourceDirectory() {
+		return "content\\resources";
+	}
 };
 
 // -------------------------------------------------------

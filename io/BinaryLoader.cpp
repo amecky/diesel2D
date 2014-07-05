@@ -86,6 +86,34 @@ void BinaryLoader::read(ds::Color* value) {
 	readBuffer(&value->a,sizeof(float));    
 }
 
+void BinaryLoader::read(ds::ColorPath* value) {
+	int count = 0;
+	readBuffer(&count,sizeof(int));
+	for ( int i = 0; i < count; ++i ) {
+		float ts = 0.0f;
+		readBuffer(&ts,sizeof(float));
+		ds::Color c;
+		readBuffer(&c.r,sizeof(float));    
+		readBuffer(&c.g,sizeof(float));    
+		readBuffer(&c.b,sizeof(float));    
+		readBuffer(&c.a,sizeof(float));    
+		value->add(ts,c);
+	}
+}
+
+void BinaryLoader::read(ds::Vector2fPath* value) {
+	int count = 0;
+	readBuffer(&count,sizeof(int));
+	for ( int i = 0; i < count; ++i ) {
+		float ts = 0.0f;
+		readBuffer(&ts,sizeof(float));
+		Vector2f c;
+		readBuffer(&c.x,sizeof(float));    
+		readBuffer(&c.y,sizeof(float));    
+		value->add(ts,c);
+	}
+}
+
 void BinaryLoader::read(ds::Rect* value) {
 	readBuffer(&value->top,sizeof(float));    
 	readBuffer(&value->left,sizeof(float));    

@@ -8,6 +8,8 @@ namespace ds {
 
 		Vector2f srt(const Vector2f& v,const Vector2f& u,float scaleX,float scaleY,float rotation);
 
+		Vector3f srt(const Vector3f& v,const Vector3f& u,float scaleX,float scaleY,float rotation);
+
 		void addRadial(Vector2f& v,float radius,float angle);
 
 		Vector2f calculateRadial(const Vector2f& v,float radius,float angle);

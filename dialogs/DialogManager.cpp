@@ -204,7 +204,7 @@ void DialogManager::load(BinaryLoader* loader) {
 			GUIDialog* dialog = new GUIDialog(m_Renderer->getViewport()->getWidth(),m_Renderer->getViewport()->getHeight());
 			LOGC("DialogManager") << "Creating new dialog: " << dialogName;
 			createDialog(dialogName.c_str(),id,dialog);
-			m_AssetCompiler->load("content\\dialogs",file.c_str(),dialog,CVT_DIALOG);
+			m_AssetCompiler->load(file.c_str(),dialog,CVT_DIALOG);
 
 		}	
 		loader->closeChunk();

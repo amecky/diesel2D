@@ -18,6 +18,7 @@ void DrawCounter::reset() {
 	m_DrawCalls = 0;
 	m_Shaders = 0;	
 	m_Flushes = 0;
+	m_Particles = 0;
 }
 
 void DrawCounter::addIndices(int indCounter) {

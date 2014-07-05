@@ -13,32 +13,18 @@ BloomComponentConverter::BloomComponentConverter() : Converter("BloomComponentCo
 BloomComponentConverter::~BloomComponentConverter(void) {
 }
 
-void BloomComponentConverter::convert(const char* fileName) {
-	char buffer[256];
-	sprintf(buffer,"content\\resources\\%s.json",fileName);
-	char out[256];
-	sprintf(out,"data\\%s.dsb",fileName);
-	BinaryWriter writer;
-	int signature[] = {0,8,15};
-	writer.open(out,signature,3);
-	JSONReader reader;
-	if ( reader.parse(buffer) ) {
-		Category* c = reader.getCategory("bloom");
-		writer.startChunk(CHNK_BLOOM_COMPONENT,1);
-		writer.write(c->getInt("initial_texture",0));
-		writer.write(c->getInt("first_target",0));
-		writer.write(c->getFloat("threshold",0.0f));
-		writer.write(c->getFloat("intensity",0.0f));
-		writer.write(c->getFloat("original_intensity",0.0f));
-		writer.write(c->getFloat("saturation",0.0f));
-		writer.write(c->getFloat("original_saturation",0.0f));
-		writer.write(c->getFloat("blur_amount",0.0f));
-		writer.closeChunk();			
-		writer.close();
-	}
-	else {
-		LOGEC("BloomComponentConverter") << "Cannot parse " << fileName;
-	}
+void BloomComponentConverter::convert(JSONReader& reader,BinaryWriter& writer) {
+	Category* c = reader.getCategory("bloom");
+	writer.startChunk(CHNK_BLOOM_COMPONENT,1);
+	writer.write(c->getInt("initial_texture",0));
+	writer.write(c->getInt("first_target",0));
+	writer.write(c->getFloat("threshold",0.0f));
+	writer.write(c->getFloat("intensity",0.0f));
+	writer.write(c->getFloat("original_intensity",0.0f));
+	writer.write(c->getFloat("saturation",0.0f));
+	writer.write(c->getFloat("original_saturation",0.0f));
+	writer.write(c->getFloat("blur_amount",0.0f));
+	writer.closeChunk();					
 }
 
 const int SC_X = 512.0f;
