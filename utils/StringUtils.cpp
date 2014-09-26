@@ -83,9 +83,8 @@ void formatInt(int value,std::string& str,int length) {
 			div *= 10;
 		}
 	}
-	int r = 0;
 	for ( int i = 0; i < length ; ++i ) {
-		r = tmp / div;
+		int r = tmp / div;
 		str += ('0' + r );
 		tmp = tmp - r * div;
 		div /= 10;        
@@ -173,9 +172,7 @@ float strtof(const char* p,char** endPtr) {
 	while (isWhitespace(*p)) {
 		++p;
 	}
-	float value = 0.0f;
-	float dec = 1.0f;
-	float frac = 0.0f;
+	float value = 0.0f;	
 	while ( isDigit(*p)) {
 		value *= 10.0f;
 		value = value + (*p - '0');
@@ -183,6 +180,8 @@ float strtof(const char* p,char** endPtr) {
 	}
 	if ( *p == '.' ) {
 		++p;
+		float dec = 1.0f;
+		float frac = 0.0f;
 		while ( isDigit(*p)) {
 			frac *= 10.0f;
 			frac = frac + (*p - '0');

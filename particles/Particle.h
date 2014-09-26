@@ -138,3 +138,117 @@ struct ParticleArray {
 };
 
 }
+
+// -------------------------------------------------------
+// Particle array
+// -------------------------------------------------------
+const int SIMPLE_PARTICLE_SIZE = 16;
+
+struct SimpleParticleArray {
+
+	float* data;
+
+	uint32 count;
+	uint32 countAlive;
+
+	SimpleParticleArray() : count(0), countAlive(0) {}
+
+	~SimpleParticleArray() {
+		delete[] data;
+	}
+
+	void initialize(unsigned int maxParticles) {
+		data = new float[maxParticles * SIMPLE_PARTICLE_SIZE];
+		count = maxParticles;
+		countAlive = 0;
+	}
+
+	void swapData(uint32 a, uint32 b) {
+		if (a != b) {
+			int oa = a * SIMPLE_PARTICLE_SIZE;
+			int ob = b * SIMPLE_PARTICLE_SIZE;
+			for (int i = 0; i < SIMPLE_PARTICLE_SIZE; ++i) {
+				data[oa + i] = data[ob + i];
+			}
+		}
+	}
+
+	void kill(uint32 id) {
+		if (countAlive > 0) {
+			swapData(id, countAlive - 1);
+			--countAlive;
+		}
+	}
+
+	void wake(uint32 id) {
+		if (countAlive < count)	{
+			swapData(id, countAlive);
+			++countAlive;
+		}
+	}
+
+};
+
+const int PARTICLE_MAX_CHANNELS = 8;
+/*
+0 = position
+1 = velocity
+2 = scale
+3 = rotation
+4 = timer / ttl / norm time
+5 = color
+6 = uv
+7 = dimension
+*/
+class NParticleArray {
+
+public:
+	NParticleArray(int size) : m_Size(size), m_Count(0) {
+		m_Data = new Vector4f[size * PARTICLE_MAX_CHANNELS];
+	}
+	~NParticleArray() {
+		delete[] m_Data;
+	}
+	Vector4f* begin(int channel) const {
+		return m_Data + channel * m_Size;
+	}
+	Vector4f* end(int channel) const {
+		return m_Data + channel * m_Size + m_Count;
+	}
+
+	void kill(int id) {
+		if (m_Count > 0) {
+			swapData(id, m_Count - 1);
+			--m_Count;
+		}
+	}
+	void wake(int id) {
+		if (m_Count < m_Size) {
+			swapData(id, m_Count);
+			++m_Count;
+		}
+	}
+	const int size() const {
+		return m_Count;
+	}
+	const int maxSize() const {
+		return m_Size;
+	}
+private:
+	void swapData(int a, int b) {
+		if (a != b) {
+			Vector4f* pa = m_Data + a;
+			Vector4f* pb = m_Data + b;
+			for (int i = 0; i < PARTICLE_MAX_CHANNELS; ++i) {
+				*pa = *pb;
+				pb += m_Size;
+				pa += m_Size;
+			}
+		}
+	}
+
+	int m_Count;
+	int m_Size;
+	Vector4f* m_Data;
+
+};

@@ -30,7 +30,7 @@ public:
 	VertexDeclaration();
 	~VertexDeclaration(void);
 	void addElement(const VDTYPE& type,const VDUSAGE& usage);
-	void create(GraphicsDevice* device);
+	void create();
 	void clear();
 	IDirect3DVertexDeclaration9* get() { return m_Decl; }
 	int getSize();

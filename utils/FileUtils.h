@@ -5,6 +5,14 @@
 
 namespace ds {
 
+struct FSFile {
+
+	char directory[128];
+	char name[128];
+	size_t size;
+	FILETIME time;
+};
+
 class FileUtils {
 
 public:
@@ -29,6 +37,12 @@ namespace file {
 		\param name the actual file include directories
 	*/
 	bool fileExists(const char* name);
+
+	void copyFile(const char* source,const char* dest);
+
+	void logFileTime(const char* fileName);
+
+	void logFileTime(const FILETIME& time);
 }
 
 class FSDirectory {

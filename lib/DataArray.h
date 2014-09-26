@@ -15,12 +15,12 @@ struct Index {
 	unsigned short next;
 };
 
-template<class U,unsigned short MAX_OBJECTS = 256>
+template<class U,unsigned short MAX_FLOW_OBJECTS = 4096>
 struct DataArray {
 
 	unsigned int numObjects;
-	Index indices[MAX_OBJECTS];
-	U objects[MAX_OBJECTS];
+	Index indices[MAX_FLOW_OBJECTS];
+	U objects[MAX_FLOW_OBJECTS];
 	unsigned short free_enqueue;
 	unsigned short free_dequeue;
 
@@ -30,12 +30,12 @@ struct DataArray {
 
 	void clear() {
 		numObjects = 0;
-		for ( unsigned short i = 0; i < MAX_OBJECTS; ++i ) {
+		for ( unsigned short i = 0; i < MAX_FLOW_OBJECTS; ++i ) {
 			indices[i].id = i;
 			indices[i].next = i + 1;
 		}
 		free_dequeue = 0;
-		free_enqueue = MAX_OBJECTS - 1;
+		free_enqueue = MAX_FLOW_OBJECTS - 1;
 	}
 
 	const bool contains(ID id) const {
@@ -51,7 +51,7 @@ struct DataArray {
 	}
 
 	ID add() {
-		assert(numObjects != MAX_OBJECTS);
+		assert(numObjects != MAX_FLOW_OBJECTS);
 		Index &in = indices[free_dequeue];
 		free_dequeue = in.next;
 		//in.id += NEW_OBJECT_ID_ADD;

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -36,18 +36,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -222,24 +226,26 @@
   <ItemGroup>
     <ClCompile Include="audio\Sound.cpp" />
     <ClCompile Include="base\EventStream.cpp" />
+    <ClCompile Include="base\StateMachine.cpp" />
     <ClCompile Include="base\WindowsBase.cpp" />
     <ClCompile Include="collision\BroadPhaseDetector.cpp" />
     <ClCompile Include="collision\CollisionDetectionSystem.cpp" />
     <ClCompile Include="collision\NarrowPhaseDetector.cpp" />
     <ClCompile Include="collision\SpatialHashingBroadPhaseDetector.cpp" />
+    <ClCompile Include="compiler\ASMConverter.cpp" />
     <ClCompile Include="compiler\AssetCompiler.cpp" />
     <ClCompile Include="compiler\BitmapFontConverter.cpp" />
     <ClCompile Include="compiler\BlueprintConverter.cpp" />
     <ClCompile Include="compiler\DialogConverter.cpp" />
     <ClCompile Include="compiler\GUIConverter.cpp" />
     <ClCompile Include="compiler\HUDConverter.cpp" />
+    <ClCompile Include="compiler\NASMConverter.cpp" />
     <ClCompile Include="compiler\NewParticleSystemConverter.cpp" />
     <ClCompile Include="compiler\ParticleManagerConverter.cpp" />
     <ClCompile Include="compiler\ParticleSystemConverter.cpp" />
     <ClCompile Include="compiler\ScriptConverter.cpp" />
     <ClCompile Include="compiler\ShaderConverter.cpp" />
     <ClCompile Include="compiler\SpriteConverter.cpp" />
-    <ClCompile Include="compiler\SpritesDescriptionConverter.cpp" />
     <ClCompile Include="data\Gizmo.cpp" />
     <ClCompile Include="dialogs\DialogManager.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
@@ -252,6 +258,7 @@
     <ClCompile Include="math\FloatArray.cpp" />
     <ClCompile Include="math\GameMath.cpp" />
     <ClCompile Include="math\matrix.cpp" />
+    <ClCompile Include="math\tweening.cpp" />
     <ClCompile Include="math\vector.cpp" />
     <ClCompile Include="memory\DataBlockAllocator.cpp" />
     <ClCompile Include="memory\FreeListAllocator.cpp" />
@@ -264,6 +271,7 @@
     <ClCompile Include="particles\EmitterMesh.cpp" />
     <ClCompile Include="particles\ParticleManager.cpp" />
     <ClCompile Include="particles\ParticleSystem.cpp" />
+    <ClCompile Include="renderer\assets.cpp" />
     <ClCompile Include="renderer\BitmapFont.cpp" />
     <ClCompile Include="renderer\buffer_types.cpp" />
     <ClCompile Include="renderer\Camera.cpp" />
@@ -271,15 +279,16 @@
     <ClCompile Include="renderer\DrawCounter.cpp" />
     <ClCompile Include="renderer\GraphicsDevice.cpp" />
     <ClCompile Include="renderer\shader.cpp" />
+    <ClCompile Include="renderer\TextureLoader.cpp" />
     <ClCompile Include="renderer\VertexDeclaration.cpp" />
     <ClCompile Include="renderer\Viewport.cpp" />
+    <ClCompile Include="script\ASM.cpp" />
+    <ClCompile Include="script\Assembler.cpp" />
     <ClCompile Include="script\ScriptVM.cpp" />
     <ClCompile Include="script\Tokenizer.cpp" />
     <ClCompile Include="sprites\SpriteBatch.cpp" />
-    <ClCompile Include="sprites\SpriteAnimation.cpp" />
     <ClCompile Include="sprites\SpriteCollisionManager.cpp" />
     <ClCompile Include="sprites\Sprite.cpp" />
-    <ClCompile Include="sprites\SpriteObjectDescription.cpp" />
     <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\FileUtils.cpp" />
     <ClCompile Include="base\Input.cpp" />
@@ -298,12 +307,15 @@
     <ClInclude Include="base\ApplicationContext.h" />
     <ClInclude Include="base\EventStream.h" />
     <ClInclude Include="base\GameObject.h" />
+    <ClInclude Include="base\GameState.h" />
     <ClInclude Include="base\Settings.h" />
+    <ClInclude Include="base\StateMachine.h" />
     <ClInclude Include="collision\BroadPhaseDetector.h" />
     <ClInclude Include="collision\CollisionDetectionSystem.h" />
     <ClInclude Include="collision\CollisionTypes.h" />
     <ClInclude Include="collision\NarrowPhaseDetector.h" />
     <ClInclude Include="collision\SpatialHashingBroadPhaseDetector.h" />
+    <ClInclude Include="compiler\ASMConverter.h" />
     <ClInclude Include="compiler\AssetCompiler.h" />
     <ClInclude Include="compiler\BitmapFontConverter.h" />
     <ClInclude Include="compiler\BlueprintConverter.h" />
@@ -311,13 +323,13 @@
     <ClInclude Include="compiler\DialogConverter.h" />
     <ClInclude Include="compiler\GUIConverter.h" />
     <ClInclude Include="compiler\HUDConverter.h" />
+    <ClInclude Include="compiler\NASMConverter.h" />
     <ClInclude Include="compiler\NewParticleSystemConverter.h" />
     <ClInclude Include="compiler\ParticleManagerConverter.h" />
     <ClInclude Include="compiler\ParticleSystemConverter.h" />
     <ClInclude Include="compiler\ScriptConverter.h" />
     <ClInclude Include="compiler\ShaderConverter.h" />
     <ClInclude Include="compiler\SpriteConverter.h" />
-    <ClInclude Include="compiler\SpritesDescriptionConverter.h" />
     <ClInclude Include="data\DataTranslator.h" />
     <ClInclude Include="data\DynamicSettings.h" />
     <ClInclude Include="data\Gizmo.h" />
@@ -338,6 +350,7 @@
     <ClInclude Include="io\BinaryWriter.h" />
     <ClInclude Include="io\FileWatcher.h" />
     <ClInclude Include="io\Serializer.h" />
+    <ClInclude Include="lib\Bitset.h" />
     <ClInclude Include="lib\BlockDataArray.h" />
     <ClInclude Include="lib\container\dVector.h" />
     <ClInclude Include="lib\container\GridArray.h" />
@@ -353,6 +366,7 @@
     <ClInclude Include="math\GameMath.h" />
     <ClInclude Include="math\math_types.h" />
     <ClInclude Include="math\matrix.h" />
+    <ClInclude Include="math\tweening.h" />
     <ClInclude Include="math\vector.h" />
     <ClInclude Include="memory\DataBlockAllocator.h" />
     <ClInclude Include="memory\FreeListAllocator.h" />
@@ -372,6 +386,7 @@
     <ClInclude Include="particles\ParticleModifier.h" />
     <ClInclude Include="particles\ParticleSystem.h" />
     <ClInclude Include="particles\Particle.h" />
+    <ClInclude Include="renderer\assets.h" />
     <ClInclude Include="renderer\BitmapFont.h" />
     <ClInclude Include="renderer\buffer_types.h" />
     <ClInclude Include="renderer\Camera.h" />
@@ -380,20 +395,20 @@
     <ClInclude Include="renderer\GraphicsDevice.h" />
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\shader.h" />
+    <ClInclude Include="renderer\TextureLoader.h" />
     <ClInclude Include="renderer\VertexDeclaration.h" />
     <ClInclude Include="renderer\vertex_types.h" />
     <ClInclude Include="renderer\Viewport.h" />
     <ClInclude Include="base\Input.h" />
+    <ClInclude Include="script\ASM.h" />
+    <ClInclude Include="script\Assembler.h" />
     <ClInclude Include="script\Script.h" />
     <ClInclude Include="script\ScriptVM.h" />
     <ClInclude Include="script\Tokenizer.h" />
-    <ClInclude Include="sprites\CompositeSprite.h" />
     <ClInclude Include="sprites\SpriteBatch.h" />
-    <ClInclude Include="sprites\SpriteAnimation.h" />
     <ClInclude Include="sprites\SpriteCollisionManager.h" />
     <ClInclude Include="sprites\Sprite.h" />
-    <ClInclude Include="sprites\SpriteObjectDescription.h" />
-    <ClInclude Include="sprites\SpritesObject.h" />
+    <ClInclude Include="sprites\SpriteGroup.h" />
     <ClInclude Include="utils\Color.h" />
     <ClInclude Include="utils\FileUtils.h" />
     <ClInclude Include="utils\font.h" />

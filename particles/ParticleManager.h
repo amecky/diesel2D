@@ -4,7 +4,7 @@
 #include "..\io\Serializer.h"
 
 namespace ds {
-
+	/*
 class ParticleManager : public Serializer {
 
 struct Index {
@@ -44,6 +44,6 @@ private:
 	int m_BlendState;
 	int m_TextureID;
 };
-
+*/
 }
 

@@ -4,29 +4,26 @@
 #include "Vector.h"
 #include "..\utils\Color.h"
 #include "..\io\Serializer.h"
-#include "SpriteObjectDescription.h"
 #include "..\script\Script.h"
 
 namespace ds {
+
+
 
 class SpriteAnimation;
 
 class Sprite : public Serializer {
 
-typedef std::vector<SpriteAnimation*> Animations;
-
 public:
 	Sprite();
 	virtual ~Sprite(void);
 	void update(float elapsed);
-	void add(SpriteAnimation* animation) {
-		m_Animations.push_back(animation);
-	}	
 	const float getTimer() const {
 		return m_Timer;
 	}
 	void resetTimer() {
 		m_Timer = 0.0f;
+		m_Delay = 0.0f;
 	}
 	//void setTextureRect(const Rect& r,int textureID = 0);
 	void setTextureRect(const Rect& r,int textureWidth = 1024,int textureHeight = 1024,int textureID = 0);
@@ -93,8 +90,16 @@ public:
 		return m_Size;
 	}
 	void tick(float elapsed) {
-		m_Elapsed = elapsed;
-		m_Timer += elapsed;
+		m_Elapsed = elapsed;		
+		if ( m_Delay > 0.0f ) {
+			m_Delay -= elapsed;
+			if ( m_Delay < 0.0f ) {
+				m_Delay = 0.0f;
+			}
+		}
+		else {
+			m_Timer += elapsed;
+		}
 	}
 	void move(float elapsed) {
 		m_Position += m_Velocity * elapsed;
@@ -130,19 +135,33 @@ public:
 	void setLayer(uint32 layer) {
 		m_Layer = layer;
 	}
+	void setDelay(float delay) {
+		m_Delay = delay;
+	}
+	float getDelay() const {
+		return m_Delay;
+	}
+	void setTimer(float t) {
+		m_Timer = t;
+	}
 	void load(BinaryLoader* loader);
-	void prepare(const SpriteDescription& description);
 	void run(Script& script);
+	const Vector4f& getUV() const {
+		return uv;
+	}
+	const Vector2f& getDimension() const {
+		return dimension;
+	}
 private:	
 	float m_Timer;
 	int m_TextureID;
-	Animations m_Animations;
 	uint32 m_ID;
 	Vector3f m_Vertices[4];
 	Vector2f m_UV[4];
 	Vector2f m_Position;
 	Vector2f m_Velocity;
 	Vector2f m_Target;
+	Vector4f uv;
 	int m_Index;
 	float m_Radius;
 	float m_Angle;
@@ -150,10 +169,12 @@ private:
 	Color m_Color;
 	bool m_Active;
 	float m_Elapsed;
+	float m_Delay;
 	//float timer;
-	float delay;
+	//float delay;
 	float dimX;
 	float dimY;
+	Vector2f dimension;
 	int m_UserValue;
 	uint32 m_Layer;
 

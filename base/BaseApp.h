@@ -14,7 +14,7 @@
 namespace ds {
 
 class GameStateManager;
-class ParticleSystem;
+class StateMachine;
 
 struct GameTime {
 	float elapsed;
@@ -97,7 +97,22 @@ public:
 	}	
 	template<class S>
 	void createGameObject(S* obj);
-	void createParticleSystem(const char* fileName,int textureID,ParticleSystem* entity,int maxParticles,int blendState = -1);
+	//void createParticleSystem(const char* fileName,int textureID,ParticleSystem* entity,int maxParticles,int blendState = -1);
+	StateMachine* getStateMachine() const {
+		return stateMachine;
+	}
+	DialogManager* getGUI() {
+		return &gui;
+	}
+	Renderer* getRenderer() {
+		return renderer;
+	}
+	AssetCompiler* getAssets() {
+		return &assets;
+	}
+	AudioManager* getAudio() {
+		return audio;
+	}
 protected:
 	World world;
 	void loadSprites();
@@ -122,8 +137,9 @@ protected:
 	bool m_Fullscreen;
 	GameTime m_GameTime;
 	Color m_ClearColor;
-	ParticleManager* particles;
+	//ParticleManager* particles;
 	SpriteCollisionManager* m_CollisionManager;
+	StateMachine* stateMachine;
 private:
 	Vector2f m_MousePos;
 	DWORD m_CurTime;
@@ -143,7 +159,7 @@ template<class S>
 void BaseApp::createGameObject(S* obj) {
 	obj->setRenderer(renderer);
 	obj->setCollisionManager(m_CollisionManager);
-	obj->setParticleManager(particles);
+	//obj->setParticleManager(particles);
 	obj->setAssetCompiler(&assets);
 	obj->setWorld(&world);
 	obj->setAudioManager(audio);

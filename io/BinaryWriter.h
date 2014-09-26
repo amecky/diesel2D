@@ -46,6 +46,7 @@ public:
 	uint32 write(uint32 value);
 	uint32 write(float value);
 	uint32 write(const Vector2f& v);
+	uint32 write(const Vector4f& v);
 	uint32 write(const ds::Color& color);
 	uint32 write(const ds::Rect& r);
 	uint32 write(const std::string& str);

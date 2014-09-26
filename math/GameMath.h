@@ -35,8 +35,12 @@ namespace ds {
 		float almostIdentity( float x, float m, float n );
 		void transformMousePosToWorld(Vector3f* vPickRayDir,Vector3f* vPickRayOrig);
 
+		// texture coordinates
+		Vector4f getTextureCoordinates(const Rect& textureRect,float textureWidth = 1024.0f,float textureHeight = 1024.0f,bool useHalfTexel = true);
 		void getTextureCoordinates(const Rect& textureRect,int textureSize,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel = true);
 		void getTextureCoordinates(const Rect& textureRect,int textureWidth,float textureHeight,float* u1,float* v1,float* u2,float* v2,bool useHalfTexel = true);
+		Vector4f getTextureCoordinates(float top,float left,float width,float height,float textureWidth = 1024.0f,float textureHeight = 1024.0f,bool useHalfTexel = true);
+
 		void follow(const Vector2f& targetPos,Vector2f& newPos,float* angle,float distance,float add);
 		void followRelative(const Vector2f& targetPos,Vector2f& newPos,float* angle,float distance,float percentage);
 		void clipToRect(Vector2f& newPos,const Rect& rect);

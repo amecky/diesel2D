@@ -18,6 +18,9 @@ public:
 	void addSprite() {
 		++m_Sprites;
 	}
+	void addSprites(int cnt) {
+		m_Sprites += cnt;
+	}
 	void addDrawCall() {
 		++m_DrawCalls;
 	}

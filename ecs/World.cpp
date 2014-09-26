@@ -5,6 +5,43 @@
 
 namespace ds {
 
+namespace wo {
+
+	static Actors actors;
+
+	ID create(uint32 layer, uint32 type, const Vector2f& pos, const Vector4f& uv, float angle, const Vector2f& scale, const Color& color) {
+		assert(layer < 16);
+		ID id = actors.add();
+		Actor& actor = actors.get(id);
+		actor.clear();
+		actor.position = pos;
+		actor.layer = layer;
+		actor.uv = uv;
+		actor.angle = angle;
+		actor.scale = scale;
+		actor.color = color;
+		actor.type = type;
+		return id;
+	}
+
+	// -------------------------------------------------------
+	// Render
+	// -------------------------------------------------------
+	void render() {
+		PR_START("wo::Render")
+		for (int i = 0; i < 16; ++i) {
+			for (uint32 j = 0; j < actors.numObjects; ++j) {
+				Actor& actor = actors.objects[j];
+				if (actor.layer == i && actor.active) {
+					//m_Renderer->draw(actor.position, 0, actor.textureRect, actor.angle, actor.scale.x, actor.scale.y, actor.color);
+				}
+			}
+		}
+		PR_END("wo::Render")
+	}
+
+}
+
 World::World(void) : m_ActorCallback(0) {
 	m_CollisionSystem.setActorArray(&m_Actors);
 	m_Behaviors.add(new FixedLifetimeBehavior);
@@ -149,12 +186,36 @@ void World::update(float elapsed) {
 	// reset collisions
 	m_CollisionSystem.reset();
 	// tick all actors
+	PRS("World::Update::tick")
 	for ( uint32 i = 0; i < m_Actors.numObjects; ++i ) {
 		m_Actors.objects[i].timer += elapsed;
 	}
+	PRE("World::Update::tick")
 	PR_START("World::Update::updateBehaviors")
 	updateBehaviors(elapsed);
 	PR_END("World::Update::updateBehaviors")
+
+	PR_START("World::Update::executeScripts")
+	for (uint32 i = 0; i < m_Actors.numObjects; ++i) {
+		Actor& actor = m_Actors.objects[i];
+		if ( actor.script != -1 ) {
+			as::AssemblerScript& script = m_Scripts[actor.script];
+			script.context.data[0] = elapsed;
+			script.context.data[1] = actor.timer;
+			as::reset(script);
+			as::registerVar(script, &actor.position);
+			as::registerVar(script, &actor.angle);
+			as::registerVar(script, &actor.scale);
+			as::registerVar(script, &actor.color);
+			as::registerVar(script, &actor.velocity);
+			as::execute(script);
+			if (script.context.event == 666) {
+				actor.alive = false;
+			}
+		}
+	}
+	PR_END("World::Update::executeScripts")
+	PR_START("World::Update::remove")
 	// remove dead actors
 	ID ids[MAX_ITEMS];
 	uint32 cnt = 0;
@@ -163,8 +224,7 @@ void World::update(float elapsed) {
 		if ( !actor.alive ) {
 			ids[cnt++] = actor.id;
 		}
-	}
-	PR_START("World::Update::remove")
+	}	
 	for ( uint32 i = 0; i < cnt; ++i ) {
 		remove(ids[i]);
 	}
@@ -197,7 +257,7 @@ void World::render() {
 		for ( uint32 j = 0; j < m_Actors.numObjects; ++j ) {
 			Actor& actor = m_Actors.objects[j];
 			if ( actor.layer == i && actor.active ) {
-				m_Renderer->draw(actor.position,0,actor.textureRect,actor.angle,actor.scale.x,actor.scale.y,actor.color);
+				//m_Renderer->draw(actor.position,0,actor.textureRect,actor.angle,actor.scale.x,actor.scale.y,actor.color);
 			}
 		}
 	}

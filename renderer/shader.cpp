@@ -1,5 +1,6 @@
 #include "shader.h"
 #include "..\utils\StringUtils.h"
+#include "assets.h"
 
 namespace ds {
 
@@ -26,7 +27,7 @@ namespace ds {
 		bool setTexture(Shader& shader,const char* name,Renderer* renderer,int textureID) {
 			D3DXHANDLE handle = findHandle(shader,name);
 			if ( handle != 0 ) {
-				shader.m_FX->SetTexture(handle,renderer->getDirectTexture(textureID));
+				shader.m_FX->SetTexture(handle,assets::getDirectTexture(textureID));
 				return true;
 			}
 			return false;

@@ -11,11 +11,11 @@
 // Enable extra D3D debugging in debug builds if using the debug DirectX runtime.  
 // This makes D3D objects work well in the debugger watch window, but slows down 
 // performance slightly.
-#if defined(DEBUG) | defined(_DEBUG)
-#ifndef D3D_DEBUG_INFO
-#define D3D_DEBUG_INFO
-#endif
-#endif
+//#if defined(DEBUG) | defined(_DEBUG)
+//#ifndef D3D_DEBUG_INFO
+//#define D3D_DEBUG_INFO
+//#endif
+//#endif
 
 // Direct3D includes
 #include <d3d9.h>
@@ -58,8 +58,9 @@ typedef float f32;
 typedef double f64;
 typedef unsigned int IdString;
 typedef unsigned long ulong;
+typedef unsigned short ushort;
 
-const uint32 UINT32_MAX = 0xffffffffu;
+//const uint32 UINT32_MAX = 0xffffffffu;
 
 #if defined(DEBUG) 
 	#ifndef HR
@@ -84,6 +85,10 @@ const uint32 UINT32_MAX = 0xffffffffu;
 #define DBG_V3(v) "x: " << v.x << " y: " << v.y << " z: " << v.z
 #endif
 
+#ifndef DBG_V4
+#define DBG_V4(v) "x: " << v.x << " y: " << v.y << " z: " << v.z << " w: " << v.w
+#endif
+
 #ifndef DBG_RECT
 #define DBG_RECT(v) "top: " << v.top << " left: " << v.left << " width: " << v.width() << " height: " << v.height()
 #endif
@@ -98,4 +103,10 @@ const uint32 UINT32_MAX = 0xffffffffu;
 
 #ifndef CALL_MEMBER_FN
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
+#endif
+
+#ifndef DISALLOW_COPY_AND_ASSIGN
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
+	TypeName(const TypeName&);               \
+	void operator=(const TypeName&)
 #endif

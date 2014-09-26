@@ -95,7 +95,7 @@ void TextMessage::render() {
 			TextEntry* te = &m_TextEntries[i];
 			if ( te->active ) {
 				for ( size_t j = 0; j < te->sprites.size(); ++j ) {
-					m_Renderer->draw(te->sprites[j]);
+					sprites::draw(te->sprites[j]);
 				}
 			}
 		}

@@ -128,6 +128,59 @@ namespace ds {
 		}
 	}
 
+	Vector4f getTextureCoordinates(const Rect& textureRect,float textureWidth,float textureHeight,bool useHalfTexel) {
+		Vector4f ret;
+		if ( useHalfTexel ) {
+			float halfTexel = 0.5f;
+			float const width   = textureWidth;
+			float const height  = textureHeight;
+
+			float tw = textureRect.width() / textureWidth;
+			float th = textureRect.height() / textureHeight;
+
+			float kUOffset = halfTexel/width;
+			float kVOffset = halfTexel/height;
+
+			ret.x = textureRect.left/width  + kUOffset;
+			ret.y = textureRect.top/height + kVOffset;  
+
+			ret.z = ret.x + tw   - 2.0f*kUOffset;
+			ret.w = ret.y + th  - 2.0f*kVOffset;
+		}
+		else {
+			ret.x = textureRect.left/textureWidth;
+			ret.z = textureRect.right/textureWidth;
+			ret.y = textureRect.top/textureHeight;
+			ret.w = textureRect.bottom/textureHeight;
+		}
+		return ret;
+	}
+
+	Vector4f getTextureCoordinates(float top,float left,float width,float height,float textureWidth,float textureHeight,bool useHalfTexel) {
+		Vector4f ret;
+		float tw = width/ textureWidth;
+		float th = height / textureHeight;
+		if ( useHalfTexel ) {
+			float halfTexel = 0.5f;
+
+			float kUOffset = halfTexel/textureWidth;
+			float kVOffset = halfTexel/textureHeight;
+
+			ret.x = left/textureWidth  + kUOffset;
+			ret.y = top/textureHeight + kVOffset;  
+
+			ret.z = ret.x + tw   - 2.0f*kUOffset;
+			ret.w = ret.y + th  - 2.0f*kVOffset;
+		}
+		else {
+			ret.x = left/textureWidth;
+			ret.z = ret.x + tw;
+			ret.y = top/textureHeight;
+			ret.w = ret.y + th;
+		}
+		return ret;
+	}
+
 	void transformMousePosToWorld(Vector3f* vPickRayDir,Vector3f* vPickRayOrig) {
 		// Get the Pick ray from the mouse position
 		/*

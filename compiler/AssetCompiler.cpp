@@ -10,11 +10,13 @@
 #include "SpriteConverter.h"
 #include "ParticleManagerConverter.h"
 #include "..\objects\BloomComponent.h"
-#include "SpritesDescriptionConverter.h"
 #include "ScriptConverter.h"
 #include "..\script\Tokenizer.h"
 #include "BlueprintConverter.h"
 #include "NewParticleSystemConverter.h"
+#include "..\renderer\TextureLoader.h"
+#include "ASMConverter.h"
+#include "NASMConverter.h"
 
 namespace ds {
 
@@ -31,6 +33,7 @@ void AssetDB::readDB() {
 			AssetDBEntry entry;
 			fread(&entry,sizeof(AssetDBEntry),1,file);
 			LOG << "db entry " << entry.fileName;
+			file::logFileTime(entry.fileTime);
 			m_Entries.push_back(entry);
 		}
 		fclose(file);
@@ -86,11 +89,13 @@ void AssetDB::update(const char* name,FILETIME fileTime) {
 
 bool AssetDB::hasChanged(const char* fileName) {
 	if ( !contains(fileName)) {
+		LOGC("AssetDB") << "file " << fileName << " is not yet in the database - loading";
 		return true;
 	}
 	for ( size_t i = 0; i < m_Entries.size(); ++i ) {
 		AssetDBEntry& entry = m_Entries[i];
 		if ( strcmp(entry.fileName,fileName) == 0 ) {
+			
 			if ( file::compareFileTime(entry.fileName,entry.fileTime)) {
 				LOGC("AssetDB") << "file " << entry.fileName << " has changed";
 				file::getFileTime(entry.fileName,entry.fileTime);
@@ -112,10 +117,13 @@ AssetCompiler::AssetCompiler() {
 	m_Mapping[CVT_SPRITE] = new SpriteConverter;
 	m_Mapping[CVT_PARTICLEMANAGER] = new ParticleManagerConverter;
 	m_Mapping[CVT_BLOOM_COMPONENT] = new BloomComponentConverter;
-	m_Mapping[CVT_SPRITES_DESCRIPTION] = new SpritesDescriptionConverter;
 	m_Mapping[CVT_SCRIPT] = new ScriptConverter;
 	m_Mapping[CVT_BLUEPRINT] = new BlueprintConverter;
 	m_Mapping[CVT_NPS] = new NewParticleSystemConverter;
+	m_Mapping[CVT_ASM] = new ASMConverter;
+	m_Mapping[CVT_NASM] = new NASMConverter;
+
+	m_BinarySerializerMapping[BINL_TEXTURE] = new TextureLoader;
 	m_CustomIndex = 100;
 }
 
@@ -168,7 +176,7 @@ void AssetCompiler::load(const char* fileName,Serializer* serializer,uint32 type
 	assert(m_Mapping.find(type) != m_Mapping.end());
 	Converter* converter = m_Mapping[type];
 	char buffer[256];
-	sprintf(buffer,"%s\\%s.json",converter->getResourceDirectory(),fileName);
+	sprintf(buffer,"%s\\%s.%s",converter->getResourceDirectory(),fileName,converter->getEnding());
 	if ( file::fileExists(buffer) ) {
 		IdString hash = string::murmur_hash(buffer);
 #ifdef DEBUG
@@ -184,6 +192,7 @@ void AssetCompiler::load(const char* fileName,Serializer* serializer,uint32 type
 		strcpy(watch.binaryName,fileName);
 		watch.serializer = serializer;
 		watch.type = type;
+		watch.binary = false;
 		file::getFileTime(buffer,watch.fileTime);
 		m_WatchList.push_back(watch);
 		LOGC("AssetCompiler") << "file watch created";
@@ -250,23 +259,71 @@ void AssetCompiler::update() {
 		if ( file::compareFileTime(watch->jsonName,watch->fileTime)) {
 			m_Database.update(watch->jsonName,watch->fileTime);
 			LOGC("AssetCompiler") << "Reloading file: " << watch->jsonName;	
-			assert(m_Mapping.find(watch->type) != m_Mapping.end());
-			Converter* converter = m_Mapping[watch->type];
-			// convert json to binary file
-			converter->convert(watch->binaryName);
-			BinaryLoader loader;
-			char buffer[256];
-			sprintf(buffer,"data\\%u",watch->hash);
-			int signature[] = {0,8,15};
-			if ( loader.open(buffer,signature,3) == 0 ) {
-				watch->serializer->load(&loader);
-				loader.close();
+			if ( watch->binary ) {
+				// do something here
+				file::copyFile(watch->jsonName,watch->binaryName);
+				assets::reloadTextureBinary(watch->binaryName);
 			}
 			else {
-				LOGEC("AssetCompiler") << "Cannot reload binary file " << buffer;
-			}
+				assert(m_Mapping.find(watch->type) != m_Mapping.end());
+				Converter* converter = m_Mapping[watch->type];
+				// convert json to binary file
+				converter->convert(watch->binaryName);
+				BinaryLoader loader;
+				char buffer[256];
+				sprintf(buffer,"data\\%u",watch->hash);
+				int signature[] = {0,8,15};
+				if ( loader.open(buffer,signature,3) == 0 ) {
+					watch->serializer->load(&loader);
+					loader.close();
+				}
+				else {
+					LOGEC("AssetCompiler") << "Cannot reload binary file " << buffer;
+				}
+			}			
 			file::getFileTime(watch->jsonName,watch->fileTime);
 		}
+	}
+}
+
+int AssetCompiler::loadBinary(const char* fileName,uint32 type) {
+	assert( type != UINT32_MAX );
+	// check if we support the type
+	assert(m_BinarySerializerMapping.find(type) != m_BinarySerializerMapping.end());
+	BinarySerializer* serializer = m_BinarySerializerMapping[type];
+	char buffer[256];
+	sprintf(buffer,"%s\\%s",serializer->getResourceDirectory(),fileName);
+	if ( file::fileExists(buffer) ) {
+		IdString hash = string::murmur_hash(buffer);
+		char bb[256];
+		sprintf(bb,"data\\%u",hash);
+#ifdef DEBUG
+		if ( m_Database.hasChanged(buffer) ) {
+			LOGC("AssetCompiler") << "copying file " << buffer;		
+			file::copyFile(buffer,bb);
+			LOGC("AssetCompiler") << "file copied to " << bb;
+		}	
+		FileWatch watch;
+		watch.hash = hash;
+		strcpy(watch.jsonName,buffer);
+		strcpy(watch.binaryName,bb);
+		watch.binary = true;
+		watch.type = type;
+		file::getFileTime(buffer,watch.fileTime);
+		m_WatchList.push_back(watch);
+		LOGC("AssetCompiler") << "file watch created";
+		m_Database.add(buffer,watch.fileTime);
+#endif
+		// load file
+		LOGC("AssetCompiler") << "loading binary file: " << bb;
+
+		
+		return serializer->load(bb);
+
+	}
+	else {
+		LOGEC("AssetCompiler") << "Cannot find file: " << buffer;
+		return -1;
 	}
 }
 

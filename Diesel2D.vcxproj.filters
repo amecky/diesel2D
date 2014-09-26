@@ -121,12 +121,6 @@
     <ClCompile Include="sprites\SpriteCollisionManager.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
-    <ClCompile Include="sprites\SpriteAnimation.cpp">
-      <Filter>sprites</Filter>
-    </ClCompile>
-    <ClCompile Include="sprites\SpriteObjectDescription.cpp">
-      <Filter>sprites</Filter>
-    </ClCompile>
     <ClCompile Include="objects\HUD.cpp">
       <Filter>objects</Filter>
     </ClCompile>
@@ -175,9 +169,6 @@
     <ClCompile Include="sprites\SpriteBatch.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\SpritesDescriptionConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
     <ClCompile Include="compiler\ScriptConverter.cpp">
       <Filter>compiler</Filter>
     </ClCompile>
@@ -215,6 +206,30 @@
       <Filter>compiler</Filter>
     </ClCompile>
     <ClCompile Include="compiler\ShaderConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="math\tweening.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="base\StateMachine.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\assets.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\TextureLoader.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\ASMConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="script\ASM.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="script\Assembler.cpp">
+      <Filter>script</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\NASMConverter.cpp">
       <Filter>compiler</Filter>
     </ClCompile>
   </ItemGroup>
@@ -392,12 +407,6 @@
     <ClInclude Include="sprites\SpriteCollisionManager.h">
       <Filter>sprites</Filter>
     </ClInclude>
-    <ClInclude Include="sprites\SpriteAnimation.h">
-      <Filter>sprites</Filter>
-    </ClInclude>
-    <ClInclude Include="sprites\SpriteObjectDescription.h">
-      <Filter>sprites</Filter>
-    </ClInclude>
     <ClInclude Include="base\ApplicationContext.h">
       <Filter>base</Filter>
     </ClInclude>
@@ -446,12 +455,6 @@
     <ClInclude Include="sprites\Sprite.h">
       <Filter>sprites</Filter>
     </ClInclude>
-    <ClInclude Include="sprites\CompositeSprite.h">
-      <Filter>sprites</Filter>
-    </ClInclude>
-    <ClInclude Include="sprites\SpritesObject.h">
-      <Filter>sprites</Filter>
-    </ClInclude>
     <ClInclude Include="particles\ParticleManager.h">
       <Filter>particles</Filter>
     </ClInclude>
@@ -466,9 +469,6 @@
     </ClInclude>
     <ClInclude Include="sprites\SpriteBatch.h">
       <Filter>sprites</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\SpritesDescriptionConverter.h">
-      <Filter>compiler</Filter>
     </ClInclude>
     <ClInclude Include="compiler\ScriptConverter.h">
       <Filter>compiler</Filter>
@@ -552,6 +552,39 @@
       <Filter>particles</Filter>
     </ClInclude>
     <ClInclude Include="compiler\ShaderConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="math\tweening.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpriteGroup.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="base\GameState.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\StateMachine.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Bitset.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\assets.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\TextureLoader.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\ASMConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="script\ASM.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="script\Assembler.h">
+      <Filter>script</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\NASMConverter.h">
       <Filter>compiler</Filter>
     </ClInclude>
   </ItemGroup>

@@ -90,13 +90,13 @@ public:
 	}
 	void generate(ParticleArray* array,const Vector2f& position,float dt,uint32 start,uint32 end) {
 		uint32 count = end - start;
-		Vector2f v(512,384);
+		//Vector2f v(512,384);
 		float angle = 0.0f;
 		float step = TWO_PI / static_cast<float>(count);
 		for ( uint32 i = 0; i < count; ++i ) {
 			float rad = ds::math::random(m_Data.radius-m_Data.variance,m_Data.radius+m_Data.variance);
-			array->position[start+i].x = v.x + rad * cos(angle);
-			array->position[start+i].y = v.y + rad * sin(angle);
+			array->position[start+i].x = position.x + rad * cos(angle);
+			array->position[start+i].y = position.y + rad * sin(angle);
 			array->rotation[start+i] = angle;
 			angle += step;
 		}

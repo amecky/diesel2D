@@ -12,6 +12,12 @@ const int MAX_COUNTER = 16;
 const int MAX_TIMER = 8;
 const int MAX_HUD_IMAGES = 64;
 
+struct HUDItem {
+
+
+
+};
+
 class HUD : public GameObject , public Serializer {
 
 struct HUDEntry {

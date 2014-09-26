@@ -5,6 +5,7 @@
 #include "..\utils\StringUtils.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\compiler\HUDConverter.h"
+#include "..\utils\Profiler.h"
 
 namespace ds {
 
@@ -215,16 +216,17 @@ int HUD::getTextIndex(int id) {
 // Draw internal buffer
 // -------------------------------------------------------
 void HUD::render() {
-	
+	PRS("HUD::draw")
 	for ( int i = 0; i < 128; ++i ) {
 		if ( m_HUDEntries[i].flag != -1 ) {
 			HUDEntry* entry = &m_HUDEntries[i];
 			for ( size_t j = 0; j < entry->sprites.size(); ++j ) {
-				m_Renderer->draw(entry->sprites[j]);
+				//m_Renderer->draw(entry->sprites[j]);
+				sprites::draw(entry->sprites[j]);// .getPosition(), entry->sprites[j].getTextureID(), entry->sprites[j].getUV(), entry->sprites[j].getDimension(), 0.0f, entry->scale, entry->scale, entry->color);
 			}
 		}
 	}
-	
+	PRE("HUD::draw")
 }
 
 // -------------------------------------------------------

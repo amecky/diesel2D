@@ -6,14 +6,14 @@ namespace ds {
 // -------------------------------------------------------
 // BlockDataArray
 // -------------------------------------------------------
-template<class U,unsigned short BLOCK_SIZE,unsigned short MAX_OBJECTS = 256>
+template<class U,unsigned short BLOCK_SIZE,unsigned short MAX_FLOW_OBJECTS = 256>
 struct BlockDataArray {
 
 	uint32 numObjects;
-	Index indices[MAX_OBJECTS];
-	uint32 nums[MAX_OBJECTS];
-	U objects[BLOCK_SIZE * MAX_OBJECTS];
-	ID internalIDs[MAX_OBJECTS];
+	Index indices[MAX_FLOW_OBJECTS];
+	uint32 nums[MAX_FLOW_OBJECTS];
+	U objects[BLOCK_SIZE * MAX_FLOW_OBJECTS];
+	ID internalIDs[MAX_FLOW_OBJECTS];
 	unsigned short free_enqueue;
 	unsigned short free_dequeue;
 
@@ -26,13 +26,13 @@ struct BlockDataArray {
 	// -------------------------------------------------------
 	void clear() {
 		numObjects = 0;
-		for ( unsigned short i = 0; i < MAX_OBJECTS; ++i ) {
+		for ( unsigned short i = 0; i < MAX_FLOW_OBJECTS; ++i ) {
 			indices[i].id = i;
 			indices[i].next = i + 1;
 			nums[i] = 0;
 		}
 		free_dequeue = 0;
-		free_enqueue = MAX_OBJECTS - 1;
+		free_enqueue = MAX_FLOW_OBJECTS - 1;
 	}
 
 	// -------------------------------------------------------
@@ -75,7 +75,7 @@ struct BlockDataArray {
 	// creates new one
 	// -------------------------------------------------------
 	ID create(const U& initialValue) {
-		assert(numObjects != MAX_OBJECTS);
+		assert(numObjects != MAX_FLOW_OBJECTS);
 		Index &in = indices[free_dequeue];
 		free_dequeue = in.next;
 		in.index = numObjects;

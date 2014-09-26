@@ -1,4 +1,5 @@
 #include "VertexDeclaration.h"
+#include "Renderer.h"
 
 namespace ds {
 
@@ -24,7 +25,7 @@ void VertexDeclaration::addElement(const VDTYPE& type,const VDUSAGE& usage) {
 }
 
 
-void VertexDeclaration::create(GraphicsDevice* device) {
+void VertexDeclaration::create() {
 	if ( m_Decl == NULL ) {
 		D3DVERTEXELEMENT9* vdElements = new D3DVERTEXELEMENT9[m_DecElements.size()+1];
 		int offset = 0;
@@ -89,7 +90,7 @@ void VertexDeclaration::create(GraphicsDevice* device) {
 		vdElements[m_DecElements.size()].Usage = 0;
 		vdElements[m_DecElements.size()].UsageIndex = 0;
 
-		device->get()->CreateVertexDeclaration(vdElements, &m_Decl);
+		renderContext.device->CreateVertexDeclaration(vdElements, &m_Decl);
 		
 		delete[] vdElements;
 	}

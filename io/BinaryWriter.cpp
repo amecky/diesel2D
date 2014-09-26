@@ -101,6 +101,14 @@ uint32 BinaryWriter::write(const Vector2f& v) {
 	return IO_OK;
 }
 
+uint32 BinaryWriter::write(const Vector4f& v) {
+	fwrite(&v.x, sizeof (float), 1, m_Stream);
+	fwrite(&v.y, sizeof (float), 1, m_Stream);
+	fwrite(&v.z, sizeof (float), 1, m_Stream);
+	fwrite(&v.w, sizeof (float), 1, m_Stream);
+	return IO_OK;
+}
+
 uint32 BinaryWriter::write(const std::string& v) {
 	int length = v.length();
 	write(length);

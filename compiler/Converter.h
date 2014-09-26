@@ -34,7 +34,7 @@ public:
 	}
 	virtual ~Converter() {}
 
-	void convert(const char* fileName) {
+	virtual void convert(const char* fileName) {
 		char buffer[256];
 		sprintf(buffer,"%s\\%s.json",getResourceDirectory(),fileName);
 		LOG << "loading file: " << buffer;
@@ -61,6 +61,9 @@ public:
 
 	virtual void convert(JSONReader& reader,BinaryWriter& writer) = 0;
 	virtual const char* getResourceDirectory()  = 0;
+	virtual const char* getEnding() const {
+		return "json";
+	}
 private:
 	IdString m_HashName;
 };

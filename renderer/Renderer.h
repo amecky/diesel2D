@@ -13,11 +13,10 @@
 #include "..\sprites\SpriteBatch.h"
 #include "BitmapFont.h"
 #include "Viewport.h"
-#include "..\sprites\SpriteObjectDescription.h"
 
+struct SimpleParticleArray;
 
 namespace ds {
-
 
 // -------------------------------------------------------
 // Constants
@@ -37,13 +36,41 @@ const int VD_TTC   = 0;
 const int VD_PTNBT = 1;
 const int VD_PTC   = 2;
 
-class DebugRenderer;
 class VertexDeclaration;
 
 struct VDStruct {
 	int vertexSize;
 	VertexDeclaration* declaration;
 };
+
+// -------------------------------------------------------
+// RenderContext
+// -------------------------------------------------------
+struct RenderContext {
+
+	HWND hwnd;
+	bool initialized;
+	TextureAsset textures[MAX_TEXTURES];
+	LPDIRECT3DDEVICE9 device;
+	LPDIRECT3D9 pD3D;	
+	D3DCAPS9 deviceCaps;
+	int screenWidth;
+	int screenHeight;
+	D3DFORMAT format;
+	DrawCounter drawCounter;
+	VDStruct vdStructs[MAX_VERDECLS];
+
+	RenderContext() : initialized(false) {}
+
+};
+
+namespace renderer {
+
+	VDStruct& getVertexDeclaration(int declarationType);
+}
+
+class DebugRenderer;
+
 
 // -------------------------------------------------------
 // Renderer
@@ -87,9 +114,7 @@ public:
 	// vertex declarations
 	void addVertexDeclaration(const char* name,VertexDeclaration* declaration);
 	VertexDeclaration* getVertexDeclaration(const char* name);
-	const VDStruct& getVertexDeclaration(int declarationType) const {
-		return m_VDStructs[declarationType];
-	}
+	
 	// Shader
 	int loadShader(const char* fxName,const char* techName);
 	Shader& getShader(int id);
@@ -99,18 +124,9 @@ public:
 	int getCurrentShaderID() {
 		return m_CurrentShader;
 	}
-	// Textures
-	int createTexture(int width,int height);
-	int loadTexture(const char* name);
-	int loadTexture(const char* dirName,const char* name);
-	int getTextureId(const char* name);
-	int loadTextureWithColorKey(const char* name,const Color& color);
+	
 	void setTexture(int id,int index = 0);
-	LPDIRECT3DTEXTURE9 getDirectTexture(int textureID);
-	D3DLOCKED_RECT lockTexture(int id);
-	void unlockTexture(int id);
-	void fillTexture(int id,const Vector2f& pos,int sizeX,int sizeY,Color* colors);
-	Vector2f getTextureSize(int idx);
+	
 	// System fonts	
 	ID3DXFont* getSystemFont();
 	
@@ -136,29 +152,28 @@ public:
 	const int getDefaultBlendState() const {
 		return m_DefaultBS;
 	}
+
 	// buffers
 	int createVertexBuffer(PrimitiveType primitiveType,int vertexDefinition,int size,bool dynamic = false);
 	int createIndexBuffer(int size,bool dynamic = false);
 	int createQuadIndexBuffer(uint32 maxQuads);
 	int createBufferHandle(PrimitiveType primType,int vertexDefinition,GeoBufferType bufferType,bool dynamic = false);
 	void lockBuffer(int handleID,int vertexCount,int indexCount,float** vertexBuffer,void** indexBuffer);
+	void lockIndexBuffer(int handleID, int indexCount, void** indexBuffer);
 	void unlockBuffer(int handleID);	
+	void unlockIndexBuffer(int handleID);
 	int drawBuffer(int handleID,int textureID);
 	void resetBuffer(int handleID);
 	void resetBufferHandle() {
 		m_CurrentIB = -1;
 		m_CurrentVB = -1;
 	}
-
-	DrawCounter& getDrawCounter() {
-		return *m_DrawCounter;
-	}
+	
+	
 	DebugRenderer& getDebugRenderer() {
 		return *m_DebugRenderer;
 	}
-	HWND getHWND() {
-		return m_Hwnd;
-	}
+
 	uint32 startShader(Shader* shader);
 	void setShaderParameter(Shader* shader,int textureID = -1);
 	void endShader(Shader* shader);
@@ -175,13 +190,9 @@ public:
 	void showProfiler(int x,int y);
 	void showDrawCounter(int x,int y);
 	void printDrawCounter();
-
-
-	void draw(const Sprite& spriteObject) {
-		m_SpriteBatch->draw(spriteObject);
-	}
-	void draw(const Vector2f& pos,int textureID,const Rect& textureRect,float rotation = 0.0f,float scaleX = 1.0f,float scaleY = 1.0f,const Color& color = Color::WHITE,const Vector2f& center = Vector2f(0,0)) {
-		m_SpriteBatch->draw(pos.x,pos.y,textureID,textureRect,rotation,scaleX,scaleY,color,center);
+	
+	void draw(int textureID, const Rect& textureRect, const ParticleArray& particleArray) {
+		//m_SpriteBatch->draw(textureID, textureRect, particleArray);
 	}
 
 	BitmapFont* loadBitmapFont(const char* name,int textureId,const Color& fillColor = Color(1.0f,0.0f,1.0f,1.0f));
@@ -189,12 +200,16 @@ public:
 	Viewport* getViewport() {
 		return m_Viewport;
 	}
-	const SpriteDescription& getSpriteDescription(int id) const {
-		return m_DescriptionManager->get(id);
+
+	int getDefaultShaderID() {
+		return m_DefaultShaderID;
 	}
-	void setDescriptionManager(SpriteDescriptionManager* descriptionManager) {
-		m_DescriptionManager = descriptionManager;
+
+	int getDefaultBlendState() {
+		return m_DefaultBS;
 	}
+
+	void flush();
 private:	
 	void loadSystemFont(const char* name,const char* fontName,int size,bool bold);
 	bool isFillColor(const Color& fillColor,const Color& currentColor);
@@ -203,37 +218,29 @@ private:
 	void createBasicVertexDeclarations();
 	void setColor(D3DLOCKED_RECT& lockedRect,int x,int y,uchar r,uchar g,uchar b,uchar a,int height);
 	Color getColor(D3DLOCKED_RECT& lockedRect,int x,int y,int height);
-	int findFreeTextureSlot();
+	//int findFreeTextureSlot();
 	int findFreeMaterialSlot();
 	int findFreeShaderSlot();
 	
 	void initializeShader(int id,const char* techName);
 	int allocateBuffer(GeoBufferType type,int vertexDefinition,int size,int& start,bool dynamic);
 	void resetDynamicBuffers();
-	SpriteDescriptionManager* m_DescriptionManager;
 	Viewport* m_Viewport;
-	D3DCAPS9 m_DeviceCaps;	
 	Camera* m_Camera;	
 	mat4 matWorldViewProj;
 	mat4 m_World;
-	GraphicsDevice *device;
 	RenderStates m_RenderStates;
 	Color m_ClearColor;
 	int mode;
-	DrawCounter* m_DrawCounter;
+	
 	DebugRenderer* m_DebugRenderer;
-	HWND m_Hwnd;
 	RasterizerStates m_RasterizerStates;
 	// new stuff
 	LPDIRECT3DSURFACE9 m_BackBuffer;	
 	RasterizerState m_RSState;
 	int m_DefaultBS;
-	int m_Width;
-	int m_Height;
 	int m_UsedRTs;
-	// all data structs
-	VDStruct m_VDStructs[MAX_VERDECLS];
-	Texture m_Textures[MAX_TEXTURES];
+	// all data structs	
 	Shader m_Shaders[MAX_SHADERS];
 	int m_BMCounter;
 	ID3DXFont* m_SystemFont;
@@ -254,7 +261,9 @@ private:
 	// debug
 	DebugMessages m_DebugMessages;
 	LPD3DXSPRITE m_DebugSprite;
-	SpriteBatch* m_SpriteBatch;
+	//SpriteBatch* m_SpriteBatch;
 };
+
+extern RenderContext renderContext;
 
 };

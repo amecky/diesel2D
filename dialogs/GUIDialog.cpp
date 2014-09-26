@@ -233,7 +233,7 @@ void GUIDialog::render() {
 		for ( size_t i = 0; i < m_Items.size(); ++i ) {
 			GUIItem* gi = &m_Items[i];
 			for ( size_t j =0; j < gi->sprites.size(); ++j ) {
-				m_Renderer->draw(gi->sprites[j]);
+				sprites::draw(gi->sprites[j]);
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 #include "..\utils\Profiler.h"
 
 namespace ds {
-
+	/*
 ParticleManager::ParticleManager() {	
 	for ( int i = 0; i < 128; ++i ) {
 		m_Indices[i].id = i;
@@ -77,5 +77,5 @@ void ParticleManager::debug() {
 		LOG << in.id << " : " << in.debugName;
 	}
 }
-
+*/
 }

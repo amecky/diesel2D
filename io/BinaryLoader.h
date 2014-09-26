@@ -70,6 +70,7 @@ public:
     void read(int* value);
 	void read(uint32* value);
 	void read(Vector2f* value);
+	void read(Vector4f* value);
 	void read(ds::Color* value);
 	void read(ds::ColorPath* value);
 	void read(ds::Vector2fPath* value);

@@ -86,23 +86,23 @@ void BloomComponent::render() {
 		int currentShader = m_Renderer->getCurrentShaderID();
 		m_Renderer->setRenderTarget(m_Settings.firstTarget);
 		m_Renderer->setCurrentShader(m_BloomShaderID);
-		m_Renderer->draw(m_BloomEntity);
+		sprites::draw(m_BloomEntity);
 	
 		m_Renderer->setRenderTarget(m_Settings.firstTarget+1);
 		m_Renderer->setCurrentShader(m_BlurHShaderID);
-		m_Renderer->draw(m_BlurHEntity);
+		sprites::draw(m_BlurHEntity);
 
 		m_Renderer->setRenderTarget(m_Settings.firstTarget+2);
 		m_Renderer->setCurrentShader(m_BloomCombineShaderID);
-		m_Renderer->draw(m_BloomCombineEntity);
+		sprites::draw(m_BloomCombineEntity);
 
 		m_Renderer->restoreBackBuffer(m_Settings.firstTarget);
 		m_Renderer->setCurrentShader(currentShader);
-		m_Renderer->draw(m_OverlayEntity);
+		sprites::draw(m_OverlayEntity);
 	}
 	else {
 		m_Renderer->restoreBackBuffer(m_Settings.firstTarget);
-		m_Renderer->draw(m_StraightEntity);
+		sprites::draw(m_StraightEntity);
 	}
 }
 

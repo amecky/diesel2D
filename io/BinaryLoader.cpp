@@ -79,6 +79,13 @@ void BinaryLoader::read(Vector2f* value) {
 	readBuffer(&value->y,sizeof(float));    
 }
 
+void BinaryLoader::read(Vector4f* value) {
+	readBuffer(&value->x, sizeof(float));
+	readBuffer(&value->y, sizeof(float));
+	readBuffer(&value->z, sizeof(float));
+	readBuffer(&value->w, sizeof(float));
+}
+
 void BinaryLoader::read(ds::Color* value) {
 	readBuffer(&value->r,sizeof(float));    
 	readBuffer(&value->g,sizeof(float));    

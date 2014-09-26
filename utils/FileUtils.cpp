@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <strsafe.h>
 #include "Log.h"
+#include <assert.h>
 
 namespace ds {
 
@@ -40,7 +41,8 @@ namespace file {
 
 	void getFileTime(const char* fileName,FILETIME& time) {
 		WORD ret = -1;
-		HANDLE hFile = CreateFile(fileName, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,OPEN_EXISTING, 0, NULL);
+		// no file sharing mode
+		HANDLE hFile = CreateFile(fileName, GENERIC_READ, 0, NULL,OPEN_EXISTING, 0, NULL);
 		if( hFile != INVALID_HANDLE_VALUE) {		
 			// Retrieve the file times for the file.
 			GetFileTime(hFile, NULL, NULL, &time);
@@ -81,11 +83,57 @@ namespace file {
 	bool compareFileTime(const char* fileName,const FILETIME& time) {
 		FILETIME now;
 		getFileTime(fileName,now);
+		//SYSTEMTIME stUTC, stLocal;
+		//FileTimeToSystemTime(&now, &stUTC);
+		//SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
+		//LOG << "file: " << fileName << " now: " << stLocal.wDay << "." << stLocal.wMonth << "." << stLocal.wYear << " " << stLocal.wHour << ":"<< stLocal.wMinute;
 		int t = CompareFileTime(&time,&now);		
 		if ( t == -1 ) {
+			logFileTime(now);
+			logFileTime(time);
 			return true;
 		}
 		return false;
+	}
+
+	void logFileTime(const FILETIME& time) {
+		SYSTEMTIME stUTC, stLocal;
+		FileTimeToSystemTime(&time, &stUTC);
+		SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
+		LOG << "time: " << stLocal.wDay << "." << stLocal.wMonth << "." << stLocal.wYear << " " << stLocal.wHour << ":" << stLocal.wMinute;
+	}
+
+	// -------------------------------------------------------
+	// Checks if the file has changed
+	// -------------------------------------------------------
+	void logFileTime(const char* fileName) {
+		FILETIME now;
+		getFileTime(fileName,now);
+		SYSTEMTIME stUTC, stLocal;
+		FileTimeToSystemTime(&now, &stUTC);
+		SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
+		LOG << "file: " << fileName << " now: " << stLocal.wDay << "." << stLocal.wMonth << "." << stLocal.wYear << " " << stLocal.wHour << ":"<< stLocal.wMinute;		
+	}
+
+	void copyFile(const char* source,const char* dest) {
+		if ( !CopyFile(source,dest,false) ) {
+			LOGE << "Cannot copy file " << source << " to " << dest;
+		}
+		/*
+		FILE *fd1 = fopen(source, "rb");
+		assert( fd1 != 0 );		
+		FILE *fd2 = fopen(dest, "wb");
+		assert( fd2 != 0 );
+		size_t n, m;
+		unsigned char buff[8192];
+		do {
+			n = fread(buff, 1, sizeof buff, fd1);
+			if (n) m = fwrite(buff, 1, n, fd2);
+			else   m = 0;
+		} while ((n > 0) && (n == m));
+		fclose(fd1);
+		fclose(fd2);
+		*/
 	}
 
 }

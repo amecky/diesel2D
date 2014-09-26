@@ -22,7 +22,9 @@ struct Actor {
 	Vector2f position;
 	Vector2f velocity;
 	float angle;
+	// remove this
 	Rect textureRect;
+	Vector4f uv;
 	Color color;
 	Vector2f scale;
 	ID colliderID;
@@ -34,8 +36,9 @@ struct Actor {
 	uint32 numBehaviors;
 	ID additionalID;
 	bool active;
+	int script;
 
-	Actor() : id(UINT_MAX) {
+	Actor() : id(UINT_MAX) ,script(-1) {
 		clear();
 	}
 	
@@ -54,6 +57,7 @@ struct Actor {
 		layer = 0;
 		additionalID = UINT_MAX;
 		active = true;
+		script = -1;
 	}
 };
 

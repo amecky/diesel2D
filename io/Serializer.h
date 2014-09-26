@@ -14,5 +14,15 @@ public:
 	
 };
 
+class BinarySerializer {
+
+public:
+	BinarySerializer() {}
+	virtual ~BinarySerializer() {}
+	// load from binary data
+	virtual int load(const char* fileName) = 0;
+	virtual const char* getResourceDirectory()  = 0;
+};
+
 }
 

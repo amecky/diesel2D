@@ -124,12 +124,20 @@ namespace ds {
 	// -------------------------------------------------------
 	// Texture
 	// -------------------------------------------------------
-	struct Texture {
+	struct TextureAsset {
 		IdString name;
 		LPDIRECT3DTEXTURE9 texture;
 		uint32 width;
 		uint32 height;
 		uint32 flags;
+	};
+
+	struct Texture {
+
+		Vector4f uv;
+		Vector2f dim;
+		int textureID;
+
 	};
 
 	// -------------------------------------------------------
@@ -177,6 +185,19 @@ namespace ds {
 		int y;
 		Color color;
 		DebugMessage() : message("") , x(0) , y(0) , color(1.0f,1.0f,1.0f,1.0f) {}
+	};
+
+	struct Polygon {
+
+		Vector2f vertices[4];
+		Vector4f uv;
+		Color color;
+
+		Polygon() : uv(0,0,0,0) , color(Color::WHITE) {
+			for ( int i = 0; i < 4; ++i ) {
+				vertices[i] = Vector2f(0.0f,0.0f);
+			}
+		}
 	};
 
 }

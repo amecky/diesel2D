@@ -7,7 +7,7 @@
 #include "..\io\FileWatcher.h"
 #include "..\utils\FileUtils.h"
 #include "..\particles\ParticleSystem.h"
-#include "..\sprites\SpriteObjectDescription.h"
+#include "StateMachine.h"
 
 namespace ds {
 
@@ -24,7 +24,7 @@ BaseApp::BaseApp() {
 	m_CurTime = 0;
 	m_LastTime = 0;
 	m_Loading = true;
-	gProfiler = new NewProfiler();
+	//gProfiler = new NewProfiler();
 	m_ClearColor = Color(100,149,237,255);
 	m_DebugInfo.showProfiler = false;
 	m_DebugInfo.printProfiler = false;
@@ -36,7 +36,8 @@ BaseApp::BaseApp() {
 	audio = new AudioManager;
 	m_Fullscreen = false;
 	m_CollisionManager = new SpriteCollisionManager();
-	particles = new ParticleManager;
+	//particles = new ParticleManager;
+	stateMachine = new StateMachine;
 	//m_DialogBatch = 0;
 }
 
@@ -45,9 +46,10 @@ BaseApp::BaseApp() {
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
 	LOGC("BaseApp") << "Destructing all elements";
-	delete particles;
+	delete stateMachine;
+	//delete particles;
 	delete m_CollisionManager;
-	delete gProfiler;
+	//delete gProfiler;
 	delete audio;
 	delete renderer;	
 	delete gFileWatcher;
@@ -71,8 +73,12 @@ void BaseApp::init() {
 	world.setRenderer(renderer);
 	world.setAssetCompiler(&assets);
 	audio->initialize(m_hWnd);
-	particles->setRenderer(renderer);
-	particles->setAssetCompiler(&assets);
+
+	profiler::init();
+	sprites::init(renderer);
+
+	//particles->setRenderer(renderer);
+	//particles->setAssetCompiler(&assets);
 	assets.setWorld(&world);
 	initialize();		
 	/*
@@ -93,9 +99,6 @@ void BaseApp::init() {
 // Load sprites
 // -------------------------------------------------------
 void BaseApp::loadSprites() {
-	SpriteDescriptionManager* sdm = new SpriteDescriptionManager;
-	assets.load("sprites",sdm,CVT_SPRITES_DESCRIPTION);
-	renderer->setDescriptionManager(sdm);
 }
 
 void BaseApp::initializeGUI() {
@@ -176,15 +179,16 @@ void BaseApp::updateTime() {
 // Build frame
 // -------------------------------------------------------
 void BaseApp::buildFrame() {	
-	gProfiler->reset();	
+	//gProfiler->reset();	
+	profiler::reset();
 	m_CollisionManager->reset();
-	PR_START("MAIN")
+	//PR_START("MAIN")
 	PR_START("FILEWATCHER")
 #ifdef DEBUG
 	assets.update();
 #endif
 	PR_END("FILEWATCHER")
-	renderer->getDrawCounter().reset();
+	renderContext.drawCounter.reset();
 	renderer->clearDebugMessages();
 	// handle key states
 	PR_START("INPUT")
@@ -211,8 +215,10 @@ void BaseApp::buildFrame() {
 			DialogID did;
 			int selected;
 			if ( gui.onButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y,&did,&selected) ) {
+				stateMachine->onGUIButton(did,selected);
 				onGUIButton(did,selected);
 			}
+			stateMachine->OnButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);
 		}
 		else {
 			OnButtonUp(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);
@@ -230,25 +236,36 @@ void BaseApp::buildFrame() {
 			}
 		}
 	//}
+	sprites::begin();
 	PR_END("GameObjects::update")
+	PR_START("StateMachine::update")
+	stateMachine->update(m_GameTime.elapsed);
+	PR_END("StateMachine::update")	
 	PR_START("Game::update")
 	update(m_GameTime);
-	world.update(m_GameTime.elapsed);
-	particles->update(m_GameTime.elapsed);
+	world.update(m_GameTime.elapsed);	
+	//particles->update(m_GameTime.elapsed);
 	PR_END("Game::update")
+	PRS("Collisions::check")
 	int collisions = m_CollisionManager->checkIntersections();
 	if ( collisions > 0 ) {
 		handleCollisions();
 	}
+	PRE("Collisions::check")
 	PR_END("UPDATE")
 	PR_START("RENDER")
 	renderer->beginRendering(m_ClearColor);	
 	renderer->setupMatrices();
 	PR_START("RENDER_GAME")
 	draw(m_GameTime);
-	//m_World.draw();
-	gui.render();
 	PR_END("RENDER_GAME")
+	//m_World.draw();
+	PRS("RENDER_GUI")
+	gui.render();
+	PRE("RENDER_GUI")
+	PRS("RENDER_FLUSH")
+	renderer->flush();
+	PRE("RENDER_FLUSH")
 	PR_START("DEBUG_RENDER")
 #ifdef DEBUG		
 	if ( m_DebugInfo.showDrawCounter ) {
@@ -260,14 +277,16 @@ void BaseApp::buildFrame() {
 	}		
 #endif
 	renderer->drawDebugMessages();
-	PR_END("DEBUG_RENDER")
-	PR_END("RENDER")		
-	renderer->endRendering();	
-	PR_END("MAIN")
+	PR_END("DEBUG_RENDER")		
+	PR_END("RENDER")
+	renderer->endRendering();
+	profiler::finalize();
+	//PR_END("MAIN")
 	if ( m_DebugInfo.printProfiler ) {
 		m_DebugInfo.printProfiler = false;
 		renderer->printDrawCounter();
-		gProfiler->print();
+		LOG << "--------------------------------";
+		profiler::print();
 	}	
 }
 
@@ -286,14 +305,6 @@ void BaseApp::sendButton(int button,int x,int y,bool down) {
 // Key message handling
 // -------------------------------------------------------
 void BaseApp::sendOnChar(char ascii,unsigned int state) {
-#ifdef DEBUG
-	if ( ascii == 'p' ) {
-		gProfiler->print();
-	}
-	if ( ascii == 'o' ) {
-		gBlockMemory->debug();
-	}
-#endif
 	m_KeyStates.ascii = ascii;
 	m_KeyStates.onChar = true;
 }
@@ -328,7 +339,7 @@ void BaseApp::sendKeyUp(WPARAM virtualKey) {
 	m_KeyStates.keyUp = true;
 	m_KeyStates.keyReleased = virtualKey;
 }
-
+/*
 void BaseApp::createParticleSystem(const char* fileName,int textureID,ParticleSystem* entity,int maxParticles,int blendState) {
 	entity->setRenderer(renderer);
 	entity->setMaxParticles(maxParticles);
@@ -339,5 +350,5 @@ void BaseApp::createParticleSystem(const char* fileName,int textureID,ParticleSy
 	//entity->load(fileName);	
 	m_GameObjects.push_back(entity);
 }
-
+*/
 }

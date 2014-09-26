@@ -9,15 +9,25 @@
 #include "Blueprint.h"
 #include "..\renderer\Renderer.h"
 #include "..\compiler\AssetCompiler.h"
+#include "..\script\Assembler.h"
 
 namespace ds {
+
+typedef DataArray<Actor, MAX_ITEMS> Actors;
+
+namespace wo {
+
+	ID create(uint32 layer, uint32 type, const Vector2f& pos, const Vector4f& uv, float angle = 0.0f, const Vector2f& scale = Vector2f(1, 1), const Color& color = Color::WHITE);
+
+}
 
 class World {
 
 typedef std::vector<ds::CollisionCallback*> Callbacks;
 typedef std::map<IdString,Blueprint*> BlueprintMap;
-typedef DataArray<Actor,MAX_ITEMS> Actors;
+
 typedef dVector<Behavior*> Behaviors;
+typedef std::vector<as::AssemblerScript> Scripts;
 
 public:
 	World(void);
@@ -77,10 +87,23 @@ public:
 	void setAssetCompiler(AssetCompiler* assetCompiler) {
 		m_Assets = assetCompiler;
 	}
+	int loadScript(const char* name) {
+		int ret = m_Scripts.size();
+		as::AssemblerScript script;
+		m_Scripts.push_back(script);
+		as::AssemblerScript& current = m_Scripts[m_Scripts.size() - 1];
+		m_Assets->load(name, &current, CVT_ASM);				
+		return ret;
+	}
+	void attachScript(ID id, int scriptID) {
+		Actor& a = getActor(id);
+		a.script = scriptID;
+	}
 private:
 	Actors m_Actors;
 	ds::Renderer* m_Renderer;
 	//ActorRegistry m_Registry;
+	Scripts m_Scripts;
 	ds::CollisionSystem m_CollisionSystem;
 	Callbacks m_Callbacks;
 	BlueprintMap m_BlueprintMap;
