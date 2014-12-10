@@ -31,9 +31,12 @@ public:
 	~VertexDeclaration(void);
 	void addElement(const VDTYPE& type,const VDUSAGE& usage);
 	void create();
-	void clear();
-	IDirect3DVertexDeclaration9* get() { return m_Decl; }
-	int getSize();
+	IDirect3DVertexDeclaration9* get() { 
+		return m_Decl; 
+	}
+	const int getSize() const {
+		return m_Size;
+	}
 private:	
 	IDirect3DVertexDeclaration9* m_Decl;
 	VDElements m_DecElements;

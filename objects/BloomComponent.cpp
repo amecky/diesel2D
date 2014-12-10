@@ -45,13 +45,13 @@ void BloomComponent::init() {
 	m_BloomTexture = m_Renderer->createRenderTarget(currentTarget,Color::BLACK);
 	LOG << "Bloom texture: " << m_BloomTexture;
 	m_BloomShaderID = shader::createBloomShader(m_Renderer,m_Settings.initialTexture,m_Settings.threshold);
-	m_BloomShader = m_Renderer->getShader(m_BloomShaderID);
+	m_BloomShader = renderer::getShader(m_BloomShaderID);
 	m_BloomEntity.setTextureRect(ds::Rect(0,0,1024,768),1024,768,m_Settings.initialTexture);
 	m_BloomEntity.setPosition(Vector2f(512,384));
 	
 	++currentTarget;
-	m_BlurHShaderID = m_Renderer->loadShader("blur","BlurTech");
-	m_BlurHShader = m_Renderer->getShader(m_BlurHShaderID);
+	m_BlurHShaderID = renderer::loadShader("blur", "BlurTech");
+	m_BlurHShader = renderer::getShader(m_BlurHShaderID);
 	shader::setTexture(m_BlurHShader,"gTex",m_Renderer,m_BloomTexture);
 	shader::setFloat(m_BlurHShader,"BlurDistance",1.0f/1024.0f);
 	m_BlurHTexture = m_Renderer->createRenderTarget(currentTarget,Color::BLACK);
@@ -62,7 +62,7 @@ void BloomComponent::init() {
 	++currentTarget;
 	m_BloomCombineTexture = m_Renderer->createRenderTarget(currentTarget,Color::BLACK);
 	m_BloomCombineShaderID = shader::createBloomCombineShader(m_Renderer,m_Settings.initialTexture,m_BlurHTexture);
-	m_BloomCombineShader = m_Renderer->getShader(m_BloomCombineShaderID);
+	m_BloomCombineShader = renderer::getShader(m_BloomCombineShaderID);
 	m_BloomCombineEntity.setTextureRect(ds::Rect(0,0,1024,768),1024,768,m_BlurHTexture);
 	m_BloomCombineEntity.setPosition(Vector2f(512,384));
 
@@ -96,12 +96,12 @@ void BloomComponent::render() {
 		m_Renderer->setCurrentShader(m_BloomCombineShaderID);
 		sprites::draw(m_BloomCombineEntity);
 
-		m_Renderer->restoreBackBuffer(m_Settings.firstTarget);
+		m_Renderer->restoreBackBuffer();
 		m_Renderer->setCurrentShader(currentShader);
 		sprites::draw(m_OverlayEntity);
 	}
 	else {
-		m_Renderer->restoreBackBuffer(m_Settings.firstTarget);
+		m_Renderer->restoreBackBuffer();
 		sprites::draw(m_StraightEntity);
 	}
 }

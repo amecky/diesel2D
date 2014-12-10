@@ -53,6 +53,11 @@ void NewParticleSystem::load(BinaryLoader* loader) {
 			VelocityRotationModifier* modifier = new VelocityRotationModifier;
 			addModifier(modifier);
 		}
+		else if (loader->getChunkID() == 109) {
+			AlphaPathModifier* modifier = new AlphaPathModifier;
+			modifier->load(loader);
+			addModifier(modifier);
+		}
 		// generators
 		else if ( loader->getChunkID() == 200 ) {	
 			RingGenerator* generator = new RingGenerator;
@@ -79,6 +84,16 @@ void NewParticleSystem::load(BinaryLoader* loader) {
 			generator->load(loader);
 			addGenerator(generator);
 		}
+		else if (loader->getChunkID() == 205) {
+			ColorGenerator* generator = new ColorGenerator;
+			generator->load(loader);
+			addGenerator(generator);
+		}
+		else if (loader->getChunkID() == 206) {
+			HSVColorGenerator* generator = new HSVColorGenerator;
+			generator->load(loader);
+			addGenerator(generator);
+		}
 		else if ( loader->getChunkID() == 300 ) {
 			ParticleEmitterData& data = m_Emitter.getEmitterData();
 			loader->read(&data.count);
@@ -87,6 +102,7 @@ void NewParticleSystem::load(BinaryLoader* loader) {
 			loader->read(&m_Data.id);
 			loader->read(&m_Data.textureID);
 			loader->read(&m_Data.textureRect);
+			m_Data.texture = ds::math::buildTexture(m_Data.textureRect.top, m_Data.textureRect.left, m_Data.textureRect.width(), m_Data.textureRect.height());
 		}
 		loader->closeChunk();
 	}		

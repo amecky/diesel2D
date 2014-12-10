@@ -74,6 +74,7 @@ struct RingGeneratorData {
 
 	float radius;
 	float variance;
+	float angleVariance;
 };
 
 class RingGenerator : public AbstractParticleGenerator<RingGeneratorData> {
@@ -82,6 +83,7 @@ public:
 	RingGenerator() : AbstractParticleGenerator<RingGeneratorData>() {
 		m_Translator.add("radius",&RingGeneratorData::radius);
 		m_Translator.add("variance",&RingGeneratorData::variance);
+		m_Translator.add("angle_variance", &RingGeneratorData::angleVariance);
 	}
 	virtual ~RingGenerator() {}
 	void init(float radius,float variance) {
@@ -92,12 +94,14 @@ public:
 		uint32 count = end - start;
 		//Vector2f v(512,384);
 		float angle = 0.0f;
+		float angleVariance = DEGTORAD(m_Data.angleVariance);
 		float step = TWO_PI / static_cast<float>(count);
 		for ( uint32 i = 0; i < count; ++i ) {
+			float myAngle = angle + ds::math::random(-angleVariance,angleVariance);
 			float rad = ds::math::random(m_Data.radius-m_Data.variance,m_Data.radius+m_Data.variance);
-			array->position[start+i].x = position.x + rad * cos(angle);
-			array->position[start+i].y = position.y + rad * sin(angle);
-			array->rotation[start+i] = angle;
+			array->position[start + i].x = position.x + rad * cos(myAngle);
+			array->position[start + i].y = position.y + rad * sin(myAngle);
+			array->rotation[start + i] = myAngle;
 			angle += step;
 		}
 	}
@@ -160,6 +164,78 @@ public:
 		for ( uint32 i = 0; i < count; ++i ) {
 			float ttl = ds::math::random(m_Data.ttl-m_Data.variance,m_Data.ttl+m_Data.variance);
 			array->timer[start+i] = Vector3f(0.0f,0.0f,ttl);
+		}
+	}
+};
+
+// -------------------------------------------------------
+// ColorGenerator
+// -------------------------------------------------------
+struct ColorGeneratorData {
+
+	Color color;
+
+};
+
+class  ColorGenerator : public AbstractParticleGenerator< ColorGeneratorData> {
+
+public:
+	ColorGenerator() : AbstractParticleGenerator< ColorGeneratorData>() {
+		m_Translator.add("color", &ColorGeneratorData::color);
+	}
+	virtual ~ColorGenerator() {}
+	void init(const Color& color) {
+		m_Data.color = color;
+	}
+	void generate(ParticleArray* array, const Vector2f& position, float dt, uint32 start, uint32 end) {
+		uint32 count = end - start;
+		for (uint32 i = 0; i < count; ++i) {
+			array->color[start + i] = m_Data.color;
+		}
+	}
+};
+
+// -------------------------------------------------------
+// ColorGenerator
+// -------------------------------------------------------
+struct HSVColorGeneratorData {
+
+	Vector3f hsv;
+	float hueVariance;
+	float saturationVariance;
+	float valueVariance;
+	float alpha;
+};
+
+class  HSVColorGenerator : public AbstractParticleGenerator<HSVColorGeneratorData> {
+
+public:
+	HSVColorGenerator() : AbstractParticleGenerator<HSVColorGeneratorData>() {
+		m_Translator.add("hsv", &HSVColorGeneratorData::hsv);
+		m_Translator.add("alpha", &HSVColorGeneratorData::alpha);
+		m_Translator.add("hue_variance", &HSVColorGeneratorData::hueVariance);
+		m_Translator.add("saturation_variance", &HSVColorGeneratorData::saturationVariance);
+		m_Translator.add("value_variance", &HSVColorGeneratorData::valueVariance);
+	}
+	
+	virtual ~HSVColorGenerator() {}
+	
+	void init(const Vector3f& hsv) {
+		m_Data.hsv = hsv;
+	}
+
+	void generate(ParticleArray* array, const Vector2f& position, float dt, uint32 start, uint32 end) {
+		uint32 count = end - start;
+		for (uint32 i = 0; i < count; ++i) {
+			float hv = ds::math::random(-m_Data.hueVariance, m_Data.hueVariance);
+			float h = math::clamp(m_Data.hsv.x + hv, 0.0f, 360.0f);
+			float sv = ds::math::random(-m_Data.saturationVariance, m_Data.saturationVariance);
+			float s = math::clamp(m_Data.hsv.y + sv, 0.0f, 100.0f);
+			float vv = ds::math::random(-m_Data.valueVariance, m_Data.valueVariance);
+			float v = math::clamp(m_Data.hsv.z + vv, 0.0f, 100.0f);
+			Color c = color::hsvToColor(h, s, v);			
+			c.a = m_Data.alpha;
+			array->color[start + i] = c;
 		}
 	}
 };

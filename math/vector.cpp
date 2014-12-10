@@ -2,6 +2,8 @@
 #include <math.h>
 #include "GameMath.h"
 #include <Vector.h>
+#include "..\utils\Log.h"
+
 namespace ds {
 
 namespace vector {
@@ -79,6 +81,22 @@ namespace vector {
 		return ret;
 	}
 
+	float calculateRotation(const Vector2f& v) {
+		Vector2f vn = normalize(v);
+		if (vn != V2_RIGHT) {
+			float dt = math::clamp(dot(vn, V2_RIGHT),-1.0f,1.0f);
+			float tmp = acos(dt);
+			float cross = -1.0f * vn.y;
+			if (cross > 0.0f) {
+				tmp = 2.0f * PI - tmp;
+			}
+			return tmp;
+		}
+		else {
+			return 0.0f;
+		}
+	}
+
 	float getAngle(const Vector2f& v1,const Vector2f& v2)  {	
 		Vector2f vn1 = normalize(v1);
 		Vector2f vn2 = normalize(v2);
@@ -106,6 +124,21 @@ namespace vector {
 		float vx = math::fastCos(angle) * velocity;
 		float vy = math::fastSin(angle) * velocity;
 		return Vector2f(vx,vy);
+	}
+
+	void clamp(Vector2f& v, const Vector2f& min, const Vector2f& max) {
+		if (v.x > max.x) {
+			v.x = max.x;
+		}
+		if (v.x < min.x) {
+			v.x = min.x;
+		}
+		if (v.y > max.y) {
+			v.y = max.y;
+		}
+		if (v.y < min.y) {
+			v.y = min.y;
+		}
 	}
 	
 }

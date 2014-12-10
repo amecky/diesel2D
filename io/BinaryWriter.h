@@ -46,12 +46,14 @@ public:
 	uint32 write(uint32 value);
 	uint32 write(float value);
 	uint32 write(const Vector2f& v);
+	uint32 write(const Vector3f& v);
 	uint32 write(const Vector4f& v);
 	uint32 write(const ds::Color& color);
 	uint32 write(const ds::Rect& r);
 	uint32 write(const std::string& str);
 	uint32 write(const ds::ColorPath& path);
 	uint32 write(const ds::Vector2fPath& path);
+	uint32 write(const ds::FloatArray& path);
     const uint32 getStatus() const {
         return m_ErrorCode;
     }

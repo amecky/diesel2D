@@ -16,8 +16,8 @@ LightComponent::~LightComponent(void) {
 // Initialize
 // -------------------------------------------------------
 void LightComponent::initialize(int startLayer,int colorRT,int normalRT,float ambient,const Color& ambientColor) {
-	m_ScreenW = m_Renderer->getViewport()->getWidth();
-	m_ScreenH = m_Renderer->getViewport()->getHeight();
+	m_ScreenW = ds::renderer::getSelectedViewport().getWidth();
+	m_ScreenH = ds::renderer::getSelectedViewport().getHeight();
 	float centerX = m_ScreenW * 0.5f;
 	float centerY = m_ScreenH * 0.5f;
 
@@ -199,7 +199,7 @@ int LightComponent::createDeferredShader() {
 	"		PixelShader = compile ps_2_0 PointLightShader();\r\n"
 	"	}\r\n"
 	"}\r\n";
-	int ret = m_Renderer->createShaderFromText(g_strBuffer,"DeferredPointLight");
+	int ret = renderer::createShaderFromText(g_strBuffer, "DeferredPointLight");
 	return ret;
 }
 
@@ -270,7 +270,7 @@ int LightComponent::createCombineShader() {
 		"		PixelShader = compile ps_2_0 CombinedPixelShader();\r\n"
 		"	}\r\n"
 		"}\r\n";
-	int ret = m_Renderer->createShaderFromText(g_strBuffer,"DeferredCombined2");
+	int ret = renderer::createShaderFromText(g_strBuffer, "DeferredCombined2");
 	return ret;
 }
 

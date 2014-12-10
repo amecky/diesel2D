@@ -1,5 +1,6 @@
 #include "FloatArray.h"
 #include <math.h>
+#include "..\utils\Log.h"
 
 namespace ds {
 

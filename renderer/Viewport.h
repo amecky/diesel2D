@@ -1,23 +1,23 @@
 #pragma once
 #include "Vector.h"
-//#include "..\math\math_types.h"
 
 namespace ds {
 
 class Viewport {
 
 public:
-	Viewport(int width,int height);
+	Viewport();
 	~Viewport(void);
 	void setDimension(int width,int height);
+
+	void setDimension(int screenWidth, int screenHeight, int worldWidth, int worldHeight);
+
 	void setPosition(int x,int y);
 	void setPosition(const Vector2f& pos);
 	const Vector2f& getPosition() const {
+		//return m_ViewPos;
 		return m_Position;
-	}
-	const Vector2f& getDelta() const {
-		return m_Delta;
-	}
+	}	
 	const int getWidth() const { 
 		return m_Width; 
 	}
@@ -30,14 +30,26 @@ public:
 	float getPositionY() {
 		return m_Position.y;
 	}
+	Vector2f convertToWorld(const Vector2f& screenPos) {
+		Vector2f p = screenPos;
+		p.x *= m_ViewScaleX;
+		p.y *= m_ViewScaleY;
+		return p;
+	}
 
 private:
 	Vector2f m_Position;
-	Vector2f m_Delta;
+	Vector2f m_ViewPos;
 	int m_Width;
 	int m_Height;
-	int m_MaxX;
-	int m_MaxY;
+	Vector2f m_Min;
+	Vector2f m_Max;
+	Vector2f m_ScreenSize;
+	Vector2f m_WorldSize;
+	float m_ScaleX;
+	float m_ScaleY;
+	float m_ViewScaleX;
+	float m_ViewScaleY;
 };
 
 };

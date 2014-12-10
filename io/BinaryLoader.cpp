@@ -79,6 +79,12 @@ void BinaryLoader::read(Vector2f* value) {
 	readBuffer(&value->y,sizeof(float));    
 }
 
+void BinaryLoader::read(Vector3f* value) {
+	readBuffer(&value->x, sizeof(float));
+	readBuffer(&value->y, sizeof(float));
+	readBuffer(&value->z, sizeof(float));
+}
+
 void BinaryLoader::read(Vector4f* value) {
 	readBuffer(&value->x, sizeof(float));
 	readBuffer(&value->y, sizeof(float));
@@ -118,6 +124,18 @@ void BinaryLoader::read(ds::Vector2fPath* value) {
 		readBuffer(&c.x,sizeof(float));    
 		readBuffer(&c.y,sizeof(float));    
 		value->add(ts,c);
+	}
+}
+
+void BinaryLoader::read(ds::FloatArray* value) {
+	int count = 0;
+	readBuffer(&count, sizeof(int));
+	for (int i = 0; i < count; ++i) {
+		float ts = 0.0f;
+		readBuffer(&ts, sizeof(float));
+		float c;
+		readBuffer(&c, sizeof(float));
+		value->add(ts, c);
 	}
 }
 

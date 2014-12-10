@@ -232,6 +232,18 @@
     <ClCompile Include="compiler\NASMConverter.cpp">
       <Filter>compiler</Filter>
     </ClCompile>
+    <ClCompile Include="flow\DataContainer.cpp">
+      <Filter>flow</Filter>
+    </ClCompile>
+    <ClCompile Include="flow\System.cpp">
+      <Filter>flow</Filter>
+    </ClCompile>
+    <ClCompile Include="flow\FlowManager.cpp">
+      <Filter>flow</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\modifiers.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
@@ -587,6 +599,21 @@
     <ClInclude Include="compiler\NASMConverter.h">
       <Filter>compiler</Filter>
     </ClInclude>
+    <ClInclude Include="flow\Bitset.h">
+      <Filter>flow</Filter>
+    </ClInclude>
+    <ClInclude Include="flow\DataContainer.h">
+      <Filter>flow</Filter>
+    </ClInclude>
+    <ClInclude Include="flow\System.h">
+      <Filter>flow</Filter>
+    </ClInclude>
+    <ClInclude Include="flow\FlowManager.h">
+      <Filter>flow</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\modifiers.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico" />
@@ -652,6 +679,9 @@
     </Filter>
     <Filter Include="collision">
       <UniqueIdentifier>{1492ec9b-a315-4461-848e-c935a447e4e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="flow">
+      <UniqueIdentifier>{c22efe01-b6df-4cca-86b6-4df4b5a2f7bb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

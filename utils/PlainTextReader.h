@@ -296,6 +296,15 @@ public:
 		float z = getFloat(2,name);
 		return Vector3f(x,y,z);
 	}
+	Vector3f getVector3f(const std::string& name,const Vector3f& defaultValue) {
+		if (hasProperty(name)) {
+			float x = getFloat(0, name);
+			float y = getFloat(1, name);
+			float z = getFloat(2, name);
+			return Vector3f(x, y, z);
+		}
+		return defaultValue;
+	}
 	ds::Color getColor(const std::string& name,const ds::Color& defaultValue = ds::Color::WHITE) {
 		if ( hasProperty(name)) {
 			assert(getElementCount(name) == 4);

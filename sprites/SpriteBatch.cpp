@@ -6,6 +6,7 @@
 #include "..\renderer\Renderer.h"
 #include "..\utils\Log.h"
 #include "..\math\GameMath.h"
+#include "..\renderer\VertexDeclaration.h"
 
 namespace ds {
 
@@ -52,7 +53,7 @@ namespace gfx {
 			batch_context.renderer->setTexture(batch_context.shaderID, "gTex", batch_context.currentTextureID);
 			batch_context.renderer->drawBuffer(batch_context.handle, batch_context.currentTextureID);
 			batch_context.renderer->resetBuffer(batch_context.handle);
-			renderContext.drawCounter.incFlushes();
+			renderContext->drawCounter.incFlushes();
 			batch_context.vertexCounter = 0;
 			PRE("gfx::endBatch")
 		}
@@ -98,7 +99,7 @@ namespace gfx {
 				Vector2f cor;
 				cor.x = pos->x;
 				cor.y = pos->y;
-				cor = cor - batch_context.renderer->getViewport()->getPosition();
+				cor = cor - ds::renderer::getSelectedViewport().getPosition();
 				Vector2f p(0, 0);
 				for (int i = 0; i < 4; ++i) {
 					p.x = VP_ARRAY[i * 2] * dim->x;
@@ -145,7 +146,7 @@ namespace gfx {
 			batch_context.renderer->unlockBuffer(batch_context.handle);
 			PRE("gfx::draw::prepare")
 			flushBatch();
-			renderContext.drawCounter.addSprites(particleArray.size());
+			renderContext->drawCounter.addSprites(particleArray.size());
 			
 		}	
 		PRE("gfx::draw")
@@ -202,13 +203,13 @@ namespace sprites {
 		D3DPOOL pool = D3DPOOL_DEFAULT;
 		DWORD usage = D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC;
 		int size = MAX_SPRITES * 4;
-		LOGC("sprites") << "creating new vertex buffer - size: " << size;
-		HR(renderContext.device->CreateVertexBuffer(size * vd.vertexSize, usage, 0, pool, &spriteCtx.vertexBuffer, NULL));
+		LOGC("sprites") << "creating new vertex buffer - size: " << size << " vd size: " << spriteCtx.vertexSize;
+		HR(renderContext->device->CreateVertexBuffer(size * spriteCtx.vertexSize, usage, 0, pool, &spriteCtx.vertexBuffer, NULL));
 
 		int indices = MAX_SPRITES * 6;
 		pool = D3DPOOL_MANAGED;
 		usage = D3DUSAGE_WRITEONLY;
-		HR(renderContext.device->CreateIndexBuffer(indices * sizeof(WORD), usage, D3DFMT_INDEX16, pool, &spriteCtx.indexBuffer, NULL));
+		HR(renderContext->device->CreateIndexBuffer(indices * sizeof(WORD), usage, D3DFMT_INDEX16, pool, &spriteCtx.indexBuffer, NULL));
 		LOGC("sprites") << "new IndexBuffer created size: " << indices;
 		WORD* indexBuffer;
 		HR(spriteCtx.indexBuffer->Lock(0, indices * sizeof(WORD), (void**)&indexBuffer, 0));
@@ -236,6 +237,13 @@ namespace sprites {
 		spriteCtx.index = 0;
 	}
 
+	void setShaderID(int shaderID) {
+		if (spriteCtx.shaderID != shaderID) {
+			sprites::flush();
+		}
+		spriteCtx.shaderID = shaderID;
+	}
+
 	// -------------------------------------------------------
 	// Prepare buffer
 	// -------------------------------------------------------
@@ -261,32 +269,32 @@ namespace sprites {
 			spriteCtx.renderer->setTexture(spriteCtx.textureID, 0);
 			spriteCtx.renderer->setTexture(spriteCtx.shaderID, "gTex", spriteCtx.textureID);
 			//m_Renderer->setBlendState(m_CurrentBlendState);
-			PR_START("sprites::drawBuffer")			
-			//if (m_CurrentVD != vDef) {
+			PR_START("sprites::drawBuffer")
+				//if (m_CurrentVD != vDef) {
 				//m_CurrentVD = vDef;
-				renderContext.device->SetVertexDeclaration(renderContext.vdStructs[VD_PTC].declaration->get());
+			HR(renderContext->device->SetVertexDeclaration(renderContext->vdStructs[VD_PTC].declaration->get()););
 			//}
-			HR(renderContext.device->SetIndices(spriteCtx.indexBuffer));
-			HR(renderContext.device->SetStreamSource(0, spriteCtx.vertexBuffer, 0, spriteCtx.vertexSize));
+			HR(renderContext->device->SetIndices(spriteCtx.indexBuffer));
+			HR(renderContext->device->SetStreamSource(0, spriteCtx.vertexBuffer, 0, spriteCtx.vertexSize));
 
 			D3DPRIMITIVETYPE pt = D3DPT_TRIANGLELIST;
 			int numPrimitives = spriteCtx.size * 2;
-			renderContext.drawCounter.addDrawCall();
-			renderContext.drawCounter.addPrimitives(numPrimitives);
-			renderContext.drawCounter.addIndices(numPrimitives * 3);
-			Shader* shader = &spriteCtx.renderer->getShader(spriteCtx.shaderID);
-			renderContext.drawCounter.addShader();
+			renderContext->drawCounter.addDrawCall();
+			renderContext->drawCounter.addPrimitives(numPrimitives);
+			renderContext->drawCounter.addIndices(numPrimitives * 3);
+			Shader* shader = &renderer::getShader(spriteCtx.shaderID);
+			renderContext->drawCounter.addShader();
 			uint32 numPasses = spriteCtx.renderer->startShader(shader);
 			for (UINT p = 0; p < numPasses; ++p) {
 				HR(shader->m_FX->BeginPass(p));
 				spriteCtx.renderer->setShaderParameter(shader);
-				HR(renderContext.device->DrawIndexedPrimitive(pt, 0, 0, spriteCtx.size * 4, 0, numPrimitives));
+				HR(renderContext->device->DrawIndexedPrimitive(pt, 0, 0, spriteCtx.size * 4, 0, numPrimitives));
 				HR(shader->m_FX->EndPass());
 			}
 			spriteCtx.renderer->endShader(shader);
 			PR_END("sprites::drawBuffer")
-			renderContext.drawCounter.incFlushes();
-			renderContext.drawCounter.addSprites(spriteCtx.size);
+			renderContext->drawCounter.incFlushes();
+			renderContext->drawCounter.addSprites(spriteCtx.size);
 			PR_END("sprites")
 		}
 	}
@@ -313,7 +321,7 @@ namespace sprites {
 		spriteCtx.sprites[idx+3].uv.y = uv.w;
 
 		Vector2f cor = pos;
-		cor = cor - spriteCtx.renderer->getViewport()->getPosition();
+		cor = cor - ds::renderer::getSelectedViewport().getPosition();
 		Vector2f p(0, 0);
 		for (int i = 0; i < 4; ++i) {
 			p.x = VP_ARRAY[i * 2] * dim.x;
@@ -325,6 +333,45 @@ namespace sprites {
 			spriteCtx.sprites[idx + i].z = 0.0f;
 			spriteCtx.sprites[idx + i].color = color;
 		}	
+		spriteCtx.index += 4;
+		++spriteCtx.size;
+	}
+
+	void draw(const Texture& texture, const ParticleArray& array) {
+		for (uint32 i = 0; i < array.countAlive; ++i) {
+			draw(array.position[i], texture, array.rotation[i], array.scale[i].x, array.scale[i].y, array.color[i]);			
+		}
+	}
+
+	void draw(const Vector2f& pos, const Texture& tex, float rotation, float scaleX, float scaleY, const Color& color, const Vector2f& center) {
+		int vertexCount = spriteCtx.index;
+		if ((vertexCount + 4) >= spriteCtx.maxVertices || tex.textureID != spriteCtx.textureID) {
+			spriteCtx.textureID = tex.textureID;
+			flush();
+		}
+		int idx = spriteCtx.index;
+		spriteCtx.sprites[idx].uv.x = tex.uv.x;
+		spriteCtx.sprites[idx].uv.y = tex.uv.y;
+		spriteCtx.sprites[idx + 1].uv.x = tex.uv.z;
+		spriteCtx.sprites[idx + 1].uv.y = tex.uv.y;
+		spriteCtx.sprites[idx + 2].uv.x = tex.uv.z;
+		spriteCtx.sprites[idx + 2].uv.y = tex.uv.w;
+		spriteCtx.sprites[idx + 3].uv.x = tex.uv.x;
+		spriteCtx.sprites[idx + 3].uv.y = tex.uv.w;
+
+		Vector2f cor = pos;
+		cor = cor - ds::renderer::getSelectedViewport().getPosition();
+		Vector2f p(0, 0);
+		for (int i = 0; i < 4; ++i) {
+			p.x = VP_ARRAY[i * 2] * tex.dim.x;
+			p.y = VP_ARRAY[i * 2 + 1] * tex.dim.y;
+			p = p - center;
+			Vector2f np = vector::srt(cor, p, scaleX, scaleY, rotation);
+			spriteCtx.sprites[idx + i].x = np.x;
+			spriteCtx.sprites[idx + i].y = np.y;
+			spriteCtx.sprites[idx + i].z = 0.0f;
+			spriteCtx.sprites[idx + i].color = color;
+		}
 		spriteCtx.index += 4;
 		++spriteCtx.size;
 	}
@@ -347,6 +394,7 @@ namespace sprites {
 		sprite->angle = rotation;
 		sprite->color = clr;
 		sprite->timer = 0.0f;
+		sprite->scale = scale;
 		sprite->target = Vector2f(0, 0);
 		sprite->index = 0;
 	}

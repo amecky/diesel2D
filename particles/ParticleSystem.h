@@ -25,6 +25,7 @@ struct NewParticleSystemData {
 	uint32 maxParticles;
 	Rect textureRect;
 	uint32 textureID;
+	Texture texture;
 };
 
 class NewParticleSystem : public GameObject , public Serializer {
@@ -70,7 +71,7 @@ public:
 	void render() {
 		PR_START("NewParticleSystem::render")
 		if ( m_Array.countAlive > 0 ) {		
-			m_Renderer->draw(m_Data.textureID, m_Data.textureRect, m_Array);			
+			ds::sprites::draw(m_Data.texture,  m_Array);			
 		}
 		PR_END("NewParticleSystem::render")
 	}

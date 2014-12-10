@@ -252,6 +252,9 @@
     <ClCompile Include="ecs\Blueprint.cpp" />
     <ClCompile Include="ecs\CollisionSystem.cpp" />
     <ClCompile Include="ecs\World.cpp" />
+    <ClCompile Include="flow\DataContainer.cpp" />
+    <ClCompile Include="flow\System.cpp" />
+    <ClCompile Include="flow\FlowManager.cpp" />
     <ClCompile Include="io\BinaryLoader.cpp" />
     <ClCompile Include="io\BinaryWriter.cpp" />
     <ClCompile Include="io\FileWatcher.cpp" />
@@ -286,6 +289,7 @@
     <ClCompile Include="script\Assembler.cpp" />
     <ClCompile Include="script\ScriptVM.cpp" />
     <ClCompile Include="script\Tokenizer.cpp" />
+    <ClCompile Include="sprites\modifiers.cpp" />
     <ClCompile Include="sprites\SpriteBatch.cpp" />
     <ClCompile Include="sprites\SpriteCollisionManager.cpp" />
     <ClCompile Include="sprites\Sprite.cpp" />
@@ -346,6 +350,10 @@
     <ClInclude Include="ecs\LifecycleBehaviors.h" />
     <ClInclude Include="ecs\MoveBehaviors.h" />
     <ClInclude Include="ecs\World.h" />
+    <ClInclude Include="flow\Bitset.h" />
+    <ClInclude Include="flow\DataContainer.h" />
+    <ClInclude Include="flow\System.h" />
+    <ClInclude Include="flow\FlowManager.h" />
     <ClInclude Include="io\BinaryLoader.h" />
     <ClInclude Include="io\BinaryWriter.h" />
     <ClInclude Include="io\FileWatcher.h" />
@@ -405,6 +413,7 @@
     <ClInclude Include="script\Script.h" />
     <ClInclude Include="script\ScriptVM.h" />
     <ClInclude Include="script\Tokenizer.h" />
+    <ClInclude Include="sprites\modifiers.h" />
     <ClInclude Include="sprites\SpriteBatch.h" />
     <ClInclude Include="sprites\SpriteCollisionManager.h" />
     <ClInclude Include="sprites\Sprite.h" />

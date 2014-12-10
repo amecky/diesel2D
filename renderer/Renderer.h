@@ -13,10 +13,14 @@
 #include "..\sprites\SpriteBatch.h"
 #include "BitmapFont.h"
 #include "Viewport.h"
+#include "..\lib\container\dVector.h"
+#include "VertexDeclaration.h"
 
 struct SimpleParticleArray;
+class Viewport;
 
 namespace ds {
+
 
 // -------------------------------------------------------
 // Constants
@@ -35,6 +39,7 @@ const int MAX_RENDER_TARGETS = 32;
 const int VD_TTC   = 0;
 const int VD_PTNBT = 1;
 const int VD_PTC   = 2;
+const int VD_PNC   = 3;
 
 class VertexDeclaration;
 
@@ -59,14 +64,38 @@ struct RenderContext {
 	D3DFORMAT format;
 	DrawCounter drawCounter;
 	VDStruct vdStructs[MAX_VERDECLS];
+	dVector<Shader> shaders;
+	//Shader shaders[MAX_SHADERS];
+	//int numShaders;
+	dVector<Viewport> viewPorts;
+	int selectedViewPort;
 
-	RenderContext() : initialized(false) {}
+	RenderContext() : initialized(false) , selectedViewPort(0) {}//, numShaders(0) {}
 
 };
 
 namespace renderer {
 
 	VDStruct& getVertexDeclaration(int declarationType);
+
+	void initializeShader(int id, const char* techName);
+
+	int createShaderFromText(const char* buffer, const char* techName);
+
+	Shader& getShader(int id);
+
+	int loadShader(const char* fxName, const char* techName);
+
+	int createViewport(int width, int height);
+
+	int createViewport(int screenWidth, int screenHeight,int worldWidth,int worldHeight);
+
+	Viewport& getSelectedViewport();
+
+	void selectViewport(int vw);
+
+	void setViewportPosition(int vw, const Vector2f& pos);
+
 }
 
 class DebugRenderer;
@@ -115,10 +144,6 @@ public:
 	void addVertexDeclaration(const char* name,VertexDeclaration* declaration);
 	VertexDeclaration* getVertexDeclaration(const char* name);
 	
-	// Shader
-	int loadShader(const char* fxName,const char* techName);
-	Shader& getShader(int id);
-	int createShaderFromText(const char* buffer,const char* techName);
 	void setTexture(int shaderID,const char* handleName,int textureID);
 	void setCurrentShader(int shaderID);
 	int getCurrentShaderID() {
@@ -140,7 +165,7 @@ public:
 	int createRenderTarget(uint32 id,const Color& clearColor = Color::WHITE);
 	int createRenderTarget(uint32 id,float width,float height,const Color& clearColor = Color::WHITE);
 	void setRenderTarget(uint32 id);
-	void restoreBackBuffer(uint32 id);
+	void restoreBackBuffer();
 	// blend states
 	int createBlendState(int srcAlpha,int dstAlpha,bool alphaEnabled);
 	int createBlendState(int srcRGB,int srcAlpha,int dstRGB,int dstAlpha,bool alphaEnabled = true,bool separateAlpha = false);
@@ -197,10 +222,6 @@ public:
 
 	BitmapFont* loadBitmapFont(const char* name,int textureId,const Color& fillColor = Color(1.0f,0.0f,1.0f,1.0f));
 
-	Viewport* getViewport() {
-		return m_Viewport;
-	}
-
 	int getDefaultShaderID() {
 		return m_DefaultShaderID;
 	}
@@ -220,12 +241,11 @@ private:
 	Color getColor(D3DLOCKED_RECT& lockedRect,int x,int y,int height);
 	//int findFreeTextureSlot();
 	int findFreeMaterialSlot();
-	int findFreeShaderSlot();
 	
 	void initializeShader(int id,const char* techName);
 	int allocateBuffer(GeoBufferType type,int vertexDefinition,int size,int& start,bool dynamic);
 	void resetDynamicBuffers();
-	Viewport* m_Viewport;
+	
 	Camera* m_Camera;	
 	mat4 matWorldViewProj;
 	mat4 m_World;
@@ -241,7 +261,7 @@ private:
 	int m_DefaultBS;
 	int m_UsedRTs;
 	// all data structs	
-	Shader m_Shaders[MAX_SHADERS];
+	//Shader m_Shaders[MAX_SHADERS];
 	int m_BMCounter;
 	ID3DXFont* m_SystemFont;
 	BlendState m_BlendStates[MAX_BLENDSTATES];
@@ -264,6 +284,6 @@ private:
 	//SpriteBatch* m_SpriteBatch;
 };
 
-extern RenderContext renderContext;
+extern RenderContext* renderContext;
 
 };

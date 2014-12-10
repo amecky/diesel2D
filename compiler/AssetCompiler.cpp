@@ -137,11 +137,6 @@ AssetCompiler::~AssetCompiler() {
 	m_Database.saveDB();
 }
 
-void AssetCompiler::setWorld(World* world) {
-	BlueprintConverter* cnv = (BlueprintConverter*)m_Mapping[CVT_BLUEPRINT];
-	cnv->setWorld(world);
-}
-
 uint32 AssetCompiler::registerConverter(Converter* converter) {
 	uint32 idx = m_CustomIndex;
 	m_Mapping[idx] = converter;

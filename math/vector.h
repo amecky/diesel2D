@@ -18,7 +18,11 @@ namespace ds {
 
 		float getAngle(const Vector2f& v1,const Vector2f& v2);
 
+		float calculateRotation(const Vector2f& v);
+
 		Vector2f getRadialVelocity(float angle,float velocity);
+
+		void clamp(Vector2f& v, const Vector2f& min, const Vector2f& max);
 
 	}
 }

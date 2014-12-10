@@ -13,7 +13,7 @@ namespace ds {
 // -------------------------------------------------------
 // Data types
 // -------------------------------------------------------
-enum DataType {DTR_INT,DTR_FLOAT,DTR_VEC2,DTR_RECT,DTR_COLOR,DTR_COLOR_PATH,DTR_VEC2_PATH,DTR_UNKNOWN};
+enum DataType {DTR_INT,DTR_FLOAT,DTR_VEC2,DTR_RECT,DTR_COLOR,DTR_COLOR_PATH,DTR_VEC2_PATH,DTR_FLOAT_PATH,DTR_VEC3,DTR_UNKNOWN};
 
 // -------------------------------------------------------
 // DataTranslator
@@ -34,9 +34,11 @@ public:
 	typedef int T::*IntMember;
 	typedef float T::*FloatMember;
 	typedef Vector2f T::*Vec2Member;
+	typedef Vector3f T::*Vec3Member;
 	typedef Rect T::*RectMember;
 	typedef Color T::*ColorMember;
 	typedef ColorPath T::*ColorPathMember;
+	typedef FloatArray T::*FloatPathMember;
 	typedef Vector2fPath T::*Vec2PathMember;
 	// -------------------------------------------------------
 	// add int member
@@ -63,6 +65,14 @@ public:
 		addDefinition(name,idx,DTR_VEC2);
 	}
 	// -------------------------------------------------------
+	// add Vector3f member
+	// -------------------------------------------------------
+	void add(const char* name, Vec3Member vec3Member) {
+		unsigned idx = m_Vec3Members.size();
+		m_Vec3Members.push_back(vec3Member);
+		addDefinition(name, idx, DTR_VEC3);
+	}
+	// -------------------------------------------------------
 	// add Rect member
 	// -------------------------------------------------------
 	void add(const char* name,RectMember rectMember) {
@@ -85,6 +95,14 @@ public:
 		unsigned idx = m_ColorPathMembers.size();
 		m_ColorPathMembers.push_back(colorPathMember);
 		addDefinition(name,idx,DTR_COLOR_PATH);
+	}
+	// -------------------------------------------------------
+	// add float path member
+	// -------------------------------------------------------
+	void add(const char* name,FloatPathMember floatPathMember) {
+		unsigned idx = m_FloatPathMembers.size();
+		m_FloatPathMembers.push_back(floatPathMember);
+		addDefinition(name, idx, DTR_FLOAT_PATH);
 	}
 	// -------------------------------------------------------
 	// add vector2f path member
@@ -152,6 +170,25 @@ public:
 		return defaultValue;
 	}
 	// -------------------------------------------------------
+	// set Vector3f value
+	// -------------------------------------------------------
+	void set(const char* name, const Vector3f& value, T* t) {
+		const DataDefinition* def = find(name, DTR_VEC3);
+		if (def != 0) {
+			t->*m_Vec3Members[def->index] = value;
+		}
+	}
+	// -------------------------------------------------------
+	// get Vector3f value
+	// -------------------------------------------------------
+	const Vector3f& get(const char* name, T* t, const Vector3f& defaultValue) const {
+		const DataDefinition* def = find(name, DTR_VEC3);
+		if (def != 0) {
+			return t->*m_Vec3Members[def->index];
+		}
+		return defaultValue;
+	}
+	// -------------------------------------------------------
 	// set Rect value
 	// -------------------------------------------------------
 	void set(const char* name,const Rect& value,T* t) {
@@ -205,6 +242,25 @@ public:
 		const DataDefinition* def = find(name,DTR_COLOR_PATH);
 		if ( def != 0 ) {
 			return t->*m_ColorPathMembers[def->index];
+		}
+		return defaultValue;
+	}
+	// -------------------------------------------------------
+	// set float path value
+	// -------------------------------------------------------
+	void set(const char* name, const FloatArray& value, T* t) {
+		const DataDefinition* def = find(name, DTR_FLOAT_PATH);
+		if (def != 0) {
+			t->*m_FloatPathMembers[def->index] = value;
+		}
+	}
+	// -------------------------------------------------------
+	// get float path value
+	// -------------------------------------------------------
+	const FloatArray& get(const char* name, T* t, const FloatArray& defaultValue) const {
+		const DataDefinition* def = find(name, DTR_FLOAT_PATH);
+		if (def != 0) {
+			return t->*m_FloatPathMembers[def->index];
 		}
 		return defaultValue;
 	}
@@ -284,6 +340,9 @@ public:
 					case DTR_VEC2 :
 						set(def.name,c->getVector2f(def.name,Vector2f(0,0)),t);
 						break;
+					case DTR_VEC3:
+						set(def.name, c->getVector2f(def.name, Vector3f(0, 0)), t);
+						break;
 					case DTR_RECT : {
 							Rect r;
 							c->getRect(def.name,&r);
@@ -295,6 +354,9 @@ public:
 						break;
 					case DTR_COLOR_PATH:
 						set(def.name,getColorPathValues(c),t);
+						break;
+					case DTR_FLOAT_PATH:
+						set(def.name, getFloatPathValues(c), t);
 						break;
 					case DTR_VEC2_PATH:
 						set(def.name,getVec2PathValues(c),t);
@@ -326,6 +388,9 @@ public:
 				case DTR_VEC2 :
 					set(def.name,category->getVector2f(def.name,Vector2f(0,0)),t);
 					break;
+				case DTR_VEC3:
+					set(def.name, category->getVector3f(def.name, Vector3f(0,0,0)), t);
+					break;
 				case DTR_RECT : {
 						Rect r;
 						category->getRect(def.name,&r);
@@ -337,6 +402,9 @@ public:
 					break;
 				case DTR_COLOR_PATH:
 					set(def.name,getColorPathValues(category),t);
+					break;
+				case DTR_FLOAT_PATH:
+					set(def.name, getFloatPathValues(category), t);
 					break;
 				case DTR_VEC2_PATH:
 					set(def.name,getVec2PathValues(category),t);
@@ -375,6 +443,9 @@ public:
 			case DTR_VEC2:
 				writer.write(get(def.name,t,Vector2f(0,0)));
 				break;
+			case DTR_VEC3:
+				writer.write(get(def.name, t, Vector3f(0,0, 0)));
+				break;
 			case DTR_COLOR:
 				writer.write(get(def.name,t,Color::WHITE));
 				break;
@@ -384,6 +455,11 @@ public:
 			case DTR_COLOR_PATH: {
 					ColorPath p;
 					writer.write(get(def.name,t,p));
+				}
+				break;
+			case DTR_FLOAT_PATH: {
+					FloatArray p;
+					writer.write(get(def.name, t, p));
 				}
 				break;
 			case DTR_VEC2_PATH: {
@@ -429,6 +505,12 @@ public:
 									set(def.name,tmp,t);
 								}
 								break;
+							case DTR_VEC3: {
+									Vector3f tmp;
+									loader.read(&tmp);
+									set(def.name, tmp, t);
+								}
+								break;
 							case DTR_COLOR: {
 									Color tmp = Color::WHITE;
 									loader.read(&tmp);
@@ -451,6 +533,12 @@ public:
 									Vector2fPath tmp;
 									loader.read(&tmp);
 									set(def.name,tmp,t);
+								}
+								break;
+							case DTR_FLOAT_PATH: {
+									FloatArray tmp;
+									loader.read(&tmp);
+									set(def.name, tmp, t);
 								}
 								break;
 						}
@@ -486,6 +574,12 @@ public:
 						set(def.name,tmp,t);
 					}
 					break;
+				case DTR_VEC3: {
+						Vector3f tmp;
+						loader.read(&tmp);
+						set(def.name, tmp, t);
+					}
+					break;
 				case DTR_COLOR: {
 						Color tmp = Color::WHITE;
 						loader.read(&tmp);
@@ -502,6 +596,12 @@ public:
 						ColorPath tmp;
 						loader.read(&tmp);
 						set(def.name,tmp,t);
+					}
+					break;
+				case DTR_FLOAT_PATH: {
+						FloatArray tmp;
+						loader.read(&tmp);
+						set(def.name, tmp, t);
 					}
 					break;
 				case DTR_VEC2_PATH: {
@@ -576,6 +676,39 @@ private:
 		return path;
 	}
 
+	FloatArray getFloatPathValues(Category* category) {
+		FloatArray path;
+		std::vector<std::string> propertyNames;
+		category->getPropertyNames(propertyNames);
+		
+		for (size_t i = 0; i < propertyNames.size(); ++i) {
+			if (propertyNames[i] == "loop_mode") {
+				// PLM_ZERO,PLM_LAST,PLM_LOOP
+				path.setLoopMode(PLM_LOOP);
+			}
+			else if (propertyNames[i] == "interpolation") {
+				// PI_LINEAR,PI_STEP,PI_CUBIC
+				std::string inMode = category->getProperty("interpolation");
+				if (inMode == "PI_STEP") {
+					path.setInterpolationMode(PI_STEP);
+				}
+				else if (inMode == "PI_CUBIC") {
+					path.setInterpolationMode(PI_CUBIC);
+				}
+			}
+			else {
+				float value = 0.0f;
+				float timeStep = 0.0f;
+				std::istringstream ist(propertyNames[i]);
+				ist >> timeStep;
+				category->getFloat(propertyNames[i], &value);
+				LOG << "adding " << value << " at " << timeStep;
+				path.add(timeStep, value);
+			}
+		}
+		return path;
+	}
+
 
 	// -------------------------------------------------------
 	// internal find
@@ -601,12 +734,15 @@ private:
 		def.type = type;
 		m_Definitions.push_back(def);
 	}
+
 	std::vector<IntMember> m_Members;
 	std::vector<FloatMember> m_FloatMembers;
 	std::vector<Vec2Member> m_Vec2Members;
+	std::vector<Vec3Member> m_Vec3Members;
 	std::vector<RectMember> m_RectMembers;
 	std::vector<ColorMember> m_ColorMembers;
 	std::vector<ColorPathMember> m_ColorPathMembers;
+	std::vector<FloatPathMember> m_FloatPathMembers;
 	std::vector<Vec2PathMember> m_Vec2PathMembers;
 	Definitions m_Definitions;
 	const static DataType unknownType = DTR_UNKNOWN;

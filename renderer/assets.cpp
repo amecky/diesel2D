@@ -10,7 +10,7 @@ namespace ds {
 		// -------------------------------------------------------
 		int findFreeTextureSlot() {
 			for ( int i = 0; i < MAX_TEXTURES; ++i ) {
-				if ( renderContext.textures[i].flags == 0 ) {
+				if ( renderContext->textures[i].flags == 0 ) {
 					return i;
 				}
 			}
@@ -23,10 +23,10 @@ namespace ds {
 		int createTexture(int width,int height) {
 			int id = findFreeTextureSlot();
 			if ( id != -1 ) {
-				TextureAsset* tr = &renderContext.textures[id];
+				TextureAsset* tr = &renderContext->textures[id];
 				tr->name = string::murmur_hash("xxxx");
 				tr->flags = 1;
-				HR(renderContext.device->CreateTexture( width, height,1, 0,D3DFMT_A8R8G8B8,D3DPOOL_MANAGED,&tr->texture,NULL ));
+				HR(renderContext->device->CreateTexture( width, height,1, 0,D3DFMT_A8R8G8B8,D3DPOOL_MANAGED,&tr->texture,NULL ));
 				tr->width = width;
 				tr->height = height;		
 				// clear the texture with white color		
@@ -45,7 +45,7 @@ namespace ds {
 		int loadTexture(const char* dirName,const char* name) {
 			int id = findFreeTextureSlot();
 			if ( id != -1 ) {
-				TextureAsset* tr = &renderContext.textures[id];
+				TextureAsset* tr = &renderContext->textures[id];
 				tr->name = string::murmur_hash(name);
 				tr->flags = 1;
 				int lw = D3DX_DEFAULT;
@@ -54,7 +54,7 @@ namespace ds {
 				char fileName[256];
 				sprintf(fileName,"%s\\%s.png",dirName,name);
 				LOGC("Renderer") << "Trying to load texture " << fileName;
-				HR(D3DXCreateTextureFromFileEx(renderContext.device,fileName, 0, 0, 1, 0,
+				HR(D3DXCreateTextureFromFileEx(renderContext->device,fileName, 0, 0, 1, 0,
 					D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL,&tr->texture));
 				tr->width = imageInfo.Width;
 				tr->height = imageInfo.Height;		
@@ -73,14 +73,14 @@ namespace ds {
 		int loadTextureBinary(const char* fileName) {
 			int id = findFreeTextureSlot();
 			if ( id != -1 ) {
-				TextureAsset* tr = &renderContext.textures[id];
+				TextureAsset* tr = &renderContext->textures[id];
 				tr->name = string::murmur_hash(fileName);
 				tr->flags = 1;
 				int lw = D3DX_DEFAULT;
 				int lh = D3DX_DEFAULT;		
 				D3DXIMAGE_INFO imageInfo;
 				LOGC("Renderer") << "Trying to load texture " << fileName;
-				HR(D3DXCreateTextureFromFileEx(renderContext.device,fileName, 0, 0, 1, 0,
+				HR(D3DXCreateTextureFromFileEx(renderContext->device,fileName, 0, 0, 1, 0,
 					D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL,&tr->texture));
 				tr->width = imageInfo.Width;
 				tr->height = imageInfo.Height;		
@@ -103,14 +103,14 @@ namespace ds {
 			if ( id == -1 ) {
 				loadTextureBinary(fileName);
 			}
-			TextureAsset* tr = &renderContext.textures[id];
+			TextureAsset* tr = &renderContext->textures[id];
 			SAFE_RELEASE(tr->texture);
 			tr->flags = 1;
 			int lw = D3DX_DEFAULT;
 			int lh = D3DX_DEFAULT;		
 			D3DXIMAGE_INFO imageInfo;
 			LOGC("Renderer") << "Trying to load texture " << fileName;
-			HR(D3DXCreateTextureFromFileEx(renderContext.device,fileName, 0, 0, 1, 0,
+			HR(D3DXCreateTextureFromFileEx(renderContext->device,fileName, 0, 0, 1, 0,
 				D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL,&tr->texture));
 			tr->width = imageInfo.Width;
 			tr->height = imageInfo.Height;		
@@ -131,7 +131,7 @@ namespace ds {
 		int getTextureId(const char* name) {
 			IdString hash = string::murmur_hash(name);
 			for ( int i = 0; i < MAX_TEXTURES; ++i ) {
-				TextureAsset* tr = &renderContext.textures[i];
+				TextureAsset* tr = &renderContext->textures[i];
 				if ( tr->flags == 1 && tr->name == hash ) {
 					return i;
 				}
@@ -145,7 +145,7 @@ namespace ds {
 		Vector2f getTextureSize(int idx) {
 			// FIXME: check if valid id
 			assert(idx >= 0 && idx < MAX_TEXTURES);
-			TextureAsset* tr = &renderContext.textures[idx];
+			TextureAsset* tr = &renderContext->textures[idx];
 			assert(tr->flags != 0);
 			return Vector2f(static_cast<int>(tr->width),static_cast<int>(tr->height));
 		}
@@ -155,7 +155,7 @@ namespace ds {
 		// -------------------------------------------------------
 		LPDIRECT3DTEXTURE9 getDirectTexture(int textureID) {
 			assert(textureID < MAX_TEXTURES);
-			return renderContext.textures[textureID].texture;
+			return renderContext->textures[textureID].texture;
 		}
 
 		// -------------------------------------------------------
@@ -164,7 +164,7 @@ namespace ds {
 		D3DLOCKED_RECT lockTexture(int id) {
 			D3DLOCKED_RECT lockedRect;
 			ZeroMemory(&lockedRect, sizeof(lockedRect));
-			TextureAsset* tr = &renderContext.textures[id];
+			TextureAsset* tr = &renderContext->textures[id];
 			HR(tr->texture->LockRect(0,&lockedRect,NULL,0));	
 			return lockedRect;
 		}
@@ -173,7 +173,7 @@ namespace ds {
 		// unlock texture
 		// -------------------------------------------------------
 		void unlockTexture(int id) {
-			TextureAsset* tr = &renderContext.textures[id];
+			TextureAsset* tr = &renderContext->textures[id];
 			HR(tr->texture->UnlockRect(0));	
 		}
 

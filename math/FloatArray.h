@@ -90,6 +90,8 @@ public:
 	void setLoopMode(const PathLoopMode& loopMode) {
 		m_LoopMode = loopMode;
 	}
+	
+
 private:
 	float catmullRom(float t, float v0, float v1, float v2, float v3);
 	PathItem m_Array[MAX_FLOAT_ARRAY_ITEMS];

@@ -15,6 +15,7 @@ namespace ds {
 // Constructing new BaseApp
 // -------------------------------------------------------	
 BaseApp::BaseApp() {
+	renderContext = new RenderContext;
 	gBlockMemory = new DataBlockAllocator();
 	gFileWatcher = new FileWatcher();
 	m_Active = true;
@@ -38,6 +39,7 @@ BaseApp::BaseApp() {
 	m_CollisionManager = new SpriteCollisionManager();
 	//particles = new ParticleManager;
 	stateMachine = new StateMachine;
+	
 	//m_DialogBatch = 0;
 }
 
@@ -52,9 +54,9 @@ BaseApp::~BaseApp() {
 	//delete gProfiler;
 	delete audio;
 	delete renderer;	
-	delete gFileWatcher;
+	delete gFileWatcher;	
 	delete gBlockMemory;
-	
+	delete renderContext;
 }
 
 // -------------------------------------------------------
@@ -79,7 +81,6 @@ void BaseApp::init() {
 
 	//particles->setRenderer(renderer);
 	//particles->setAssetCompiler(&assets);
-	assets.setWorld(&world);
 	initialize();		
 	/*
 	LOGC("BaseApp") << "-> loading gui.json";
@@ -188,7 +189,7 @@ void BaseApp::buildFrame() {
 	assets.update();
 #endif
 	PR_END("FILEWATCHER")
-	renderContext.drawCounter.reset();
+	renderContext->drawCounter.reset();
 	renderer->clearDebugMessages();
 	// handle key states
 	PR_START("INPUT")
@@ -243,7 +244,7 @@ void BaseApp::buildFrame() {
 	PR_END("StateMachine::update")	
 	PR_START("Game::update")
 	update(m_GameTime);
-	world.update(m_GameTime.elapsed);	
+	//world.update(m_GameTime.elapsed);	
 	//particles->update(m_GameTime.elapsed);
 	PR_END("Game::update")
 	PRS("Collisions::check")
@@ -269,7 +270,7 @@ void BaseApp::buildFrame() {
 	PR_START("DEBUG_RENDER")
 #ifdef DEBUG		
 	if ( m_DebugInfo.showDrawCounter ) {
-		int y = renderer->getViewport()->getHeight() - 80;
+		int y = ds::renderer::getSelectedViewport().getHeight() - 80;
 		renderer->showDrawCounter(10,y);
 	}
 	if ( m_DebugInfo.showProfiler ) {

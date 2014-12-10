@@ -38,6 +38,9 @@ void HUD::clear() {
 	for ( int i = 0; i < MAX_HUD_IMAGES; ++i ) {
 		m_Images[i].flag = -1;
 	}
+	for (int i = 0; i < MAX_HUD_NUMBERS; ++i) {
+		m_Numbers[i].flag = -1;
+	}
 }
 
 // -------------------------------------------------------
@@ -142,6 +145,54 @@ void HUD::addTimer(int id,int x,int y,const ds::Color& color,float scale) {
 	setTimer(id,0,0);	
 }
 
+void HUD::addNumber(int id, int x, int y, int length, const ds::Color& color, float scale) {
+	HUDNumber& n = m_Numbers[id];
+	n.position = Vector2f(x, y);
+	n.value = 0;
+	n.num = length;
+	n.color = color;
+	n.flag = 1;
+	setNumber(id, 0);
+}
+
+void HUD::setNumber(int id, int value) {
+	HUDNumber& n = m_Numbers[id];
+	int div = 1;
+	int length = n.num;
+	if (n.num == -1) {
+		length = 0;
+		int tmp = value / div;
+		while (tmp >= 1) {
+			div *= 10;
+			tmp = value / div;
+			++length;
+		}
+	}
+	if (length >= 16) {
+		length = 16;
+	}
+	if (length == 0) {
+		length = 1;
+	}
+	div = pow(10, (length - 1));
+	Vector2f p = n.position;
+	int tmp = value;
+	float xp = 0.0f;
+	for (int i = 0; i < length; ++i) {
+		int r = tmp / div;
+		if (r < 0 || r > 9) {
+			r = 0;
+		}
+		n.digits[i] = r;
+		n.textures[i] = m_Definitions[r].texture;
+		n.positions[i] = p;
+		p.x += m_Definitions[r].width;
+		xp += m_Definitions[r].width;
+		tmp = tmp - r * div;
+		div /= 10;
+	}
+}
+
 // -------------------------------------------------------
 // Set timer
 // -------------------------------------------------------
@@ -226,6 +277,14 @@ void HUD::render() {
 			}
 		}
 	}
+	for (int i = 0; i < MAX_HUD_NUMBERS; ++i) {
+		if (m_Numbers[i].flag != -1) {
+			HUDNumber& n = m_Numbers[i];
+			for (int j = 0; j < n.num; ++j) {
+				sprites::draw(n.positions[j], n.textures[j]);
+			}
+		}
+	}
 	PRE("HUD::draw")
 }
 
@@ -254,6 +313,13 @@ void HUD::createText(HUDEntry* entry,const std::string& text,bool clear) {
 	font::createText(*m_Font,entry->pos,text,entry->color,entry->sprites,entry->scale,entry->scale);	
 }
 
+void HUD::defineNumber(int index, float top, float left, float width, float height) {
+	assert(index >= 0 && index < 10);
+	NumberDef& def = m_Definitions[index];
+	def.start = left;
+	def.width = width;
+	def.texture = math::buildTexture(top, left, width, height);
+}
 // -------------------------------------------------------
 // Create new HUD entry
 // -------------------------------------------------------
@@ -276,34 +342,49 @@ int HUD::createEntry(const Vector2f& pos,float scale,const ds::Color& color) {
 void HUD::load(BinaryLoader* loader) {	
 	clear();
 	while ( loader->openChunk() == 0 ) {
-		int id = 0;
-		loader->read(&id);
-		Vector2f pos;
-		loader->read(&pos);
-		Color clr(255,255,255,255);
-		loader->read(&clr);
-		float scale = 1.0f;
-		loader->read(&scale);
-		if ( loader->getChunkID() == 1 ) {							
-			int length = 6;
-			loader->read(&length);
-			addCounter(id,pos.x,pos.y,length,0,clr,scale);
+		if (loader->getChunkID() == 5) {
+			Rect r;
+			for (int i = 0; i < 10; ++i) {
+				loader->read(&r);
+				defineNumber(i, r.top, r.left, r.width(), r.height());
+			}
 		}
-		else if ( loader->getChunkID() == 2 ) {							
-			addTimer(id,pos.x,pos.y,clr,scale);
-		}
-		else if ( loader->getChunkID() == 3 ) {							
-			std::string str;
-			loader->read(str);
-			addText(id,pos.x,pos.y,str,clr,scale);
-		}
-		else if ( loader->getChunkID() == 4 ) {	
-			Rect rect;
-			loader->read(&rect);
-			addImage(id,pos.x,pos.y,rect,clr,scale);
+		else {
+			int id = 0;
+			loader->read(&id);
+			Vector2f pos;
+			loader->read(&pos);
+			Color clr(255,255,255,255);
+			loader->read(&clr);
+			float scale = 1.0f;
+			loader->read(&scale);
+			if ( loader->getChunkID() == 1 ) {							
+				int length = 6;
+				loader->read(&length);
+				addCounter(id,pos.x,pos.y,length,0,clr,scale);
+			}
+			else if ( loader->getChunkID() == 2 ) {							
+				addTimer(id,pos.x,pos.y,clr,scale);
+			}
+			else if ( loader->getChunkID() == 3 ) {							
+				std::string str;
+				loader->read(str);
+				addText(id,pos.x,pos.y,str,clr,scale);
+			}
+			else if ( loader->getChunkID() == 4 ) {	
+				Rect rect;
+				loader->read(&rect);
+				addImage(id,pos.x,pos.y,rect,clr,scale);
+			}		
+			else if (loader->getChunkID() == 6) {
+				int length = -1;
+				loader->read(&length);
+				addNumber(id, pos.x, pos.y, length, clr, scale);
+			}
 		}
 		loader->closeChunk();
 	}		
 }
+
 
 }

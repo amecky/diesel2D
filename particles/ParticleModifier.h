@@ -213,6 +213,32 @@ public:
 };
 
 // -------------------------------------------------------
+// AlphaPathModifier
+// -------------------------------------------------------
+struct AlphaPathModifierData {
+
+	FloatArray path;
+
+};
+
+class AlphaPathModifier : public AbstractParticleModifier<AlphaPathModifierData> {
+
+public:
+	AlphaPathModifier() : AbstractParticleModifier<AlphaPathModifierData>() {
+		m_Translator.add("path", &AlphaPathModifierData::path);
+	}
+	virtual ~AlphaPathModifier() {}
+	void add(float time, float a) {
+		m_Data.path.add(time, a);
+	}
+	void update(ParticleArray* array, float dt) {
+		for (uint32 i = 0; i < array->countAlive; ++i) {
+			array->color[i].a = m_Data.path.get(array->timer[i].y) / 255.0f;
+		}
+	}
+};
+
+// -------------------------------------------------------
 // DampingVelocityModifier
 // -------------------------------------------------------
 struct DampingVelocityModifierData {

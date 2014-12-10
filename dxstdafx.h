@@ -97,6 +97,10 @@ typedef unsigned short ushort;
 #define DBG_CLR(v) "r: " << v.r << " g: " << v.g << " b: " << v.b << " a: " << v.a
 #endif
 
+#ifndef DBG_TEX
+#define DBG_TEX(v) "dim.x: " << v.dim.x << " dim.y: " << v.dim.y << " u1: " << v.uv.x << " v1: " << v.uv.y << " u2: " << v.uv.z << " v2: " << v.uv.w;
+#endif
+
 #ifndef BM_NEW
 #define BM_NEW(x) new(gBlockMemory->alloc(sizeof(x)))x();
 #endif

@@ -11,14 +11,27 @@ namespace ds {
 const int MAX_COUNTER = 16;
 const int MAX_TIMER = 8;
 const int MAX_HUD_IMAGES = 64;
-
-struct HUDItem {
-
-
-
-};
+const int MAX_HUD_NUMBERS = 8;
 
 class HUD : public GameObject , public Serializer {
+
+struct NumberDef {
+	float start;
+	float width;
+	ds::Texture texture;
+};
+
+struct HUDNumber {
+	uint32 id;
+	int value;
+	int digits[16];
+	int num;
+	Vector2f positions[16];
+	Texture textures[16];
+	Vector2f position;
+	Color color;
+	int flag;
+};
 
 struct HUDEntry {
 	uint32 id;
@@ -66,57 +79,25 @@ public:
 
 	void update(float elapsed);
 	void render();
+
+	void defineNumber(int index, float top, float left, float width, float height);
+
 	int addText(int x,int y,const std::string& txt,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
 			
 	void addImage(int id,int x,int y,const Rect& texturRect,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
-	/*
-	 * Add new counter
-	 *
-	 * @param id - the id of the counter
-	 * @param x - x position
-	 * @param y - y position
-	 * @param length - number of digits
-	 * @param value - initial value
-	 * @param color - font color
-	 * @param scale - scale of the text
-	 */
+	
 	void addCounter(int id,int x,int y,int length,int value,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
-	/*
-	 * Add new text
-	 *
-	 * @param id - the id of the counter
-	 * @param x - x position
-	 * @param y - y position
-	 * @param text - the text itself
-	 * @param color - font color
-	 * @param scale - scale of the text
-	 */
+	
 	void addText(int id,int x,int y,const std::string& txt,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
-	/*
-	 * Set new text. Only the text will be updated. Position and everything else stays the same
-	 *
-	 * @param id - the id of the text
-	 * @param txt - the new text
-	 */
+
+	void addNumber(int id, int x, int y, int length, const ds::Color& color = ds::Color(1.0f, 1.0f, 1.0f, 1.0f), float scale = 1.0f);
+
+	void setNumber(int id, int value);
+	
 	void setText(int id,const std::string& txt);
-	/*
-	 * Add new counter
-	 *
-	 * @param id - the id of the counter
-	 * @param x - x position
-	 * @param y - y position
-	 * @param length - number of digits
-	 * @param value - initial value
-	 * @param color - font color
-	 * @param scale - scale of the text
-	 */
+	
 	void addTimer(int id,int x,int y,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
-	/*
-	 * Set the value of the counter defined by the ID
-	 *
-	 * @param id - id of the counter
-	 * @param value - the new value
-	 */
+	
 	void setCounterValue(int id,int value);
 	void setTimer(int id,int minutes,int seconds);
 	void stopTimer(int id);
@@ -139,6 +120,8 @@ private:
 	HUDEntry m_HUDEntries[256];
 	HUDCounter m_Counter[MAX_COUNTER];
 	HUDTimer m_Timer[MAX_TIMER];
+	NumberDef m_Definitions[10];
+	HUDNumber m_Numbers[MAX_HUD_NUMBERS];
 };
 
 }

@@ -181,6 +181,14 @@ namespace ds {
 		return ret;
 	}
 
+	Texture buildTexture(float top, float left, float width, float height, float textureWidth, float textureHeight, bool useHalfTexel) {
+		Texture ret;		
+		ret.uv = getTextureCoordinates(Rect(top,left,width,height),textureWidth,textureHeight);
+		ret.textureID = 0;
+		ret.dim = Vector2f(width ,height);
+		return ret;
+	}
+
 	void transformMousePosToWorld(Vector3f* vPickRayDir,Vector3f* vPickRayOrig) {
 		// Get the Pick ray from the mouse position
 		/*

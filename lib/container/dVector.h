@@ -67,6 +67,12 @@ public:
 	void set(size_type index,const T& value) {
 		m_Data[index] = value;
 	}
+	int create(){
+		T t;
+		int id = m_Size;
+		add(t);
+		return id;
+	}
 	void add(const T& value) {
 		if ( m_Size != m_Capacity ) {
 			//m_Data[m_Size] = value;

@@ -398,11 +398,11 @@ inline void Grid<T>::dropCells(std::vector<DroppedCell>& droppedCells) {
 				}			
 				if ( !isFree(x,sy)) {
 					DroppedCell dc;
-					dc.from = GridPoint(x,y);
-					dc.to = GridPoint(x,sy);
+					dc.from = GridPoint(x,sy);
+					dc.to = GridPoint(x,y);
 					droppedCells.push_back(dc);
 					set(x,y,get(x,sy));
-					remove(x,sy);						
+					remove(x,sy);							
 				}
 			}
 		}

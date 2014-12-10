@@ -26,20 +26,40 @@ namespace color {
 		return Color(lhs.r * invT + rhs.r * t,lhs.g * invT + rhs.g * t,lhs.b * invT + rhs.b * t,lhs.a * invT + rhs.a * t);
 	}
 
+	// 0 < h < 360 / 0 < s < 100 / 0 < v < 100
 	Color hsvToColor(float h,float s,float v) {
 		if (h == 0 && s == 0) {
-			return Color(v, v, v);
+			return Color(v / 100.0f, v / 100.0f, v / 100.0f);
 		}
-		float c = s * v;
-		float x = c * (1.0f - abs(fmod(h,2.0f) - 1.0f));
-		float m = v - c;
+		
+		float hh = h / 60.0f;
 
-		if (h < 1) return Color(c + m, x + m, m);
-		else if (h < 2) return Color(x + m, c + m, m);
-		else if (h < 3) return Color(m, c + m, x + m);
-		else if (h < 4) return Color(m, x + m, c + m);
-		else if (h < 5) return Color(x + m, m, c + m);
-		else return Color(c + m, m, x + m);
+		float c = s / 100.0f * v / 100.0f;
+		float x = c * (1.0f - abs(fmod(hh,2.0f) - 1.0f));
+		Color clr;
+		if (hh < 1.0f) {
+			clr = Color(c, x, 0.0f);
+		}
+		else if (hh < 2.0f) {
+			clr = Color(x, c, 0.0f);
+		}
+		else if (hh < 3.0f) {
+			clr = Color(0.0f, c, x);
+		}
+		else if (hh < 4.0f) {
+			clr = Color(0.0f, x, c);
+		}
+		else if (hh < 5) {
+			clr = Color(x, 0.0f, c);
+		}
+		else {
+			clr = Color(c, 0.0f, x);
+		}
+		float m = v / 100.0f - c;
+		clr.r += m;
+		clr.g += m;
+		clr.b += m;
+		return clr;
 	}
 }
 

@@ -23,8 +23,6 @@ const uint32 CVT_ASM                 = 12;
 const uint32 CVT_NASM                = 13;
 const uint32 BINL_TEXTURE            = 0;
 
-class World;
-
 // -------------------------------------------------------
 // Asset database
 // -------------------------------------------------------
@@ -91,7 +89,6 @@ public:
 	int loadBinary(const char* fileName,uint32 type);
 
 	uint32 getConvertedID(const char* name);
-	void setWorld(World* world);
 private:
 	uint32 m_CustomIndex;
 	void reload(FileWatch* watch);

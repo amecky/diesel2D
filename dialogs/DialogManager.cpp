@@ -201,7 +201,7 @@ void DialogManager::load(BinaryLoader* loader) {
 			std::string file;
 			loader->read(file);
 
-			GUIDialog* dialog = new GUIDialog(m_Renderer->getViewport()->getWidth(),m_Renderer->getViewport()->getHeight());
+			GUIDialog* dialog = new GUIDialog(ds::renderer::getSelectedViewport().getWidth(), ds::renderer::getSelectedViewport().getHeight());
 			LOGC("DialogManager") << "Creating new dialog: " << dialogName;
 			createDialog(dialogName.c_str(),id,dialog);
 			m_AssetCompiler->load(file.c_str(),dialog,CVT_DIALOG);

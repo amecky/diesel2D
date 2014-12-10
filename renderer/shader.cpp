@@ -96,8 +96,8 @@ namespace ds {
 				"pixelShader  = compile ps_2_0 TTCVPS();\r\n"	
 				"}\r\n"
 				"}\r\n";
-			int ret = renderer->createShaderFromText(g_strBuffer,"TTCVTech");
-			Shader sh = renderer->getShader(ret);
+			int ret = renderer::createShaderFromText(g_strBuffer, "TTCVTech");
+			Shader sh = renderer::getShader(ret);
 			shader::setTexture(sh,"gTex",renderer,textureId);
 			return ret;
 		}
@@ -139,8 +139,8 @@ namespace ds {
 				"		pixelShader  = compile ps_2_0 BasicPS();\r\n"
 				"	}\r\n"
 				"}\r\n";
-			int ret = renderer->createShaderFromText(g_strBuffer,"PTCTech");
-			Shader sh = renderer->getShader(ret);
+			int ret = renderer::createShaderFromText(g_strBuffer, "PTCTech");
+			Shader sh = renderer::getShader(ret);
 			if ( textureId != -1 ) {
 				shader::setTexture(sh,"gTex",renderer,textureId);
 			}
@@ -182,8 +182,8 @@ namespace ds {
 			"		pixelShader = compile ps_2_0 BloomPS();\r\n"
 			"	}\r\n"
 			"}\r\n";
-			int ret = renderer->createShaderFromText(g_strBuffer,"BloomTech");
-			Shader sh = renderer->getShader(ret);
+			int ret = renderer::createShaderFromText(g_strBuffer, "BloomTech");
+			Shader sh = renderer::getShader(ret);
 			shader::setTexture(sh,"gTex",renderer,textureID);
 			shader::setFloat(sh,"Threshold",threshold);
 			return ret;
@@ -229,8 +229,8 @@ namespace ds {
 			"		pixelShader = compile ps_2_0 BlurPS();\r\n"
 			"	}\r\n"
 			"}\r\n";
-			int ret = renderer->createShaderFromText(g_strBuffer,"BlurTech");
-			Shader sh = renderer->getShader(ret);
+			int ret = renderer::createShaderFromText(g_strBuffer, "BlurTech");
+			Shader sh = renderer::getShader(ret);
 			shader::setTexture(sh,"gTex",renderer,textureID);
 			return ret;
 		}
@@ -291,10 +291,63 @@ namespace ds {
 			"		pixelShader = compile ps_2_0 BCPS();\r\n"
 			"	}\r\n"
 			"}\r\n";
-			int ret = renderer->createShaderFromText(g_strBuffer,"BCTech");
-			Shader sh = renderer->getShader(ret);
+			int ret = renderer::createShaderFromText(g_strBuffer, "BCTech");
+			Shader sh = renderer::getShader(ret);
 			shader::setTexture(sh,"gTex",renderer,bloomTextureID);
 			shader::setTexture(sh,"ColorMap",renderer,colorTextureID);
+			return ret;
+		}
+
+		int createCombineLightShader(Renderer* renderer, int lightTextureID, int colorTextureID) {
+			const char* g_strBuffer =
+				"uniform extern float4x4 gWVP;\r\n"
+				"uniform extern texture LightMap;\r\n"
+				"uniform extern texture ColorMap;\r\n"
+				"float4 ambientLight = float4(0.1,0.1,0.1,1.0);\r\n"
+				"sampler LightMapSampler = sampler_state {\r\n"
+				"	Texture = <LightMap>;\r\n"
+				"	MinFilter = LINEAR;\r\n"
+				"	MagFilter = LINEAR;\r\n"
+				"	MipFilter = LINEAR;\r\n"
+				"	AddressU  = Clamp;\r\n"
+				"	AddressV  = Clamp;\r\n"
+				"};\r\n"
+				"sampler ColorMapSampler = sampler_state {\r\n"
+				"	Texture = <ColorMap>;\r\n"
+				"	MinFilter = Linear;\r\n"
+				"	MagFilter = Linear;\r\n"
+				"	MipFilter = Linear;\r\n"
+				"	AddressU  = Clamp;\r\n"
+				"	AddressV  = Clamp;\r\n"
+				"};\r\n"
+				"struct OutputVS {\r\n"
+				"	float4 posH   : POSITION0;\r\n"
+				"	float2 Tex   : TEXCOORD0;\r\n"
+				"	float4 color0 : COLOR0;\r\n"
+				"};\r\n"
+				"OutputVS FadeVS(float3 posL : POSITION0,float2 tex0 : TEXCOORD0 , float4 color : COLOR0) {\r\n"
+				"	OutputVS outVS = (OutputVS)0; \r\n"
+				"	outVS.posH = mul(float4(posL, 1.0f), gWVP);   \r\n"
+				"	outVS.Tex = tex0;\r\n"
+				"	outVS.color0 = color;\r\n"
+				"	return outVS;\r\n"
+				"}\r\n"
+				"float4 BCPS(OutputVS input) : COLOR0 {\r\n"
+				"	float4 lightColor = tex2D(LightMapSampler, input.Tex);\r\n"
+				"	float4 originalColor = tex2D(ColorMapSampler, input.Tex);\r\n"
+				"   float4 lc = lightColor + ambientLight;\r\n"
+				"	return originalColor * saturate(lc);\r\n"
+				"}\r\n"
+				"technique BCTech {\r\n"
+				"	pass P0 {\r\n"
+				"		vertexShader = compile vs_2_0 FadeVS();\r\n"
+				"		pixelShader = compile ps_2_0 BCPS();\r\n"
+				"	}\r\n"
+				"}\r\n";
+			int ret = renderer::createShaderFromText(g_strBuffer, "BCTech");
+			Shader sh = renderer::getShader(ret);
+			shader::setTexture(sh, "LightMap", renderer, lightTextureID);
+			shader::setTexture(sh, "ColorMap", renderer, colorTextureID);
 			return ret;
 		}
 	}

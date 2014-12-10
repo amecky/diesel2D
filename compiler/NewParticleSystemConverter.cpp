@@ -51,7 +51,7 @@ void NewParticleSystemConverter::convert(JSONReader& reader,BinaryWriter& writer
 					ColorPathModifier lm;
 					lm.convert(c,writer);
 					writer.closeChunk();
-				}
+				}				
 				else if ( c->getName() == "damping_velocity_modifier" ) {		
 					writer.startChunk(106,1);
 					DampingVelocityModifier lm;
@@ -66,6 +66,12 @@ void NewParticleSystemConverter::convert(JSONReader& reader,BinaryWriter& writer
 				}
 				else if ( c->getName() == "velocity_rotation_modifier" ) {		
 					writer.startChunk(108,1);
+					writer.closeChunk();
+				}
+				else if (c->getName() == "alpha_path_modifier") {
+					writer.startChunk(109, 1);
+					AlphaPathModifier lm;
+					lm.convert(c, writer);
 					writer.closeChunk();
 				}
 			}
@@ -109,6 +115,18 @@ void NewParticleSystemConverter::convert(JSONReader& reader,BinaryWriter& writer
 					writer.startChunk(204,1);
 					SizeGenerator rg;
 					rg.convert(c,writer);
+					writer.closeChunk();
+				}
+				else if (c->getName() == "color_generator") {
+					writer.startChunk(205, 1);
+					ColorGenerator rg;
+					rg.convert(c, writer);
+					writer.closeChunk();
+				}
+				else if (c->getName() == "hsv_color_generator") {
+					writer.startChunk(206, 1);
+					HSVColorGenerator rg;
+					rg.convert(c, writer);
 					writer.closeChunk();
 				}
 			}

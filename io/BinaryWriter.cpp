@@ -101,6 +101,13 @@ uint32 BinaryWriter::write(const Vector2f& v) {
 	return IO_OK;
 }
 
+uint32 BinaryWriter::write(const Vector3f& v) {
+	fwrite(&v.x, sizeof (float), 1, m_Stream);
+	fwrite(&v.y, sizeof (float), 1, m_Stream);
+	fwrite(&v.z, sizeof (float), 1, m_Stream);
+	return IO_OK;
+}
+
 uint32 BinaryWriter::write(const Vector4f& v) {
 	fwrite(&v.x, sizeof (float), 1, m_Stream);
 	fwrite(&v.y, sizeof (float), 1, m_Stream);
@@ -151,6 +158,18 @@ uint32 BinaryWriter::write(const ds::Vector2fPath& v) {
 		Vector2f c = v.getVec2(i);
 		fwrite(&c.x, sizeof (float), 1, m_Stream);
 		fwrite(&c.y, sizeof (float), 1, m_Stream);
+	}
+	return IO_OK;
+}
+
+uint32 BinaryWriter::write(const ds::FloatArray& v) {
+	int size = v.size();
+	fwrite(&size, sizeof(int), 1, m_Stream);
+	for (int i = 0; i < size; ++i) {
+		float ts = v.key(i);
+		fwrite(&ts, sizeof(float), 1, m_Stream);
+		float c = v.value(i);
+		fwrite(&c, sizeof (float), 1, m_Stream);
 	}
 	return IO_OK;
 }

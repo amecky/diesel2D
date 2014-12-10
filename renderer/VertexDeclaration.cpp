@@ -4,12 +4,12 @@
 namespace ds {
 
 VertexDeclaration::VertexDeclaration(const char* handle) {
-	 m_Decl = NULL;
+	 m_Decl = 0;
 	 m_Size = 0;
 }
 
 VertexDeclaration::VertexDeclaration() {
-	m_Decl = NULL;
+	m_Decl = 0;
 	m_Size = 0;
 }
 
@@ -26,7 +26,7 @@ void VertexDeclaration::addElement(const VDTYPE& type,const VDUSAGE& usage) {
 
 
 void VertexDeclaration::create() {
-	if ( m_Decl == NULL ) {
+	if ( m_Decl == 0 ) {
 		D3DVERTEXELEMENT9* vdElements = new D3DVERTEXELEMENT9[m_DecElements.size()+1];
 		int offset = 0;
 		for ( size_t i = 0; i < m_DecElements.size(); ++i ) {			
@@ -36,22 +36,22 @@ void VertexDeclaration::create() {
 				case VT_FLOAT2 : 
 					vdElements[i].Type = D3DDECLTYPE_FLOAT2;
 					offset += 8;
-					m_Size += 2;
+					m_Size += 8;
 					break;
 				case VT_FLOAT3 : 
 					vdElements[i].Type = D3DDECLTYPE_FLOAT3;
 					offset += 12;
-					m_Size += 3;
+					m_Size += 12;
 					break;
 				case VT_FLOAT4 : 
 					vdElements[i].Type = D3DDECLTYPE_FLOAT4;
 					offset += 16;
-					m_Size += 4;
+					m_Size += 16;
 					break;
 				case VT_COLOR : 
 					vdElements[i].Type = D3DDECLTYPE_D3DCOLOR;
 					offset += 4;
-					m_Size += 2;
+					m_Size += 16;
 					break;
 			}
 			
@@ -90,14 +90,10 @@ void VertexDeclaration::create() {
 		vdElements[m_DecElements.size()].Usage = 0;
 		vdElements[m_DecElements.size()].UsageIndex = 0;
 
-		renderContext.device->CreateVertexDeclaration(vdElements, &m_Decl);
-		
+		HR(renderContext->device->CreateVertexDeclaration(vdElements, &m_Decl));
+		assert(m_Decl != 0);
 		delete[] vdElements;
 	}
-}
-
-void VertexDeclaration::clear() {
-	SAFE_RELEASE(m_Decl);
 }
 
 };

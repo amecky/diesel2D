@@ -138,6 +138,8 @@ namespace ds {
 		Vector2f dim;
 		int textureID;
 
+		Texture() : uv(0, 0, 1, 1), dim(32, 32), textureID(0) {}
+
 	};
 
 	// -------------------------------------------------------
@@ -151,11 +153,13 @@ namespace ds {
 	// Shader
 	// -------------------------------------------------------
 	struct Shader {
+
 		ID3DXEffect* m_FX;
 		D3DXHANDLE m_hTech;
-		int flag;
 		ShaderConstant* constants;
 		uint32 constantCount;
+
+		Shader() : m_FX(0), constants(0), constantCount(0) {}
 	};
 
 	// -------------------------------------------------------

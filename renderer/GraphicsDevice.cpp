@@ -1,6 +1,5 @@
 #include "GraphicsDevice.h"
 #include "..\utils\Log.h"
-#include "Renderer.h"
 
 namespace ds {
 
@@ -8,25 +7,25 @@ namespace graphics {
 
 	void initializeDevice(const Settings& settings) {
 		// Create the D3D object.
-		renderContext.pD3D = Direct3DCreate9(D3D_SDK_VERSION);
+		renderContext->pD3D = Direct3DCreate9(D3D_SDK_VERSION);
 
 		D3DDISPLAYMODE d3ddm;
-		HR(renderContext.pD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm));
+		HR(renderContext->pD3D->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm));
 
-		renderContext.pD3D->GetDeviceCaps( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &renderContext.deviceCaps );
+		renderContext->pD3D->GetDeviceCaps( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &renderContext->deviceCaps );
 
 
 		// Set up the structure used to create the D3DDevice
 		D3DPRESENT_PARAMETERS m_pp;
 		ZeroMemory( &m_pp, sizeof( m_pp ) );	
 		D3DFORMAT adapterFormat = D3DFMT_X8R8G8B8;
-		if ( SUCCEEDED( renderContext.pD3D->CheckDeviceFormat( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, adapterFormat, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, D3DFMT_D24S8 ) ) ) {
+		if ( SUCCEEDED( renderContext->pD3D->CheckDeviceFormat( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, adapterFormat, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, D3DFMT_D24S8 ) ) ) {
 			m_pp.AutoDepthStencilFormat = D3DFMT_D24S8;
 		}
-		else if ( SUCCEEDED( renderContext.pD3D->CheckDeviceFormat( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, adapterFormat, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, D3DFMT_D24X8 ) ) ) {
+		else if ( SUCCEEDED( renderContext->pD3D->CheckDeviceFormat( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, adapterFormat, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, D3DFMT_D24X8 ) ) ) {
 			m_pp.AutoDepthStencilFormat = D3DFMT_D24X8;
 		}
-		else if ( SUCCEEDED( renderContext.pD3D->CheckDeviceFormat( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, adapterFormat, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, D3DFMT_D16 ) ) ) {
+		else if ( SUCCEEDED( renderContext->pD3D->CheckDeviceFormat( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, adapterFormat, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, D3DFMT_D16 ) ) ) {
 			m_pp.AutoDepthStencilFormat = D3DFMT_D16;
 		}
 		m_pp.BackBufferWidth        = settings.width;
@@ -35,7 +34,7 @@ namespace graphics {
 		m_pp.BackBufferCount        = 1;
 		DWORD total;
 
-		if(SUCCEEDED(renderContext.pD3D->CheckDeviceMultiSampleType(D3DADAPTER_DEFAULT,D3DDEVTYPE_HAL,d3ddm.Format,true,D3DMULTISAMPLE_NONMASKABLE,&total))) {
+		if(SUCCEEDED(renderContext->pD3D->CheckDeviceMultiSampleType(D3DADAPTER_DEFAULT,D3DDEVTYPE_HAL,d3ddm.Format,true,D3DMULTISAMPLE_NONMASKABLE,&total))) {
 			m_pp.MultiSampleType = D3DMULTISAMPLE_NONMASKABLE;
 			m_pp.MultiSampleQuality = total - 1;
 			LOG << "multi sample is supported - quality level " << total -1;
@@ -46,7 +45,7 @@ namespace graphics {
 			m_pp.MultiSampleQuality     = 0;
 		}
 		m_pp.SwapEffect             = D3DSWAPEFFECT_DISCARD; 
-		m_pp.hDeviceWindow          = renderContext.hwnd;
+		m_pp.hDeviceWindow          = renderContext->hwnd;
 		if ( settings.fullscreen ) {
 			m_pp.Windowed = false;
 		}
@@ -64,11 +63,11 @@ namespace graphics {
 		//m_pp.FullScreen_RefreshRateInHz = (Windowed) ? 0 : m_displayMode.RefreshRate;
 
 		DWORD vertexProcessing = 0;
-		if ( renderContext.deviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT )
+		if ( renderContext->deviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT )
 		{
 			vertexProcessing = D3DCREATE_HARDWARE_VERTEXPROCESSING;
 			// Check for pure device
-			if ( renderContext.deviceCaps.DevCaps & D3DDEVCAPS_PUREDEVICE )
+			if ( renderContext->deviceCaps.DevCaps & D3DDEVCAPS_PUREDEVICE )
 			{
 				vertexProcessing |= D3DCREATE_PUREDEVICE;
 			}
@@ -79,23 +78,23 @@ namespace graphics {
 		}
 
 		// Create the D3DDevice
-		HR(renderContext.pD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, renderContext.hwnd,vertexProcessing,&m_pp, &renderContext.device ));
+		HR(renderContext->pD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, renderContext->hwnd,vertexProcessing,&m_pp, &renderContext->device ));
 
 		D3DFORMAT format = d3ddm.Format;
 		std::string info = D3DFormatToString(format,true);    
-		HR(renderContext.device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
-		HR(renderContext.device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-		renderContext.screenWidth = settings.width;
-		renderContext.screenHeight = settings.height;
+		HR(renderContext->device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
+		HR(renderContext->device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
+		renderContext->screenWidth = settings.width;
+		renderContext->screenHeight = settings.height;
 		writeInfo(settings,info);
 
 	}
 
 	void writeInfo(const Settings& settings,const std::string& info) {
 		LOG << "Hardware informations";
-		LOG << "Maximum primitives: " << renderContext.deviceCaps.MaxPrimitiveCount;
-		LOG << "Vertex shader version: " <<((renderContext.deviceCaps.VertexShaderVersion>>8)&0xFF) << "." << ((renderContext.deviceCaps.VertexShaderVersion>>0)&0xFF);
-		LOG << "Pixel shader version: " << ((renderContext.deviceCaps.PixelShaderVersion>>8)&0xFF) << "." << ((renderContext.deviceCaps.PixelShaderVersion>>0)&0xFF);
+		LOG << "Maximum primitives: " << renderContext->deviceCaps.MaxPrimitiveCount;
+		LOG << "Vertex shader version: " <<((renderContext->deviceCaps.VertexShaderVersion>>8)&0xFF) << "." << ((renderContext->deviceCaps.VertexShaderVersion>>0)&0xFF);
+		LOG << "Pixel shader version: " << ((renderContext->deviceCaps.PixelShaderVersion>>8)&0xFF) << "." << ((renderContext->deviceCaps.PixelShaderVersion>>0)&0xFF);
 		LOG << "Settings";
 		LOG << "Format: " << info;
 		LOG << "Width: " << settings.width;
