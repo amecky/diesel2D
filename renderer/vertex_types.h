@@ -63,7 +63,7 @@ namespace ds {
 	};
 
 	// -------------------------------------------------------
-	// TTC Vertex
+	// PTC Vertex
 	// -------------------------------------------------------
 	struct PTCVertex {
 
@@ -95,6 +95,52 @@ namespace ds {
 			//tv = texcoords.y;
 			uv = texcoords;
 			color = clr;
+		}
+	};
+
+	// -------------------------------------------------------
+	// PTC Vertex
+	// -------------------------------------------------------
+	struct ParticleVertex {
+
+		float x, y, z;
+		Vector2f uv;
+		Vector2f scale;
+		Vector2f dimension;
+		Vector2f rotationIndex;
+		Color color;
+		
+		ParticleVertex() {
+			x = y = z = 0.0f;
+			uv = Vector2f(0, 0);
+			color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+			scale.x = 1.0f;
+			scale.y = 1.0f;
+			rotationIndex = Vector2f(0, 0);
+			dimension.x = 0.0f;
+			dimension.y = 0.0f;
+		}
+
+		ParticleVertex(float xp, float yp, float zp, float u, float v, const Color& clr = Color::WHITE) {
+			x = xp;
+			y = yp;
+			z = zp;
+			//tu = u;
+			//tv = v;
+			uv = Vector2f(u, v);
+			color = clr;
+		}
+
+		ParticleVertex(const Vector3f& pos,int index,const Vector2f& texcoords,const Vector2f& scl,float rot,const Vector2f& dim,const Color& clr = Color::WHITE) {
+			x = pos.x;
+			y = pos.y;
+			z = pos.z;
+			uv = texcoords;
+			color = clr;
+			scale = scl;
+			rotationIndex.x = rot;
+			rotationIndex.y = index;
+			dimension = dim;
 		}
 	};
 

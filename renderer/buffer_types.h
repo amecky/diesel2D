@@ -4,56 +4,33 @@
 
 namespace ds {
 
-enum GeoBufferType {
-	GBT_VERTEX = 0,
-	GBT_INDEX  = 1,
-	GBT_BOTH   = 2
-};
+	struct VertexBuffer {
 
-enum PrimitiveType {
-	PT_IDX = 0,
-	PT_TRI = 1
-};
+		LPDIRECT3DVERTEXBUFFER9 buffer;
+		int vertexDeclaration;
+		int size;
+		int vertexSize;
+		int num;
 
-// -------------------------------------------------------
-// Geometry buffer
-// -------------------------------------------------------
-struct GeometryBuffer {
-	GeoBufferType type;
-	uint32 maxSize;
-	uint32 size;
-	uint32 used;
-	uint32 userCounter;
-	int vertexDefinition;
-	bool dynamic;
-	PrimitiveType primitiveType;
-	union {
-		LPDIRECT3DINDEXBUFFER9 indexBuffer;
-		LPDIRECT3DVERTEXBUFFER9 vertexBuffer;
+		VertexBuffer() : buffer(0), size(0), vertexDeclaration(-1) , num(0) {}
+
 	};
-	void initialize();
-};
 
-// -------------------------------------------------------
-// Buffer reference
-// -------------------------------------------------------
-struct BufferReference {
-	uint32 bufferIdx;
-	int start;
-	int count;
-};
-// -------------------------------------------------------
-// Buffer handle
-// -------------------------------------------------------
-struct GeoBufferHandle {
-	int locked;
-	BufferReference vBufferRef;
-	BufferReference iBufferRef;
-	PrimitiveType primitiveType;
-	int used;
-	bool dynamic;
-	GeoBufferType bufferType;
-	int vertexDefinition;
-};
+	struct IndexBuffer {
+
+		LPDIRECT3DINDEXBUFFER9 buffer;
+		int size;
+		int num;
+	};
+
+	namespace buffer {
+
+		void create(VertexBuffer& buffer, int vertexType, int size, bool dynamic = true);
+
+		void create(IndexBuffer& buffer, int size);
+
+		void buildQuadIndices(IndexBuffer& buffer, int size);
+
+	}
 
 }

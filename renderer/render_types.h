@@ -140,6 +140,16 @@ namespace ds {
 
 		Texture() : uv(0, 0, 1, 1), dim(32, 32), textureID(0) {}
 
+		const Vector2f getUV(int idx) const {
+			switch (idx) {
+				case 0: return Vector2f(uv.x, uv.y); break;
+				case 1: return Vector2f(uv.z, uv.y); break;
+				case 2: return Vector2f(uv.z, uv.w); break;
+				case 3: return Vector2f(uv.x, uv.w); break;
+				default: return Vector2f(0, 0);
+			}
+		}
+
 	};
 
 	// -------------------------------------------------------
@@ -171,13 +181,10 @@ namespace ds {
 		LPDIRECT3DTEXTURE9 texture;
 		LPDIRECT3DSURFACE9 surface;
 		LPD3DXRENDERTOSURFACE rts;
+		int textureID;
 
-		RenderTarget() : flag(0) , clearColor(Color(0,0,0,255)) ,texture(0) , surface(0) , rts(0) {}
+		RenderTarget() : flag(0) , clearColor(Color(0,0,0,255)) ,texture(0) , surface(0) , rts(0) , textureID(-1) {}
 
-		~RenderTarget() {
-			SAFE_RELEASE(surface);
-			SAFE_RELEASE(rts);
-		}
 	};
 	
 	// -------------------------------------------------------

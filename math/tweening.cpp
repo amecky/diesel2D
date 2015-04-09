@@ -1,10 +1,17 @@
 #include "tweening.h"
-
+#include "..\dxstdafx.h"
 
 namespace tweening {
 
 	float linear(float start,float end,float t) {
 		return start + ( end - start ) * t;
+	}
+
+	// -------------------------------------------------------
+	// easeSine
+	// -------------------------------------------------------
+	float easeSinus(float start,float end,float t) {
+		return start + (end - start) * sin(t * PI);
 	}
 
 	// -------------------------------------------------------

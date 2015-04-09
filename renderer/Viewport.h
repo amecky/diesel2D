@@ -36,7 +36,16 @@ public:
 		p.y *= m_ViewScaleY;
 		return p;
 	}
-
+	Vector2f convertToScreen(const Vector2f& worldPos) {
+		Vector2f p = worldPos;
+		p.x /= m_ViewScaleX;
+		p.y /= m_ViewScaleY;
+		return p;
+	}
+	const Vector2f& getWorldSize() const {
+		return m_WorldSize;
+	}
+	const bool isInside(const Vector2f& pos,const Vector2f& extent);
 private:
 	Vector2f m_Position;
 	Vector2f m_ViewPos;

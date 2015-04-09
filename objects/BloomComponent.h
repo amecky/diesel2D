@@ -2,6 +2,7 @@
 #include "..\renderer\render_types.h"
 #include "..\base\GameObject.h"
 #include "..\compiler\Converter.h"
+#include "..\sprites\Sprite.h"
 
 namespace ds {
 

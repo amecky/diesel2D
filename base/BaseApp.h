@@ -6,10 +6,7 @@
 #include "..\dialogs\DialogManager.h"
 #include "..\audio\AudioManager.h"
 #include "GameObject.h"
-#include "..\sprites\SpriteCollisionManager.h"
 #include "..\compiler\AssetCompiler.h"
-#include "..\particles\ParticleManager.h"
-#include "..\ecs\World.h"
 
 namespace ds {
 
@@ -88,9 +85,14 @@ public:
 	const Vector2f& getMousePos() const {
 		return m_MousePos;
 	}
+	const Vector2f& getTwistedMousePos() const {
+		return m_TwistedMousePos;
+	}
 	void setMousePos(int x,int y) {		
 		m_MousePos.x = static_cast<float>(x);
 		m_MousePos.y = static_cast<float>(y);
+		m_TwistedMousePos.x = static_cast<float>(x);
+		m_TwistedMousePos.y = renderer::getScreenHeight() - static_cast<float>(y);
 	}
 	float random(float min,float max) {
 		return min + (max - min)* (float)rand();
@@ -104,9 +106,9 @@ public:
 	DialogManager* getGUI() {
 		return &gui;
 	}
-	Renderer* getRenderer() {
-		return renderer;
-	}
+	//Renderer* getRenderer() {
+		//return renderer;
+	//}
 	AssetCompiler* getAssets() {
 		return &assets;
 	}
@@ -114,7 +116,6 @@ public:
 		return audio;
 	}
 protected:
-	World world;
 	void loadSprites();
 	void initializeGUI();
 	virtual const char* getTitle() = 0;
@@ -124,7 +125,7 @@ protected:
 	virtual void OnKeyUp( WPARAM wParam ) {}
 	virtual void onGUIButton(DialogID dlgID,int button) {}
 	virtual void OnChar(char ascii,unsigned int keyState) {}
-	Renderer* renderer;
+	//Renderer* renderer;
 	DialogManager gui;
 	AudioManager* audio;
 	AssetCompiler assets;
@@ -137,11 +138,10 @@ protected:
 	bool m_Fullscreen;
 	GameTime m_GameTime;
 	Color m_ClearColor;
-	//ParticleManager* particles;
-	SpriteCollisionManager* m_CollisionManager;
 	StateMachine* stateMachine;
 private:
 	Vector2f m_MousePos;
+	Vector2f m_TwistedMousePos;
 	DWORD m_CurTime;
 	float g_fElapsedTime;
 	DWORD m_LastTime;
@@ -151,17 +151,14 @@ private:
 	ButtonState m_ButtonState;
 	MTRand_open rand;		
 	GameObjects m_GameObjects;
-	
+	bool m_Running;
 	
 }; 
 
 template<class S>
 void BaseApp::createGameObject(S* obj) {
-	obj->setRenderer(renderer);
-	obj->setCollisionManager(m_CollisionManager);
 	//obj->setParticleManager(particles);
 	obj->setAssetCompiler(&assets);
-	obj->setWorld(&world);
 	obj->setAudioManager(audio);
 	obj->init();
 	obj->GameObject::setActive(true);

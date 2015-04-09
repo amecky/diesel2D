@@ -6,6 +6,8 @@ namespace ds {
 
 	namespace vector {
 
+		void srt(const Vector2f& v, const Vector2f& u, const Vector2f& scale, float rotation, Vector2f* ret);
+
 		Vector2f srt(const Vector2f& v,const Vector2f& u,float scaleX,float scaleY,float rotation);
 
 		Vector3f srt(const Vector3f& v,const Vector3f& u,float scaleX,float scaleY,float rotation);

@@ -36,22 +36,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -226,38 +222,29 @@
   <ItemGroup>
     <ClCompile Include="audio\Sound.cpp" />
     <ClCompile Include="base\EventStream.cpp" />
-    <ClCompile Include="base\StateMachine.cpp" />
     <ClCompile Include="base\WindowsBase.cpp" />
     <ClCompile Include="collision\BroadPhaseDetector.cpp" />
     <ClCompile Include="collision\CollisionDetectionSystem.cpp" />
     <ClCompile Include="collision\NarrowPhaseDetector.cpp" />
     <ClCompile Include="collision\SpatialHashingBroadPhaseDetector.cpp" />
-    <ClCompile Include="compiler\ASMConverter.cpp" />
     <ClCompile Include="compiler\AssetCompiler.cpp" />
     <ClCompile Include="compiler\BitmapFontConverter.cpp" />
-    <ClCompile Include="compiler\BlueprintConverter.cpp" />
     <ClCompile Include="compiler\DialogConverter.cpp" />
     <ClCompile Include="compiler\GUIConverter.cpp" />
     <ClCompile Include="compiler\HUDConverter.cpp" />
-    <ClCompile Include="compiler\NASMConverter.cpp" />
     <ClCompile Include="compiler\NewParticleSystemConverter.cpp" />
     <ClCompile Include="compiler\ParticleManagerConverter.cpp" />
-    <ClCompile Include="compiler\ParticleSystemConverter.cpp" />
-    <ClCompile Include="compiler\ScriptConverter.cpp" />
+    <ClCompile Include="compiler\PathConverter.cpp" />
     <ClCompile Include="compiler\ShaderConverter.cpp" />
     <ClCompile Include="compiler\SpriteConverter.cpp" />
     <ClCompile Include="data\Gizmo.cpp" />
     <ClCompile Include="dialogs\DialogManager.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
-    <ClCompile Include="ecs\Blueprint.cpp" />
-    <ClCompile Include="ecs\CollisionSystem.cpp" />
-    <ClCompile Include="ecs\World.cpp" />
-    <ClCompile Include="flow\DataContainer.cpp" />
-    <ClCompile Include="flow\System.cpp" />
-    <ClCompile Include="flow\FlowManager.cpp" />
     <ClCompile Include="io\BinaryLoader.cpp" />
     <ClCompile Include="io\BinaryWriter.cpp" />
     <ClCompile Include="io\FileWatcher.cpp" />
+    <ClCompile Include="lib\DataContainer.cpp" />
+    <ClCompile Include="math\CubicBezierPath.cpp" />
     <ClCompile Include="math\FloatArray.cpp" />
     <ClCompile Include="math\GameMath.cpp" />
     <ClCompile Include="math\matrix.cpp" />
@@ -271,28 +258,25 @@
     <ClCompile Include="objects\BloomComponent.cpp" />
     <ClCompile Include="objects\HUD.cpp" />
     <ClCompile Include="objects\TextMessage.cpp" />
-    <ClCompile Include="particles\EmitterMesh.cpp" />
+    <ClCompile Include="particles\ParticleEmitter.cpp" />
     <ClCompile Include="particles\ParticleManager.cpp" />
     <ClCompile Include="particles\ParticleSystem.cpp" />
-    <ClCompile Include="renderer\assets.cpp" />
+    <ClCompile Include="physics\ColliderArray.cpp" />
     <ClCompile Include="renderer\BitmapFont.cpp" />
     <ClCompile Include="renderer\buffer_types.cpp" />
     <ClCompile Include="renderer\Camera.cpp" />
     <ClCompile Include="renderer\Camera2D.cpp" />
-    <ClCompile Include="renderer\DrawCounter.cpp" />
+    <ClCompile Include="renderer\graphics.cpp" />
     <ClCompile Include="renderer\GraphicsDevice.cpp" />
     <ClCompile Include="renderer\shader.cpp" />
     <ClCompile Include="renderer\TextureLoader.cpp" />
     <ClCompile Include="renderer\VertexDeclaration.cpp" />
     <ClCompile Include="renderer\Viewport.cpp" />
-    <ClCompile Include="script\ASM.cpp" />
-    <ClCompile Include="script\Assembler.cpp" />
-    <ClCompile Include="script\ScriptVM.cpp" />
-    <ClCompile Include="script\Tokenizer.cpp" />
     <ClCompile Include="sprites\modifiers.cpp" />
+    <ClCompile Include="sprites\SpriteArray.cpp" />
     <ClCompile Include="sprites\SpriteBatch.cpp" />
-    <ClCompile Include="sprites\SpriteCollisionManager.cpp" />
-    <ClCompile Include="sprites\Sprite.cpp" />
+    <ClCompile Include="sprites\SpriteTemplates.cpp" />
+    <ClCompile Include="tasks\TaskManager.cpp" />
     <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\FileUtils.cpp" />
     <ClCompile Include="base\Input.cpp" />
@@ -304,7 +288,20 @@
     <ClCompile Include="utils\PlainTextReader.cpp" />
     <ClCompile Include="utils\StringUtils.cpp" />
     <ClCompile Include="base\BaseApp.cpp" />
+    <ClCompile Include="world\actions\AbstractAction.cpp" />
+    <ClCompile Include="world\actions\AlphaFadeToAction.cpp" />
+    <ClCompile Include="world\actions\FollowCurveAction.cpp" />
+    <ClCompile Include="world\actions\FollowPathAction.cpp" />
+    <ClCompile Include="world\actions\FollowTargetAction.cpp" />
+    <ClCompile Include="world\actions\MoveByAction.cpp" />
+    <ClCompile Include="world\actions\MoveToAction.cpp" />
+    <ClCompile Include="world\actions\MoveWithAction.cpp" />
+    <ClCompile Include="world\actions\RotateAction.cpp" />
+    <ClCompile Include="world\actions\RotateByAction.cpp" />
+    <ClCompile Include="world\actions\ScalingAction.cpp" />
+    <ClCompile Include="world\actions\WaitAction.cpp" />
     <ClCompile Include="world\components\LightComponent.cpp" />
+    <ClCompile Include="world\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="audio\Sound.h" />
@@ -313,25 +310,20 @@
     <ClInclude Include="base\GameObject.h" />
     <ClInclude Include="base\GameState.h" />
     <ClInclude Include="base\Settings.h" />
-    <ClInclude Include="base\StateMachine.h" />
     <ClInclude Include="collision\BroadPhaseDetector.h" />
     <ClInclude Include="collision\CollisionDetectionSystem.h" />
     <ClInclude Include="collision\CollisionTypes.h" />
     <ClInclude Include="collision\NarrowPhaseDetector.h" />
     <ClInclude Include="collision\SpatialHashingBroadPhaseDetector.h" />
-    <ClInclude Include="compiler\ASMConverter.h" />
     <ClInclude Include="compiler\AssetCompiler.h" />
     <ClInclude Include="compiler\BitmapFontConverter.h" />
-    <ClInclude Include="compiler\BlueprintConverter.h" />
     <ClInclude Include="compiler\Converter.h" />
     <ClInclude Include="compiler\DialogConverter.h" />
     <ClInclude Include="compiler\GUIConverter.h" />
     <ClInclude Include="compiler\HUDConverter.h" />
-    <ClInclude Include="compiler\NASMConverter.h" />
     <ClInclude Include="compiler\NewParticleSystemConverter.h" />
     <ClInclude Include="compiler\ParticleManagerConverter.h" />
-    <ClInclude Include="compiler\ParticleSystemConverter.h" />
-    <ClInclude Include="compiler\ScriptConverter.h" />
+    <ClInclude Include="compiler\PathConverter.h" />
     <ClInclude Include="compiler\ShaderConverter.h" />
     <ClInclude Include="compiler\SpriteConverter.h" />
     <ClInclude Include="data\DataTranslator.h" />
@@ -340,20 +332,6 @@
     <ClInclude Include="data\Param.h" />
     <ClInclude Include="dialogs\DialogManager.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
-    <ClInclude Include="ecs\Actor.h" />
-    <ClInclude Include="ecs\ActorArray.h" />
-    <ClInclude Include="ecs\Animations.h" />
-    <ClInclude Include="ecs\BehaviorSettings.h" />
-    <ClInclude Include="ecs\Blueprint.h" />
-    <ClInclude Include="ecs\CollisionSystem.h" />
-    <ClInclude Include="ecs\ControllerBehaviors.h" />
-    <ClInclude Include="ecs\LifecycleBehaviors.h" />
-    <ClInclude Include="ecs\MoveBehaviors.h" />
-    <ClInclude Include="ecs\World.h" />
-    <ClInclude Include="flow\Bitset.h" />
-    <ClInclude Include="flow\DataContainer.h" />
-    <ClInclude Include="flow\System.h" />
-    <ClInclude Include="flow\FlowManager.h" />
     <ClInclude Include="io\BinaryLoader.h" />
     <ClInclude Include="io\BinaryWriter.h" />
     <ClInclude Include="io\FileWatcher.h" />
@@ -367,9 +345,14 @@
     <ClInclude Include="lib\container\String.h" />
     <ClInclude Include="lib\DataArray.h" />
     <ClInclude Include="lib\DataBuffer.h" />
+    <ClInclude Include="lib\DataContainer.h" />
     <ClInclude Include="lib\Grid.h" />
+    <ClInclude Include="lib\IDMap.h" />
+    <ClInclude Include="lib\PriorityQueue.h" />
     <ClInclude Include="lib\ScratchBuffer.h" />
+    <ClInclude Include="math\BezierCurve.h" />
     <ClInclude Include="math\Bitset.h" />
+    <ClInclude Include="math\CubicBezierPath.h" />
     <ClInclude Include="math\FloatArray.h" />
     <ClInclude Include="math\GameMath.h" />
     <ClInclude Include="math\math_types.h" />
@@ -388,18 +371,17 @@
     <ClInclude Include="objects\HUD.h" />
     <ClInclude Include="objects\TextMessage.h" />
     <ClInclude Include="particles\DynamicSettings.h" />
-    <ClInclude Include="particles\EmitterMesh.h" />
     <ClInclude Include="particles\ParticleEmitter.h" />
     <ClInclude Include="particles\ParticleManager.h" />
     <ClInclude Include="particles\ParticleModifier.h" />
     <ClInclude Include="particles\ParticleSystem.h" />
     <ClInclude Include="particles\Particle.h" />
-    <ClInclude Include="renderer\assets.h" />
+    <ClInclude Include="physics\ColliderArray.h" />
     <ClInclude Include="renderer\BitmapFont.h" />
     <ClInclude Include="renderer\buffer_types.h" />
     <ClInclude Include="renderer\Camera.h" />
     <ClInclude Include="renderer\Camera2D.h" />
-    <ClInclude Include="renderer\DrawCounter.h" />
+    <ClInclude Include="renderer\graphics.h" />
     <ClInclude Include="renderer\GraphicsDevice.h" />
     <ClInclude Include="renderer\render_types.h" />
     <ClInclude Include="renderer\shader.h" />
@@ -408,16 +390,12 @@
     <ClInclude Include="renderer\vertex_types.h" />
     <ClInclude Include="renderer\Viewport.h" />
     <ClInclude Include="base\Input.h" />
-    <ClInclude Include="script\ASM.h" />
-    <ClInclude Include="script\Assembler.h" />
-    <ClInclude Include="script\Script.h" />
-    <ClInclude Include="script\ScriptVM.h" />
-    <ClInclude Include="script\Tokenizer.h" />
     <ClInclude Include="sprites\modifiers.h" />
+    <ClInclude Include="sprites\SpriteArray.h" />
     <ClInclude Include="sprites\SpriteBatch.h" />
-    <ClInclude Include="sprites\SpriteCollisionManager.h" />
     <ClInclude Include="sprites\Sprite.h" />
-    <ClInclude Include="sprites\SpriteGroup.h" />
+    <ClInclude Include="sprites\SpriteTemplates.h" />
+    <ClInclude Include="tasks\TaskManager.h" />
     <ClInclude Include="utils\Color.h" />
     <ClInclude Include="utils\FileUtils.h" />
     <ClInclude Include="utils\font.h" />
@@ -430,7 +408,20 @@
     <ClInclude Include="utils\PlainTextReader.h" />
     <ClInclude Include="utils\StringUtils.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="world\actions\AbstractAction.h" />
+    <ClInclude Include="world\actions\AlphaFadeToAction.h" />
+    <ClInclude Include="world\actions\FollowCurveAction.h" />
+    <ClInclude Include="world\actions\FollowPathAction.h" />
+    <ClInclude Include="world\actions\FollowTargetAction.h" />
+    <ClInclude Include="world\actions\MoveByAction.h" />
+    <ClInclude Include="world\actions\MoveToAction.h" />
+    <ClInclude Include="world\actions\MoveWithAction.h" />
+    <ClInclude Include="world\actions\RotateAction.h" />
+    <ClInclude Include="world\actions\RotateByAction.h" />
+    <ClInclude Include="world\actions\ScalingAction.h" />
+    <ClInclude Include="world\actions\WaitAction.h" />
     <ClInclude Include="world\components\LightComponent.h" />
+    <ClInclude Include="world\World.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico" />

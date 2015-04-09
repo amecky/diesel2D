@@ -1,6 +1,7 @@
 #include "..\dxstdafx.h"
 #include "BaseApp.h"
 #include "..\utils\Log.h"
+#include <strsafe.h>
 /*
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -12,6 +13,39 @@ extern ds::BaseApp *app;
 #define GETY(l) (int(l) >> 16)
 
 bool active = true;
+
+void ErrorExit(LPTSTR lpszFunction) 
+{ 
+	// Retrieve the system error message for the last-error code
+
+	LPVOID lpMsgBuf;
+	LPVOID lpDisplayBuf;
+	DWORD dw = GetLastError(); 
+
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+		FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		dw,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR) &lpMsgBuf,
+		0, NULL );
+
+	// Display the error message and exit the process
+
+	lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
+		(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR)); 
+	StringCchPrintf((LPTSTR)lpDisplayBuf, 
+		LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+		TEXT("%s failed with error %d: %s"), 
+		lpszFunction, dw, lpMsgBuf); 
+	MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK); 
+
+	LocalFree(lpMsgBuf);
+	LocalFree(lpDisplayBuf);
+	ExitProcess(dw); 
+}
 
 LRESULT CALLBACK WinProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam){	
 	switch (message){
@@ -147,13 +181,16 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	wincl.lpszClassName = "Diesel";
 	wincl.lpfnWndProc = WinProc;
 	wincl.style = 0;
-	wincl.hIcon = LoadIcon( hThisInst, MAKEINTRESOURCE( IDI_APPLICATION ) );
+	wincl.hIcon = LoadIcon( NULL, IDI_APPLICATION);
 	wincl.hCursor = LoadCursor( NULL, IDC_ARROW );
 	wincl.lpszMenuName = NULL;
 	wincl.cbClsExtra = 0;
 	wincl.cbWndExtra = 0;
 	wincl.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-	if (!RegisterClass(&wincl)) return 0;
+	if (!RegisterClass(&wincl)) {
+		ErrorExit("RegisterClass");
+		return 0;
+	}
 	app->setInstance(hThisInst);
 	app->createWindow();
 	app->init();

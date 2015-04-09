@@ -45,6 +45,29 @@ namespace vector {
 		return Vector2f(xt,yt);
 	}
 
+	void srt(const Vector2f& v, const Vector2f& u, const Vector2f& scale, float rotation,Vector2f* ret) {
+		float sx = u.x * scale.x;
+		float sy = u.y * scale.y;
+
+		// rotation clock wise
+		//float xt = cosf(rotation) * sx + sinf(rotation) * sy;
+		//float yt = -sinf(rotation) * sx + cosf(rotation) * sy;
+
+		// rotation counter clock wise
+		//float xt = cosf(rotation) * sx - sinf(rotation) * sy;
+		//float yt = sinf(rotation) * sx + cosf(rotation) * sy;
+
+		float xt = math::fastCos(rotation) * sx - math::fastSin(rotation) * sy;
+		float yt = math::fastSin(rotation) * sx + math::fastCos(rotation) * sy;
+
+		xt += v.x;
+		yt += v.y;
+
+		ret->x = xt;
+		ret->y = yt;
+		//return Vector2f(xt, yt);
+	}
+
 	Vector3f srt(const Vector3f& v,const Vector3f& u,float scaleX,float scaleY,float rotation) {
 		float sx = u.x * scaleX;
 		float sy = u.y * scaleY;
@@ -97,7 +120,10 @@ namespace vector {
 		}
 	}
 
-	float getAngle(const Vector2f& v1,const Vector2f& v2)  {	
+	float getAngle(const Vector2f& v1,const Vector2f& v2)  {
+		Vector2f diff = v2 - v1;
+		return calculateRotation(diff);
+		/*
 		Vector2f vn1 = normalize(v1);
 		Vector2f vn2 = normalize(v2);
 		if ( vn1 != vn2 ) {			
@@ -118,6 +144,7 @@ namespace vector {
 		else {
 			return 0.0f;
 		}
+		*/
 	}
 
 	Vector2f getRadialVelocity(float angle,float velocity) {

@@ -43,6 +43,14 @@ void Viewport::setPosition(const Vector2f& pos) {
 	m_ViewPos.y = m_Position.y * m_ScaleY;
 }
 
-
+const bool Viewport::isInside(const Vector2f& pos,const Vector2f& extent) {
+	if ( pos.x < extent.x * 0.5f || pos.x > ( m_WorldSize.x - extent.x * 0.5f )) {
+		return false;
+	}
+	if ( pos.y < extent.y * 0.5f || pos.y > ( m_WorldSize.y - extent.y * 0.5f )) {
+		return false;
+	}
+	return true;
+}
 
 };

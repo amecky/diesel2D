@@ -9,6 +9,8 @@ namespace tweening {
 
 	float easeInQuad(float start,float end,float t);
 
+	float easeSinus(float start,float end,float t);
+
 	float easeOutQuad(float start,float end,float t);
 
 	float easeInOutQuad(float start,float end,float t);

@@ -49,9 +49,6 @@
     <ClCompile Include="base\WindowsBase.cpp">
       <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="renderer\DrawCounter.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="dialogs\GUIDialog.cpp">
       <Filter>dialogs</Filter>
     </ClCompile>
@@ -97,9 +94,6 @@
     <ClCompile Include="renderer\Camera2D.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
-    <ClCompile Include="particles\EmitterMesh.cpp">
-      <Filter>particles</Filter>
-    </ClCompile>
     <ClCompile Include="world\components\LightComponent.cpp">
       <Filter>world\components</Filter>
     </ClCompile>
@@ -117,9 +111,6 @@
     </ClCompile>
     <ClCompile Include="data\Gizmo.cpp">
       <Filter>data</Filter>
-    </ClCompile>
-    <ClCompile Include="sprites\SpriteCollisionManager.cpp">
-      <Filter>sprites</Filter>
     </ClCompile>
     <ClCompile Include="objects\HUD.cpp">
       <Filter>objects</Filter>
@@ -148,14 +139,8 @@
     <ClCompile Include="renderer\BitmapFont.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\ParticleSystemConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
     <ClCompile Include="compiler\SpriteConverter.cpp">
       <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="sprites\Sprite.cpp">
-      <Filter>sprites</Filter>
     </ClCompile>
     <ClCompile Include="particles\ParticleManager.cpp">
       <Filter>particles</Filter>
@@ -169,24 +154,6 @@
     <ClCompile Include="sprites\SpriteBatch.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\ScriptConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="script\ScriptVM.cpp">
-      <Filter>script</Filter>
-    </ClCompile>
-    <ClCompile Include="script\Tokenizer.cpp">
-      <Filter>script</Filter>
-    </ClCompile>
-    <ClCompile Include="ecs\CollisionSystem.cpp">
-      <Filter>ecs</Filter>
-    </ClCompile>
-    <ClCompile Include="ecs\World.cpp">
-      <Filter>ecs</Filter>
-    </ClCompile>
-    <ClCompile Include="ecs\Blueprint.cpp">
-      <Filter>ecs</Filter>
-    </ClCompile>
     <ClCompile Include="collision\BroadPhaseDetector.cpp">
       <Filter>collision</Filter>
     </ClCompile>
@@ -199,9 +166,6 @@
     <ClCompile Include="collision\SpatialHashingBroadPhaseDetector.cpp">
       <Filter>collision</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\BlueprintConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
     <ClCompile Include="compiler\NewParticleSystemConverter.cpp">
       <Filter>compiler</Filter>
     </ClCompile>
@@ -211,37 +175,76 @@
     <ClCompile Include="math\tweening.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="base\StateMachine.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
-    <ClCompile Include="renderer\assets.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="renderer\TextureLoader.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\ASMConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="script\ASM.cpp">
-      <Filter>script</Filter>
-    </ClCompile>
-    <ClCompile Include="script\Assembler.cpp">
-      <Filter>script</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler\NASMConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="flow\DataContainer.cpp">
-      <Filter>flow</Filter>
-    </ClCompile>
-    <ClCompile Include="flow\System.cpp">
-      <Filter>flow</Filter>
-    </ClCompile>
-    <ClCompile Include="flow\FlowManager.cpp">
-      <Filter>flow</Filter>
-    </ClCompile>
     <ClCompile Include="sprites\modifiers.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DataContainer.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="world\World.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\AlphaFadeToAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\MoveToAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\ScalingAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\AbstractAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\SpriteArray.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\RotateByAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\FollowPathAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="math\CubicBezierPath.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\PathConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\FollowCurveAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\MoveByAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\WaitAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\ColliderArray.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\MoveWithAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleEmitter.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="tasks\TaskManager.cpp">
+      <Filter>tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\RotateAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\graphics.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\FollowTargetAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="sprites\SpriteTemplates.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
   </ItemGroup>
@@ -309,9 +312,6 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="renderer\render_types.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer\DrawCounter.h">
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="renderer\vertex_types.h">
@@ -383,9 +383,6 @@
     <ClInclude Include="math\Bitset.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="particles\EmitterMesh.h">
-      <Filter>particles</Filter>
-    </ClInclude>
     <ClInclude Include="world\components\LightComponent.h">
       <Filter>world\components</Filter>
     </ClInclude>
@@ -415,9 +412,6 @@
     </ClInclude>
     <ClInclude Include="data\Gizmo.h">
       <Filter>data</Filter>
-    </ClInclude>
-    <ClInclude Include="sprites\SpriteCollisionManager.h">
-      <Filter>sprites</Filter>
     </ClInclude>
     <ClInclude Include="base\ApplicationContext.h">
       <Filter>base</Filter>
@@ -455,9 +449,6 @@
     <ClInclude Include="renderer\BitmapFont.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\ParticleSystemConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
     <ClInclude Include="compiler\SpriteConverter.h">
       <Filter>compiler</Filter>
     </ClInclude>
@@ -482,47 +473,11 @@
     <ClInclude Include="sprites\SpriteBatch.h">
       <Filter>sprites</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\ScriptConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="script\ScriptVM.h">
-      <Filter>script</Filter>
-    </ClInclude>
-    <ClInclude Include="script\Tokenizer.h">
-      <Filter>script</Filter>
-    </ClInclude>
-    <ClInclude Include="script\Script.h">
-      <Filter>script</Filter>
-    </ClInclude>
     <ClInclude Include="data\DataTranslator.h">
       <Filter>data</Filter>
     </ClInclude>
     <ClInclude Include="lib\DataArray.h">
       <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\Actor.h">
-      <Filter>ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\Animations.h">
-      <Filter>ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\CollisionSystem.h">
-      <Filter>ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\ControllerBehaviors.h">
-      <Filter>ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\LifecycleBehaviors.h">
-      <Filter>ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\MoveBehaviors.h">
-      <Filter>ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\World.h">
-      <Filter>ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\Blueprint.h">
-      <Filter>ecs</Filter>
     </ClInclude>
     <ClInclude Include="data\DynamicSettings.h">
       <Filter>data</Filter>
@@ -545,15 +500,6 @@
     <ClInclude Include="collision\SpatialHashingBroadPhaseDetector.h">
       <Filter>collision</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\BlueprintConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\BehaviorSettings.h">
-      <Filter>ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs\ActorArray.h">
-      <Filter>ecs</Filter>
-    </ClInclude>
     <ClInclude Include="particles\ParticleModifier.h">
       <Filter>particles</Filter>
     </ClInclude>
@@ -569,50 +515,89 @@
     <ClInclude Include="math\tweening.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="sprites\SpriteGroup.h">
-      <Filter>sprites</Filter>
-    </ClInclude>
     <ClInclude Include="base\GameState.h">
-      <Filter>base</Filter>
-    </ClInclude>
-    <ClInclude Include="base\StateMachine.h">
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="lib\Bitset.h">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="renderer\assets.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="renderer\TextureLoader.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\ASMConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="script\ASM.h">
-      <Filter>script</Filter>
-    </ClInclude>
-    <ClInclude Include="script\Assembler.h">
-      <Filter>script</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\NASMConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="flow\Bitset.h">
-      <Filter>flow</Filter>
-    </ClInclude>
-    <ClInclude Include="flow\DataContainer.h">
-      <Filter>flow</Filter>
-    </ClInclude>
-    <ClInclude Include="flow\System.h">
-      <Filter>flow</Filter>
-    </ClInclude>
-    <ClInclude Include="flow\FlowManager.h">
-      <Filter>flow</Filter>
-    </ClInclude>
     <ClInclude Include="sprites\modifiers.h">
       <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DataContainer.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="world\World.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\AlphaFadeToAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\MoveToAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\ScalingAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\AbstractAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpriteArray.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\RotateByAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\FollowPathAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="math\CubicBezierPath.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\PathConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="math\BezierCurve.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\FollowCurveAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\MoveByAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\WaitAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\ColliderArray.h">
+      <Filter>physics</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\IDMap.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\MoveWithAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="tasks\TaskManager.h">
+      <Filter>tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\RotateAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\graphics.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\FollowTargetAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="sprites\SpriteTemplates.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\PriorityQueue.h">
+      <Filter>lib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -671,17 +656,20 @@
     <Filter Include="compiler">
       <UniqueIdentifier>{fcbfebaa-fe95-4080-a20b-7f0f2d6b1828}</UniqueIdentifier>
     </Filter>
-    <Filter Include="script">
-      <UniqueIdentifier>{f5116c61-182b-405c-95ec-8389dba62434}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ecs">
       <UniqueIdentifier>{78a42f98-d454-4702-8275-944d42677625}</UniqueIdentifier>
     </Filter>
     <Filter Include="collision">
       <UniqueIdentifier>{1492ec9b-a315-4461-848e-c935a447e4e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="flow">
-      <UniqueIdentifier>{c22efe01-b6df-4cca-86b6-4df4b5a2f7bb}</UniqueIdentifier>
+    <Filter Include="world\actions">
+      <UniqueIdentifier>{361fb336-b0a8-4233-884f-79b32526eba3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="physics">
+      <UniqueIdentifier>{dc726061-ad8c-4911-afd6-184d845f5cc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tasks">
+      <UniqueIdentifier>{a533f33a-9f33-48e6-857d-831e1586eb3b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

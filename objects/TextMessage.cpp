@@ -9,7 +9,7 @@ TextMessage::TextMessage() : GameObject() , m_TextCounter(0) , m_Total(0) {
 }
 
 void TextMessage::init(const char* fontName,int textureID) {
-	m_BitmapFont = m_Renderer->loadBitmapFont(fontName,textureID);
+	m_BitmapFont = renderer::loadBitmapFont(fontName,textureID);
 	assert(m_BitmapFont != 0);
 	//font::load(fontName,m_Renderer,textureID,m_BitmapFont);
 }
@@ -83,7 +83,7 @@ void TextMessage::setColor(uint32 id,const Color& color) {
 	TextEntry* te = &m_TextEntries[id];
 	assert(te != 0);	
 	for ( size_t i = 0; i < te->sprites.size(); ++i ) {
-		te->sprites[i].setColor(color);
+		te->sprites[i].color = color;
 	}
 }
 // -------------------------------------------------------

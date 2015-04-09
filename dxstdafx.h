@@ -62,7 +62,7 @@ typedef unsigned short ushort;
 
 //const uint32 UINT32_MAX = 0xffffffffu;
 
-#if defined(DEBUG) 
+#if defined(RELEASE) 
 	#ifndef HR
 #define HR(x) { HRESULT hr = x;	if ( FAILED(hr) ) { DXTraceA(__FILE__ ,__LINE__ ,hr,#x,true); 	}} 
 	#endif

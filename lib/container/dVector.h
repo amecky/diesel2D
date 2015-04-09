@@ -19,7 +19,10 @@ public:
 	}
 	~dVector() {
 		clear();
-		delete[] m_Data;
+		if (m_Data != 0) {
+			delete[] m_Data;
+			m_Data = 0;
+		}
 	}
 	const size_type size() const {
 		return m_Size;

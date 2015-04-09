@@ -2,7 +2,6 @@
 #include "..\io\BinaryWriter.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\particles\ParticleModifier.h"
-#include "..\particles\EmitterMesh.h"
 #include "..\particles\ParticleEmitter.h"
 
 namespace ds {
@@ -84,6 +83,7 @@ void NewParticleSystemConverter::convert(JSONReader& reader,BinaryWriter& writer
 			writer.write(emitter->getUInt32("ejection_period",0));
 			writer.write(emitter->getUInt32("ejection_variance",0));
 			writer.write(emitter->getUInt32("ejection_counter",0));
+			writer.write(emitter->getFloat("duration", 0.0f));
 			writer.closeChunk();
 			for ( size_t i = 0; i < categories.size(); ++i ) {
 				Category* c = categories[i];			
@@ -126,6 +126,30 @@ void NewParticleSystemConverter::convert(JSONReader& reader,BinaryWriter& writer
 				else if (c->getName() == "hsv_color_generator") {
 					writer.startChunk(206, 1);
 					HSVColorGenerator rg;
+					rg.convert(c, writer);
+					writer.closeChunk();
+				}
+				else if (c->getName() == "point_generator") {
+					writer.startChunk(207, 1);
+					PointGenerator rg;
+					rg.convert(c, writer);
+					writer.closeChunk();
+				}
+				if (c->getName() == "circle_position_generator") {
+					writer.startChunk(208, 1);
+					CircleGenerator rg;
+					rg.convert(c, writer);
+					writer.closeChunk();
+				}
+				else if (c->getName() == "line_position_generator") {
+					writer.startChunk(209, 1);
+					LineGenerator rg;
+					rg.convert(c, writer);
+					writer.closeChunk();
+				}
+				else if (c->getName() == "velocity_generator") {
+					writer.startChunk(210, 1);
+					VelocityGenerator rg;
 					rg.convert(c, writer);
 					writer.closeChunk();
 				}

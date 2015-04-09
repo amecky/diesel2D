@@ -28,7 +28,7 @@ void LightComponent::initialize(int startLayer,int colorRT,int normalRT,float am
 		PTCVertex(Vector3f(-centerX,-centerY,0.0f),Vector2f(0.0f,1.0f))
 	};
 
-	m_AddBS = m_Renderer->createBlendState(BL_ONE,BL_ONE,true);	
+	m_AddBS = renderer::createBlendState(BL_ONE,BL_ONE,true);	
 /*
 	int layer = startLayer;
 	int lightRT = m_World->createRenderTarget(layer,m_ScreenW,m_ScreenH);
@@ -109,9 +109,9 @@ int LightComponent::addLight(const Vector3f& position,float radius,const Color& 
 // Draw
 // -------------------------------------------------------
 void LightComponent::draw() {
-	m_Renderer->setCurrentShader(m_ShaderID);
-	int current = m_Renderer->getCurrentBlendState();
-	m_Renderer->setBlendState(m_AddBS);
+	renderer::setCurrentShader(m_ShaderID);
+	int current = renderer::getCurrentBlendState();
+	renderer::setBlendState(m_AddBS);
 	for ( size_t i = 0; i < m_Lights.size(); ++i ) {
 		Light* l = &m_Lights[i];
 		if ( l->active ) {
@@ -122,10 +122,10 @@ void LightComponent::draw() {
 			shader::setFloat(m_LightShader,"lightDecay",l->radius);
 			shader::setFloat(m_LightShader,"specularStrength",l->specular);
 			shader::setFloat(m_LightShader,"lightStrength",l->strength);
-			m_Renderer->drawBuffer(m_Handle,-1);
+			//m_Renderer->drawBuffer(m_Handle,-1);
 		}
 	}
-	m_Renderer->setBlendState(current);
+	renderer::setBlendState(current);
 }
 
 // -------------------------------------------------------

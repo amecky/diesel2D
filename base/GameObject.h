@@ -1,8 +1,6 @@
 #pragma once
 #include "EventStream.h"
 #include "..\renderer\Renderer.h"
-#include "..\sprites\SpriteCollisionManager.h"
-#include "..\ecs\World.h"
 #include "..\audio\AudioManager.h"
 
 namespace ds {
@@ -21,17 +19,11 @@ public:
 	void setRenderer(Renderer* renderer) {
 		m_Renderer = renderer;
 	}
-	void setCollisionManager(SpriteCollisionManager* collisionManager) {
-		m_CollisionManager = collisionManager;
-	}
 	//void setParticleManager(ParticleManager* particleManager) {
 		//m_Particles = particleManager;
 	//}
 	void setAssetCompiler(AssetCompiler* assetCompiler) {
 		m_Assets = assetCompiler;
-	}
-	void setWorld(World* world) {
-		m_World = world;
 	}
 	void setAudioManager(AudioManager* audio) {
 		m_Audio = audio;
@@ -57,10 +49,8 @@ public:
 protected:
 	EventStream m_Events;
 	Renderer* m_Renderer;
-	SpriteCollisionManager* m_CollisionManager;
 	//ParticleManager* m_Particles;
 	AssetCompiler* m_Assets;
-	World* m_World;
 	AudioManager* m_Audio;
 private:
 	GameObject(const GameObject& other) {}

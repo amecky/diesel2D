@@ -1,6 +1,5 @@
 #pragma once
 #include "ParticleSystem.h"
-#include "EmitterMesh.h"
 #include "..\lib\container\List.h"
 #include "..\io\Serializer.h"
 #include <IPath.h>
@@ -12,13 +11,67 @@
 #include "ParticleModifier.h"
 #include "ParticleEmitter.h"
 #include "..\utils\Profiler.h"
-#include "..\script\ASM.h"
+#include "..\compiler\AssetCompiler.h"
+#include "..\renderer\Renderer.h"
 
 namespace ds {
 	
+	struct ModifierData {
+
+		char* buffer;
+		int index;
+		int num;
+		int entries[64];
+
+		ModifierData() : buffer(0) , index(0) , num(0) {}
+
+		~ModifierData() {
+			if (buffer != 0) {
+				delete[] buffer;
+			}
+		}
+
+		void allocate(int size) {
+			buffer = new char[size];
+		}
+
+		template<class T>
+		const bool get(int id,T* t,int size) const {
+			int idx = entries[id];
+			char* data = buffer + idx;
+			memcpy(t, data, size);
+			return true;
+		}
+
+		template<class T>
+		int add(const T& t) {
+			int current = index;
+			entries[num++] = current;
+			char* data = buffer + index;
+			memcpy(data, &t, sizeof(t));
+			index += sizeof(t);
+			return current;
+		}
+	};
+
+	typedef void(*PModifier)(const ModifierData&, ParticleArray*, float);
+	typedef void(*PGenerator)(const ModifierData&, ParticleArray*, const Vector2f&, float, uint32, uint32);
+
+	struct LiveOverTimeData {
+
+		float ttl;
+
+	};
+
+	void lifeOverTime(const ModifierData& data, ParticleArray* array, float dt);
+
+	void move(const ModifierData& data, ParticleArray* array, float dt);
+
 // -------------------------------------------------------
 // New particle system
 // -------------------------------------------------------
+const int MAX_PARTICLES = 4096;
+
 struct NewParticleSystemData {
 
 	uint32 id;
@@ -28,28 +81,21 @@ struct NewParticleSystemData {
 	Texture texture;
 };
 
-class NewParticleSystem : public GameObject , public Serializer {
+class NewParticleSystem : public Serializer {
 
 typedef std::vector<ParticleModifier*> Modifiers;
+//typedef std::vector<ParticleEmitterInstance> EmitterInstances;
 
 public:
-	NewParticleSystem() : GameObject() {
-		m_Array.initialize(4096);
+	NewParticleSystem() {
+		m_Array.initialize(MAX_PARTICLES);
+		
 	}
 	virtual ~NewParticleSystem() {
 		clear();
 	}
 
-	void init() {}
-
-	void clear() {
-		Modifiers::iterator it = m_Modifiers.begin();
-		while ( it != m_Modifiers.end()) {
-			delete (*it);
-			it = m_Modifiers.erase(it);
-		}
-		m_Emitter.clear();
-	}
+	void clear();
 
 	void init(const NewParticleSystemData& data) {
 		m_Data = data;
@@ -57,24 +103,26 @@ public:
 
 	void init(const Rect& r,uint32 textureID) {
 		m_Data.textureID = textureID;
-		m_Data.textureRect = r;
+		m_Data.textureRect = r;		
 	}
 
-	void update(float elapsed) {
-		//m_Emitter.generate(&m_Array,m_Position,elapsed);
-		PR_START("NewParticleSystem::update")
-		for ( size_t i = 0;i < m_Modifiers.size(); ++i ) {
-			m_Modifiers[i]->update(&m_Array,elapsed);
-		}
-		PR_END("NewParticleSystem::update")
+	template<class T>
+	void addPM(const PModifier& modifier,const T& t) {
+		modifiers[numModifiers] = modifier;
+		dataIndices[numModifiers] = m_ModifierData.add(t);
+		++numModifiers;
 	}
-	void render() {
-		PR_START("NewParticleSystem::render")
-		if ( m_Array.countAlive > 0 ) {		
-			ds::sprites::draw(m_Data.texture,  m_Array);			
-		}
-		PR_END("NewParticleSystem::render")
+
+	void addPM(const PModifier& modifier) {
+		modifiers[numModifiers] = modifier;
+		dataIndices[numModifiers] = -1;
+		++numModifiers;
 	}
+
+	void update(float elapsed);
+
+	void render();
+
 	ParticleEmitter& getEmitter() {
 		return m_Emitter;
 	}
@@ -86,7 +134,14 @@ public:
 }
 	void start(const Vector2f& startPosition) {
 		m_Position = startPosition;
+		//ParticleEmitterInstance instance;
+		//m_Emitter.createInstance(&instance);
+		//m_Instances.push_back(instance);
+		m_Emitter.start();
 		m_Emitter.generate(&m_Array,m_Position,0.0f);
+	}
+	void stop() {
+		m_Emitter.stop();
 	}
 	void addModifier(ParticleModifier* modifier) {
 		m_Modifiers.push_back(modifier);
@@ -95,80 +150,39 @@ public:
 		m_Position = position;
 	}
 	void load(BinaryLoader* loader);
+	void setDebugName(const char* name);
+	const int getCountAlive() const {
+		return m_Array.countAlive;
+	}
+	const char* getDebugName() const {
+		return m_DebugName;
+	}
+	const ParticleArray& getArray() const {
+		return m_Array;
+	}
+	const Texture& getTexture() const {
+		return m_Data.texture;
+	}
 private:
+	ParticleGenerator* createGenerator(int id);
+	ParticleModifier* createModifier(int id);
+	void prepareVertices();
+	void buildVertices();
 	Vector2f m_Position;
 	NewParticleSystemData m_Data;
 	ParticleSettings m_Settings;
 	ParticleArray m_Array;
 	Modifiers m_Modifiers;
 	ParticleEmitter m_Emitter;
-};
+	char m_DebugName[32];
+	//EmitterInstances m_Instances;
 
-class ScriptedParticleSystem : public GameObject {
+	PModifier modifiers[32];
+	int dataIndices[32];
+	int numModifiers;
+	ModifierData m_ModifierData;
 
-public:
-	ScriptedParticleSystem() : GameObject() , m_Array(4096) {}
-
-	virtual ~ScriptedParticleSystem() {}
-
-	void init() {}
 	
-	void init(const Rect& r, uint32 textureID,const char* scriptName) {
-		m_TextureID = textureID;
-		m_TextureRect = r;
-		m_Assets->load(scriptName, &m_ParticleScript, CVT_NASM);
-		nasm::debug(m_ParticleScript);
-	}
-	
-	void update(float elapsed) {
-		PRS("ScriptedParticleSystem::update")
-		if (m_Array.size() > 0) {
-			nasm::patch_constant(m_ParticleScript, "dt", Vector4f(elapsed));
-			PRS("ScriptedParticleSystem::update::TTL")
-			Vector4f* timer = m_Array.begin(4);
-			for (int i = 0; i < m_Array.size(); ++i) {
-				timer->x += elapsed;
-				timer->z = timer->x / timer->y;
-				++timer;
-			}
-			PRE("ScriptedParticleSystem::update::TTL")
-			nasm::execute(m_ParticleScript, "move", m_Array);
-			PRS("ScriptedParticleSystem::update::KILL")
-			timer = m_Array.begin(4);
-			uint32 cnt = 0;
-			while (cnt < m_Array.size()) {
-				if (timer->x >= timer->y) {
-					m_Array.kill(cnt);
-				}
-				++cnt;
-				++timer;
-			}			
-			PRE("ScriptedParticleSystem::update::KILL")
-			
-
-		}
-		PRE("ScriptedParticleSystem::update")
-	}
-	void render() {
-		PRS("ScriptedParticleSystem::render")
-		if (m_Array.size() > 0) {
-			gfx::draw(m_TextureID, m_Array);
-		}
-		PRE("ScriptedParticleSystem::render")
-	}	
-	void start(const Vector2f& startPosition) {
-		m_Position = startPosition;		
-		nasm::emitt(m_ParticleScript, "emitter", startPosition.x, startPosition.y, m_Array);
-	}	
-	void setPosition(const Vector2f& position) {
-		m_Position = position;
-	}	
-private:
-	nasm::ASMScript m_ParticleScript;
-	Vector2f m_Position;
-	NParticleArray m_Array;
-	int m_TextureID;
-	Rect m_TextureRect;
 };
 
 }

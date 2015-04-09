@@ -3,7 +3,6 @@
 #include <map>
 #include "..\io\Serializer.h"
 #include <vector>
-#include "..\script\Script.h"
 
 namespace ds {
 
@@ -19,8 +18,7 @@ const uint32 CVT_SPRITES_DESCRIPTION = 8;
 const uint32 CVT_SCRIPT              = 9;
 const uint32 CVT_BLUEPRINT           = 10;
 const uint32 CVT_NPS                 = 11;
-const uint32 CVT_ASM                 = 12;
-const uint32 CVT_NASM                = 13;
+const uint32 CVT_PATH                = 14;
 const uint32 BINL_TEXTURE            = 0;
 
 // -------------------------------------------------------
@@ -66,17 +64,9 @@ struct FileWatch {
 	bool binary;
 };
 
-struct ScriptWatch {
-	char jsonName[256];
-	char binaryName[256];
-	Script* script;
-	FILETIME fileTime;
-};
-
 typedef std::map<uint32,Converter*> ConverterMapping;
 typedef std::map<uint32,BinarySerializer*> BinarySerializerMapping;
 typedef std::vector<FileWatch> WatchList;
-typedef std::vector<ScriptWatch> ScriptWatchList;
 
 public:
 	AssetCompiler();
@@ -84,10 +74,7 @@ public:
 	void update();
 	uint32 registerConverter(Converter* converter);	
 	void load(const char* fileName,Serializer* serializer,uint32 type);
-	void loadScript(const char* fileName,Script* script);
-
 	int loadBinary(const char* fileName,uint32 type);
-
 	uint32 getConvertedID(const char* name);
 private:
 	uint32 m_CustomIndex;
@@ -95,7 +82,6 @@ private:
 	ConverterMapping m_Mapping;
 	BinarySerializerMapping m_BinarySerializerMapping;
 	WatchList m_WatchList;
-	ScriptWatchList m_ScriptWatchList;
 	AssetDB m_Database;
 };
 

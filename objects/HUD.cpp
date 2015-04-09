@@ -17,7 +17,7 @@ HUD::~HUD() {
 }
 
 void HUD::init(int textureID,const char* fontName) {
-	m_Font = m_Renderer->loadBitmapFont(fontName,textureID);
+	m_Font = renderer::loadBitmapFont(fontName,textureID);
 	clear();
 }
 
@@ -123,10 +123,10 @@ void HUD::addImage(int id,int x,int y,const Rect& texturRect,const Color& color,
 	hi->id = id;
 	HUDEntry* entry = &m_HUDEntries[hi->entryID];
 	Sprite sp;
-	sp.setPosition(Vector2f(x,y));
-	sp.setTextureRect(texturRect);
-	sp.setColor(color);
-	sp.setScale(Vector2f(scale,scale));
+	sp.position = Vector2f(x,y);
+	sp.texture = math::buildTexture(texturRect);
+	sp.color = color;
+	sp.scale = Vector2f(scale,scale);
 	entry->sprites.push_back(sp);	
 }
 
@@ -174,7 +174,7 @@ void HUD::setNumber(int id, int value) {
 	if (length == 0) {
 		length = 1;
 	}
-	div = pow(10, (length - 1));
+	div = (int)pow(10.0f, (length - 1.0f));
 	Vector2f p = n.position;
 	int tmp = value;
 	float xp = 0.0f;

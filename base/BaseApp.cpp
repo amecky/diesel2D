@@ -7,7 +7,6 @@
 #include "..\io\FileWatcher.h"
 #include "..\utils\FileUtils.h"
 #include "..\particles\ParticleSystem.h"
-#include "StateMachine.h"
 
 namespace ds {
 
@@ -15,7 +14,6 @@ namespace ds {
 // Constructing new BaseApp
 // -------------------------------------------------------	
 BaseApp::BaseApp() {
-	renderContext = new RenderContext;
 	gBlockMemory = new DataBlockAllocator();
 	gFileWatcher = new FileWatcher();
 	m_Active = true;
@@ -36,11 +34,7 @@ BaseApp::BaseApp() {
 	rand.seed(GetTickCount());
 	audio = new AudioManager;
 	m_Fullscreen = false;
-	m_CollisionManager = new SpriteCollisionManager();
-	//particles = new ParticleManager;
-	stateMachine = new StateMachine;
-	
-	//m_DialogBatch = 0;
+
 }
 
 // -------------------------------------------------------
@@ -48,15 +42,13 @@ BaseApp::BaseApp() {
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
 	LOGC("BaseApp") << "Destructing all elements";
-	delete stateMachine;
-	//delete particles;
-	delete m_CollisionManager;
 	//delete gProfiler;
 	delete audio;
-	delete renderer;	
+	renderer::shutdown();	
 	delete gFileWatcher;	
 	delete gBlockMemory;
-	delete renderContext;
+
+	//delete renderContext;
 }
 
 // -------------------------------------------------------
@@ -71,29 +63,17 @@ void BaseApp::init() {
 	settings.synched = true;
 	settings.mode = 1;
 	settings.postProcessing = false;
-	renderer = new Renderer(m_hWnd,settings);   
-	world.setRenderer(renderer);
-	world.setAssetCompiler(&assets);
+	renderer::initialize(m_hWnd,settings);   
 	audio->initialize(m_hWnd);
 
 	profiler::init();
-	sprites::init(renderer);
-
-	//particles->setRenderer(renderer);
-	//particles->setAssetCompiler(&assets);
+	sprites::init();
 	initialize();		
-	/*
-	LOGC("BaseApp") << "-> loading gui.json";
-	if ( file::fileExists("content\\resources\\gui.json")) {
-		LOGC("BaseApp") << "There is a gui file";
-		initializeGUI();
-	}
-	*/
-	LOGC("BaseApp") << "----------------- Init ----------------------";
 	LOGC("BaseApp") << "------------ Loading content  ---------------";
-	loadContent();
+	loadContent();	
 	LOGC("BaseApp") << "------------ Loading content  ---------------";
 	m_Loading = false;
+	m_Running = true;
 }
 
 // -------------------------------------------------------
@@ -103,7 +83,6 @@ void BaseApp::loadSprites() {
 }
 
 void BaseApp::initializeGUI() {
-	gui.setRenderer(renderer);
 	gui.setAssetCompiler(&assets);
 	assets.load("gui",&gui,CVT_GUI);	
 }
@@ -112,7 +91,6 @@ void BaseApp::initializeGUI() {
 // -------------------------------------------------------
 void BaseApp::createWindow() {
 	RECT DesktopSize;
-	HBRUSH bgBrush = CreateSolidBrush(RGB(0,0,0));
 	GetClientRect(GetDesktopWindow(),&DesktopSize);
 	// Create the application's window
 	m_hWnd = CreateWindow( "Diesel", "Diesel",
@@ -182,15 +160,14 @@ void BaseApp::updateTime() {
 void BaseApp::buildFrame() {	
 	//gProfiler->reset();	
 	profiler::reset();
-	m_CollisionManager->reset();
 	//PR_START("MAIN")
 	PR_START("FILEWATCHER")
 #ifdef DEBUG
 	assets.update();
 #endif
 	PR_END("FILEWATCHER")
-	renderContext->drawCounter.reset();
-	renderer->clearDebugMessages();
+	renderer::drawCounter().reset();
+	renderer::clearDebugMessages();
 	// handle key states
 	PR_START("INPUT")
 	if ( m_KeyStates.keyDown ) {
@@ -215,48 +192,40 @@ void BaseApp::buildFrame() {
 			OnButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);
 			DialogID did;
 			int selected;
-			if ( gui.onButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y,&did,&selected) ) {
-				stateMachine->onGUIButton(did,selected);
+			if ( gui.onButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y,&did,&selected) ) {			
 				onGUIButton(did,selected);
 			}
-			stateMachine->OnButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);
 		}
 		else {
 			OnButtonUp(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);
 		}
 	}
-	PR_START("UPDATE")
-	gui.updateMousePos(getMousePos());
-	PR_START("GameObjects::update")
-	//if ( !m_Paused ) {
-		for ( size_t i = 0; i < m_GameObjects.size(); ++i ) {
-			GameObject* obj = m_GameObjects[i];
-			obj->resetEvents();
-			if (obj->isActive()) {				
-				obj->update(m_GameTime.elapsed);
-			}
-		}
-	//}
 	sprites::begin();
-	PR_END("GameObjects::update")
-	PR_START("StateMachine::update")
-	stateMachine->update(m_GameTime.elapsed);
-	PR_END("StateMachine::update")	
-	PR_START("Game::update")
-	update(m_GameTime);
-	//world.update(m_GameTime.elapsed);	
-	//particles->update(m_GameTime.elapsed);
-	PR_END("Game::update")
-	PRS("Collisions::check")
-	int collisions = m_CollisionManager->checkIntersections();
-	if ( collisions > 0 ) {
-		handleCollisions();
+	if ( m_Running ) {
+		PR_START("UPDATE")
+		gui.updateMousePos(getMousePos());
+		PR_START("GameObjects::update")
+		//if ( !m_Paused ) {
+			for ( size_t i = 0; i < m_GameObjects.size(); ++i ) {
+				GameObject* obj = m_GameObjects[i];
+				obj->resetEvents();
+				if (obj->isActive()) {				
+					obj->update(m_GameTime.elapsed);
+				}
+			}
+		//}
+	
+		PR_END("GameObjects::update")
+		PR_START("Game::update")
+		update(m_GameTime);
+		PR_END("Game::update")
+		PRS("Collisions::check")
+		PRE("Collisions::check")
+		PR_END("UPDATE")
 	}
-	PRE("Collisions::check")
-	PR_END("UPDATE")
 	PR_START("RENDER")
-	renderer->beginRendering(m_ClearColor);	
-	renderer->setupMatrices();
+	renderer::beginRendering(m_ClearColor);	
+	renderer::setupMatrices();
 	PR_START("RENDER_GAME")
 	draw(m_GameTime);
 	PR_END("RENDER_GAME")
@@ -265,27 +234,27 @@ void BaseApp::buildFrame() {
 	gui.render();
 	PRE("RENDER_GUI")
 	PRS("RENDER_FLUSH")
-	renderer->flush();
+	renderer::flush();
 	PRE("RENDER_FLUSH")
 	PR_START("DEBUG_RENDER")
 #ifdef DEBUG		
 	if ( m_DebugInfo.showDrawCounter ) {
 		int y = ds::renderer::getSelectedViewport().getHeight() - 80;
-		renderer->showDrawCounter(10,y);
+		debug::showDrawCounter(10,y);
 	}
 	if ( m_DebugInfo.showProfiler ) {
-		renderer->showProfiler(10,10);
+		debug::showProfiler(10, 10);
 	}		
 #endif
-	renderer->drawDebugMessages();
+	debug::drawDebugMessages();
 	PR_END("DEBUG_RENDER")		
 	PR_END("RENDER")
-	renderer->endRendering();
+	renderer::endRendering();
 	profiler::finalize();
 	//PR_END("MAIN")
 	if ( m_DebugInfo.printProfiler ) {
 		m_DebugInfo.printProfiler = false;
-		renderer->printDrawCounter();
+		debug::printDrawCounter();
 		LOG << "--------------------------------";
 		profiler::print();
 	}	
@@ -330,6 +299,9 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 	else if ( virtualKey == VK_F3 && m_DebugInfo.showProfiler) {
 		m_DebugInfo.showProfiler = false;
 	}	
+	else if ( virtualKey == VK_F4 ) {
+		m_Running = !m_Running;
+	}	
 	if ( virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
 		m_DebugInfo.debugRenderer = true;
 	}
@@ -340,16 +312,5 @@ void BaseApp::sendKeyUp(WPARAM virtualKey) {
 	m_KeyStates.keyUp = true;
 	m_KeyStates.keyReleased = virtualKey;
 }
-/*
-void BaseApp::createParticleSystem(const char* fileName,int textureID,ParticleSystem* entity,int maxParticles,int blendState) {
-	entity->setRenderer(renderer);
-	entity->setMaxParticles(maxParticles);
-	entity->setBlendState(blendState);
-	entity->setTextureID(textureID);
-	entity->init();
-	assets.load(fileName,entity,CVT_PARTICLESYSTEM);
-	//entity->load(fileName);	
-	m_GameObjects.push_back(entity);
-}
-*/
+
 }

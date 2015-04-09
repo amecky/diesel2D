@@ -158,7 +158,7 @@ IdString murmur_hash(const void * key, int len, unsigned int seed) {
 }
 
 bool isDigit(const char c) {
-	return ( c >= '0' && c <= '9' );
+	return ((c >= '0' && c <= '9') || c == '-' || c == '+');
 }
 
 bool isWhitespace(const char c) {
@@ -172,28 +172,36 @@ float strtof(const char* p,char** endPtr) {
 	while (isWhitespace(*p)) {
 		++p;
 	}
-	float value = 0.0f;	
-	while ( isDigit(*p)) {
+	float sign = 1.0f;
+	if (*p == '-') {
+		sign = -1.0f;
+		++p;
+	}
+	else if (*p == '+') {
+		++p;
+	}
+	float value = 0.0f;
+	while (isDigit(*p)) {
 		value *= 10.0f;
 		value = value + (*p - '0');
 		++p;
 	}
-	if ( *p == '.' ) {
+	if (*p == '.') {
 		++p;
 		float dec = 1.0f;
 		float frac = 0.0f;
-		while ( isDigit(*p)) {
+		while (isDigit(*p)) {
 			frac *= 10.0f;
 			frac = frac + (*p - '0');
 			dec *= 10.0f;
 			++p;
 		}
-		value = value + ( frac / dec );
+		value = value + (frac / dec);
 	}
 	if (endPtr) {
 		*endPtr = (char *)(p);
 	}
-	return value;
+	return value * sign;
 }
 
 bool isCharacter(const char p) {

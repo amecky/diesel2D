@@ -1,6 +1,5 @@
 #include "shader.h"
 #include "..\utils\StringUtils.h"
-#include "assets.h"
 
 namespace ds {
 
@@ -15,6 +14,15 @@ namespace ds {
 			return false;
 		}
 
+		bool setVector2f(Shader& shader, const char* name, const Vector2f& v) {
+			D3DXHANDLE handle = findHandle(shader, name);
+			if (handle != 0) {
+				shader.m_FX->SetValue(handle, &v, sizeof(Vector2f));
+				return true;
+			}
+			return false;
+		}
+
 		bool setValue(Shader& shader,const char* name,void* data,UINT size) {
 			D3DXHANDLE handle = findHandle(shader,name);
 			if ( handle != 0 ) {
@@ -24,10 +32,10 @@ namespace ds {
 			return false;
 		}
 
-		bool setTexture(Shader& shader,const char* name,Renderer* renderer,int textureID) {
+		bool setTexture(Shader& shader,const char* name,int textureID) {
 			D3DXHANDLE handle = findHandle(shader,name);
 			if ( handle != 0 ) {
-				shader.m_FX->SetTexture(handle,assets::getDirectTexture(textureID));
+				shader.m_FX->SetTexture(handle,renderer::getDirectTexture(textureID));
 				return true;
 			}
 			return false;
@@ -98,14 +106,64 @@ namespace ds {
 				"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "TTCVTech");
 			Shader sh = renderer::getShader(ret);
-			shader::setTexture(sh,"gTex",renderer,textureId);
+			shader::setTexture(sh,"gTex",textureId);
 			return ret;
 		}
 
+
+		int createParticleShader(Renderer* renderer) {
+			const char* g_strBuffer =
+				"uniform extern float4x4 gWVP;\r\n"
+				"uniform extern texture gTex; \r\n"
+				"uniform extern float2 viewportPosition = float2(512, 384); \r\n"
+				"float VP_ARRAY[8] = { -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f, -0.5f, -0.5f }; \r\n"
+				"sampler TexS = sampler_state{ \r\n"
+				"Texture = <gTex>; \r\n"
+				"MinFilter = LINEAR; \r\n"
+				"MagFilter = LINEAR; \r\n"
+				"MipFilter = LINEAR; \r\n"
+				"AddressU = CLAMP; \r\n"
+				"AddressV = CLAMP; \r\n"
+				"}; \r\n"
+				"struct OutputVS {\r\n"
+				"float4 posH : POSITION0; \r\n"
+				"float2 tex0 : TEXCOORD0; \r\n"
+				"float4 color0 : COLOR0; \r\n"
+				"}; \r\n"
+				"OutputVS BasicVS(float3 posL : POSITION0, float2 tex0 : TEXCOORD0, float2 scale : TEXCOORD1, float2 dim : TEXCOORD2, float2 rotindex : TEXCOORD3, float4 color : COLOR0) {\r\n"
+				"OutputVS outVS = (OutputVS)0; \r\n"
+				"outVS.tex0 = tex0; \r\n"
+				"outVS.color0 = color; \r\n"
+				"float3 pos = posL; \r\n"
+				"pos -= float3(viewportPosition, 0.0f); \r\n"
+				"float px = VP_ARRAY[rotindex.y * 2] * dim.x; \r\n"
+				"float py = VP_ARRAY[rotindex.y * 2 + 1] * dim.y; \r\n"
+				"float sx = px * scale.x; \r\n"
+				"float sy = py * scale.y; \r\n"
+				"float xt = cos(rotindex.x) * sx - sin(rotindex.x) * sy; \r\n"
+				"float yt = sin(rotindex.x) * sx + cos(rotindex.x) * sy; \r\n"
+				"xt += pos.x; \r\n"
+				"yt += pos.y; \r\n"
+				"outVS.posH = mul(float4(xt, yt, 0.0f, 1.0f), gWVP); \r\n"
+				"return outVS; \r\n"
+				"}\r\n"
+				"float4 BasicPS(OutputVS input) : COLOR{ \r\n"
+				"float4 clr = tex2D(TexS, input.tex0); \r\n"
+				"return clr * input.color0; \r\n"
+				"}\r\n"
+				"technique ParticleTech{ \r\n"
+				"pass P0{ \r\n"
+				"vertexShader = compile vs_2_0 BasicVS(); \r\n"
+				"pixelShader = compile ps_2_0 BasicPS(); \r\n"
+				"}\r\n"
+				"}; \r\n";
+			int ret = renderer::createShaderFromText(g_strBuffer, "ParticleTech");
+			return ret;
+		}
 		// -------------------------------------------------------
 		// Create a position texture color shader
 		// -------------------------------------------------------
-		int createPTCShader(Renderer* renderer,int textureId) {
+		int createPTCShader(int textureId) {
 			const char* g_strBuffer = 
 				"uniform extern float4x4 gWVP;\r\n"
 				"uniform extern texture gTex;\r\n"
@@ -142,7 +200,7 @@ namespace ds {
 			int ret = renderer::createShaderFromText(g_strBuffer, "PTCTech");
 			Shader sh = renderer::getShader(ret);
 			if ( textureId != -1 ) {
-				shader::setTexture(sh,"gTex",renderer,textureId);
+				shader::setTexture(sh,"gTex",textureId);
 			}
 			return ret;
 		}
@@ -184,7 +242,7 @@ namespace ds {
 			"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "BloomTech");
 			Shader sh = renderer::getShader(ret);
-			shader::setTexture(sh,"gTex",renderer,textureID);
+			shader::setTexture(sh,"gTex",textureID);
 			shader::setFloat(sh,"Threshold",threshold);
 			return ret;
 		}
@@ -231,7 +289,7 @@ namespace ds {
 			"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "BlurTech");
 			Shader sh = renderer::getShader(ret);
-			shader::setTexture(sh,"gTex",renderer,textureID);
+			shader::setTexture(sh,"gTex",textureID);
 			return ret;
 		}
 
@@ -293,8 +351,8 @@ namespace ds {
 			"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "BCTech");
 			Shader sh = renderer::getShader(ret);
-			shader::setTexture(sh,"gTex",renderer,bloomTextureID);
-			shader::setTexture(sh,"ColorMap",renderer,colorTextureID);
+			shader::setTexture(sh,"gTex",bloomTextureID);
+			shader::setTexture(sh,"ColorMap",colorTextureID);
 			return ret;
 		}
 
@@ -346,8 +404,8 @@ namespace ds {
 				"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "BCTech");
 			Shader sh = renderer::getShader(ret);
-			shader::setTexture(sh, "LightMap", renderer, lightTextureID);
-			shader::setTexture(sh, "ColorMap", renderer, colorTextureID);
+			shader::setTexture(sh, "LightMap",  lightTextureID);
+			shader::setTexture(sh, "ColorMap",  colorTextureID);
 			return ret;
 		}
 	}

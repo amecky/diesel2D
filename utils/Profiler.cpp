@@ -98,7 +98,7 @@ namespace profiler {
 		if (index == -1 && ctx.index < MAX_PROFLING_ENTRIES) {
 			int idx = ctx.index++;
 			ProfileData& pd = ctx.data[idx];
-			pd.invokeCounter = 0;
+			pd.invokeCounter = 1;
 			pd.totalTime = 0.0f;
 			pd.subTime = 0.0f;
 			pd.level = ctx.data[ctx.current].level + 1;
@@ -133,7 +133,7 @@ namespace profiler {
 			float elapsed = LIToSecs(time);
 			ctx.totalTime += elapsed;
 			ctx.data[index].totalTime += elapsed;
-			ctx.data[index].invokeCounter += 1;
+			//ctx.data[index].invokeCounter += 1;
 			ctx.current = ctx.data[index].parent;
 		}
 	}

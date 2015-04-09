@@ -1,6 +1,6 @@
 #pragma once
 #include "..\io\Serializer.h"
-#include "assets.h"
+#include "graphics.h"
 
 namespace ds {
 
@@ -10,7 +10,7 @@ public:
 	TextureLoader(void);
 	~TextureLoader(void);
 	virtual int load(const char* fileName) {
-		return assets::loadTextureBinary(fileName);
+		return renderer::loadTextureBinary(fileName);
 	}
 	virtual const char* getResourceDirectory()   {
 		return "content\\textures";

@@ -67,12 +67,12 @@ std::ostringstream& Log::get(const std::string& category) {
 
 Log::~Log() {
     os << std::endl;
-	//OutputDebugStringA(os.str().c_str());
-	handler().write(os.str());
+	OutputDebugStringA(os.str().c_str());
+	//handler().write(os.str());
 }
 
 LogOutputHandler& Log::handler() {
-	static FileOutputHandler coh;
+	static ConsoleOutputHandler coh;
 	return coh;	
 }
 

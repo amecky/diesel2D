@@ -62,6 +62,7 @@ public:
         return m_Height;
     }
     void findMatchingNeighbours(int x,int y,std::vector<GridPoint>& entries);    
+	void findMatchingNeighbours(int x,int y,const T& node,std::vector<GridPoint>& entries);    
     void fillRow(int row,const T& t);
     void fillColumn(int column,const T& t);
     void copyRow(int oldRow,int newRow);
@@ -79,6 +80,7 @@ protected:
 private:
     const int getIndex(int x,int y) const;
     void findMatching(int x,int y,GridNode* providedNode,std::vector<GridNode*>& gridNodes);
+	void simpleFindMatching(int x,int y,GridNode* providedNode,std::vector<GridNode*>& gridNodes);
     int m_Width;
     int m_Height;
     int m_Size;
@@ -224,6 +226,47 @@ inline void Grid<T>::findMatchingNeighbours(int x, int y,std::vector<GridPoint>&
             entries.push_back(point);
         }
     }
+}
+
+template<class T>
+inline void Grid<T>::findMatchingNeighbours(int x,int y,const T& node,std::vector<GridPoint>& entries) {
+	std::vector<GridNode*> gridNodes;
+	if ( !isFree(x,y)) {
+		GridNode tmp;
+		tmp.x = x;
+		tmp.y = y;
+		tmp.data = node;
+		tmp.used = true;
+		simpleFindMatching(x,y,&tmp,gridNodes);
+	}
+	if ( !gridNodes.empty()) {
+		for ( std::size_t i = 0; i < gridNodes.size(); ++i ) {
+			GridNode* node = gridNodes[i];
+			GridPoint point;
+			point.x = node->x;
+			point.y = node->y;
+			entries.push_back(point);
+		}
+	}
+}
+
+// ------------------------------------------------
+// internal findMatching
+// ------------------------------------------------
+template<class T>
+inline void Grid<T>::simpleFindMatching(int x,int y,GridNode* providedNode,std::vector<GridNode*>& gridNodes) {
+	if ( !isFree(x-1,y)) {
+		findMatching(x-1,y,providedNode,gridNodes);
+	}
+	if ( !isFree(x+1,y)) {
+		findMatching(x+1,y,providedNode,gridNodes);
+	}
+	if ( !isFree(x,y-1)) {
+		findMatching(x,y-1,providedNode,gridNodes);
+	}
+	if ( !isFree(x,y+1)) {
+		findMatching(x,y+1,providedNode,gridNodes);
+	}
 }
 
 // ------------------------------------------------

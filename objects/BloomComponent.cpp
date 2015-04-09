@@ -42,35 +42,35 @@ void BloomComponent::init() {
 	m_Assets->load("bloom",this,CVT_BLOOM_COMPONENT);
 	int currentTarget = m_Settings.firstTarget;
 	// Bloom
-	m_BloomTexture = m_Renderer->createRenderTarget(currentTarget,Color::BLACK);
+	m_BloomTexture = renderer::createRenderTarget(currentTarget,Color::BLACK);
 	LOG << "Bloom texture: " << m_BloomTexture;
 	m_BloomShaderID = shader::createBloomShader(m_Renderer,m_Settings.initialTexture,m_Settings.threshold);
 	m_BloomShader = renderer::getShader(m_BloomShaderID);
-	m_BloomEntity.setTextureRect(ds::Rect(0,0,1024,768),1024,768,m_Settings.initialTexture);
-	m_BloomEntity.setPosition(Vector2f(512,384));
+	m_BloomEntity.texture = math::buildTexture(0,0,1024,768,1024,768,m_Settings.initialTexture);
+	m_BloomEntity.position = Vector2f(512,384);
 	
 	++currentTarget;
 	m_BlurHShaderID = renderer::loadShader("blur", "BlurTech");
 	m_BlurHShader = renderer::getShader(m_BlurHShaderID);
-	shader::setTexture(m_BlurHShader,"gTex",m_Renderer,m_BloomTexture);
+	shader::setTexture(m_BlurHShader,"gTex",m_BloomTexture);
 	shader::setFloat(m_BlurHShader,"BlurDistance",1.0f/1024.0f);
-	m_BlurHTexture = m_Renderer->createRenderTarget(currentTarget,Color::BLACK);
-	m_BlurHEntity.setTextureRect(ds::Rect(0,0,1024,768),1024,768,m_BloomTexture);
-	m_BlurHEntity.setPosition(Vector2f(512,384));
+	m_BlurHTexture = renderer::createRenderTarget(currentTarget,Color::BLACK);
+	m_BlurHEntity.texture = math::buildTexture(0, 0, 1024, 768, 1024, 768, m_BloomTexture);
+	m_BlurHEntity.position = Vector2f(512,384);
 	
 	// Bloom combine	
 	++currentTarget;
-	m_BloomCombineTexture = m_Renderer->createRenderTarget(currentTarget,Color::BLACK);
+	m_BloomCombineTexture = renderer::createRenderTarget(currentTarget, Color::BLACK);
 	m_BloomCombineShaderID = shader::createBloomCombineShader(m_Renderer,m_Settings.initialTexture,m_BlurHTexture);
 	m_BloomCombineShader = renderer::getShader(m_BloomCombineShaderID);
-	m_BloomCombineEntity.setTextureRect(ds::Rect(0,0,1024,768),1024,768,m_BlurHTexture);
-	m_BloomCombineEntity.setPosition(Vector2f(512,384));
+	m_BloomCombineEntity.texture = math::buildTexture(0, 0, 1024, 768, 1024, 768, m_BlurHTexture);
+	m_BloomCombineEntity.position = Vector2f(512,384);
 
-	m_OverlayEntity.setTextureRect(ds::Rect(0,0,1024,768),1024,768,m_BloomCombineTexture);
-	m_OverlayEntity.setPosition(Vector2f(512,384));
+	m_OverlayEntity.texture = math::buildTexture(0, 0, 1024, 768, 1024, 768, m_BloomCombineTexture);
+	m_OverlayEntity.position = Vector2f(512,384);
 
-	m_StraightEntity.setTextureRect(ds::Rect(0,0,1024,768),1024,768,m_Settings.initialTexture);
-	m_StraightEntity.setPosition(Vector2f(512,384));
+	m_StraightEntity.texture = math::buildTexture(0, 0, 1024, 768, 1024, 768, m_Settings.initialTexture);
+	m_StraightEntity.position = Vector2f(512,384);
 }
 
 void BloomComponent::update(float elapsed) {
@@ -83,25 +83,25 @@ void BloomComponent::update(float elapsed) {
 
 void BloomComponent::render() {
 	if ( m_UseBloom ) {
-		int currentShader = m_Renderer->getCurrentShaderID();
-		m_Renderer->setRenderTarget(m_Settings.firstTarget);
-		m_Renderer->setCurrentShader(m_BloomShaderID);
+		int currentShader = renderer::getCurrentShaderID();
+		renderer::setRenderTarget(m_Settings.firstTarget);
+		renderer::setCurrentShader(m_BloomShaderID);
 		sprites::draw(m_BloomEntity);
 	
-		m_Renderer->setRenderTarget(m_Settings.firstTarget+1);
-		m_Renderer->setCurrentShader(m_BlurHShaderID);
+		renderer::setRenderTarget(m_Settings.firstTarget + 1);
+		renderer::setCurrentShader(m_BlurHShaderID);
 		sprites::draw(m_BlurHEntity);
 
-		m_Renderer->setRenderTarget(m_Settings.firstTarget+2);
-		m_Renderer->setCurrentShader(m_BloomCombineShaderID);
+		renderer::setRenderTarget(m_Settings.firstTarget + 2);
+		renderer::setCurrentShader(m_BloomCombineShaderID);
 		sprites::draw(m_BloomCombineEntity);
 
-		m_Renderer->restoreBackBuffer();
-		m_Renderer->setCurrentShader(currentShader);
+		renderer::restoreBackBuffer();
+		renderer::setCurrentShader(currentShader);
 		sprites::draw(m_OverlayEntity);
 	}
 	else {
-		m_Renderer->restoreBackBuffer();
+		renderer::restoreBackBuffer();
 		sprites::draw(m_StraightEntity);
 	}
 }

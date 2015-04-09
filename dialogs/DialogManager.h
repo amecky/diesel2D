@@ -21,10 +21,7 @@ typedef std::vector<ToggleAction> ToggleActions;
 
 public:
 	DialogManager(void);
-	~DialogManager(void);
-	void setRenderer(Renderer* renderer) {
-		m_Renderer = renderer;
-	}
+	~DialogManager(void);	
 	void init(const char* fontName,int textureID);
 	void render();
 	void toggle(const char* oldDialogName,const char* newDialogName);
@@ -41,6 +38,7 @@ public:
 	//void activate(const char* name);
 	//void deactivate(const char* name);
 	void load(BinaryLoader* loader);
+	void tick(float dt);
 private:	
 	void setActiveFlag(const char* name,bool active);	
 	void createDialog(const char* name,int id,GUIDialog* dialog);
@@ -50,7 +48,6 @@ private:
 	Dialogs m_Dialogs;
 	uint32 m_Index;
 	ToggleActions m_ToggleActions;
-	Renderer* m_Renderer;
 };
 
 }

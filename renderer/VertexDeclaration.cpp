@@ -27,6 +27,10 @@ void VertexDeclaration::addElement(const VDTYPE& type,const VDUSAGE& usage) {
 
 void VertexDeclaration::create() {
 	if ( m_Decl == 0 ) {
+		int counter[10];
+		for (int i = 0; i < 10; ++i) {
+			counter[i] = 0;
+		}
 		D3DVERTEXELEMENT9* vdElements = new D3DVERTEXELEMENT9[m_DecElements.size()+1];
 		int offset = 0;
 		for ( size_t i = 0; i < m_DecElements.size(); ++i ) {			
@@ -60,27 +64,41 @@ void VertexDeclaration::create() {
 			switch ( m_DecElements[i].usage ) {
 				case VDU_POSITION : 
 					vdElements[i].Usage = D3DDECLUSAGE_POSITION;
+					vdElements[i].UsageIndex = counter[0];
+					++counter[0];
 					break;
 				case VDU_POSITIONT : 
 					vdElements[i].Usage = D3DDECLUSAGE_POSITIONT;
+					vdElements[i].UsageIndex = counter[1];
+					++counter[1];
 					break;
 				case VDU_COLOR : 
 					vdElements[i].Usage = D3DDECLUSAGE_COLOR;
+					vdElements[i].UsageIndex = counter[2];
+					++counter[2];
 					break;
 				case VDU_TANGENT : 
 					vdElements[i].Usage = D3DDECLUSAGE_TANGENT;
+					vdElements[i].UsageIndex = counter[3];
+					++counter[3];
 					break;
 				case VDU_BINORMAL : 
 					vdElements[i].Usage = D3DDECLUSAGE_BINORMAL;
+					vdElements[i].UsageIndex = counter[4];
+					++counter[4];
 					break;
 				case VDU_NORMAL : 
 					vdElements[i].Usage = D3DDECLUSAGE_NORMAL;
+					vdElements[i].UsageIndex = counter[5];
+					++counter[5];
 					break;
 				case VDU_TEXCOORD : 
 					vdElements[i].Usage = D3DDECLUSAGE_TEXCOORD;
+					vdElements[i].UsageIndex = counter[6];
+					++counter[6];
 					break;
 			}
-			vdElements[i].UsageIndex = 0;			
+				
 		}	
 		// closing element
 		vdElements[m_DecElements.size()].Stream = 0xff;
@@ -90,7 +108,7 @@ void VertexDeclaration::create() {
 		vdElements[m_DecElements.size()].Usage = 0;
 		vdElements[m_DecElements.size()].UsageIndex = 0;
 
-		HR(renderContext->device->CreateVertexDeclaration(vdElements, &m_Decl));
+		HR(renderer::getDevice()->CreateVertexDeclaration(vdElements, &m_Decl));
 		assert(m_Decl != 0);
 		delete[] vdElements;
 	}
