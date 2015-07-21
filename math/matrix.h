@@ -10,7 +10,11 @@ Vector2f operator * (const ds::mat3& m,const Vector2f& v);
 
 Vector4f operator * (const ds::mat4& m,const Vector4f& v);
 
+Vector4f operator * (const Vector4f& v,const ds::mat4& m);
+
 Vector3f operator * (const ds::mat4& m,const Vector3f& v);
+
+Vector3f operator * (const Vector3f& v,const ds::mat4& m);
 
 ds::mat4 operator * (const ds::mat4& m1,const ds::mat4& m2);
 
@@ -46,13 +50,23 @@ namespace ds {
 
 		mat4 mat4Scale(float scaleX,float scaleY,float scaleZ);
 
+		mat4 mat4Scale(const Vector3f& scale);
+
 		mat4 mat4Transform(const Vector3f& pos);
 
 		mat4 mat4Rotation(const Vector3f& v,float angle);
 
+		mat4 mat4Rotation(const Vector3f& r);
+
+		mat4 mat4RotationX(float angle);
+
+		mat4 mat4RotationY(float angle);
+
 		mat4 mat4RotationZ(float angle);
 
 		mat4 mat4RotateZXY(float angleX,float angleY,float angleZ);
+
+		mat4 mat4RotateZXY(const Vector3f& r);
 
 		mat4 mat4PerspectiveFovLH(float fovy,float aspect,float zn,float zf);
 

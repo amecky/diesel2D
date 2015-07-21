@@ -13,7 +13,7 @@ namespace ds {
 // -------------------------------------------------------
 // Data types
 // -------------------------------------------------------
-enum DataType {DTR_INT,DTR_FLOAT,DTR_VEC2,DTR_RECT,DTR_COLOR,DTR_COLOR_PATH,DTR_VEC2_PATH,DTR_FLOAT_PATH,DTR_VEC3,DTR_UNKNOWN};
+enum DataType {DTR_INT,DTR_FLOAT,DTR_VEC2,DTR_RECT,DTR_COLOR,DTR_COLOR_PATH,DTR_VEC2_PATH,DTR_FLOAT_PATH,DTR_VEC3,DTR_UNKNOWN,DTR_BOOL};
 
 // -------------------------------------------------------
 // DataTranslator
@@ -33,6 +33,7 @@ typedef std::vector<DataDefinition> Definitions;
 public:
 	typedef int T::*IntMember;
 	typedef float T::*FloatMember;
+	typedef bool T::*BoolMember;
 	typedef Vector2f T::*Vec2Member;
 	typedef Vector3f T::*Vec3Member;
 	typedef Rect T::*RectMember;
@@ -111,6 +112,14 @@ public:
 		unsigned idx = m_Vec2PathMembers.size();
 		m_Vec2PathMembers.push_back(vec2PathMember);
 		addDefinition(name,idx,DTR_VEC2_PATH);
+	}
+	// -------------------------------------------------------
+	// add bool member
+	// -------------------------------------------------------
+	void add(const char* name, BoolMember b) {
+		unsigned idx = m_BoolMembers.size();
+		m_BoolMembers.push_back(b);
+		addDefinition(name, idx, DTR_BOOL);
 	}
 	// -------------------------------------------------------
 	// set int value
@@ -284,6 +293,25 @@ public:
 		return defaultValue;
 	}
 	// -------------------------------------------------------
+	// set bool value
+	// -------------------------------------------------------
+	void set(const char* name,const bool b, T* t) {
+		const DataDefinition* def = find(name, DTR_BOOL);
+		if (def != 0) {
+			t->*m_BoolMembers[def->index] = b;
+		}
+	}
+	// -------------------------------------------------------
+	// get float path value
+	// -------------------------------------------------------
+	const bool get(const char* name, T* t,bool defaultValue) const {
+		const DataDefinition* def = find(name, DTR_BOOL);
+		if (def != 0) {
+			return t->*m_BoolMembers[def->index];
+		}
+		return defaultValue;
+	}
+	// -------------------------------------------------------
 	// contains
 	// -------------------------------------------------------
 	bool contains(const char* name) {
@@ -341,7 +369,10 @@ public:
 						set(def.name,c->getVector2f(def.name,Vector2f(0,0)),t);
 						break;
 					case DTR_VEC3:
-						set(def.name, c->getVector2f(def.name, Vector3f(0, 0)), t);
+						set(def.name, c->getVector3f(def.name, Vector3f(0, 0, 0)), t);
+						break;
+					case DTR_BOOL:
+						set(def.name, c->getBool(def.name,false), t);
 						break;
 					case DTR_RECT : {
 							Rect r;
@@ -390,6 +421,9 @@ public:
 					break;
 				case DTR_VEC3:
 					set(def.name, category->getVector3f(def.name, Vector3f(0,0,0)), t);
+					break;
+				case DTR_BOOL:
+					set(def.name, category->getBool(def.name, false), t);
 					break;
 				case DTR_RECT : {
 						Rect r;
@@ -445,6 +479,9 @@ public:
 				break;
 			case DTR_VEC3:
 				writer.write(get(def.name, t, Vector3f(0,0, 0)));
+				break;
+			case DTR_BOOL:
+				writer.write(get(def.name, t, false));
 				break;
 			case DTR_COLOR:
 				writer.write(get(def.name,t,Color::WHITE));
@@ -510,6 +547,12 @@ public:
 									loader.read(&tmp);
 									set(def.name, tmp, t);
 								}
+								break;
+							case DTR_BOOL: {
+								bool tmp;
+								loader.read(&tmp);
+								set(def.name, tmp, t);
+							}
 								break;
 							case DTR_COLOR: {
 									Color tmp = Color::WHITE;
@@ -578,6 +621,12 @@ public:
 						Vector3f tmp;
 						loader.read(&tmp);
 						set(def.name, tmp, t);
+					}
+					break;
+				case DTR_BOOL: {
+					bool tmp;
+					loader.read(&tmp);
+					set(def.name, tmp, t);
 					}
 					break;
 				case DTR_COLOR: {
@@ -744,6 +793,7 @@ private:
 	std::vector<ColorPathMember> m_ColorPathMembers;
 	std::vector<FloatPathMember> m_FloatPathMembers;
 	std::vector<Vec2PathMember> m_Vec2PathMembers;
+	std::vector<BoolMember> m_BoolMembers;
 	Definitions m_Definitions;
 	const static DataType unknownType = DTR_UNKNOWN;
 };

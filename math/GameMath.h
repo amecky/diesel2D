@@ -46,6 +46,9 @@ namespace ds {
 
 		void follow(const Vector2f& targetPos,Vector2f& newPos,float* angle,float distance,float add);
 		void followRelative(const Vector2f& targetPos,Vector2f& newPos,float* angle,float distance,float percentage);
+
+		void move_towards(const Vector2f& targetPos, Vector2f& newPos, float* angle, float velocity, float dt);
+
 		void clipToRect(Vector2f& newPos,const Rect& rect);
 		bool isOutside(Vector2f& pos,const Rect& rect);
 		float reflect(float angle);

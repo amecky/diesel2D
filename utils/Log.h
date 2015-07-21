@@ -41,6 +41,10 @@ public:
 	std::ostringstream& error();
 	std::ostringstream& get(const std::string& category);    
 	std::ostringstream& get(const char *file, const unsigned long line);    
+	std::ostringstream& error(const char *file, const unsigned long line);
+	std::ostringstream& error(const char *file, const unsigned long line,const char* message);
+	std::ostringstream& error(const char *file, const unsigned long line, char* format, va_list args);
+	std::ostringstream& error(const char *file, const unsigned long line, char* format, ...);
 	std::ostringstream& error(const std::string& category);   
 	static LogOutputHandler& handler();        
 protected:
@@ -64,7 +68,12 @@ private:
 #define LOGC(category) Log().get(category)
 #define LOGEC(category) Log().error(category)
 
-#define ELOG Log().get(__FILE__,__LINE__)
+#define ELOG(M) \
+	do {\
+		Log().error(__FILE__,__LINE__,M); \
+	} while (0)
+
+//#define ELOG(M,...) Log().error(__FILE__,__LINE__,M,...)
 
 #endif	/* LOG_H */
 

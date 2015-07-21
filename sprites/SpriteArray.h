@@ -50,6 +50,24 @@ namespace ds {
 			assert(in.index != USHRT_MAX);
 			return in.index;
 		}
+
+		const Vector2f& getPosition(SID sid) const {
+			SpriteArrayIndex &in = indices[sid];
+			assert(in.index != USHRT_MAX);
+			return positions[in.index];
+		}
+
+		const Vector2f& getScale(SID sid) const {
+			SpriteArrayIndex &in = indices[sid];
+			assert(in.index != USHRT_MAX);
+			return scales[in.index];
+		}
+
+		const Texture& getTexture(SID sid) const {
+			SpriteArrayIndex &in = indices[sid];
+			assert(in.index != USHRT_MAX);
+			return textures[in.index];
+		}
 	};
 
 	namespace sar {

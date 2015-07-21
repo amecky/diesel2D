@@ -14,6 +14,10 @@ public:
 	const mat4& getViewMatrix() const;
 	const mat4& getProjectionMatrix() const;
 	const mat4& getViewProjectionMatrix() const;
+	const Vector3f& getUpVector() const {
+		return m_UpVec;
+	}
+	Vector3f screenToWorld(const Vector2f& pos);
 	void setOrthogonal();
 	void restore();
 	Vector3f getPosition() { return m_ViewPos;}
@@ -48,7 +52,7 @@ private:
 	Vector3f m_LookAt;
 	Vector3f m_RightVec;
 
-
+	float m_FOV;
 	float m_Speed;
 	bool m_Ortho;
 };

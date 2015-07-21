@@ -61,6 +61,12 @@ public:
     const int height() const {
         return m_Height;
     }
+	bool isValid(int x, int y) const {
+		if (x >= 0 && x < m_Width && y >= 0 && y < m_Height) {
+			return true;
+		}
+		return false;
+	}
     void findMatchingNeighbours(int x,int y,std::vector<GridPoint>& entries);    
 	void findMatchingNeighbours(int x,int y,const T& node,std::vector<GridPoint>& entries);    
     void fillRow(int row,const T& t);

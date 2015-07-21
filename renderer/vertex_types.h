@@ -101,6 +101,41 @@ namespace ds {
 	// -------------------------------------------------------
 	// PTC Vertex
 	// -------------------------------------------------------
+	struct PNCVertex {
+
+		Vector3f position;
+		Vector3f normal;
+		Color color;
+
+		PNCVertex() : position(0, 0, 0), normal(0, 0, 0), color(Color::WHITE) {}
+
+		PNCVertex(const Vector3f& pos,const Vector3f& n, const Color& clr = Color::WHITE) 
+			: position(pos) , normal(n) , color(clr) {
+		}
+
+	};
+
+	// -------------------------------------------------------
+	// PNTC Vertex
+	// -------------------------------------------------------
+	struct PNTCVertex {
+
+		Vector3f position;
+		Vector3f normal;
+		Vector2f uv;
+		Color color;
+
+		PNTCVertex() : position(0, 0, 0), normal(0, 0, 0), uv(0, 0), color(Color::WHITE) {}
+
+		PNTCVertex(const Vector3f& pos, const Vector3f& n, const Vector2f& t, const Color& clr = Color::WHITE)
+			: position(pos), normal(n), uv(t) , color(clr) {
+		}
+
+	};
+
+	// -------------------------------------------------------
+	// PTC Vertex
+	// -------------------------------------------------------
 	struct ParticleVertex {
 
 		float x, y, z;
@@ -166,6 +201,20 @@ namespace ds {
 	};
 
 	// -------------------------------------------------------
+	// Shape
+	// -------------------------------------------------------
+	struct Shape {
+
+		Vector2f v[4];
+		Color color;
+
+		Shape() : color(Color::WHITE) {
+			for (int i = 0; i < 4; ++i) {
+				v[i] = Vector2f(0, 0);
+			}
+		}
+	};
+	// -------------------------------------------------------
 	// Surface is a plane in 3D space
 	// -------------------------------------------------------
 	struct Surface {
@@ -175,9 +224,10 @@ namespace ds {
 		Vector3f n;
 		Vector3f t;
 		Vector3f b;
+		Color color;
 
 		Surface() {
-
+			color = Color::WHITE;
 		}
 
 		Surface(const Vector3f& cv1,const Vector3f& cv2,const Vector3f& cv3,const Vector3f& cv4,const Vector3f& nn,const Vector3f& tt,const Vector3f& bb,float ttu1,float ttv1,float ttu2,float ttv2) {
@@ -192,6 +242,7 @@ namespace ds {
 			n = nn;
 			t = tt;
 			b = bb;
+			color = Color::WHITE;
 		}
 
 		Surface(const Vector3f& cv1,const Vector3f& cv2,const Vector3f& cv3,const Vector3f& cv4,const Vector3f& nn,const Vector3f& tt,const Vector3f& bb,const Vector2f& _uv1,const Vector2f& _uv2,const Vector2f& _uv3,const Vector2f& _uv4) {
@@ -206,6 +257,7 @@ namespace ds {
 			n = nn;
 			t = tt;
 			b = bb;
+			color = Color::WHITE;
 		}
 	};
 

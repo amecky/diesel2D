@@ -10,6 +10,8 @@
 #include "..\lib\container\dVector.h"
 #include "VertexDeclaration.h"
 #include "..\sprites\SpriteTemplates.h"
+#include "..\utils\StringUtils.h"
+#include "..\compiler\AssetCompiler.h"
 
 namespace ds {
 
@@ -26,25 +28,50 @@ namespace ds {
 	// -------------------------------------------------------
 	// Vertex declaration types
 	// -------------------------------------------------------
-	const int VD_TTC = 0;
-	const int VD_PTNBT = 1;
-	const int VD_PTC = 2;
-	const int VD_PNC = 3;
+	const int VD_TTC      = 0;
+	const int VD_PTNBT    = 1;
+	const int VD_PTC      = 2;
+	const int VD_PNC      = 3;
 	const int VD_PARTICLE = 4;
+	const int VD_PNTC     = 5;
+	const int VD_UNKNOWN  = -1;
 
+	namespace renderer {
+
+		int getTextureId(IdString hash);
+
+		int getShaderID(IdString hash);
+
+		int getBlendStateID(IdString hash);
+
+		int getDescriptorID(IdString hash);
+
+		ID getMeshDataID(IdString hash);
+
+		int getMeshID(IdString hash);
+	}
 
 	struct Descriptor {
+
+		IdString hash;
 		int texture;
 		int shader;
 		int blendState;
 
-		Descriptor() : texture(-1), shader(-1), blendState(0) {}
-		Descriptor(int texture, int shader) : texture(texture), shader(shader), blendState(0) {}
-		Descriptor(int texture, int shader, int blendState = 0) : texture(texture), shader(shader), blendState(blendState) {}
+		Descriptor() : hash(0) , texture(-1), shader(-1), blendState(0) {}
+		explicit Descriptor(const char* name) : texture(-1), shader(-1), blendState(0) {
+			hash = string::murmur_hash(name);
+		}
+		Descriptor(int texture, int shader) : hash(0), texture(texture), shader(shader), blendState(0) {}
+		Descriptor(int texture, int shader, int blendState = 0) : hash(0), texture(texture), shader(shader), blendState(blendState) {}
+		Descriptor(const char* name,int texture, int shader) : texture(texture), shader(shader), blendState(0) {
+			hash = string::murmur_hash(name);
+		}
 	};
 
-	struct DescriptorData {
+	struct DescriptorData : public Serializer {
 
+		IdString* hashes;
 		int* textures;
 		int* shaders;
 		int* blendStates;
@@ -55,7 +82,8 @@ namespace ds {
 		DescriptorData() : buffer(0), num(0), total(0) {}
 
 		int add(const Descriptor& desc) {
-			textures[num++] = desc.texture;
+			hashes[num++] = desc.hash;
+			textures[num - 1] = desc.texture;
 			shaders[num - 1] = desc.shader;
 			blendStates[num - 1] = desc.blendState;
 			return num - 1;
@@ -63,6 +91,7 @@ namespace ds {
 
 		bool get(int idx, Descriptor* desc) {
 			if (idx >= 0 && idx < num) {
+				desc->hash = hashes[idx];
 				desc->texture = textures[idx];
 				desc->shader = shaders[idx];
 				desc->blendState = blendStates[idx];
@@ -70,8 +99,191 @@ namespace ds {
 			}
 			return false;
 		}
+
+		bool find(const char* name, Descriptor* desc) {
+			int idx = -1;
+			IdString myHash = string::murmur_hash(name);
+			for (int i = 0; i < num; ++i) {
+				if (hashes[i] == myHash) {
+					idx = i;
+				}
+			}
+			if (idx >= 0 && idx < num) {
+				desc->hash = hashes[idx];
+				desc->texture = textures[idx];
+				desc->shader = shaders[idx];
+				desc->blendState = blendStates[idx];
+				return true;
+			}
+			return false;
+		}
+
+		int getID(const char* name) {
+			IdString myHash = string::murmur_hash(name);
+			for (int i = 0; i < num; ++i) {
+				if (hashes[i] == myHash) {
+					return i;
+				}
+			}			
+			return -1;
+		}
+
+		int getID(IdString myHash) {
+			for (int i = 0; i < num; ++i) {
+				if (hashes[i] == myHash) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		void load(BinaryLoader* loader) {
+			while (loader->openChunk() == 0) {
+				if (loader->getChunkID() == CHNK_DESCRIPTOR) {
+					IdString name;
+					loader->read(&name);
+					IdString texture;
+					loader->read(&texture);
+					int tid = -1;
+					if (texture != 0) {
+						tid = renderer::getTextureId(texture);
+						assert(tid != -1);
+					}
+					IdString shader;
+					loader->read(&shader);
+					int sid = renderer::getShaderID(shader);
+					assert(sid != -1);
+					IdString blendState;
+					loader->read(&blendState);
+					int bid = renderer::getBlendStateID(blendState);
+					assert(bid != -1);
+					int idx = getID(name);
+					if (idx == -1) {
+						// new descriptor
+						Descriptor desc;
+						desc.hash = name;
+						desc.texture = tid;
+						desc.shader = sid;
+						desc.blendState = bid;
+						add(desc);
+					}
+					else {
+						Descriptor desc;
+						get(idx, &desc);
+						desc.texture = tid;
+						desc.shader = sid;
+						desc.blendState = bid;
+					}					
+				}
+				loader->closeChunk();
+			}
+		}
 	};
 
+	struct MeshArray : public Serializer {
+
+		IdString* hashes;
+		int* descriptors;
+		ID* dataIDs;
+		int* vertexTypes;
+		char* buffer;
+		int num;
+		int total;
+
+		MeshArray() : buffer(0), num(0), total(0) {}
+
+		int add(const Mesh& m) {
+			hashes[num++] = m.hashName;
+			descriptors[num - 1] = m.descriptorID;
+			dataIDs[num - 1] = m.meshDataID;
+			vertexTypes[num - 1] = m.vertexType;
+			return num - 1;
+		}
+
+		bool get(int idx, Mesh* m) {
+			if (idx >= 0 && idx < num) {
+				m->hashName = hashes[idx];
+				m->descriptorID = descriptors[idx];
+				m->meshDataID= dataIDs[idx];
+				m->vertexType= vertexTypes[idx];
+				return true;
+			}
+			return false;
+		}
+
+		bool find(const char* name, Mesh* m) {
+			int idx = -1;
+			IdString myHash = string::murmur_hash(name);
+			for (int i = 0; i < num; ++i) {
+				if (hashes[i] == myHash) {
+					idx = i;
+				}
+			}
+			if (idx >= 0 && idx < num) {
+				m->hashName = hashes[idx];
+				m->descriptorID = descriptors[idx];
+				m->meshDataID = dataIDs[idx];
+				m->vertexType = vertexTypes[idx];
+				return true;
+			}
+			return false;
+		}
+
+		int getID(const char* name) {
+			IdString myHash = string::murmur_hash(name);
+			for (int i = 0; i < num; ++i) {
+				if (hashes[i] == myHash) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		int getID(IdString myHash) {
+			for (int i = 0; i < num; ++i) {
+				if (hashes[i] == myHash) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		void load(BinaryLoader* loader) {
+			while (loader->openChunk() == 0) {
+				if (loader->getChunkID() == CHNK_MESH) {
+					IdString name;
+					loader->read(&name);
+					IdString dataName;
+					loader->read(&dataName);
+					int vt = -1;
+					loader->read(&vt);
+					IdString descName;
+					loader->read(&descName);
+					int descID = renderer::getDescriptorID(descName);
+					XASSERT(descID != -1, "Unable to find matching descriptor");
+					ID dataID = renderer::getMeshDataID(dataName);
+					XASSERT(dataID != INVALID_ID, "Unable to find mesh data");
+					int idx = getID(name);
+					if (idx == -1) {
+						// new descriptor
+						Mesh m;
+						m.hashName = name;
+						m.descriptorID = descID;
+						m.vertexType = vt;
+						m.meshDataID = dataID;
+						add(m);
+					}
+					else {
+						descriptors[idx] = descID;
+						vertexTypes[idx] = vt;
+						dataIDs[idx] = dataID;
+						
+					}
+				}
+				loader->closeChunk();
+			}
+		}
+	};
 	struct DrawCounter {
 
 		int numPrim;
@@ -124,6 +336,12 @@ namespace ds {
 
 		int getScreenHeight();
 
+		Camera* getCamera();
+
+		void setWorldMatrix(const mat4& world);
+
+		void set2DCameraOff();
+
 		bool beginRendering(const Color& clearColor);
 
 		void setupMatrices();
@@ -134,7 +352,7 @@ namespace ds {
 
 		void flush();
 
-		void endRendering();
+		void endRendering();		
 
 		VDStruct& getVertexDeclaration(int declarationType);
 
@@ -162,9 +380,9 @@ namespace ds {
 
 		void setViewportPosition(int vw, const Vector2f& pos);
 
-		int createBlendState(int srcAlpha, int dstAlpha, bool alphaEnabled);
+		int createBlendState(const char* name, int srcAlpha, int dstAlpha, bool alphaEnabled);
 
-		int createBlendState(int srcRGB, int srcAlpha, int dstRGB, int dstAlpha, bool alphaEnabled = true, bool separateAlpha = false);
+		int createBlendState(const char* name, int srcRGB, int srcAlpha, int dstRGB, int dstAlpha, bool alphaEnabled = true, bool separateAlpha = false);
 
 		int getCurrentBlendState();
 
@@ -179,6 +397,13 @@ namespace ds {
 		int createQuadIndexBuffer(int maxQuads);
 
 		int getQuadIndexBufferIndex();
+
+		// -------------------------------------------------
+		// descriptor
+		// -------------------------------------------------
+		DescriptorData* getDescriptorData();
+
+		int getDescriptorID(const char* name);
 
 		int addDescriptor(const Descriptor& desc);
 
@@ -196,7 +421,7 @@ namespace ds {
 
 		void draw_render_target(int rtID, int shaderID = -1);
 
-		void loadSystemFont(const char* name, const char* fontName, int size, bool bold);
+		void draw_render_target_additive(int rtID, int shaderID = -1);
 
 		BitmapFont* createBitmapFont(const char* name);
 
@@ -238,6 +463,8 @@ namespace ds {
 
 		int getTextureId(const char* name);
 
+		//int getTextureId(IdString hash);
+
 		int loadTextureWithColorKey(const char* name, const Color& color);
 
 		LPDIRECT3DTEXTURE9 getDirectTexture(int textureID);
@@ -250,17 +477,44 @@ namespace ds {
 
 		int findFreeTextureSlot();
 
-		void clearDebugMessages();
+		//void loadSpriteTemplates(const char* name);
 
-		const Sprite& getSpriteTemplate(int id);
+		bool getSpriteTemplate(const char* name, Sprite* sprite);
 		
 		SpriteTemplates* getSpriteTemplates();
 
 		bool hasSpriteTemplate(int id);
+
+		// -------------------------------------------------
+		// meshes
+		// -------------------------------------------------
+		ID createMeshData(const char* name);
+
+		ID loadMeshData(const char* name,const char* fileName);
+
+		MeshData& getMeshData(ID id);
+
+		void getMesh(int id,Mesh* m);
+
+		int createMesh(const char* name, int descriptorID, ID dataID, int vertexType);
+
+		int getMeshID(const char* name);
+
+		int getVDType(const char* name);
+
+		MeshArray* getMeshArray();
+
+		Vector2f& getMousePosition();
+
+		void setMousePosition(int x, int y);
 	}
 
 	namespace debug {
 
+		Vector2f getTextSize(const char* text);
+		void loadSystemFont(const char* name, const char* fontName, int size, bool bold);
+		void reset();
+		//void initialize(BitmapFont* font,float ts = 1.0f);
 		void drawDebugMessages();
 		void debug(int x, int y, const char* text);
 		void debug(int x, int y, char* format, ...);

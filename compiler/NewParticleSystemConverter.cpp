@@ -153,6 +153,18 @@ void NewParticleSystemConverter::convert(JSONReader& reader,BinaryWriter& writer
 					rg.convert(c, writer);
 					writer.closeChunk();
 				}
+				else if (c->getName() == "sphere_generator") {
+					writer.startChunk(211, 1);
+					SphereGenerator rg;
+					rg.convert(c, writer);
+					writer.closeChunk();
+				}
+				else if (c->getName() == "random_sphere_generator") {
+					writer.startChunk(212, 1);
+					RandomSphereGenerator rg;
+					rg.convert(c, writer);
+					writer.closeChunk();
+				}
 			}
 		}		
 	}

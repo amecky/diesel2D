@@ -55,7 +55,7 @@ namespace ds {
 	};
 
 	typedef void(*PModifier)(const ModifierData&, ParticleArray*, float);
-	typedef void(*PGenerator)(const ModifierData&, ParticleArray*, const Vector2f&, float, uint32, uint32);
+	typedef void(*PGenerator)(const ModifierData&, ParticleArray*, const Vector3f&, float, uint32, uint32);
 
 	struct LiveOverTimeData {
 
@@ -131,23 +131,20 @@ public:
 	}
 	void addGenerator(ParticleGenerator* generator) {
 		m_Emitter.add(generator);
-}
-	void start(const Vector2f& startPosition) {
-		m_Position = startPosition;
-		//ParticleEmitterInstance instance;
-		//m_Emitter.createInstance(&instance);
-		//m_Instances.push_back(instance);
-		m_Emitter.start();
-		m_Emitter.generate(&m_Array,m_Position,0.0f);
 	}
+
+	void start(const Vector3f& startPosition);
+
+	void start(const ParticleGeneratorData& data);
+
 	void stop() {
 		m_Emitter.stop();
 	}
 	void addModifier(ParticleModifier* modifier) {
 		m_Modifiers.push_back(modifier);
 	}
-	void setPosition(const Vector2f& position) {
-		m_Position = position;
+	void setPosition(const Vector3f& position) {
+		_generatorData.position = position;
 	}
 	void load(BinaryLoader* loader);
 	void setDebugName(const char* name);
@@ -168,7 +165,7 @@ private:
 	ParticleModifier* createModifier(int id);
 	void prepareVertices();
 	void buildVertices();
-	Vector2f m_Position;
+	ParticleGeneratorData _generatorData;
 	NewParticleSystemData m_Data;
 	ParticleSettings m_Settings;
 	ParticleArray m_Array;

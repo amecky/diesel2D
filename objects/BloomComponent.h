@@ -29,7 +29,6 @@ public:
 struct BloomSettings  {
 
 	int firstTarget;
-	int initialTexture;
 	float threshold;
 	float intensity;
 	float originalIntensity;
@@ -42,28 +41,29 @@ struct BloomSettings  {
 // -------------------------------------------------------
 // Bloom component
 // -------------------------------------------------------
-class BloomComponent : public GameObject , public Serializer {
+class BloomComponent : public Serializer {
 
 public:
 	BloomComponent(void);
 	~BloomComponent(void);
 	void update(float elapsed);
-	void init();
+	int init(int baseTarget,int texID);
 	void render();
 	void load(BinaryLoader* loader);
 	void useBloom(bool use) {
 		m_UseBloom = use;
+	}
+	void toggle() {
+		m_UseBloom = !m_UseBloom;
+	}
+	const bool isActive() const {
+		return m_UseBloom;
 	}
 private:
 	BloomSettings m_Settings;
 	int m_BloomTexture;
 	int m_BlurHTexture;
 	int m_BloomCombineTexture;
-	Sprite m_BloomEntity;
-	Sprite m_BlurHEntity;
-	Sprite m_BloomCombineEntity;
-	Sprite m_OverlayEntity;
-	Sprite m_StraightEntity;
 	Shader m_BlurHShader;
 	Shader m_BlurVShader;
 	Shader m_BloomShader;
@@ -72,6 +72,7 @@ private:
 	int m_BlurHShaderID;
 	int m_BloomCombineShaderID;
 	bool m_UseBloom;
+	int _baseRT;
 };
 
 

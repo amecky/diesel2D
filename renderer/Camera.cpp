@@ -2,6 +2,7 @@
 #include <d3dx9math.h>
 #include "..\math\vector.h"
 #include "..\math\matrix.h"
+#include "..\utils\Log.h"
 
 namespace ds {
 
@@ -20,7 +21,8 @@ Camera::Camera(int width,int height) {
 
 	float w = static_cast<float>(width);
 	float h = static_cast<float>(height);
-	setLens(0.25f*PI, 1.0f, 1.0f, 1000.0f);
+	float aspect = w / h;
+	setLens(0.25f*PI, aspect, 1.0f, 1000.0f);
 	m_OrthoProj = matrix::mat4OrthoLH(w,h,0.0f,1.0f);	// checked
 	m_OrthoView = matrix::m4identity();//matrix::mat4LookAtLH(m_ViewPos,m_LookAt,m_UpVec); // checked
 	m_Ortho = false;
@@ -141,6 +143,99 @@ void Camera::update(float elapsedTime,const Vector2f& mousePosition,bool buttonP
 		m_LastMousePosition.x = mousePosition.x;
 		m_LastMousePosition.y = mousePosition.y;
 	//}
+}
+
+Vector3f Camera::screenToWorld(const Vector2f& pos) {
+	
+	mat4 ma1 = m_View * m_Proj;
+	mat4 inv1 = matrix::mat4Inverse(ma1);
+
+	Vector4f in;
+	in.x = (pos.x - 1024.0f) / 1024.0f;
+	in.y = (768.0f - pos.y) / 768.0f;
+	in.z = 1.0f;
+	in.w = 1.0;
+
+	// Map to range -1 to 1
+	in.x = in.x * 2.0 - 1.0;
+	in.y = in.y * 2.0 - 1.0;
+	in.z = in.z * 2.0 - 1.0;
+
+	Vector4f o4 = inv1 * in;
+	o4 *= 1.0f / o4.w;
+	/*
+	//Vector4f ndc(2 * pos.x / 1024 - 1,2 * (768 - pos.y) / 768 - 1,1, 1);
+
+	Vector3f ndc(2 * pos.x / 1024 - 1, 2 * (768 - pos.y) / 768 - 1, 1);
+
+	Vector3f tmp = m * ndc;
+	//tmp *= 1.0f / tmp.w;
+
+	return Vector3f(tmp.x, tmp.y, tmp.z);
+	*/
+	
+	/*
+	Vector3f v;
+	v.x = (((2.0f * pos.x) / 1024) - 1) / m_Proj._11;
+	v.y = (-2.0f * pos.y / 768 + 1) / m_Proj._22;
+	v.z = 1.0f;
+
+	//LOG << "v: " << DBG_V3(v);
+
+	mat4 matInvView = matrix::mat4Inverse(m_View);
+
+	//Vector4f ndc((2 * (pos.x - 1024)) / 1024 - 1,(2 * (768 - pos.y)) / 768 - 1, 0, 1);
+
+	Vector3f rayDir = matInvView * v;
+
+	Vector3f rayOrigin;
+
+	rayOrigin.x = matInvView._41;
+	rayOrigin.y = matInvView._42;
+	rayOrigin.z = matInvView._43;
+	//LOG << "v: " << DBG_V3(v);
+	return rayDir;
+	*/
+
+
+	D3DXMATRIX tm;
+	D3DXMatrixPerspectiveFovLH(&tm, 0.25f*PI, 1024.0f / 768.0f, 0.1f, 1000.0f);
+	mat4 m = m_View;// *m_Proj;
+	mat4 inv = matrix::mat4Inverse(m_Proj);
+	D3DXMATRIX itm;
+	D3DXMatrixInverse(&itm,NULL,&tm);
+
+	D3DXMATRIX viewMatrix;
+	D3DXMatrixLookAtLH(&viewMatrix,
+		&D3DXVECTOR3(0.0f, 0.0f, -16.0f), //position
+		&D3DXVECTOR3(0.0f, 0.0f, 0.0f), //Look at
+		&D3DXVECTOR3(0.0f, 1.0f, 0.0f));
+
+	D3DXMATRIX worldMatrix;
+	D3DXMatrixIdentity(&worldMatrix);
+
+	D3DXMATRIX m1, m2, m3;
+	D3DXVECTOR3 vvec,outv;
+	D3DXMatrixMultiply(&m1, &worldMatrix, &viewMatrix);
+	D3DXMatrixMultiply(&m2, &m1, &tm);
+	D3DXMatrixInverse(&m3, NULL, &m2);
+	vvec.x = 2.0f * (pos.x - 1024.0f) / 1024.0f - 1.0f;
+	vvec.y = 1.0f - 2.0f * (pos.y - 768.0f) / 768.0f;
+	vvec.z = 1.0f;// (pv->z - pviewport->MinZ) / (pviewport->MaxZ - pviewport->MinZ);
+	D3DXVec3TransformCoord(&outv, &vvec, &m3);
+
+	//LOG << "screen pos: " << DBG_V2(pos);
+	Vector3f vec;
+	vec.x = (((2.0f * pos.x) / 1024.0f) - 1.0f);// / m_Proj._11;
+	vec.y = -(((2.0f * pos.y) / 768.0f) - 1.0f);// / m_Proj._22;
+
+	//vec.x = (2.0f * pos.x - 1024.0f) / 1024.0f - 1.0f;
+	//vec.y = 1.0f - (2.0f * pos.y - 768.0f) / 768.0f;
+	vec.z = 1.0f;// (pos.z - 0.1) / (1000 - pviewport->MinZ);
+	Vector3f pout = vec * inv;
+	//D3DXVec3TransformCoord(pout, &vec, &inv);
+	return vec;
+	
 }
 
 void Camera::buildView() {

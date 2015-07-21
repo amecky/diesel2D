@@ -132,6 +132,39 @@ namespace sprites {
 		}
 	}
 
+	void draw(const Shape& shape, const Texture& tex) {
+		int vertexCount = spriteCtx.index;
+		if ((vertexCount + 4) >= spriteCtx.maxVertices) {
+			renderer::setTexture(tex.textureID);
+			flush();
+		}
+		int idx = spriteCtx.index;
+		spriteCtx.sprites[idx].uv.x = tex.uv.x;
+		spriteCtx.sprites[idx].uv.y = tex.uv.y;
+		spriteCtx.sprites[idx + 1].uv.x = tex.uv.z;
+		spriteCtx.sprites[idx + 1].uv.y = tex.uv.y;
+		spriteCtx.sprites[idx + 2].uv.x = tex.uv.z;
+		spriteCtx.sprites[idx + 2].uv.y = tex.uv.w;
+		spriteCtx.sprites[idx + 3].uv.x = tex.uv.x;
+		spriteCtx.sprites[idx + 3].uv.y = tex.uv.w;
+		//Vector2f cor = pos;
+		//cor = cor - ds::renderer::getSelectedViewport().getPosition();
+		//Vector2f p(0, 0);
+		for (int i = 0; i < 4; ++i) {
+			//p.x = VP_ARRAY[i * 2] * tex.dim.x;
+			//p.y = VP_ARRAY[i * 2 + 1] * tex.dim.y;
+			//p = p - center;
+			//Vector2f np = vector::srt(cor, p, scaleX, scaleY, rotation);
+			Vector2f np = shape.v[i] - ds::renderer::getSelectedViewport().getPosition();
+			spriteCtx.sprites[idx + i].x = np.x;
+			spriteCtx.sprites[idx + i].y = np.y;
+			spriteCtx.sprites[idx + i].z = 0.0f;
+			spriteCtx.sprites[idx + i].color = shape.color;
+		}
+		spriteCtx.index += 4;
+		++spriteCtx.size;
+	}
+
 	void draw(const Vector2f& pos, const Texture& tex, float rotation, float scaleX, float scaleY, const Color& color, const Vector2f& center) {
 		int vertexCount = spriteCtx.index;
 		if ((vertexCount + 4) >= spriteCtx.maxVertices  ) {
@@ -147,7 +180,6 @@ namespace sprites {
 		spriteCtx.sprites[idx + 2].uv.y = tex.uv.w;
 		spriteCtx.sprites[idx + 3].uv.x = tex.uv.x;
 		spriteCtx.sprites[idx + 3].uv.y = tex.uv.w;
-
 		Vector2f cor = pos;
 		cor = cor - ds::renderer::getSelectedViewport().getPosition();
 		Vector2f p(0, 0);
@@ -199,10 +231,15 @@ namespace sprites {
 		}
 	}
 
-	void drawTemplate(int id) {
-		if (renderer::hasSpriteTemplate(id)) {
-			draw(renderer::getSpriteTemplate(id));
+	void drawTemplate(const char* name) {
+		/*
+		Sprite sp;
+		if (renderer::hasSpriteTemplate(name)) {
+
+			renderer::getSpriteTemplate(id)
+			draw(sp);
 		}
+		*/
 	}
 }
 

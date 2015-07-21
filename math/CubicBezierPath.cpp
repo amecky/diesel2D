@@ -50,9 +50,6 @@ namespace ds {
 			}
 			previous = p;
 		}
-
-		LOG << "-----> total length: " << m_TotalLength;
-
 		for ( int i = 0; i < m_Elements.size(); ++i ) {
 			m_Elements[i].build();
 		}
@@ -61,13 +58,11 @@ namespace ds {
 	void CubicBezierPath::approx(float u, Vector2f* p) {
 		assert(u >= 0.0f && u <= 1.0f);
 		float t = find(u);
-		//LOG << "u: " << u << " t: " << t;
 		get(t, p);
 	}
 
 	float CubicBezierPath::find(float u) {
 		float targetLength = u * m_TotalLength;// [32];
-		//LOG << "target: " << targetLength;
 		int low = 0;
 		int high = MAX_CBP_STEPS;
 		int index = 0;
@@ -85,8 +80,6 @@ namespace ds {
 		if (m_ArcLength[index] > targetLength) {
 			index--;
 		}
-
-		//LOG << "index: " << index;
 		float lengthBefore = m_ArcLength[index];
 		if (lengthBefore == targetLength) {
 			return lengthBefore;

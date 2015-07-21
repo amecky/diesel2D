@@ -93,6 +93,7 @@ public:
 		m_MousePos.y = static_cast<float>(y);
 		m_TwistedMousePos.x = static_cast<float>(x);
 		m_TwistedMousePos.y = renderer::getScreenHeight() - static_cast<float>(y);
+		renderer::setMousePosition(m_TwistedMousePos.x, m_TwistedMousePos.y);
 	}
 	float random(float min,float max) {
 		return min + (max - min)* (float)rand();
@@ -109,9 +110,9 @@ public:
 	//Renderer* getRenderer() {
 		//return renderer;
 	//}
-	AssetCompiler* getAssets() {
-		return &assets;
-	}
+	//AssetCompiler* getAssets() {
+		//return &assets;
+	//}
 	AudioManager* getAudio() {
 		return audio;
 	}
@@ -128,7 +129,7 @@ protected:
 	//Renderer* renderer;
 	DialogManager gui;
 	AudioManager* audio;
-	AssetCompiler assets;
+	//AssetCompiler assets;
 	HINSTANCE hInstance;
 	HWND m_hWnd;
 	bool m_Active;
@@ -158,7 +159,7 @@ private:
 template<class S>
 void BaseApp::createGameObject(S* obj) {
 	//obj->setParticleManager(particles);
-	obj->setAssetCompiler(&assets);
+	//obj->setAssetCompiler(&assets);
 	obj->setAudioManager(audio);
 	obj->init();
 	obj->GameObject::setActive(true);

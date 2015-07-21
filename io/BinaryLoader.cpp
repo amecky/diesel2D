@@ -150,6 +150,10 @@ void BinaryLoader::read(int* value) {
     readBuffer(value,sizeof(int));    
 }
 
+void BinaryLoader::read(bool* value) {
+	readBuffer(value, sizeof(bool));
+}
+
 void BinaryLoader::read(uint32* value) {
 	readBuffer(value,sizeof(uint32));    
 }

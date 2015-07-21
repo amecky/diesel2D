@@ -6,8 +6,10 @@
 #include "..\sprites\Sprite.h"
 #include "..\sprites\SpriteArray.h"
 #include "..\physics\ColliderArray.h"
+#include "..\physics\PhysicalWorld.h"
 #include "..\math\tweening.h"
 #include "..\math\CubicBezierPath.h"
+#include "..\math\StraightPath.h"
 #include <vector>
 
 namespace ds {
@@ -19,7 +21,8 @@ namespace ds {
 		AT_FOLLOW_CURVE,
 		AT_WAIT,
 		AT_MOVE_WITH,
-		AT_ROTATE
+		AT_ROTATE,
+		AT_FOLLOW_STRAIGHT_PATH
 	};
 
 	enum RepeatType {
@@ -40,6 +43,8 @@ namespace ds {
 	class MoveWithAction;
 	class RotateAction;
 	class FollowTargetAction;
+	class FollowStraightPathAction;
+	class ColorFadeToAction;
 
 	typedef void (*MoveFunc)(Vector2f&,float*,float);
 
@@ -72,14 +77,15 @@ namespace ds {
 
 	typedef std::vector<AbstractAction*> Actions;
 
-	typedef std::map<SID,CID> ColliderMap;
-
 	public:
 		World();
 		~World(void);
 		SID create(const Vector2f& pos,const Texture& r,int type = -1);
+		SID create(const Vector2f& pos, const char* templateName);
 		void remove(SID sid);
 		void render();
+
+		void setBoundingRect(const Rect& r);
 
 		const bool contains(SID sid) const {
 			return m_Data.contains(sid);
@@ -94,6 +100,11 @@ namespace ds {
 			SpriteArrayIndex &in = m_Data.indices[sid];
 			assert(in.index != USHRT_MAX);
 			m_Data.textures[in.index] = t;
+		}
+		const Texture& getTexture(SID sid) const {
+			SpriteArrayIndex &in = m_Data.indices[sid];
+			assert(in.index != USHRT_MAX);
+			return m_Data.textures[in.index];
 		}
 		// scaling
 		void scale(SID sid,float sx,float sy) {
@@ -132,11 +143,15 @@ namespace ds {
 
 		void followPath(SID sid,CubicBezierPath* path,float ttl,int mode = 0);
 
+		void followPath(SID sid, StraightPath* path, float ttl, int mode = 0);
+
 		void followCurve(SID sid,BezierCurve* path,float ttl,int mode = 0);
 
 		void followTarget(SID sid,float velocity, Vector2f* pos);
 
 		void fadeAlphaTo(SID sid,float startAlpha,float endAlpha,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+
+		void fadeColorTo(SID sid, const Color& startColor, const Color& endColor, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
 
 		void wait(SID sid,float ttl);
 
@@ -144,22 +159,37 @@ namespace ds {
 
 		void debug(SID sid);
 
+
+
 		const ActionEventBuffer& getEventBuffer() const {
 			return m_Buffer;
 		}
 
-		void attachCollider(SID sid,const Vector2f& extent,int type);
-		bool hasCollisions() {
-			return m_NumCollisions > 0;
-		}
-		int getNumCollisions() {
-			return m_NumCollisions;
-		}
-		const Collision& getCollision(int idx) const {
-			return m_Collisions[idx];
+		void attachCollider(SID sid, const Vector2f& extent, int type) {
+			m_Physics.attachCollider(sid, extent, type);
 		}
 
-		void drawColliders(const Texture& texture);
+		void attachCollider(SID sid, int type){
+			m_Physics.attachCollider(sid, type);
+		}
+
+		void ignoreCollisions(int firstType, int secondType) {
+			m_Physics.ignore(firstType, secondType);
+		}
+
+		bool hasCollisions() {
+			return m_Physics.hasCollisions();
+		}
+		int getNumCollisions() {
+			return m_Physics.getNumCollisions();
+		}
+		const Collision& getCollision(int idx) const {
+			return m_Physics.getCollision(idx);
+		}
+
+		void drawColliders(const Texture& texture) {
+			m_Physics.drawColliders(texture);
+		}
 
 		SID pick(const Vector2f& pos);
 
@@ -169,16 +199,12 @@ namespace ds {
 	private:
 		ActionEventBuffer m_Buffer;
 		void allocate(int size);
-		void allocateCollider(int size);
-		void checkCollisions();
-		void checkCollisions(int currentIndex,const Vector2f& pos,const Vector2f& extent);
-		bool containsCollision(CID firstID,CID secondID);
+		
 
 		SpriteArray m_Data;
-		ColliderArray m_ColliderData;
-		ColliderMap m_ColliderMap;
-		Collision m_Collisions[256];
-		int m_NumCollisions;
+		
+		PhysicalWorld m_Physics;
+
 		MoveToAction* m_MoveToAction;	
 		ScalingAction* m_ScalingAction;
 		AlphaFadeToAction* m_AlphaFadeToAction;
@@ -190,6 +216,8 @@ namespace ds {
 		MoveWithAction* m_MoveWithAction;
 		RotateAction* m_RotateAction;
 		FollowTargetAction* m_FollowTargetAction;
+		FollowStraightPathAction* m_FollowStraightPathAction;
+		ColorFadeToAction* m_ColorFadeToAction;
 		Actions m_Actions;
 
 	};

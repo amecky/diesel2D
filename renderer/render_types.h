@@ -3,6 +3,8 @@
 #include "..\utils\Color.h"
 #include "..\math\math_types.h"
 #include "..\lib\container\List.h"
+#include "vertex_types.h"
+#include "..\lib\DataArray.h"
 #include <d3dx9core.h>
 
 namespace ds {
@@ -63,6 +65,8 @@ namespace ds {
 	// Blend state
 	// -------------------------------------------------------
 	struct BlendState {
+
+		IdString hashName;
 		int srcFactorRGB;
 		int dstFactorRGB;
 		int blendModeRGB;
@@ -134,11 +138,12 @@ namespace ds {
 
 	struct Texture {
 
+		IdString hashName;
 		Vector4f uv;
 		Vector2f dim;
 		int textureID;
 
-		Texture() : uv(0, 0, 1, 1), dim(32, 32), textureID(0) {}
+		Texture() : hashName(0) , uv(0, 0, 1, 1), dim(32, 32), textureID(0) {}
 
 		const Vector2f getUV(int idx) const {
 			switch (idx) {
@@ -149,7 +154,6 @@ namespace ds {
 				default: return Vector2f(0, 0);
 			}
 		}
-
 	};
 
 	// -------------------------------------------------------
@@ -164,18 +168,20 @@ namespace ds {
 	// -------------------------------------------------------
 	struct Shader {
 
+		IdString hashName;
 		ID3DXEffect* m_FX;
 		D3DXHANDLE m_hTech;
 		ShaderConstant* constants;
 		uint32 constantCount;
 
-		Shader() : m_FX(0), constants(0), constantCount(0) {}
+		Shader() : hashName(0) , m_FX(0), constants(0), constantCount(0) {}
 	};
 
 	// -------------------------------------------------------
 	// Render target
 	// -------------------------------------------------------
 	struct RenderTarget {
+
 		int flag;
 		Color clearColor;
 		LPDIRECT3DTEXTURE9 texture;
@@ -186,7 +192,139 @@ namespace ds {
 		RenderTarget() : flag(0) , clearColor(Color(0,0,0,255)) ,texture(0) , surface(0) , rts(0) , textureID(-1) {}
 
 	};
+
+	struct Sphere {
+
+		Vector3f position;
+		float radius;
+
+		Sphere() : position(0, 0, 0), radius(0.0f) {}
+
+		Sphere(const Vector3f& pos, float r) : position(pos), radius(r) {}
+
+	};
+
+	struct AABBox {
+
+		Vector2f position;
+		Vector2f extent;
+		Vector2f min;
+		Vector2f max;
+
+		AABBox() {}
+
+		AABBox(const Vector2f& pos, const Vector2f& ext) {
+			position = pos;
+			extent = ext * 0.5f;
+			min = vec_min(position - extent, position + extent);
+			max = vec_max(position - extent, position + extent);
+		}
+
+		void scale(const Vector2f& s) {
+			extent.x *= s.x;
+			extent.y *= s.y;
+			min = vec_min(position - extent, position + extent);
+			max = vec_max(position - extent, position + extent);
+		}
+
+		void transpose(const Vector2f& pos) {
+			position = pos;
+			min = vec_min(position - extent, position + extent);
+			max = vec_max(position - extent, position + extent);
+		}
+
+		Vector2f findClosestPoint(const Vector2f& p) const {
+			Vector2f ret(0, 0);
+			ret.x = (p.x < min.x) ? min.x : (p.x > max.x) ? max.x : p.x;
+			ret.y = (p.y < min.y) ? min.y : (p.y > max.y) ? max.y : p.y;
+			return ret;
+		}
+
+		bool contains(const Vector2f& point) const {
+			if (point.x < min.x || max.x < point.x) {
+				return false;
+			}
+			else if (point.y < min.y || max.y < point.y) {
+				return false;
+			}
+			return true;
+		}
+
+		const bool overlaps(const AABBox& b) const {
+			const Vector2f T = b.position - position;
+			return fabs(T.x) <= (extent.x + b.extent.x) && fabs(T.y) <= (extent.y + b.extent.y);
+		}
+
+		const bool overlaps(const Sphere& sphere) const {
+			float s, d = 0;
+			//find the square of the distance
+			//from the sphere to the box
+			for (int i = 0; i < 2; ++i) {
+				if (sphere.position[i] < min_value(i)) {
+					s = sphere.position[i] - min_value(i);
+					d += s*s;
+				}
+				else if (sphere.position[i] > max_value(i)) {
+					s = sphere.position[i] - max_value(i);
+					d += s*s;
+				}
+
+			}
+			return d <= sphere.radius * sphere.radius;
+		}
+
+		float min_value(int index) const {
+			return min[index];
+		}
+
+		float max_value(int index) const {
+			return max[index];
+		}
+	};
+
+	// -------------------------------------------------------
+	// Material
+	// -------------------------------------------------------
+	struct Material {
+
+		IdString hash;
+		int texture;
+		int shader;
+		int blendState;
+		int vertexType;
+		Color diffuseColor;
+
+		Material() : hash(0), texture(-1), shader(-1), blendState(0) {}
+		
+	};
 	
+	// -------------------------------------------------------
+	// MeshData
+	// -------------------------------------------------------
+	struct MeshData {
+
+		IdString hash;
+		ID id;
+		Surface* faces;
+		int size;
+		AABBox aabBox;
+
+		MeshData() : size(0) , faces(0) {}
+		
+	};
+
+	// -------------------------------------------------------
+	// MeshData
+	// -------------------------------------------------------
+	struct Mesh {
+
+		ID id;
+		IdString hashName;
+		int descriptorID;
+		ID meshDataID;
+		int vertexType;
+
+	};
 	// -------------------------------------------------------
 	// Debug message
 	// -------------------------------------------------------

@@ -95,6 +95,13 @@ namespace vector {
 		v.y += radius * math::fastSin(angle);
 	}
 
+	// -PI < beta < PI   0 < phi < 2PI
+	void addRadial(Vector3f& v, float radius, float beta, float phi) {
+		v.x += radius * cos(phi) * sin(beta);
+		v.y += radius * sin(phi) * sin(beta);
+		v.z += radius * cos(beta);
+	}
+
 	Vector2f calculateRadial(const Vector2f& v,float radius,float angle) {
 		Vector2f ret;
 		//float ra = math::reflect(angle);

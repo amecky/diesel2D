@@ -7,14 +7,14 @@ namespace ds {
 
 	namespace shader {
 
-		int createTransformedTextureColorShader(Renderer* renderer,int textureId);
+		int createTransformedTextureColorShader(int textureId);
 		int createPTCShader(int textureId);
 
-		int createBloomShader(Renderer* renderer,int textureID,float threshold);
-		int createBlurShader(Renderer* renderer,int textureID);
-		int createBloomCombineShader(Renderer* renderer,int colorTextureID,int bloomTextureID);
+		int createBloomShader(int textureID,float threshold);
+		int createBlurShader(int textureID);
+		int createBloomCombineShader(int colorTextureID,int bloomTextureID);
 
-		int createCombineLightShader(Renderer* renderer, int lightTextureID, int colorTextureID);
+		int createCombineLightShader(int lightTextureID, int colorTextureID);
 
 		bool setVector3f(Shader& shader,const char* name,const Vector3f& v);
 		bool setVector2f(Shader& shader, const char* name, const Vector2f& v);

@@ -1,5 +1,6 @@
 #include "World.h"
 #include "..\sprites\SpriteBatch.h"
+#include "..\renderer\graphics.h"
 #include "actions\MoveToAction.h"
 #include "actions\ScalingAction.h"
 #include "actions\AlphaFadeToAction.h"
@@ -11,6 +12,8 @@
 #include "actions\MoveWithAction.h"
 #include "actions\RotateAction.h"
 #include "actions\FollowTargetAction.h"
+#include "actions\FollowStraightPathAction.h"
+#include "actions\ColorFadeToAction.h"
 #include "..\physics\ColliderArray.h"
 #include "..\utils\Profiler.h"
 
@@ -39,7 +42,11 @@ namespace ds {
 		m_Actions.push_back(m_RotateAction);
 		m_FollowTargetAction = new FollowTargetAction;
 		m_Actions.push_back(m_FollowTargetAction);
-		m_NumCollisions = 0;
+		m_FollowStraightPathAction = new FollowStraightPathAction;
+		m_Actions.push_back(m_FollowStraightPathAction);
+		m_ColorFadeToAction = new ColorFadeToAction;
+		m_Actions.push_back(m_ColorFadeToAction);
+		
 	}
 
 
@@ -52,9 +59,7 @@ namespace ds {
 		if ( m_Data.buffer != 0 ) {
 			delete[] m_Data.buffer;
 		}
-		if ( m_ColliderData.buffer != 0 ) {
-			delete[] m_ColliderData.buffer;
-		}
+		
 	}
 
 	void World::allocate(int size) {
@@ -92,40 +97,11 @@ namespace ds {
 				sar::clear(sad);
 			}
 			m_Data = sad;
+			m_Physics.setDataPtr(&m_Data);
 		}
 	}
 
-	void World::allocateCollider(int size) {
-		if ( size > m_ColliderData.total ) {
-			ColliderArray ca;
-			int sz = size * (sizeof(ColliderArrayIndex) + sizeof(CID) + sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(int));
-			ca.buffer = new char[sz];
-			ca.total = size;
-			ca.num = 0;
-			ca.indices = (ColliderArrayIndex*)(ca.buffer);
-			ca.ids = (CID*)(ca.indices + size);
-			ca.sids = (SID*)(ca.ids + size);
-			ca.positions = (Vector2f*)(ca.sids + size);
-			ca.extents = (Vector2f*)(ca.positions + size);			
-			ca.types = (int*)(ca.extents + size);
-			if ( m_ColliderData.buffer != 0 ) {
-				memcpy(ca.indices, m_ColliderData.indices, m_ColliderData.num * sizeof(SpriteArrayIndex));
-				memcpy(ca.ids, m_ColliderData.ids, m_ColliderData.num * sizeof(CID));
-				memcpy(ca.positions, m_ColliderData.positions, m_ColliderData.num * sizeof(Vector2f));
-				memcpy(ca.extents, m_ColliderData.extents, m_ColliderData.num * sizeof(Vector2f));
-				memcpy(ca.types, m_ColliderData.types, m_ColliderData.num * sizeof(int));
-				ca.free_dequeue = m_ColliderData.free_dequeue;
-				ca.free_enqueue = m_ColliderData.free_enqueue;
-				ca.num = m_ColliderData.num;
-				delete[] m_ColliderData.buffer;
-			}
-			else {
-				physics::clear(ca);
-			}
-			m_ColliderData = ca;
-		}
-	}
-
+	
 	SID World::create(const Vector2f& pos,const Texture& r,int type) {
 		if ( m_Data.total == 0 ) {
 			allocate(256);
@@ -136,14 +112,26 @@ namespace ds {
 		return sar::create(m_Data,pos,r,type);		
 	}
 
-	void World::remove(SID id) {
-		if (m_ColliderMap.find(id) != m_ColliderMap.end()) {
-			CID cid = m_ColliderMap[id];
-			//LOG << "removing: " << id << " CID:" << cid;
-			//debug();		
-			m_ColliderData.remove(cid);
-			m_ColliderMap.erase(id);
+	SID World::create(const Vector2f& pos, const char* templateName) {
+		if (m_Data.total == 0) {
+			allocate(256);
 		}
+		if (m_Data.num >= m_Data.total) {
+			allocate(m_Data.total * 2);
+		}
+		Sprite sp;
+		if (renderer::getSpriteTemplate(templateName, &sp)) {
+			SID sid = sar::create(m_Data, pos, sp.texture, sp.type);
+			sar::set(m_Data, sid, sp);
+			sar::setPosition(m_Data, sid, pos);
+			return sid;
+			
+		}
+		return INVALID_SID;
+	}
+
+	void World::remove(SID id) {
+		m_Physics.remove(id);		
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->remove(id);
 		}		
@@ -164,21 +152,12 @@ namespace ds {
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->update(m_Data, dt, m_Buffer);
 		}
-
-		ColliderMap::iterator it = m_ColliderMap.begin();
-		while ( it != m_ColliderMap.end() ) {
-			SID sid = it->first;
-			CID cid = it->second;
-			m_ColliderData.moveTo(cid,sar::getPosition(m_Data,sid));
-			++it;
-		}
-		m_NumCollisions = 0;
-		checkCollisions();
+		m_Physics.tick(dt);
 		PR_END("World:tick")
 	}
 
 	void World::moveTo(SID sid,const Vector2f& startPos,const Vector2f& endPos,float ttl,int mode,const tweening::TweeningType& tweeningType) {
-		m_MoveToAction->attach(sid,startPos,endPos,ttl,mode,tweeningType);
+		m_MoveToAction->attach(sid,m_Data,startPos,endPos,ttl,mode,tweeningType);
 	}
 
 	void World::moveBy(SID sid,const Vector2f& velocity,bool bounce) {
@@ -236,8 +215,16 @@ namespace ds {
 		m_AlphaFadeToAction->attach(sid,startAlpha,endAlpha,ttl,mode,tweeningType);
 	}
 
+	void World::fadeColorTo(SID sid, const Color& startColor, const Color& endColor, float ttl, int mode, const tweening::TweeningType& tweeningType) {
+		m_ColorFadeToAction->attach(sid, startColor, endColor, ttl, mode, tweeningType);
+	}
+
 	void World::followPath(SID sid,CubicBezierPath* path,float ttl,int mode) {
 		m_FollowPathAction->attach(sid,path,ttl,mode);
+	}
+
+	void World::followPath(SID sid, StraightPath* path, float ttl, int mode) {
+		m_FollowStraightPathAction->attach(sid,m_Data, path, ttl, mode);
 	}
 
 	void World::followCurve(SID sid,BezierCurve* path,float ttl,int mode) {
@@ -260,62 +247,16 @@ namespace ds {
 		}		
 	}
 
-	void World::attachCollider(SID sid,const Vector2f& extent,int type) {
-		if ( m_ColliderData.total == 0 ) {
-			allocateCollider(256);
-		}
-		if ( m_ColliderData.num >= m_ColliderData.total ) {
-			allocateCollider(m_ColliderData.total * 2);
-		}
-		const Vector2f& p = getPosition(sid);
-		CID cid = m_ColliderData.create(sid,p,extent,type);
-		m_ColliderMap[sid] = cid;
-	}
+	
 
-	void World::checkCollisions() {
-		for ( int i = 0; i < m_ColliderData.num; ++i ) {
-			checkCollisions(i,m_ColliderData.positions[i],m_ColliderData.extents[i]);
+	void World::setBoundingRect(const Rect& r) {
+		// we need to switch y
+		Rect newRect = r;
+		newRect.top = r.bottom;
+		newRect.bottom = r.top;
+		for (size_t i = 0; i < m_Actions.size(); ++i) {
+			m_Actions[i]->setBoundingRect(newRect);
 		}
-	}
-
-	void World::checkCollisions(int currentIndex,const Vector2f& pos,const Vector2f& extent) {
-		for ( int i = 0; i < m_ColliderData.num; ++i ) {
-			if ( i != currentIndex ) {
-				const Vector2f& p = m_ColliderData.positions[i];
-				const Vector2f& e = m_ColliderData.extents[i];
-				if ( physics::testBoxIntersection(pos,extent,p,e)) {
-					//LOG << "found intersection between " << currentIndex << " and " << i;
-					if ( m_NumCollisions < 256 ) {
-						CID firstID = m_ColliderData.ids[currentIndex];
-						CID secondID = m_ColliderData.ids[i];
-						if ( !containsCollision(firstID,secondID)) {
-							Collision& c = m_Collisions[m_NumCollisions++];
-							c.firstPos = pos;
-							c.firstID = m_ColliderData.ids[currentIndex];
-							c.firstSID = m_ColliderData.sids[currentIndex];
-							c.firstType = m_ColliderData.types[currentIndex];
-							c.secondPos = p;
-							c.secondID = m_ColliderData.ids[i];
-							c.secondSID = m_ColliderData.sids[i];
-							c.secondType = m_ColliderData.types[i];
-						}						
-					}
-				}
-			}
-		}
-	}
-
-	bool World::containsCollision(CID firstID,CID secondID) {
-		for ( int i = 0; i < m_NumCollisions; ++i ) {
-			Collision& other = m_Collisions[i];
-			if ( other.firstID == firstID && other.secondID == secondID ) {
-				return true;
-			}
-			if ( other.secondID == firstID && other.firstID == secondID ) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	void World::debug() {
@@ -327,10 +268,7 @@ namespace ds {
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->debug();
 		}
-		LOG << "------- Colliders --------";
-		for ( int i = 0; i < m_ColliderData.num; ++i ) {
-			LOG << i << " sid: " << m_ColliderData.sids[i] << " cid: " << m_ColliderData.ids[i] << " type: " << m_ColliderData.types[i] << " pos: " << DBG_V2(m_ColliderData.positions[i]) << " extent: " << DBG_V2(m_ColliderData.extents[i]);
-		}		
+		
 	}
 
 	void World::debug(SID sid) {
@@ -353,12 +291,5 @@ namespace ds {
 		return INVALID_SID;
 	}
 
-	void World::drawColliders(const Texture& texture) {
-		for ( int i = 0; i < m_ColliderData.num; ++i ) {
-			Vector2f& e = m_ColliderData.extents[i];
-			float sx = e.x / texture.dim.x;
-			float sy = e.y / texture.dim.y;
-			ds::sprites::draw(m_ColliderData.positions[i],texture,0.0f,sx,sy);
-		}
-	}
+	
 }

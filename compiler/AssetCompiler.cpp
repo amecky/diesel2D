@@ -12,6 +12,10 @@
 #include "NewParticleSystemConverter.h"
 #include "..\renderer\TextureLoader.h"
 #include "PathConverter.h"
+#include "StraightPathConverter.h"
+#include "DescriptorConverter.h"
+#include "MeshConverter.h"
+#include "..\particles\ParticleManager.h"
 
 const unsigned int UINT32_MAX = 1024;
 
@@ -115,12 +119,16 @@ AssetCompiler::AssetCompiler() {
 	m_Mapping[CVT_BLOOM_COMPONENT] = new BloomComponentConverter;
 	m_Mapping[CVT_NPS] = new NewParticleSystemConverter;
 	m_Mapping[CVT_PATH] = new PathConverter;
+	m_Mapping[CVT_STRAIGHT_PATH] = new StraightPathConverter;
+	m_Mapping[CVT_DESCRIPTOR] = new DescriptorConverter;
+	m_Mapping[CVT_MESH] = new MeshConverter;
 	m_BinarySerializerMapping[BINL_TEXTURE] = new TextureLoader;
 	m_CustomIndex = 100;
 }
 
 
 AssetCompiler::~AssetCompiler() {
+	LOG << "Removing asset compiler";
 	ConverterMapping::iterator it = m_Mapping.begin();
 	while ( it != m_Mapping.end() ) {
 		delete (*it).second;
@@ -277,6 +285,32 @@ int AssetCompiler::loadBinary(const char* fileName,uint32 type) {
 	else {
 		LOGEC("AssetCompiler") << "Cannot find file: " << buffer;
 		return -1;
+	}
+	
+}
+
+static AssetCompiler compiler;
+
+namespace assets {
+
+	void load(const char* fileName, Serializer* serializer, uint32 type) {
+		compiler.load(fileName, serializer, type);
+	}
+
+	uint32 registerConverter(Converter* converter) {
+		return compiler.registerConverter(converter);
+	}
+
+	void update() {
+		compiler.update();
+	}
+
+	void loadParticleSystem(const char* fileName, ParticleManager* particleManager) {
+		compiler.load(fileName, particleManager, CVT_PARTICLEMANAGER);
+	}
+
+	void loadSpriteTemplates(const char* fileName) {
+		compiler.load(fileName, renderer::getSpriteTemplates(), CVT_SPRITE);
 	}
 }
 

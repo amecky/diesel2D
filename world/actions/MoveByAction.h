@@ -35,6 +35,7 @@ namespace ds {
 		void allocate(int sz);
 		void rotateTo(SpriteArray& array, int index);
 		MoveByActionData m_Data;
+		bool isOutOfBounds(const Vector2f& pos, const Vector2f& v);
 	};
 
 }

@@ -11,6 +11,7 @@
 #include <Vector.h>
 #include "..\utils\Color.h"
 #include "..\math\FloatArray.h"
+#include "..\renderer\render_types.h"
 
 class BinaryLoader {
     
@@ -68,6 +69,7 @@ public:
     }
     void read(float* value);
     void read(int* value);
+	void read(bool* value);
 	void read(uint32* value);
 	void read(Vector2f* value);
 	void read(Vector3f* value);
@@ -77,6 +79,7 @@ public:
 	void read(ds::Vector2fPath* value);
 	void read(ds::FloatArray* value);
 	void read(ds::Rect* value);
+	void read(ds::Texture* value);
 	void read(std::string& str);
     /*
      * Reads data into buffer

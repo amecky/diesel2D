@@ -6,6 +6,7 @@
 #define NEW_OBJECT_ID_ADD 0x10000
 
 typedef unsigned int ID;
+const unsigned int INVALID_ID = UINT_MAX; 
 
 namespace ds {
 
@@ -71,6 +72,73 @@ struct DataArray {
 		indices[free_enqueue].next = id & INDEX_MASK;
 		free_enqueue = id & INDEX_MASK;
 	}
+};
+
+struct BaseArray {
+
+	Index* indices;
+	ID* ids;
+	int num;
+	int total;
+	char* buffer;
+
+	unsigned short free_enqueue;
+	unsigned short free_dequeue;
+
+	BaseArray() : num(0), total(0), buffer(0) {
+		clear();
+	}
+	/*
+	virtual ~BaseArray() {
+		if (buffer != 0) {
+			delete[] buffer;
+		}
+	}
+	*/
+	void clear() {
+		for (unsigned short i = 0; i < total; ++i) {
+			indices[i].id = i;
+			indices[i].next = i + 1;
+		}
+		num = 0;
+		free_dequeue = 0;
+		free_enqueue = total - 1;
+	}
+
+	const bool contains(ID id) const {
+		Index& in = indices[id];
+		return in.index != USHRT_MAX;
+	}
+
+	const int getIndex(ID id) const {
+		Index &in = indices[id];
+		assert(in.index != USHRT_MAX);
+		return in.index;
+	}
+
+	ID add() {
+		Index &in = indices[free_dequeue];
+		free_dequeue = in.next;
+		in.index = num++;
+		ids[in.index] = in.id;		
+		return in.id;
+	}
+
+	void remove(ID id) {
+		Index &in = indices[id & INDEX_MASK];
+		assert(in.index != USHRT_MAX);
+		ID currentID = ids[num - 1];
+		Index& next = indices[currentID & INDEX_MASK];
+		ids[in.index] = ids[next.index];
+		swap(in.index, next.index);
+		--num;
+		indices[currentID & INDEX_MASK].index = in.index;
+		in.index = USHRT_MAX;
+		indices[free_enqueue].next = id & INDEX_MASK;
+		free_enqueue = id & INDEX_MASK;
+	}
+
+	virtual void swap(int oldIndex, int newIndex) = 0;
 };
 
 }

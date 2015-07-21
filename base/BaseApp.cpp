@@ -34,7 +34,6 @@ BaseApp::BaseApp() {
 	rand.seed(GetTickCount());
 	audio = new AudioManager;
 	m_Fullscreen = false;
-
 }
 
 // -------------------------------------------------------
@@ -73,6 +72,9 @@ void BaseApp::init() {
 	loadContent();	
 	LOGC("BaseApp") << "------------ Loading content  ---------------";
 	m_Loading = false;
+	LOGC("BaseApp") << "------------ Initialize  ---------------";
+	initialize();
+	LOGC("BaseApp") << "------------ Initialize  ---------------";	
 	m_Running = true;
 }
 
@@ -83,8 +85,7 @@ void BaseApp::loadSprites() {
 }
 
 void BaseApp::initializeGUI() {
-	gui.setAssetCompiler(&assets);
-	assets.load("gui",&gui,CVT_GUI);	
+	ds::assets::load("gui", &gui, CVT_GUI);
 }
 // -------------------------------------------------------
 // Creates the window
@@ -163,11 +164,11 @@ void BaseApp::buildFrame() {
 	//PR_START("MAIN")
 	PR_START("FILEWATCHER")
 #ifdef DEBUG
-	assets.update();
+	assets::update();
 #endif
 	PR_END("FILEWATCHER")
 	renderer::drawCounter().reset();
-	renderer::clearDebugMessages();
+	debug::reset();
 	// handle key states
 	PR_START("INPUT")
 	if ( m_KeyStates.keyDown ) {
@@ -233,6 +234,7 @@ void BaseApp::buildFrame() {
 	PRS("RENDER_GUI")
 	gui.render();
 	PRE("RENDER_GUI")
+	debug::drawDebugMessages();
 	PRS("RENDER_FLUSH")
 	renderer::flush();
 	PRE("RENDER_FLUSH")
@@ -246,7 +248,7 @@ void BaseApp::buildFrame() {
 		debug::showProfiler(10, 10);
 	}		
 #endif
-	debug::drawDebugMessages();
+	
 	PR_END("DEBUG_RENDER")		
 	PR_END("RENDER")
 	renderer::endRendering();

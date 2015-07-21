@@ -71,7 +71,7 @@ namespace ds {
 			return 0;
 		}
 
-		int createTransformedTextureColorShader(Renderer* renderer,int textureId) {
+		int createTransformedTextureColorShader(int textureId) {
 			const char* g_strBuffer = 
 				"texture gTex;\r\n"
 				"sampler TexS = sampler_state {\r\n"
@@ -111,7 +111,7 @@ namespace ds {
 		}
 
 
-		int createParticleShader(Renderer* renderer) {
+		int createParticleShader() {
 			const char* g_strBuffer =
 				"uniform extern float4x4 gWVP;\r\n"
 				"uniform extern texture gTex; \r\n"
@@ -205,7 +205,7 @@ namespace ds {
 			return ret;
 		}
 
-		int createBloomShader(Renderer* renderer,int textureID,float threshold) {
+		int createBloomShader(int textureID,float threshold) {
 			const char* g_strBuffer = 
 			"uniform extern float4x4 gWVP;\r\n"
 			"uniform extern texture gTex;\r\n"
@@ -247,7 +247,7 @@ namespace ds {
 			return ret;
 		}
 
-		int createBlurShader(Renderer* renderer,int textureID) {
+		int createBlurShader(int textureID) {
 			const char* g_strBuffer =
 			"uniform extern float4x4 gWVP;\r\n"
 			"uniform extern texture gTex;\r\n"
@@ -293,7 +293,7 @@ namespace ds {
 			return ret;
 		}
 
-		int createBloomCombineShader(Renderer* renderer,int colorTextureID,int bloomTextureID) {
+		int createBloomCombineShader(int colorTextureID,int bloomTextureID) {
 			const char* g_strBuffer =
 			"uniform extern float4x4 gWVP;\r\n"
 			"uniform extern texture gTex;\r\n"
@@ -356,7 +356,7 @@ namespace ds {
 			return ret;
 		}
 
-		int createCombineLightShader(Renderer* renderer, int lightTextureID, int colorTextureID) {
+		int createCombineLightShader(int lightTextureID, int colorTextureID) {
 			const char* g_strBuffer =
 				"uniform extern float4x4 gWVP;\r\n"
 				"uniform extern texture LightMap;\r\n"

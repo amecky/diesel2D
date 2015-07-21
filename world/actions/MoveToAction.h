@@ -28,7 +28,7 @@ namespace ds {
 	public:
 		MoveToAction();
 		virtual ~MoveToAction() {}
-		void attach(SID id,const Vector2f& startPos,const Vector2f& endPos,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+		void attach(SID id, SpriteArray& array,const Vector2f& startPos, const Vector2f& endPos, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
 		void clear();
 		void debug();

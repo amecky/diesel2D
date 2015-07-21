@@ -1,9 +1,14 @@
 #include "AbstractAction.h"
 #include "..\..\utils\Log.h"
+#include "..\..\renderer\Renderer.h"
 
 namespace ds {
 
-	AbstractAction::AbstractAction(void) : m_Buffer(0) {
+	AbstractAction::AbstractAction(void) : m_Buffer(0) {		
+		//m_BoundingRect.left = 0.0f;
+		//m_BoundingRect.bottom = 0.0f;
+		//m_BoundingRect.right = renderer::getScreenWidth();
+		//m_BoundingRect.top = renderer::getScreenHeight();
 	}
 
 
@@ -11,6 +16,13 @@ namespace ds {
 		if ( m_Buffer != 0 ) {
 			delete[] m_Buffer;
 		}
+	}
+
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
+	void AbstractAction::setBoundingRect(const Rect& r) {
+		m_BoundingRect = r;
 	}
 
 	// -------------------------------------------------------

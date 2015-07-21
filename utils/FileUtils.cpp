@@ -96,6 +96,24 @@ namespace file {
 		return false;
 	}
 
+	// -------------------------------------------------------
+	// Compares filetime of two files and returns true if
+	// first one is older
+	// -------------------------------------------------------
+	bool isOlder(const char* firstFile, const char* secondFile) {
+		FILETIME firstTime;
+		FILETIME secondTime;
+		getFileTime(firstFile, firstTime);
+		getFileTime(secondFile, secondTime);
+		int t = CompareFileTime(&firstTime, &secondTime);
+		if (t == -1) {
+			LOG << firstFile << " is older as " << secondFile;
+			return true;
+		}
+		LOG << firstFile << " is NOT older as " << secondFile;
+		return false;
+	}
+
 	void logFileTime(const FILETIME& time) {
 		SYSTEMTIME stUTC, stLocal;
 		FileTimeToSystemTime(&time, &stUTC);

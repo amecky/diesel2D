@@ -46,6 +46,53 @@ std::ostringstream& Log::get(const char *file, const unsigned long line) {
 	os << "] ";
 	return os;
 }
+
+std::ostringstream& Log::error(const char *file, const unsigned long line) {
+	os << NowTime();
+	os << " [ERROR] : ";
+	os << " : [";
+	os << file;
+	os << " : ";
+	os << line;
+	os << "] ";	
+	return os;
+}
+
+std::ostringstream& Log::error(const char *file, const unsigned long line,const char* message) {
+	os << NowTime();
+	os << " [ERROR] : ";
+	os << " : [";
+	os << file;
+	os << " : ";
+	os << line;
+	os << "] ";
+	os << message;
+	return os;
+}
+
+std::ostringstream& Log::error(const char *file, const unsigned long line, char* format, va_list args) {
+	os << NowTime();
+	os << " [ERROR] : ";
+	os << " : [";
+	os << file;
+	os << " : ";
+	os << line;
+	os << "] ";
+	char buffer[1024];
+	memset(buffer, 0, sizeof(buffer));
+	int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);
+	os << buffer;
+	return os;
+}
+
+std::ostringstream& Log::error(const char *file, const unsigned long line, char* format, ...) {
+	va_list args;
+	va_start(args, format);
+	error(file, line, format, args);
+	va_end(args);
+	return os;
+}
+
 std::ostringstream& Log::error() {
 	os << NowTime();
 	os << " [ERROR] : ";

@@ -47,12 +47,28 @@ namespace ds {
 		float angle = vector::calculateRotation(m_Data.velocities[index]);
 		sar::rotate(array, m_Data.ids[index], angle);
 	}
+
+	bool MoveByAction::isOutOfBounds(const Vector2f& pos, const Vector2f& v) {
+		if (v.x > 0.0f && pos.x > m_BoundingRect.right) {
+			return true;
+		}
+		if (v.x < 0.0f && pos.x < m_BoundingRect.left) {
+			return true;
+		}
+		if (v.y > 0.0f && pos.y > m_BoundingRect.top) {
+			return true;
+		}
+		if (v.y < 0.0f && pos.y < m_BoundingRect.bottom) {
+			return true;
+		}
+		return false;
+	}
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
 	void MoveByAction::update(SpriteArray& array,float dt,ActionEventBuffer& buffer) {	
-		Viewport& vp = renderer::getSelectedViewport();
-		const Vector2f& ws = vp.getWorldSize();
+		//Viewport& vp = renderer::getSelectedViewport();
+		//const Vector2f& ws = vp.getWorldSize();
 		if ( m_Data.num > 0 ) {				
 			// move
 			for ( int i = 0; i < m_Data.num; ++i ) {
@@ -60,12 +76,14 @@ namespace ds {
 				p += m_Data.velocities[i] * dt;
 				//float angle = vector::calculateRotation(m_Data.velocities[i]);
 				//sar::rotate(array,m_Data.ids[i], angle);
-				if ( p.x < 0.0f || p.x > ws.x || p.y < 0.0f || p.y > ws.y ) {
+				//if ( p.x < 0.0f || p.x > ws.x || p.y < 0.0f || p.y > ws.y ) {
+				//if (p.x < m_BoundingRect.left || p.x > m_BoundingRect.right || p.y < m_BoundingRect.top || p.y > m_BoundingRect.bottom) {
+				if (isOutOfBounds(p, m_Data.velocities[i])) { 
 					if (m_Data.bounce[i]) {
-						if (p.y < 0.0f || p.y > ws.y) {
+						if (p.y < 0.0f || p.y > m_BoundingRect.bottom) {
 							m_Data.velocities[i].y *= -1.0f;
 						}
-						if (p.x < 0.0f || p.x > ws.x ) {
+						if (p.x < 0.0f || p.x > m_BoundingRect.right ) {
 							m_Data.velocities[i].x *= -1.0f;
 						}
 						rotateTo(array, i);

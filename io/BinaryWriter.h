@@ -45,6 +45,7 @@ public:
     uint32 write(int value);
 	uint32 write(uint32 value);
 	uint32 write(float value);
+	uint32 write(bool value);
 	uint32 write(const Vector2f& v);
 	uint32 write(const Vector3f& v);
 	uint32 write(const Vector4f& v);

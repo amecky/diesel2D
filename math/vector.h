@@ -14,6 +14,8 @@ namespace ds {
 
 		void addRadial(Vector2f& v,float radius,float angle);
 
+		void addRadial(Vector3f& v, float radius, float beta,float phi);
+
 		Vector2f calculateRadial(const Vector2f& v,float radius,float angle);
 
 		void rotate(Vector2f& v,float angle);

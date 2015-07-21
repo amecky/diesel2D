@@ -181,7 +181,7 @@ public:
 			Vector2f perp = Vector2f(-array->velocity[i].y,array->velocity[i].x);
 			perp = normalize(perp);
 			perp = perp * (sin(array->timer[i].x * m_Data.amplitude * array->random[i]) * m_Data.radius * array->random[i]);// * p->random;	
-			array->position[i] += perp * dt;
+			//array->position[i] += perp * dt;
 		}
 	}
 };
@@ -260,7 +260,7 @@ public:
 	void update(ParticleArray* array,float dt) {
 		float d = m_Data.damping * 0.01f;
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
-			Vector2f v = array->velocity[i] * d;
+			Vector3f v = array->velocity[i] * d;
 			array->velocity[i] -= v * dt;
 		}
 	}
@@ -303,7 +303,7 @@ public:
 
 	void update(ParticleArray* array,float dt) {
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
-			array->rotation[i] = math::getTargetAngle(V2_RIGHT,array->velocity[i]);			
+			//array->rotation[i] = math::getTargetAngle(V2_RIGHT,array->velocity[i]);			
 		}
 	}
 };

@@ -73,6 +73,10 @@ typedef unsigned short ushort;
 	#endif
 #endif
 
+#ifndef XASSERT
+#define XASSERT(cond, s, ...) do { if (!(cond)) {char buf[2048];sprintf(buf,">> ERROR: " s "\n", ##__VA_ARGS__);OutputDebugStringA(buf); assert(cond);} } while (false)
+#endif
+
 #ifndef BIT
 #define BIT( num ) ( 1 << ( num ) )
 #endif

@@ -19,6 +19,9 @@ const uint32 CVT_SCRIPT              = 9;
 const uint32 CVT_BLUEPRINT           = 10;
 const uint32 CVT_NPS                 = 11;
 const uint32 CVT_PATH                = 14;
+const uint32 CVT_STRAIGHT_PATH       = 15;
+const uint32 CVT_DESCRIPTOR          = 18;
+const uint32 CVT_MESH                = 19;
 const uint32 BINL_TEXTURE            = 0;
 
 // -------------------------------------------------------
@@ -84,6 +87,21 @@ private:
 	WatchList m_WatchList;
 	AssetDB m_Database;
 };
+
+class ParticleManager;
+
+namespace assets {
+
+	void load(const char* fileName, Serializer* serializer, uint32 type);
+
+	void loadParticleSystem(const char* fileName, ParticleManager* particleManager);
+
+	void loadSpriteTemplates(const char* fileName);
+
+	uint32 registerConverter(Converter* converter);
+
+	void update();
+}
 
 }
 

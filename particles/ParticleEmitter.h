@@ -7,6 +7,16 @@
 
 namespace ds {
 
+	struct ParticleGeneratorData {
+
+		Vector3f position;
+		float rotation;
+
+		ParticleGeneratorData() : position(0, 0, 0), rotation(0.0f) {}
+		explicit ParticleGeneratorData(const Vector3f& p) : position(p), rotation(0.0f) {}
+
+	};
+
 enum ParticleGeneratorType {
 	PGT_DEFAULT,
 	PGT_RING,
@@ -23,7 +33,7 @@ class ParticleGenerator {
 public:
 	ParticleGenerator() {}
 	virtual ~ParticleGenerator() {}
-	virtual void generate(ParticleArray* array,const Vector2f& position,float dt,uint32 start,uint32 end) = 0;
+	virtual void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) = 0;
 	virtual void convert(Category* category,BinaryWriter& writer) {} 
 	virtual void load(BinaryLoader* loader) {}
 	virtual const ParticleGeneratorType getType() const = 0;
@@ -69,14 +79,16 @@ class DefaultParticleGenerator : public ParticleGenerator{
 public:
 	DefaultParticleGenerator() : ParticleGenerator() {}
 	virtual ~DefaultParticleGenerator() {}
-	void generate(ParticleArray* array,const Vector2f& position,float dt,uint32 start,uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		for ( uint32 i = start; i < end; ++i ) {
 			array->color[i] = Color::WHITE;
 			array->scale[i] = Vector2f(1,1);
-			array->rotation[i] = 0.0f;
+			array->rotation[i] = data.rotation;
 			array->timer[i] = Vector3f(0,1,1);
 			array->random[i] = 1.0f;
-			array->acceleration[i] = Vector2f(0,0);
+			array->acceleration[i] = Vector3f(0,0,0);
+			array->velocity[i] = Vector3f(0, 0, 0);
+			array->position[i] = Vector3f(0, 0, 0);
 			array->type[i] = 1;
 		}
 	}
@@ -114,7 +126,7 @@ public:
 		m_Data.radius = radius;
 		m_Data.variance = variance;
 	}
-	void generate(ParticleArray* array,const Vector2f& position,float dt,uint32 start,uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		uint32 count = end - start;
 		//float angle = 0.0f;
 		float angleVariance = DEGTORAD(m_Data.angleVariance);
@@ -125,8 +137,11 @@ public:
 		for ( uint32 i = 0; i < count; ++i ) {
 			float myAngle = m_Angle + ds::math::random(-angleVariance,angleVariance);
 			float rad = ds::math::random(m_Data.radius-m_Data.variance,m_Data.radius+m_Data.variance);
-			array->position[start + i].x = position.x + rad * cos(myAngle);
-			array->position[start + i].y = position.y + rad * sin(myAngle);
+			array->position[start + i].x = data.position.x + rad * cos(myAngle);
+			array->position[start + i].y = data.position.y + rad * sin(myAngle);
+			array->position[start + i].z = data.position.z;
+			//array->position[start + i].y = position.y;
+			//array->position[start + i].z = position.z + rad * sin(myAngle);
 			array->rotation[start + i] = myAngle;
 			array->type[start + i] = 1;
 			m_Angle += step;
@@ -161,13 +176,13 @@ public:
 		m_Data.minRadius = minRadius;
 		m_Data.maxRadius = maxRadius;
 	}
-	void generate(ParticleArray* array, const Vector2f& position, float dt, uint32 start, uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		uint32 count = end - start;
 		for (uint32 i = 0; i < count; ++i) {
 			float myAngle = ds::math::random(0.0f,TWO_PI);
 			float rad = ds::math::random(m_Data.minRadius, m_Data.maxRadius);
-			array->position[start + i].x = position.x + rad * cos(myAngle);
-			array->position[start + i].y = position.y + rad * sin(myAngle);
+			array->position[start + i].x = data.position.x + rad * cos(myAngle);
+			array->position[start + i].y = data.position.y + rad * sin(myAngle);
 			array->rotation[start + i] = myAngle;
 			array->type[start + i] = 1;
 		}
@@ -182,10 +197,10 @@ public:
 // -------------------------------------------------------
 struct LineGeneratorData {
 
-	Vector2f startPos;
-	Vector2f endPos;
+	Vector3f startPos;
+	Vector3f endPos;
 
-	LineGeneratorData() : startPos(0,0) , endPos(0,0) {}
+	LineGeneratorData() : startPos(0,0,0) , endPos(0,0,0) {}
 };
 
 class LineGenerator : public AbstractParticleGenerator<LineGeneratorData> {
@@ -196,11 +211,11 @@ public:
 		m_Translator.add("end_position", &LineGeneratorData::endPos);
 	}
 	virtual ~LineGenerator() {}
-	void init(const Vector2f& startPos,const Vector2f& endPos) {
+	void init(const Vector3f& startPos,const Vector3f& endPos) {
 		m_Data.startPos = startPos;
 		m_Data.endPos = endPos;
 	}	
-	void generate(ParticleArray* array, const Vector2f& position, float dt, uint32 start, uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		float dx = math::random(m_Data.startPos.x, m_Data.endPos.x);
 		float dy = math::random(m_Data.startPos.y, m_Data.endPos.y);
 		array->position[start].x = dx;
@@ -238,13 +253,16 @@ public:
 	void setAngle(float angle) {
 		m_Data.angle = angle;
 	}
-	void generate(ParticleArray* array,const Vector2f& position,float dt,uint32 start,uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		float angle = m_Data.angle;
 		float angleVariance = DEGTORAD(m_Data.angleVariance);
 		float myAngle = angle + ds::math::random(-angleVariance,angleVariance);
-		array->position[start].x = position.x;
-		array->position[start].y = position.y;
+		array->position[start].x = data.position.x;
+		array->position[start].y = data.position.y;
 		array->rotation[start] = myAngle;
+		if (data.rotation != 0.0f) {
+			array->rotation[start] = data.rotation;
+		}
 		array->type[start] = 1;
 	}
 	const ParticleGeneratorType getType() const {
@@ -252,6 +270,96 @@ public:
 	}
 };
 
+// -------------------------------------------------------
+// Sphere generator
+// -------------------------------------------------------
+struct SphereGeneratorData {
+
+	Vector2f beta;
+	Vector2f phi;
+	float radius;
+	float radiusVariance;
+
+	SphereGeneratorData() : radius(1.0f), radiusVariance(0.0f), beta(-180, 180), phi(0, 360) {}
+};
+
+class SphereGenerator : public AbstractParticleGenerator<SphereGeneratorData> {
+
+public:
+	SphereGenerator() : AbstractParticleGenerator<SphereGeneratorData>() {
+		m_Translator.add("radius", &SphereGeneratorData::radius);
+		m_Translator.add("radius_variance", &SphereGeneratorData::radiusVariance);
+		m_Translator.add("beta", &SphereGeneratorData::beta);
+		m_Translator.add("phi", &SphereGeneratorData::phi);
+	}
+	virtual ~SphereGenerator() {}
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
+		uint32 count = end - start;
+		int slices = 16;
+		int ring = count / slices;
+		float deltaBeta = TWO_PI / static_cast<float> (slices);
+		float beta = -PI;// 0.0f;// m_Data.angle;
+		int cnt = 0;
+		for (int j = 0; j < slices; ++j) {
+			for (uint32 i = 0; i < ring; ++i) {				
+				float myAngle = static_cast<float>(i) / static_cast<float>(ring)* TWO_PI;
+				float rad = ds::math::random(m_Data.radius - m_Data.radiusVariance, m_Data.radius + m_Data.radiusVariance);
+				array->position[start + cnt].x = data.position.x + rad * cos(myAngle) * sin(beta);
+				array->position[start + cnt].y = data.position.y + rad * sin(myAngle) * sin(beta);
+				array->position[start + cnt].z = data.position.z + rad * cos(beta);
+				array->rotation[start + cnt] = beta;
+				array->type[start + cnt] = 1;
+				++cnt;
+			}
+			beta += deltaBeta;
+		}
+	}
+	const ParticleGeneratorType getType() const {
+		return PGT_POINT;
+	}
+};
+
+// -------------------------------------------------------
+// Sphere generator
+// -------------------------------------------------------
+struct RandomSphereGeneratorData {
+
+	float radius;
+	float radiusVariance;
+	Vector2f beta;
+	Vector2f phi;
+
+	RandomSphereGeneratorData() : radius(1.0f), radiusVariance(0.0f) , beta(-180,180) , phi(0,360) {}
+};
+
+class RandomSphereGenerator : public AbstractParticleGenerator<RandomSphereGeneratorData> {
+
+public:
+	RandomSphereGenerator() : AbstractParticleGenerator<RandomSphereGeneratorData>() {
+		m_Translator.add("radius", &RandomSphereGeneratorData::radius);
+		m_Translator.add("radius_variance", &RandomSphereGeneratorData::radiusVariance);
+		m_Translator.add("beta", &RandomSphereGeneratorData::beta);
+		m_Translator.add("phi", &RandomSphereGeneratorData::phi);
+	}
+	virtual ~RandomSphereGenerator() {}
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
+		uint32 count = end - start;
+		for (uint32 i = 0; i < count; ++i) {
+			float myAngle = ds::math::random(DEGTORAD(m_Data.phi.x), DEGTORAD(m_Data.phi.y));
+			float beta = ds::math::random(DEGTORAD(m_Data.beta.x), DEGTORAD(m_Data.beta.y));
+			float rad = ds::math::random(m_Data.radius - m_Data.radiusVariance, m_Data.radius + m_Data.radiusVariance);
+			array->position[start + i].x = data.position.x + rad * cos(myAngle) * sin(beta);
+			array->position[start + i].y = data.position.y + rad * sin(myAngle) * sin(beta);
+			array->position[start + i].z = data.position.z + rad * cos(beta);
+			array->rotation[start + i] = beta;
+			array->type[start + i] = 1;
+		}
+		
+	}
+	const ParticleGeneratorType getType() const {
+		return PGT_POINT;
+	}
+};
 // -------------------------------------------------------
 // RadialVelocityGenerator
 // -------------------------------------------------------
@@ -274,11 +382,14 @@ public:
 		m_Data.velocity = velocity;
 		m_Data.variance = variance;
 	}
-	void generate(ParticleArray* array,const Vector2f& position,float dt,uint32 start,uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		uint32 count = end - start;
 		for ( uint32 i = 0; i < count; ++i ) {
 			float v = ds::math::random(m_Data.velocity-m_Data.variance,m_Data.velocity+m_Data.variance);
-			array->velocity[start+i] = vector::getRadialVelocity(array->rotation[start+i],v);
+			Vector3f d = array->position[start + i] - data.position;
+			Vector3f dn = normalize(d);
+			array->velocity[start + i] = dn * v;
+			//array->velocity[start+i] = vector::getRadialVelocity(array->rotation[start+i],v);
 		}
 	}
 	const ParticleGeneratorType getType() const {
@@ -291,8 +402,8 @@ public:
 // -------------------------------------------------------
 struct VelocityGeneratorData {
 
-	Vector2f velocity;
-	Vector2f variance;
+	Vector3f velocity;
+	Vector3f variance;
 
 };
 class VelocityGenerator : public AbstractParticleGenerator<VelocityGeneratorData> {
@@ -304,11 +415,11 @@ public:
 	}
 
 	virtual ~VelocityGenerator() {}
-	void init(const Vector2f& velocity, const Vector2f& variance) {
+	void init(const Vector3f& velocity, const Vector3f& variance) {
 		m_Data.velocity = velocity;
 		m_Data.variance = variance;
 	}
-	void generate(ParticleArray* array, const Vector2f& position, float dt, uint32 start, uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		uint32 count = end - start;
 		for (uint32 i = 0; i < count; ++i) {
 			array->velocity[start + i].x = ds::math::random(m_Data.velocity.x - m_Data.variance.x, m_Data.velocity.x + m_Data.variance.x);
@@ -341,7 +452,7 @@ public:
 		m_Data.ttl = ttl;
 		m_Data.variance = variance;
 	}
-	void generate(ParticleArray* array,const Vector2f& position,float dt,uint32 start,uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		uint32 count = end - start;
 		for ( uint32 i = 0; i < count; ++i ) {
 			float ttl = ds::math::random(m_Data.ttl-m_Data.variance,m_Data.ttl+m_Data.variance);
@@ -372,7 +483,7 @@ public:
 	void init(const Color& color) {
 		m_Data.color = color;
 	}
-	void generate(ParticleArray* array, const Vector2f& position, float dt, uint32 start, uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		uint32 count = end - start;
 		for (uint32 i = 0; i < count; ++i) {
 			array->color[start + i] = m_Data.color;
@@ -412,7 +523,7 @@ public:
 		m_Data.hsv = hsv;
 	}
 
-	void generate(ParticleArray* array, const Vector2f& position, float dt, uint32 start, uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		uint32 count = end - start;
 		for (uint32 i = 0; i < count; ++i) {
 			float hv = ds::math::random(-m_Data.hueVariance, m_Data.hueVariance);
@@ -452,7 +563,7 @@ public:
 		m_Data.scale = scale;
 		m_Data.variance = variance;
 	}
-	void generate(ParticleArray* array,const Vector2f& position,float dt,uint32 start,uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		uint32 count = end - start;
 		for ( uint32 i = 0; i < count; ++i ) {	
 			array->scale[start+i].x = ds::math::random(m_Data.scale.x - m_Data.variance.x,m_Data.scale.x + m_Data.variance.x);
@@ -487,7 +598,7 @@ public:
 		m_Data.minRandom = random;
 		m_Data.maxRandom = 1.0f;
 	}
-	void generate(ParticleArray* array,const Vector2f& position,float dt,uint32 start,uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
 		uint32 count = end - start;
 		for ( uint32 i = 0; i < count; ++i ) {	
 			array->random[start+i] = ds::math::random(m_Data.minRandom,m_Data.maxRandom);
@@ -572,7 +683,7 @@ public:
 	~ParticleEmitter();
 	void clear(bool addDefault = true);
 	void start();
-	void generate(ParticleArray* array, const Vector2f& pos, float dt, bool started = true);
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, bool started = true);
 	ParticleGenerator* getGenerator(ParticleGeneratorType type);
 	void add(ParticleGenerator* generator);
 	ParticleEmitterData& getEmitterData();
@@ -582,7 +693,7 @@ public:
 	void stop();
 	void createInstance(ParticleEmitterInstance* instance);
 private:
-	void generate(ParticleArray* array, const Vector2f& pos,int count, float dt);
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, int count, float dt);
 	Generators m_Generators;
 	ParticleEmitterData m_EmitterData;
 	ParticleSpawner m_Spawner;

@@ -29,9 +29,14 @@ private:
 namespace file {
 
 	void listDirectory(const char* dir,std::vector<std::string>& files);
+	
 	bool loadTextFile(const char* name,std::vector<std::string>& lines);
+	
 	void getFileTime(const char* fileName,FILETIME& time);
+
 	bool compareFileTime(const char* fileName,const FILETIME& time);
+
+	bool isOlder(const char* firstFile, const char* secondFile);
 	//! Check if a file exists
 	/*
 		\param name the actual file include directories

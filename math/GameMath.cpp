@@ -372,6 +372,19 @@ namespace ds {
 		}
 	}
 
+	void move_towards(const Vector2f& targetPos, Vector2f& newPos, float* angle, float velocity, float dt) {
+		Vector2f p = newPos;
+		Vector2f diff = targetPos - p;
+		//*angle = 2.0f * D3DX_PI - getAngle(diff,V2_RIGHT);
+		*angle = getAngle(diff, V2_RIGHT);
+		if (*angle < 0.0f) {
+			*angle += 2.0f * D3DX_PI;
+		}
+		Vector2f dn = normalize(diff);
+		Vector2f v = dn * velocity;
+		newPos += v * dt;		
+	}
+
 	void followRelative(const Vector2f& targetPos,Vector2f& newPos,float* angle,float dst,float percentage) {
 		Vector2f p = newPos;
 		Vector2f diff = targetPos - p;

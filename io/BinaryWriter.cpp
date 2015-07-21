@@ -95,6 +95,14 @@ uint32 BinaryWriter::write(float value) {
 	return IO_OK;
 }
 
+uint32 BinaryWriter::write(bool value) {
+	if (fwrite(&value, sizeof(bool), 1, m_Stream) != 1) {
+		m_ErrorCode = IO_WRITE_ERROR;
+		return m_ErrorCode;
+	}
+	return IO_OK;
+}
+
 uint32 BinaryWriter::write(const Vector2f& v) {
 	fwrite(&v.x, sizeof (float), 1, m_Stream);
 	fwrite(&v.y, sizeof (float), 1, m_Stream);
@@ -127,10 +135,18 @@ uint32 BinaryWriter::write(const std::string& v) {
 }
 
 uint32 BinaryWriter::write(const ds::Color& v) {
-	fwrite(&v.r, sizeof (float), 1, m_Stream);
-	fwrite(&v.g, sizeof (float), 1, m_Stream);
-	fwrite(&v.b, sizeof (float), 1, m_Stream);
-	fwrite(&v.a, sizeof (float), 1, m_Stream);
+	ds::Color tmp = v;
+	if (v.r > 1.0f) {
+		tmp.r /= 255.0f;
+		tmp.g /= 255.0f;
+		tmp.b /= 255.0f;
+		tmp.a /= 255.0f;
+
+	}
+	fwrite(&tmp.r, sizeof (float), 1, m_Stream);
+	fwrite(&tmp.g, sizeof (float), 1, m_Stream);
+	fwrite(&tmp.b, sizeof (float), 1, m_Stream);
+	fwrite(&tmp.a, sizeof (float), 1, m_Stream);
 	return IO_OK;
 }
 
@@ -141,6 +157,13 @@ uint32 BinaryWriter::write(const ds::ColorPath& v) {
 		float ts = v.getTimeStep(i);
 		fwrite(&ts,sizeof(float),1,m_Stream);
 		ds::Color c = v.getColor(i);
+		if (c.r > 1.0f) {
+			c.r /= 255.0f;
+			c.g /= 255.0f;
+			c.b /= 255.0f;
+			c.a /= 255.0f;
+
+		}
 		fwrite(&c.r, sizeof (float), 1, m_Stream);
 		fwrite(&c.g, sizeof (float), 1, m_Stream);
 		fwrite(&c.b, sizeof (float), 1, m_Stream);

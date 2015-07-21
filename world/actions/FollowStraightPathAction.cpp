@@ -1,0 +1,133 @@
+#include "FollowStraightPathAction.h"
+#include "..\..\math\GameMath.h"
+#include "..\..\utils\Log.h"
+
+namespace ds {
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
+	FollowStraightPathAction::FollowStraightPathAction() : AbstractAction() {
+	}
+
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
+	FollowStraightPathAction::~FollowStraightPathAction() {
+	}
+
+	void FollowStraightPathAction::allocate(int sz) {
+		int size = sz * (sizeof(SID) + sizeof(StraightPath*) + sizeof(float) + sizeof(float) + sizeof(int));
+		m_Buffer = new char[size];
+		m_Data.ids = (SID*)(m_Buffer);
+		m_Data.path = (StraightPath**)(m_Data.ids + sz);
+		m_Data.timers = (float*)(m_Data.path + sz);
+		m_Data.ttl = (float*)(m_Data.timers + sz);
+		m_Data.modes = (int*)(m_Data.ttl + sz);
+		m_Data.total = sz;
+	}
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
+	void FollowStraightPathAction::attach(SID id, SpriteArray& array, StraightPath* path, float ttl, int mode) {
+		if ( m_Data.total == 0 ) {
+			allocate(256);
+			m_Data.num = 0;
+		}
+		int idx = m_Data.num;
+		if ( m_Mapping.find(id) != m_Mapping.end()) {
+			idx = m_Mapping[id];			
+		}
+		else {
+			++m_Data.num;
+		}
+		m_Data.ids[idx] = id;
+		m_Data.path[idx] = path;
+		m_Data.timers[idx] = 0.0f;
+		m_Data.ttl[idx] = ttl;
+		m_Data.modes[idx] = mode;
+		if ( mode > 0 ) {
+			--m_Data.modes[idx];
+		}
+		Vector2f p;
+		path->approx(0.0f, &p);
+		sar::setPosition(array, id, p);
+		m_Mapping[id] = idx;
+	}
+
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
+	void FollowStraightPathAction::update(SpriteArray& array, float dt, ActionEventBuffer& buffer) {
+		if ( m_Data.num > 0 ) {				
+			// move
+			Vector2f p;
+			Vector2f t;
+			for ( int i = 0; i < m_Data.num; ++i ) {
+				float norm = math::norm(m_Data.timers[i] , m_Data.ttl[i]);
+				m_Data.path[i]->approx(norm,&p);
+
+				m_Data.path[i]->tanget(norm, &t);
+				float a = vector::calculateRotation(t);
+				sar::rotate(array, m_Data.ids[i], a);
+				sar::setPosition(array,m_Data.ids[i],p);
+				m_Data.timers[i] += dt;
+				if ( m_Data.timers[i] >= m_Data.ttl[i] ) {
+					if ( m_Data.modes[i] < 0 ) {
+						m_Data.timers[i] = 0.0f;
+					}
+					else if ( m_Data.modes[i] == 0 ) {
+						m_Data.path[i]->get(1.0f,&p);
+						sar::setPosition(array,m_Data.ids[i],p);						
+						buffer.add(m_Data.ids[i], AT_FOLLOW_STRAIGHT_PATH, array.getType(m_Data.ids[i]));
+						removeByIndex(i);
+					}
+					else {
+						--m_Data.modes[i];
+						m_Data.timers[i] = 0.0f;
+
+					}
+				}
+			}
+		}
+	}
+
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
+	SID FollowStraightPathAction::swap(int i) {
+		int last = m_Data.num - 1;
+		SID last_id = m_Data.ids[last];
+		SID current = m_Data.ids[i];
+		m_Data.ids[i] = m_Data.ids[last];
+		m_Data.path[i] = m_Data.path[last];
+		m_Data.timers[i] = m_Data.timers[last];
+		m_Data.ttl[i] = m_Data.ttl[last];
+		m_Data.modes[i] = m_Data.modes[last];
+		m_Mapping[last_id] =  i;
+		--m_Data.num;
+		return current;
+	}
+
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
+	void FollowStraightPathAction::clear() {
+		m_Mapping.clear();
+		m_Data.num = 0;
+	}
+
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
+	void FollowStraightPathAction::debug() {
+		for ( int i = 0; i < m_Data.num; ++i ) {
+			LOG << i << " : id: " << m_Data.ids[i] << " timer: " << m_Data.timers[i];
+		}
+		std::map<SID,int>::iterator it = m_Mapping.begin();
+		while ( it != m_Mapping.end()) {
+			LOG << it->first << " = " << it->second;
+			++it;
+		}
+	}
+
+}

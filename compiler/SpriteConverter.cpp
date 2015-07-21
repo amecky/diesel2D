@@ -17,7 +17,9 @@ void SpriteConverter::convert(JSONReader& reader,BinaryWriter& writer) {
 		Category* c = categories[i];
 		if (c->getName() == "sprite") {
 			writer.startChunk(CHNK_SPRITE, 1);
-			writer.write(c->getInt("id", -1));
+			std::string name = c->getProperty("name");
+			IdString hash = string::murmur_hash(name.c_str());
+			writer.write(hash);
 			writer.write(c->getInt("texture_id", 0));
 			writer.write(c->getVector2f("position", Vector2f(100, 100)));
 			Rect r;
@@ -26,6 +28,7 @@ void SpriteConverter::convert(JSONReader& reader,BinaryWriter& writer) {
 			writer.write(c->getVector2f("scale", Vector2f(1.0f, 1.0f)));
 			writer.write(c->getFloat("rotation", 0.0f));
 			writer.write(c->getColor("color", Color(255, 255, 255, 255)));
+			writer.write(c->getInt("type", 0));
 			writer.closeChunk();
 		}
 	}

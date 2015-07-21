@@ -204,7 +204,7 @@ namespace ds {
 				GUIDialog* dialog = new GUIDialog();
 				LOGC("DialogManager") << "Creating new dialog: " << dialogName;
 				createDialog(dialogName.c_str(),id,dialog);
-				m_AssetCompiler->load(file.c_str(),dialog,CVT_DIALOG);
+				ds::assets::load(file.c_str(),dialog,CVT_DIALOG);
 
 			}	
 			loader->closeChunk();

@@ -25,7 +25,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void MoveToAction::attach(SID id,const Vector2f& startPos,const Vector2f& endPos,float ttl,int mode,const tweening::TweeningType& tweeningType) {
+	void MoveToAction::attach(SID id, SpriteArray& array,const Vector2f& startPos, const Vector2f& endPos, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		if ( m_Data.total == 0 ) {
 			int size = 256;
 			allocate(size);
@@ -48,6 +48,7 @@ namespace ds {
 		if ( mode > 0 ) {
 			--m_Data.modes[idx];
 		}
+		sar::setPosition(array, id, startPos);
 		m_Mapping[id] = idx;
 	}
 

@@ -247,6 +247,36 @@
     <ClCompile Include="sprites\SpriteTemplates.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
+    <ClCompile Include="math\StraightPath.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\FollowStraightPathAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\StraightPathConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\ColorFadeToAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\DescriptorConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\ObjLoader.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\MeshConverter.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\PhysicalWorld.cpp">
+      <Filter>physics</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\TimedObject.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Trails.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
@@ -598,6 +628,36 @@
     </ClInclude>
     <ClInclude Include="lib\PriorityQueue.h">
       <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="math\StraightPath.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\FollowStraightPathAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\StraightPathConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\ColorFadeToAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\DescriptorConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\ObjLoader.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\MeshConverter.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\PhysicalWorld.h">
+      <Filter>physics</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\TimedObject.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Trails.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

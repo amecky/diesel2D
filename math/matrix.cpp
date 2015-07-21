@@ -30,6 +30,7 @@ Vector3f operator * (const ds::mat3& m,const Vector3f& v) {
 	return tmp;
 }
 
+// column mode
 Vector4f operator * (const ds::mat4& m,const Vector4f& v) {
 	Vector4f tmp;
 	tmp.x = m._11 * v.x + m._12 * v.y + m._13 * v.z + m._14 * v.w;
@@ -42,6 +43,22 @@ Vector4f operator * (const ds::mat4& m,const Vector4f& v) {
 Vector3f operator * (const ds::mat4& m,const Vector3f& v) {
 	Vector4f nv(v.x,v.y,v.z,1.0f);
 	Vector4f tmp = m * nv;	
+	return Vector3f(tmp.x,tmp.y,tmp.z);
+}
+
+// row mode
+Vector4f operator * (const Vector4f& v,const ds::mat4& m) {
+	Vector4f tmp;
+	tmp.x = m._11 * v.x + m._21 * v.y + m._31 * v.z + m._41 * v.w;
+	tmp.y = m._12 * v.x + m._22 * v.y + m._32 * v.z + m._42 * v.w;
+	tmp.z = m._13 * v.x + m._23 * v.y + m._33 * v.z + m._43 * v.w;
+	tmp.w = m._14 * v.x + m._24 * v.y + m._34 * v.z + m._44 * v.w;
+	return tmp;
+}
+
+Vector3f operator * (const Vector3f& v,const ds::mat4& m) {
+	Vector4f nv(v.x,v.y,v.z,1.0f);
+	Vector4f tmp = nv * m;	
 	return Vector3f(tmp.x,tmp.y,tmp.z);
 }
 
@@ -246,13 +263,8 @@ namespace matrix {
 			0,                                   0,              0,                                 1);
 	}
 
-	mat4 mat4RotationZ(float angle) {
-		mat4 tmp = m4identity();
-		tmp._11 = cos(angle);
-		tmp._12 = -sin(angle);
-		tmp._21 = sin(angle);
-		tmp._22 = cos(angle);
-		return tmp;
+	mat4 mat4RotateZXY(const Vector3f& r) {
+		return mat4RotateZXY(r.x,r.y,r.z);
 	}
 
 	mat4 mat4PerspectiveFovLH(float fovy,float aspect,float zn,float zf) {
@@ -300,6 +312,7 @@ namespace matrix {
 	// -------------------------------------------------------
 	// Translation matrix
 	// -------------------------------------------------------
+
 	mat4 mat4Transform(const Vector3f& pos) {
 		mat4 tm (
 			 1.0f,  0.0f,  0.0f, 0.0f,
@@ -319,6 +332,19 @@ namespace matrix {
 			   0.0f,   0.0f, scaleZ, 0.0f,
 			   0.0f,   0.0f,   0.0f, 1.0f
 		);	
+		return sm;
+	}
+
+	// -------------------------------------------------------
+	// Scale matrix
+	// -------------------------------------------------------
+	mat4 mat4Scale(const Vector3f& scale) {
+		mat4 sm (
+			scale.x ,   0.0f,   0.0f, 0.0f,
+			0.0f, scale.y,   0.0f, 0.0f,
+			0.0f,   0.0f, scale.z, 0.0f,
+			0.0f,   0.0f,   0.0f, 1.0f
+			);	
 		return sm;
 	}
 
@@ -465,6 +491,42 @@ namespace matrix {
 		return mat3( v.x*v.x*ic + co,       v.y*v.x*ic - si*v.z,    v.z*v.x*ic + si*v.y,
 			v.x*v.y*ic + si*v.z,   v.y*v.y*ic + co,        v.z*v.y*ic - si*v.x,
 			v.x*v.z*ic - si*v.y,   v.y*v.z*ic + si*v.x,    v.z*v.z*ic + co );
+	}
+
+	// http://www.cprogramming.com/tutorial/3d/rotationMatrices.html
+	// left hand sided
+	mat4 mat4RotationX(float angle) {
+		mat4 sm (
+			1.0f,        0.0f,       0.0f, 0.0f,
+			0.0f,  cos(angle), -sin(angle), 0.0f,
+			0.0f,  sin(angle), cos(angle), 0.0f,
+			0.0f,        0.0f,        0.0f, 1.0f
+			);	
+		return sm;
+	}
+
+	mat4 mat4RotationY(float angle) {
+		mat4 sm (
+			 cos(angle), 0.0f, sin(angle), 0.0f,
+			       0.0f, 1.0f,       0.0f, 0.0f,
+			-sin(angle), 0.0f, cos(angle), 0.0f,
+			       0.0f, 0.0f,       0.0f, 1.0f
+			);	
+		return sm;
+	}
+
+	mat4 mat4RotationZ(float angle) {
+		mat4 sm (
+			 cos(angle),-sin(angle), 0.0f, 0.0f,
+			 sin(angle), cos(angle), 0.0f, 0.0f,
+			       0.0f,       0.0f, 1.0f, 0.0f,
+			       0.0f,       0.0f, 0.0f, 1.0f
+			);	
+		return sm;
+	}
+
+	mat4 mat4Rotation(const Vector3f& r) {
+		return mat4RotationZ(r.z) * mat4RotationY(r.y) * mat4RotationX(r.x);
 	}
 }
 

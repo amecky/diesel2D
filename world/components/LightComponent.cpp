@@ -28,7 +28,7 @@ void LightComponent::initialize(int startLayer,int colorRT,int normalRT,float am
 		PTCVertex(Vector3f(-centerX,-centerY,0.0f),Vector2f(0.0f,1.0f))
 	};
 
-	m_AddBS = renderer::createBlendState(BL_ONE,BL_ONE,true);	
+	m_AddBS = renderer::createBlendState("alpha_blend",BL_ONE,BL_ONE,true);	
 /*
 	int layer = startLayer;
 	int lightRT = m_World->createRenderTarget(layer,m_ScreenW,m_ScreenH);

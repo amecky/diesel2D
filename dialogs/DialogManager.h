@@ -32,9 +32,9 @@ public:
 	void updateMousePos(const Vector2f& mousePos);
 	GUIDialog* get(const char* dialogName);
 	void addToggleAction(const char* oldDialogName,const char* newDialogName,int buttonId);
-	void setAssetCompiler(AssetCompiler* assetCompiler) {
-		m_AssetCompiler = assetCompiler;
-	}
+	//void setAssetCompiler(AssetCompiler* assetCompiler) {
+		//m_AssetCompiler = assetCompiler;
+	//}
 	//void activate(const char* name);
 	//void deactivate(const char* name);
 	void load(BinaryLoader* loader);
@@ -42,7 +42,7 @@ public:
 private:	
 	void setActiveFlag(const char* name,bool active);	
 	void createDialog(const char* name,int id,GUIDialog* dialog);
-	AssetCompiler* m_AssetCompiler;
+	//AssetCompiler* m_AssetCompiler;
 	BitmapFont* m_Font;
 	bool m_Initialized;
 	Dialogs m_Dialogs;

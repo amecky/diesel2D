@@ -18,6 +18,7 @@ namespace ds {
 		Texture texture;
 		Color color;
 		int type;
+		AABBox box;
 
 		Sprite() : id(0) , position(0,0) , scale(1,1) , rotation(0.0f) , color(Color::WHITE) , type(0) {}
 

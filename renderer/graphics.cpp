@@ -3,6 +3,10 @@
 #include "shader.h"
 #include "..\math\matrix.h"
 #include "..\sprites\SpriteTemplates.h"
+#include "..\utils\font.h"
+#include "..\utils\ObjLoader.h"
+#include "..\utils\FileUtils.h"
+#include "..\compiler\AssetCompiler.h"
 
 #ifdef DEBUG
 DWORD SHADER_FLAGS = D3DXFX_NOT_CLONEABLE | D3DXSHADER_DEBUG;
@@ -16,6 +20,21 @@ namespace ds {
 	typedef List<RasterizerState*> RasterizerStates;
 	typedef List<DebugMessage> DebugMessages;
 
+	struct DebugContext {
+
+		bool initialized;
+		std::vector<Sprite> characters;
+		ID3DXFont* font;
+		LPD3DXSPRITE debugSprite;
+
+		DebugContext() : initialized(false) {}
+
+		void init(ID3DXFont* font, float ts = 1.0f) {
+			initialized = true;
+		}
+
+	};
+
 	struct RenderTargetQuad {
 
 		int vertexBufferID;
@@ -23,6 +42,8 @@ namespace ds {
 		PTCVertex vertices[4];
 
 	};
+
+	const int MAX_RT = 16;
 	// -------------------------------------------------------
 	// RenderContext
 	// -------------------------------------------------------
@@ -57,9 +78,8 @@ namespace ds {
 		int defaultDescriptor;
 		int currentDescriptor;
 		std::vector<BitmapFont> bitmapFonts;
-		ID3DXFont* systemFont;
 		int currentTextures[5];
-		std::vector<RenderTarget> renderTargets;
+		RenderTarget renderTargets[MAX_RT];
 		int usedRenderTargets;
 		int currentRenderTarget;
 		mat4 matWorldViewProj;
@@ -75,9 +95,12 @@ namespace ds {
 		RasterizerState rsState;
 		// debug
 		DebugMessages debugMessages;
-		LPD3DXSPRITE debugSprite;
 		RenderTargetQuad renderTargetQuad;
 		SpriteTemplates spriteTemplates;
+		DebugContext debugContext;
+		dVector<MeshData> meshData;
+		MeshArray meshes;
+		Vector2f mousePosition;
 
 		RenderContext() : initialized(false), selectedViewPort(0), numBlendStates(0) {
 			drawCounter.reset();
@@ -111,6 +134,15 @@ namespace ds {
 			ptbntVD->create();
 			renderContext->vdStructs[VD_PTNBT].vertexSize = 56;
 			renderContext->vdStructs[VD_PTNBT].declaration = ptbntVD;
+
+			VertexDeclaration* pntcVD = new VertexDeclaration;
+			pntcVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION);
+			pntcVD->addElement(ds::VT_FLOAT3, ds::VDU_NORMAL);
+			pntcVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD);
+			pntcVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR);
+			pntcVD->create();
+			renderContext->vdStructs[VD_PNTC].vertexSize = 48;
+			renderContext->vdStructs[VD_PNTC].declaration = pntcVD;
 
 			VertexDeclaration* ptcVD = new VertexDeclaration;
 			ptcVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION);
@@ -243,10 +275,15 @@ namespace ds {
 			getRenderStates();
 			//m_PostProcessing = settings.postProcessing;	
 			renderContext->defaultShaderID = shader::createPTCShader(-1);
-			renderContext->defaultBlendState = renderer::createBlendState(BL_SRC_ALPHA, BL_ONE_MINUS_SRC_ALPHA, true);
-			LOGC("Renderer") << "default blendstate " << renderContext->defaultBlendState;
+			renderContext->defaultBlendState = renderer::createBlendState("default",BL_SRC_ALPHA, BL_ONE_MINUS_SRC_ALPHA, true);
+			//renderContext->defaultBlendState = renderer::createBlendState("rt_blend", BL_SRC_ALPHA, BL_ZERO, BL_ONE_MINUS_SRC_ALPHA, BL_ONE_MINUS_SRC_ALPHA, true);
+			renderContext->defaultBlendState = renderer::createBlendState("rt_blend", BL_SRC_ALPHA, BL_ONE_MINUS_SRC_ALPHA, true);
+			LOGC("Renderer") << "'default' blendstate " << renderContext->defaultBlendState;
+			int addBS = renderer::createBlendState("alpha_blend", ds::BL_ONE, ds::BL_ONE, true);
+			LOGC("Renderer") << "'alpha_blend' blendstate " << addBS;
 
 			Descriptor desc;
+			desc.hash = string::murmur_hash("default_descriptor");
 			desc.texture = 0;
 			desc.shader = renderContext->defaultShaderID;
 			desc.blendState = renderContext->defaultBlendState;
@@ -257,10 +294,10 @@ namespace ds {
 			renderContext->device->GetRenderTarget(0, &renderContext->backBuffer);
 			// create default buffers
 			renderContext->quadIndexBufferIndex = renderer::createQuadIndexBuffer(8192);
-			// prepare debug
-			renderer::loadSystemFont("Verdana", "Verdana", 10, false);
-			D3DXCreateSprite(renderContext->device, &renderContext->debugSprite);
 			buildRenderTargetQuad();
+			// prepare debug
+			debug::loadSystemFont("Verdana", "Verdana", 10, false);
+			D3DXCreateSprite(renderContext->device, &renderContext->debugContext.debugSprite);
 		}
 
 		// ---------------------------------------------------------------------
@@ -268,6 +305,14 @@ namespace ds {
 		// ---------------------------------------------------------------------
 		void shutdown() {
 			LOG << "destructing Renderer";
+			if (renderContext->meshes.buffer != 0) {
+				delete[] renderContext->meshes.buffer;
+			}
+			for (int i = 0; i < renderContext->meshData.size(); ++i) {
+				if (renderContext->meshData[i].faces != 0) {
+					delete[] renderContext->meshData[i].faces;
+				}
+			}
 			renderContext->rasterizerStates.deleteContents();
 			LOGC("Renderer") << "Releasing textures";
 			for (int i = 0; i < MAX_TEXTURES; ++i) {
@@ -295,13 +340,14 @@ namespace ds {
 			for (int i = 0; i < renderContext->indexBuffers.size(); ++i) {
 				SAFE_RELEASE(renderContext->indexBuffers[i].buffer);
 			}
-			for (int i = 0; i < renderContext->renderTargets.size(); ++i) {
-				SAFE_RELEASE(renderContext->renderTargets[i].rts);
-				SAFE_RELEASE(renderContext->renderTargets[i].surface);
+			for (int i = 0; i < MAX_RT; ++i) {
+				if (renderContext->renderTargets[i].flag != 0) {
+					SAFE_RELEASE(renderContext->renderTargets[i].rts);
+					SAFE_RELEASE(renderContext->renderTargets[i].surface);
+				}
 			}
 			LOGC("Renderer") << "Releasing system font";
-			SAFE_RELEASE(renderContext->systemFont);
-			SAFE_RELEASE(renderContext->debugSprite);
+			SAFE_RELEASE(renderContext->debugContext.font);
 			delete renderContext->camera;
 			if (renderContext->device != NULL) {
 				renderContext->device->Release();
@@ -428,6 +474,10 @@ namespace ds {
 			return renderContext->screenHeight;
 		}
 
+		Camera* getCamera() {
+			return renderContext->camera;
+		}
+
 		VDStruct& getVertexDeclaration(int declarationType) {
 			return renderContext->vdStructs[declarationType];
 		}
@@ -455,9 +505,12 @@ namespace ds {
 
 		}
 
+		// FIXME: add name as parameter
 		int createShaderFromText(const char* buffer, const char* techName) {
 			int id = renderContext->shaders.create();
 			Shader* shader = &renderContext->shaders[id];
+			// FIXME: do not use techName
+			shader->hashName = string::murmur_hash(techName);
 			UINT dwBufferSize = (UINT)strlen(buffer) + 1;
 			ID3DXBuffer* errors = 0;
 			D3DXCreateEffect(renderContext->device, buffer, dwBufferSize, 0, 0, SHADER_FLAGS, 0, &shader->m_FX, &errors);
@@ -468,6 +521,15 @@ namespace ds {
 			LOGC("Renderer") << "Shader created - id: " << id;
 			initializeShader(id, techName);
 			return id;
+		}
+
+		int getShaderID(IdString hash) {
+			for (int i = 0; i < renderContext->shaders.size(); ++i) {
+				if (renderContext->shaders[i].hashName == hash) {
+					return i;
+				}
+			}
+			return -1;
 		}
 
 		Shader& getShader(int id) {
@@ -483,7 +545,7 @@ namespace ds {
 			sprintf(fileName, "content\\effects\\%s.fx", fxName);
 			int id = renderContext->shaders.create();
 			Shader* shader = &renderContext->shaders[id];
-
+			shader->hashName = string::murmur_hash(fxName);
 			ID3DXBuffer* errors = 0;
 			HRESULT hr = D3DXCreateEffectFromFileA(renderContext->device, fileName, 0, 0, SHADER_FLAGS, 0, &shader->m_FX, &errors);
 			//if ( hr != S_OK && errors != 0 ) {
@@ -531,9 +593,10 @@ namespace ds {
 			renderContext->viewPorts[vw].setPosition(pos);
 		}
 
-		int createBlendState(int srcRGB, int srcAlpha, int dstRGB, int dstAlpha, bool alphaEnabled, bool separateAlpha) {
+		int createBlendState(const char* name, int srcRGB, int srcAlpha, int dstRGB, int dstAlpha, bool alphaEnabled, bool separateAlpha) {
 			if (renderContext->numBlendStates < MAX_BLENDSTATES) {
 				BlendState& bs = renderContext->blendStates[renderContext->numBlendStates++];
+				bs.hashName = string::murmur_hash(name);
 				bs.blendEnable = alphaEnabled;
 				bs.srcFactorRGB = srcRGB;
 				bs.srcFactorAlpha = srcAlpha;
@@ -544,8 +607,9 @@ namespace ds {
 				bs.alphaFunc = ALPHA_GREATER;
 				bs.alphaRef = 0;
 				bs.separateAlpha = separateAlpha;
+				bs.mask = 0x0f;
 				bs.flag = 1;
-				LOGC("Renderer") << "created new blendstate - id: " << renderContext->numBlendStates - 1;
+				LOGC("Renderer") << "created new blendstate '" << name << "' - id: " << renderContext->numBlendStates - 1;
 				return renderContext->numBlendStates - 1;
 			}
 			else {
@@ -554,8 +618,18 @@ namespace ds {
 			}
 		}
 
-		int createBlendState(int srcAlpha, int dstAlpha, bool alphaEnabled) {
-			return createBlendState(srcAlpha, srcAlpha, dstAlpha, dstAlpha, alphaEnabled);
+		int getBlendStateID(IdString hash) {
+			for (int i = 0; i < MAX_BLENDSTATES; ++i) {
+				BlendState& bs = renderContext->blendStates[i];
+				if (bs.hashName == hash) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		int createBlendState(const char* name,int srcAlpha, int dstAlpha, bool alphaEnabled) {
+			return createBlendState(name,srcAlpha, srcAlpha, dstAlpha, dstAlpha, alphaEnabled);
 		}
 
 		int getCurrentBlendState() {
@@ -713,16 +787,18 @@ namespace ds {
 		}
 
 		void allocateDescriptorData(int size) {
-			int sz = size * (sizeof(int) * 3);
+			int sz = size * (sizeof(IdString) + sizeof(int) * 3);
 			LOG << "allocating data - size: " << size << " total: " << sz;
 			DescriptorData data;
 			data.buffer = new char[sz];
-			data.textures = (int*)(data.buffer);
+			data.hashes = (IdString*)(data.buffer);
+			data.textures = (int*)(data.hashes + size);
 			data.shaders = (int*)(data.textures + size);
 			data.blendStates = (int*)(data.shaders + size);
 			data.num = 0;
 			data.total = size;
 			if (renderContext->descriptorData.buffer != 0) {
+				memcpy(data.hashes, renderContext->descriptorData.hashes, sizeof(IdString) * renderContext->descriptorData.num);
 				memcpy(data.textures, renderContext->descriptorData.textures, sizeof(int) * renderContext->descriptorData.num);
 				memcpy(data.shaders, renderContext->descriptorData.shaders, sizeof(int) * renderContext->descriptorData.num);
 				memcpy(data.blendStates, renderContext->descriptorData.blendStates, sizeof(int) * renderContext->descriptorData.num);
@@ -732,6 +808,27 @@ namespace ds {
 			renderContext->descriptorData = data;
 		}
 
+		DescriptorData* getDescriptorData() {
+			return &renderContext->descriptorData;
+		}
+		// -------------------------------------------------------
+		// get descriptor ID
+		// -------------------------------------------------------
+		int getDescriptorID(IdString hash) {
+			int id = renderContext->descriptorData.getID(hash);
+			XASSERT(id != -1, "No descriptor %d found", hash);
+			return id;
+		}
+
+		int getDescriptorID(const char* name) {
+			int id = renderContext->descriptorData.getID(name);
+			XASSERT(id != -1,"No descriptor '%s' found",name);
+			return id;
+		}
+
+		// -------------------------------------------------------
+		// add descriptor
+		// -------------------------------------------------------
 		int addDescriptor(const Descriptor& desc) {
 			if ((renderContext->descriptorData.num + 1) >= renderContext->descriptorData.total) {
 				allocateDescriptorData(renderContext->descriptorData.total + 16);
@@ -766,8 +863,10 @@ namespace ds {
 			}
 
 			if (renderContext->descriptorData.textures[newID] != renderContext->descriptorData.textures[renderContext->currentDescriptor]) {
-				setTexture(renderContext->descriptorData.textures[newID], 0);
-				setTexture(renderContext->currentShaderID, "gTex", renderContext->descriptorData.textures[newID]);				
+				if (renderContext->descriptorData.textures[newID] != -1) {
+					setTexture(renderContext->descriptorData.textures[newID], 0);
+					setTexture(renderContext->currentShaderID, "gTex", renderContext->descriptorData.textures[newID]);
+				}
 			}
 			int newBS = renderContext->descriptorData.blendStates[newID];
 			int oldBS = renderContext->descriptorData.blendStates[renderContext->currentDescriptor];
@@ -788,6 +887,14 @@ namespace ds {
 			if (hndl != NULL) {
 				shader->m_FX->SetValue(hndl, &renderContext->matWorld, sizeof(mat4));
 			}
+			hndl = shader->m_FX->GetParameterByName(0, "gCameraPos");
+			if (hndl != NULL) {
+				shader->m_FX->SetValue(hndl, &renderContext->camera->getPosition(), sizeof(Vector3f));
+			}
+			hndl = shader->m_FX->GetParameterByName(0, "gCameraUp");
+			if (hndl != NULL) {
+				shader->m_FX->SetValue(hndl, &renderContext->camera->getUpVector(), sizeof(Vector3f));
+			}
 			if (textureID != -1) {
 				hndl = shader->m_FX->GetParameterByName(0, "gTex");
 				if (hndl != NULL) {
@@ -807,10 +914,10 @@ namespace ds {
 				D3DXMatrixInverse(&worldInverse, 0, &matrix::convert(renderContext->matWorld));
 				shader->m_FX->SetValue(hndl, &worldInverse, sizeof(mat4));
 			}
-			hndl = shader->m_FX->GetParameterByName(0, "gWorld");
-			if (hndl != NULL) {
-				shader->m_FX->SetValue(hndl, &renderContext->matWorld, sizeof(mat4));
-			}
+			//hndl = shader->m_FX->GetParameterByName(0, "gWorld");
+			//if (hndl != NULL) {
+				//shader->m_FX->SetValue(hndl, &renderContext->matWorld, sizeof(mat4));
+			//}
 			hndl = shader->m_FX->GetParameterByName(0, "gView");
 			if (hndl != NULL) {
 				shader->m_FX->SetValue(hndl, &renderContext->matView, sizeof(mat4));
@@ -837,9 +944,9 @@ namespace ds {
 			renderer::endShader(desc.shader);
 		}
 
-		void draw_render_target(int rtID, int shaderID) {
+		void draw_render_target_common(int rtID, int shaderID,int blendState) {
 			PR_START("draw_render_target")
-			sprites::flush();
+				sprites::flush();
 			fillBuffer(renderContext->renderTargetQuad.vertexBufferID, renderContext->renderTargetQuad.vertices, 4);
 			const VertexBuffer& vb = renderContext->vertexBuffers[renderContext->renderTargetQuad.vertexBufferID];
 			VDStruct& vds = renderContext->vdStructs[vb.vertexDeclaration];
@@ -851,6 +958,9 @@ namespace ds {
 
 			D3DPRIMITIVETYPE pt = D3DPT_TRIANGLELIST;
 			int numPrimitives = 4;
+			
+			int current = renderer::getCurrentBlendState();
+			renderer::setBlendState(blendState);
 
 			RenderTarget& rt = renderContext->renderTargets[rtID];
 
@@ -870,7 +980,22 @@ namespace ds {
 				HR(shader->m_FX->EndPass());
 			}
 			renderer::endShader(sid);
+			renderer::setBlendState(current);
 			PR_END("draw_render_target")
+		}
+
+		void draw_render_target(int rtID, int shaderID) {
+			const char* name = "rt_blend";
+			IdString hash = string::murmur_hash(name);
+			int idx = renderer::getBlendStateID(hash);
+			draw_render_target_common(rtID, shaderID, idx);			
+		}
+
+		void draw_render_target_additive(int rtID, int shaderID) {
+			const char* name = "alpha_blend";
+			IdString hash = string::murmur_hash(name);
+			int idx = renderer::getBlendStateID(hash);
+			draw_render_target_common(rtID, shaderID, idx);
 		}
 
 		void draw(int descriptorID, int vertexBufferID, int numVertices,int indexBufferID) {
@@ -903,22 +1028,7 @@ namespace ds {
 			++renderContext->drawCounter.flushes;			
 			PR_END("drawBuffer")
 		}
-
-		void loadSystemFont(const char* name, const char* fontName, int size, bool bold) {
-			LOGC("Renderer") << "Loading font " << fontName << " size " << size;
-			UINT type = FW_NORMAL;
-			if (bold) {
-				type = FW_BOLD;
-			}
-			HDC hDC = GetDC(renderContext->hwnd);
-			int nHeight = -MulDiv(size, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-			ReleaseDC(NULL, hDC);
-			HR(D3DXCreateFontA(renderContext->device, nHeight, 0, type, 0, false, DEFAULT_CHARSET,
-				DEFAULT_QUALITY, ANTIALIASED_QUALITY,
-				DEFAULT_PITCH | FF_DONTCARE,
-				fontName, &renderContext->systemFont));
-		}
-
+		
 		// -------------------------------------------------------
 		// Checks if color is fill color
 		// -------------------------------------------------------
@@ -1095,7 +1205,9 @@ namespace ds {
 		int createRenderTarget(uint32 id, const Color& clearColor) {
 			int tid = findFreeTextureSlot();
 			if (tid != -1) {
-				RenderTarget rt;
+				RenderTarget& rt = renderContext->renderTargets[id];
+				// make sure it is not used so far
+				assert(rt.flag == 0);
 				rt.clearColor = clearColor;
 				D3DXCreateRenderToSurface(renderContext->device,renderContext->screenWidth,renderContext->screenHeight,D3DFMT_A8R8G8B8,false,D3DFMT_UNKNOWN,&rt.rts);
 				renderContext->device->CreateTexture(renderContext->screenWidth,renderContext->screenHeight,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&rt.texture,NULL);
@@ -1107,7 +1219,7 @@ namespace ds {
 				t->texture = rt.texture;
 				rt.texture->GetSurfaceLevel(0, &rt.surface);
 				rt.textureID = tid;
-				renderContext->renderTargets.push_back(rt);
+				rt.flag = 1;
 				return tid;
 			}
 			else {
@@ -1145,6 +1257,8 @@ namespace ds {
 		// -------------------------------------------------------
 		void setRenderTarget(uint32 id) {
 			RenderTarget* rt = &renderContext->renderTargets[id];
+			// check that we have a valid RT
+			assert(rt->flag == 1);
 			sprites::flush();
 			if (renderContext->currentRenderTarget != -1) {
 				RenderTarget* activeRT = &renderContext->renderTargets[renderContext->currentRenderTarget];
@@ -1196,20 +1310,19 @@ namespace ds {
 		// -------------------------------------------------------
 		int createTexture(int width, int height) {
 			int id = findFreeTextureSlot();
-			if (id != -1) {
-				TextureAsset* tr = &renderContext->textures[id];
-				tr->name = string::murmur_hash("xxxx");
-				tr->flags = 1;
-				HR(renderContext->device->CreateTexture(width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &tr->texture, NULL));
-				tr->width = width;
-				tr->height = height;
-				// clear the texture with white color		
-				D3DLOCKED_RECT sRect;
-				tr->texture->LockRect(0, &sRect, NULL, NULL);
-				BYTE *bytes = (BYTE*)sRect.pBits;
-				memset(bytes, 128, width*sRect.Pitch);
-				tr->texture->UnlockRect(0);
-			}
+			XASSERT(id != -1, "No more texture slots available");
+			TextureAsset* tr = &renderContext->textures[id];
+			tr->name = string::murmur_hash("xxxx");
+			tr->flags = 1;
+			HR(renderContext->device->CreateTexture(width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &tr->texture, NULL));
+			tr->width = width;
+			tr->height = height;
+			// clear the texture with white color		
+			D3DLOCKED_RECT sRect;
+			tr->texture->LockRect(0, &sRect, NULL, NULL);
+			BYTE *bytes = (BYTE*)sRect.pBits;
+			memset(bytes, 128, width*sRect.Pitch);
+			tr->texture->UnlockRect(0);
 			return id;
 		}
 
@@ -1218,27 +1331,22 @@ namespace ds {
 		// -------------------------------------------------------
 		int loadTexture(const char* dirName, const char* name) {
 			int id = findFreeTextureSlot();
-			if (id != -1) {
-				TextureAsset* tr = &renderContext->textures[id];
-				tr->name = string::murmur_hash(name);
-				tr->flags = 1;
-				int lw = D3DX_DEFAULT;
-				int lh = D3DX_DEFAULT;
-				D3DXIMAGE_INFO imageInfo;
-				char fileName[256];
-				sprintf(fileName, "%s\\%s.png", dirName, name);
-				LOGC("Renderer") << "Trying to load texture " << fileName;
-				HR(D3DXCreateTextureFromFileEx(renderContext->device, fileName, 0, 0, 1, 0,
-					D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
-				tr->width = imageInfo.Width;
-				tr->height = imageInfo.Height;
-				LOGC("Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
-				return id;
-			}
-			else {
-				LOGEC("Renderer") << "No more texture slots available";
-				return -1;
-			}
+			XASSERT(id != -1, "No more texture slots available");
+			TextureAsset* tr = &renderContext->textures[id];
+			tr->name = string::murmur_hash(name);
+			tr->flags = 1;
+			int lw = D3DX_DEFAULT;
+			int lh = D3DX_DEFAULT;
+			D3DXIMAGE_INFO imageInfo;
+			char fileName[256];
+			sprintf(fileName, "%s\\%s.png", dirName, name);
+			LOGC("Renderer") << "Trying to load texture " << fileName;
+			HR(D3DXCreateTextureFromFileEx(renderContext->device, fileName, 0, 0, 1, 0,
+				D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
+			tr->width = imageInfo.Width;
+			tr->height = imageInfo.Height;
+			LOGC("Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
+			return id;			
 		}
 
 		// -------------------------------------------------------
@@ -1299,11 +1407,7 @@ namespace ds {
 			return loadTexture("content\\textures", name);
 		}
 
-		// -------------------------------------------------------
-		// Get texture id
-		// -------------------------------------------------------
-		int getTextureId(const char* name) {
-			IdString hash = string::murmur_hash(name);
+		int getTextureId(IdString hash) {
 			for (int i = 0; i < MAX_TEXTURES; ++i) {
 				TextureAsset* tr = &renderContext->textures[i];
 				if (tr->flags == 1 && tr->name == hash) {
@@ -1313,6 +1417,13 @@ namespace ds {
 			return -1;
 		}
 
+		// -------------------------------------------------------
+		// Get texture id
+		// -------------------------------------------------------
+		int getTextureId(const char* name) {
+			IdString hash = string::murmur_hash(name);
+			return getTextureId(hash);
+		}
 		// -------------------------------------------------------
 		// Get texture size
 		// -------------------------------------------------------
@@ -1350,7 +1461,7 @@ namespace ds {
 			TextureAsset* tr = &renderContext->textures[id];
 			HR(tr->texture->UnlockRect(0));
 		}
-
+		
 		void setTransformations() {
 			renderContext->matView = renderContext->camera->getViewMatrix();
 			renderContext->matProjection = renderContext->camera->getProjectionMatrix();
@@ -1433,12 +1544,7 @@ namespace ds {
 		}
 
 		//void setShaderParameter(Shader* shader,int textureID = -1);
-		// debug messages
-		void clearDebugMessages() {
-			renderContext->debugMessages.clear();
-		}
 
-		
 		//-----------------------------------------------------------------------------
 		// Name: SetupMatrices()
 		// Desc: Sets up the world, view, and projection transform Matrices.
@@ -1466,17 +1572,17 @@ namespace ds {
 		}
 
 		void setWorldMatrix(const mat4& world) {
+			/*
 			for (int x = 0; x < 4; ++x) {
 				for (int y = 0; y < 4; ++y) {
 					renderContext->matWorld.m[x][y] = world.m[x][y];
 				}
 			}
+			*/
+			renderContext->matWorld = world;
+			setTransformations();
 			//device->get()->SetTransform(D3DTS_WORLD,&m_World);
-			renderContext->matWorldViewProj = renderContext->matWorld * renderContext->camera->getViewMatrix() * renderContext->camera->getProjectionMatrix();
-		}
-
-		Camera* getCamera() {
-			return renderContext->camera;
+			//renderContext->matWorldViewProj = renderContext->matWorld * renderContext->camera->getViewMatrix() * renderContext->camera->getProjectionMatrix();
 		}
 
 		// -------------------------------------------------------
@@ -1522,8 +1628,8 @@ namespace ds {
 			}
 		}
 
-		const Sprite& getSpriteTemplate(int id) {
-			return renderContext->spriteTemplates.get(id);
+		bool getSpriteTemplate(const char* name,Sprite* sprite) {
+			return renderContext->spriteTemplates.get(name,sprite);
 		}
 
 		SpriteTemplates* getSpriteTemplates() {
@@ -1534,29 +1640,204 @@ namespace ds {
 			return renderContext->spriteTemplates.contains(id);
 		}
 
+		ID getMeshDataID(IdString hash) {
+			for (size_t i = 0; i < renderContext->meshData.size(); ++i) {
+				if (renderContext->meshData[i].hash == hash) {
+					return renderContext->meshData[i].id;
+				}
+			}
+			return INVALID_ID;
+		}
 
+		ID loadMeshData(const char* name, const char* file) {
+			ID id = createMeshData(name);
+			MeshData& md = getMeshData(id);
+			LOG << "load meshdata - name: " << name << " id: " << md.id << " hash: " << md.hash;
+			char fileName[256];
+			char srcFileName[256];
+			int dataID = -1;
+			sprintf(fileName, "content\\data\\%s.bin", file);
+			sprintf(srcFileName, "content\\data\\%s.obj", file);
+			ObjLoader ml;
+			if (!file::fileExists(fileName) || file::isOlder(fileName, srcFileName)) {
+				LOGC("mesh") << "obj fileName: " << srcFileName;
+				ml.parse(srcFileName, md);
+				ml.save(fileName, md);
+			}
+			if (file::fileExists(fileName)) {
+				LOG << "reading binary file";
+				ml.read(fileName, md);
+			}			
+			return id;
+		}
+
+		ID createMeshData(const char* name) {
+			size_t s = renderContext->meshData.size();
+			MeshData data;
+			data.hash = string::murmur_hash(name);
+			data.id = static_cast<ID>(s);
+			LOG << "create meshdata - name: " << name << " id: " << data.id << " hash: " << data.hash;
+			data.size = 0;
+			renderContext->meshData.add(data);
+			return data.id;
+		}
+
+		MeshData& getMeshData(ID id) {
+			return renderContext->meshData[id];
+		}
+		
+		void allocateMeshArray(int size) {
+			int sz = size * (sizeof(IdString) + sizeof(int) + sizeof(ID) + sizeof(int));
+			LOG << "allocating data - size: " << size << " total: " << sz;
+			MeshArray data;
+			data.buffer = new char[sz];
+			data.hashes = (IdString*)(data.buffer);
+			data.descriptors = (int*)(data.hashes + size);
+			data.dataIDs = (ID*)(data.descriptors + size);
+			data.vertexTypes = (int*)(data.dataIDs + size);
+			data.num = 0;
+			data.total = size;
+			if (renderContext->descriptorData.buffer != 0) {
+				memcpy(data.hashes, renderContext->meshes.hashes, sizeof(IdString) * renderContext->meshes.num);
+				memcpy(data.descriptors, renderContext->meshes.descriptors, sizeof(int) * renderContext->meshes.num);
+				memcpy(data.dataIDs, renderContext->meshes.dataIDs, sizeof(ID) * renderContext->meshes.num);
+				memcpy(data.vertexTypes, renderContext->meshes.vertexTypes, sizeof(int) * renderContext->meshes.num);
+				data.num = renderContext->meshes.num;
+				delete[] renderContext->meshes.buffer;
+			}
+			renderContext->meshes = data;
+		}
+
+		void getMesh(int id,Mesh* m) {
+			renderContext->meshes.get(id,m);
+
+		}
+
+		MeshArray* getMeshArray() {
+			return &renderContext->meshes;
+		}
+
+		int createMesh(const char* name,int descriptorID,ID dataID,int vertexType) {
+			if ((renderContext->meshes.num + 1) >= renderContext->meshes.total) {
+				allocateMeshArray(renderContext->meshes.total + 16);
+			}
+			Mesh m;
+			m.hashName = string::murmur_hash(name);
+			m.descriptorID = descriptorID;
+			m.meshDataID = dataID;
+			m.vertexType = vertexType;
+			int idx = renderContext->meshes.add(m);
+			LOG << "create mesh - name: " << name << " id: " << idx << " hash: " << m.hashName;
+			return idx;
+		}
+
+		int getMeshID(const char* name) {
+			IdString hash = string::murmur_hash(name);
+			return getMeshID(hash);
+		}
+
+		int getMeshID(IdString hash) {
+			return renderContext->meshes.getID(hash);
+		}
+
+		int getVDType(const char* name) {
+			if (strcmp(name, "TTC") == 0) {
+				return VD_TTC;
+			}
+			if (strcmp(name, "PTNBT") == 0) {
+				return VD_PTNBT;
+			}
+			if (strcmp(name, "PTC") == 0) {
+				return VD_PTC;
+			}
+			if (strcmp(name, "PNC") == 0) {
+				return VD_PNC;
+			}
+			if (strcmp(name, "PARTICLE") == 0) {
+				return VD_PARTICLE;
+			}
+			if (strcmp(name, "PNTC") == 0) {
+				return VD_PNTC;
+			}
+			return VD_UNKNOWN;
+		}
+
+		Vector2f& getMousePosition() {
+			return renderContext->mousePosition;
+		}
+
+		void setMousePosition(int x, int y) {
+			renderContext->mousePosition = Vector2f(x, y);
+		}
 	}
 
 	namespace debug {
 
 		// -------------------------------------------------------
+		// Loads system font
+		// -------------------------------------------------------
+		void loadSystemFont(const char* name, const char* fontName, int size, bool bold) {
+			LOGC("Renderer") << "Loading font " << fontName << " size " << size;
+			UINT type = FW_NORMAL;
+			if (bold) {
+				type = FW_BOLD;
+			}
+			HDC hDC = GetDC(renderContext->hwnd);
+			int nHeight = -MulDiv(size, GetDeviceCaps(hDC, LOGPIXELSY), 72);
+			HR(D3DXCreateFontA(renderContext->device, nHeight, 0, type, 0, false, DEFAULT_CHARSET,
+				DEFAULT_QUALITY, ANTIALIASED_QUALITY,
+				DEFAULT_PITCH | FF_DONTCARE,
+				fontName, &renderContext->debugContext.font));
+			ReleaseDC(renderContext->hwnd,hDC);
+		}
+
+		void reset() {
+			renderContext->debugMessages.clear();
+			renderContext->debugContext.characters.clear();
+		}
+		// -------------------------------------------------------
 		// Draw debug messages
 		// -------------------------------------------------------
 		void drawDebugMessages() {
-			if (renderContext->debugMessages.num() > 0) {
+			if ( renderContext->debugMessages.num() > 0) {
 				IDirect3DDevice9 * pDevice = renderContext->device;
-				ID3DXFont *font = renderContext->systemFont;
+				ID3DXFont *font = renderContext->debugContext.font;
 				if (font != 0) {
 					RECT font_rect;
-					renderContext->debugSprite->Begin(D3DXSPRITE_ALPHABLEND);
+					renderContext->debugContext.debugSprite->Begin(D3DXSPRITE_ALPHABLEND);
 					for (size_t i = 0; i < renderContext->debugMessages.num(); ++i) {
 						DebugMessage* message = &renderContext->debugMessages[i];
 						SetRect(&font_rect, message->x, message->y, message->x + 200, message->y + 60);
-						font->DrawTextA(renderContext->debugSprite, message->message.c_str(), -1, &font_rect, DT_LEFT | DT_NOCLIP, message->color);
+						font->DrawTextA(renderContext->debugContext.debugSprite, message->message.c_str(), -1, &font_rect, DT_LEFT | DT_NOCLIP, message->color);
 					}
-					renderContext->debugSprite->End();
+					renderContext->debugContext.debugSprite->End();
 				}
 			}
+				/*
+				float ts = renderContext->debugContext.textScale;
+				for (size_t i = 0; i < renderContext->debugMessages.num(); ++i) {
+					DebugMessage* message = &renderContext->debugMessages[i];
+					font::createText(*renderContext->debugContext.bitmapFont,Vector2f(message->x,message->y), message->message, message->color, renderContext->debugContext.characters, ts, ts);
+				}				
+				for (size_t i = 0; i < renderContext->debugContext.characters.size(); ++i) {
+					Sprite& sp = renderContext->debugContext.characters[i];
+					sprites::draw(sp.position, sp.texture, 0.0f, ts, ts, sp.color);
+				}
+				*/
+//			}
+		}
+
+		Vector2f getTextSize(const char* text) {
+			IDirect3DDevice9 * pDevice = renderContext->device;
+			ID3DXFont *font = renderContext->debugContext.font;
+			Vector2f size;
+			if (font != 0) {
+				RECT font_rect;
+				font->DrawTextA(renderContext->debugContext.debugSprite, text, strlen(text), &font_rect, DT_CALCRECT, D3DCOLOR_XRGB(0, 0, 0));
+				size.x = font_rect.right - font_rect.left;
+				size.y = font_rect.bottom - font_rect.top;
+			}
+			return size;
 		}
 
 		void debug(int x, int y, char* format, ...) {
@@ -1581,7 +1862,7 @@ namespace ds {
 			DebugMessage message;
 			char buffer[1024];
 			memset(buffer, 0, sizeof(buffer));
-			int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);
+			int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);			
 			message.message = std::string(buffer);
 			message.x = x;
 			message.y = y;

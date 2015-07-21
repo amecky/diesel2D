@@ -345,7 +345,8 @@ public:
 			rect->bottom = rect->top + static_cast<float>(getInt(3,name));
 		}		
 	}
-	bool getBool(const std::string& name,bool defaultValue) {
+	
+	bool getBool(const std::string& name,bool defaultValue = false) {
 		if ( hasProperty(name)) {
 			std::string s;
 			getProperty(name,s);
@@ -358,6 +359,7 @@ public:
 			return defaultValue;
 		}		
 	}
+
 	void getBool(const std::string& name,bool* ret) {
 		if ( hasProperty(name)) {
 			std::string s;
@@ -411,13 +413,14 @@ public:
 		if ( hasProperty(name)) {
 			*ret = getFloat(0,name);
 		}
-	}
-	float getFloat(const std::string& name,float defaultValue) {
+	}	
+	float getFloat(const std::string& name,float defaultValue = 0.0f) {
 		if ( hasProperty(name)) {
 			return getFloat(0,name);
 		}
 		return defaultValue;
 	}
+	
 	uint32 getUInt32(const std::string& name,uint32 defaultValue) {
 		if ( hasProperty(name)) {
 			return static_cast<uint32>(getInt(0,name));
@@ -438,7 +441,7 @@ public:
 			*value = getInt(0,name);
 		}
 	}
-	int getInt(const std::string& name,int defaultValue) {
+	int getInt(const std::string& name,int defaultValue = 0) {
 		if ( hasProperty(name)) {
 			return getInt(0,name);
 		}
