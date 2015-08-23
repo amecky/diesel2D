@@ -2,11 +2,11 @@
 
 namespace ds {
 
-class Bitset {
+class Bits {
 
 public:
-	Bitset() : m_Bits(0) {}
-	~Bitset() {}
+	Bits() : m_Bits(0) {}
+	~Bits() {}
 	void set(int index) {
 		m_Bits |= 1 << index;
 	}

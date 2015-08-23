@@ -12,7 +12,6 @@
 #include "ParticleEmitter.h"
 #include "..\utils\Profiler.h"
 #include "..\compiler\AssetCompiler.h"
-#include "..\renderer\Renderer.h"
 
 namespace ds {
 	

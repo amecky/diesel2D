@@ -15,9 +15,10 @@
 #include "StraightPathConverter.h"
 #include "DescriptorConverter.h"
 #include "MeshConverter.h"
+#include "ShaderConverter.h"
 #include "..\particles\ParticleManager.h"
 
-const unsigned int UINT32_MAX = 1024;
+//const unsigned int UINT32_MAX = 1024;
 
 namespace ds {
 
@@ -122,6 +123,7 @@ AssetCompiler::AssetCompiler() {
 	m_Mapping[CVT_STRAIGHT_PATH] = new StraightPathConverter;
 	m_Mapping[CVT_DESCRIPTOR] = new DescriptorConverter;
 	m_Mapping[CVT_MESH] = new MeshConverter;
+	m_Mapping[CVT_SHADER] = new ShaderConverter;
 	m_BinarySerializerMapping[BINL_TEXTURE] = new TextureLoader;
 	m_CustomIndex = 100;
 }
@@ -312,6 +314,15 @@ namespace assets {
 	void loadSpriteTemplates(const char* fileName) {
 		compiler.load(fileName, renderer::getSpriteTemplates(), CVT_SPRITE);
 	}
+	
+
+	int loadShader(const char* fileName) {
+		int id = renderer::createEmptyShader(fileName);
+		Shader* s = renderer::getShader(id);
+		compiler.load(fileName, s, CVT_SHADER);		
+		return id;
+	}
+	
 }
 
 }

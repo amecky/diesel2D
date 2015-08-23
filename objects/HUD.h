@@ -1,10 +1,10 @@
 #pragma once
 #include "..\renderer\render_types.h"
-#include "..\renderer\Renderer.h"
 #include "..\utils\GameTimer.h"
 #include "..\io\Serializer.h"
 #include "..\sprites\Sprite.h"
 #include "..\base\GameObject.h"
+#include "..\renderer\BitmapFont.h"
 
 namespace ds {
 

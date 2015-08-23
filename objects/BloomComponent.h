@@ -3,6 +3,8 @@
 #include "..\base\GameObject.h"
 #include "..\compiler\Converter.h"
 #include "..\sprites\Sprite.h"
+#include "..\sprites\SpriteBatch.h"
+#include "..\io\Serializer.h"
 
 namespace ds {
 
@@ -64,10 +66,10 @@ private:
 	int m_BloomTexture;
 	int m_BlurHTexture;
 	int m_BloomCombineTexture;
-	Shader m_BlurHShader;
-	Shader m_BlurVShader;
-	Shader m_BloomShader;
-	Shader m_BloomCombineShader;
+	Shader* m_BlurHShader;
+	Shader* m_BlurVShader;
+	Shader* m_BloomShader;
+	Shader* m_BloomCombineShader;
 	int m_BloomShaderID;
 	int m_BlurHShaderID;
 	int m_BloomCombineShaderID;

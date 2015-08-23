@@ -301,7 +301,7 @@ public:
 		float beta = -PI;// 0.0f;// m_Data.angle;
 		int cnt = 0;
 		for (int j = 0; j < slices; ++j) {
-			for (uint32 i = 0; i < ring; ++i) {				
+			for (int i = 0; i < ring; ++i) {				
 				float myAngle = static_cast<float>(i) / static_cast<float>(ring)* TWO_PI;
 				float rad = ds::math::random(m_Data.radius - m_Data.radiusVariance, m_Data.radius + m_Data.radiusVariance);
 				array->position[start + cnt].x = data.position.x + rad * cos(myAngle) * sin(beta);

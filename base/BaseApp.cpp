@@ -7,6 +7,8 @@
 #include "..\io\FileWatcher.h"
 #include "..\utils\FileUtils.h"
 #include "..\particles\ParticleSystem.h"
+#include "..\sprites\SpriteBatch.h"
+#include "..\renderer\graphics.h"
 
 namespace ds {
 

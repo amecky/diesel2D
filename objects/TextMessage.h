@@ -4,6 +4,7 @@
 #include "..\renderer\render_types.h"
 #include "..\sprites\Sprite.h"
 #include "..\base\GameObject.h"
+#include "..\renderer\BitmapFont.h"
 
 namespace ds {
 

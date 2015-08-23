@@ -6,6 +6,8 @@
 #include "..\utils\PlainTextReader.h"
 #include "..\compiler\HUDConverter.h"
 #include "..\utils\Profiler.h"
+#include "..\renderer\graphics.h"
+#include "..\sprites\SpriteBatch.h"
 
 namespace ds {
 

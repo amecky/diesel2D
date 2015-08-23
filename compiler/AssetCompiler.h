@@ -3,6 +3,7 @@
 #include <map>
 #include "..\io\Serializer.h"
 #include <vector>
+#include "..\renderer\shader.h"
 
 namespace ds {
 
@@ -22,6 +23,7 @@ const uint32 CVT_PATH                = 14;
 const uint32 CVT_STRAIGHT_PATH       = 15;
 const uint32 CVT_DESCRIPTOR          = 18;
 const uint32 CVT_MESH                = 19;
+const uint32 CVT_SHADER              = 20;
 const uint32 BINL_TEXTURE            = 0;
 
 // -------------------------------------------------------
@@ -97,6 +99,8 @@ namespace assets {
 	void loadParticleSystem(const char* fileName, ParticleManager* particleManager);
 
 	void loadSpriteTemplates(const char* fileName);
+
+	int loadShader(const char* fileName);
 
 	uint32 registerConverter(Converter* converter);
 

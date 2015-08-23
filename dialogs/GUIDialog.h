@@ -1,10 +1,10 @@
 #pragma once
-#include "..\renderer\Renderer.h"
 #include <vector>
 #include "..\renderer\render_types.h"
 #include "..\io\Serializer.h"
 #include "..\sprites\Sprite.h"
 #include "..\math\tweening.h"
+#include "..\renderer\BitmapFont.h"
 
 namespace ds {
 

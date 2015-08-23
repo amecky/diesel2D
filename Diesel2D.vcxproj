@@ -40,6 +40,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -288,7 +289,6 @@
     <ClCompile Include="utils\font.cpp" />
     <ClCompile Include="utils\Log.cpp" />
     <ClCompile Include="utils\mtrand.cpp" />
-    <ClCompile Include="renderer\Renderer.cpp" />
     <ClCompile Include="utils\ObjLoader.cpp" />
     <ClCompile Include="utils\Profiler.cpp" />
     <ClCompile Include="utils\PlainTextReader.cpp" />
@@ -306,11 +306,11 @@
     <ClCompile Include="world\actions\MoveByAction.cpp" />
     <ClCompile Include="world\actions\MoveToAction.cpp" />
     <ClCompile Include="world\actions\MoveWithAction.cpp" />
+    <ClCompile Include="world\actions\RemoveAfterAction.cpp" />
     <ClCompile Include="world\actions\RotateAction.cpp" />
     <ClCompile Include="world\actions\RotateByAction.cpp" />
     <ClCompile Include="world\actions\ScalingAction.cpp" />
     <ClCompile Include="world\actions\WaitAction.cpp" />
-    <ClCompile Include="world\components\LightComponent.cpp" />
     <ClCompile Include="world\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -417,7 +417,6 @@
     <ClInclude Include="utils\GameTimer.h" />
     <ClInclude Include="utils\Log.h" />
     <ClInclude Include="utils\mtrand.h" />
-    <ClInclude Include="renderer\Renderer.h" />
     <ClInclude Include="dxstdafx.h" />
     <ClInclude Include="utils\ObjLoader.h" />
     <ClInclude Include="utils\Profiler.h" />
@@ -436,11 +435,11 @@
     <ClInclude Include="world\actions\MoveByAction.h" />
     <ClInclude Include="world\actions\MoveToAction.h" />
     <ClInclude Include="world\actions\MoveWithAction.h" />
+    <ClInclude Include="world\actions\RemoveAfterAction.h" />
     <ClInclude Include="world\actions\RotateAction.h" />
     <ClInclude Include="world\actions\RotateByAction.h" />
     <ClInclude Include="world\actions\ScalingAction.h" />
     <ClInclude Include="world\actions\WaitAction.h" />
-    <ClInclude Include="world\components\LightComponent.h" />
     <ClInclude Include="world\World.h" />
   </ItemGroup>
   <ItemGroup>

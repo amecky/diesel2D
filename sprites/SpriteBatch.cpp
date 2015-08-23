@@ -3,10 +3,10 @@
 #include "..\utils\Profiler.h"
 #include "..\renderer\shader.h"
 #include "..\sprites\Sprite.h"
-#include "..\renderer\Renderer.h"
 #include "..\utils\Log.h"
 #include "..\math\GameMath.h"
 #include "..\renderer\VertexDeclaration.h"
+#include "..\renderer\graphics.h"
 
 namespace ds {
 
@@ -58,12 +58,24 @@ namespace sprites {
 		spriteCtx.bufferIndex = renderer::createVertexBuffer(VD_PTC,MAX_SPRITES * 4);
 	}
 
+	int getDescriptorID() {
+		return spriteCtx.descriptorID;
+	}
+
+	void setDescriptorID(int id) {
+		spriteCtx.descriptorID = id;
+		flush();
+	}
+
 	void begin() {
 		spriteCtx.size = 0;
 		spriteCtx.index = 0;
 	}
 
-	void setShaderID(int shaderID) {
+	void setShaderID(int shader) {
+		// the shader in desctiptor
+		renderer::getDescriptorData()->shaders[spriteCtx.descriptorID] = shader;
+		//flush();
 	}
 
 	void end() {

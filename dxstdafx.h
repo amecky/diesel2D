@@ -42,6 +42,8 @@ const float TWO_PI_INV = 1.0f / TWO_PI;
 #define DEGTORAD( degree ) ((degree) * (PI / 180.0f))
 #define RADTODEG( radian ) ((radian) * (180.0f / PI))
 
+#define _SCL_SECURE_NO_WARNINGS
+
 // ---------------------------------------
 // type definitions
 // ---------------------------------------

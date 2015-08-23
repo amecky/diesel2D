@@ -5,6 +5,8 @@
 #include "..\utils\PlainTextReader.h"
 #include "..\io\FileWatcher.h"
 #include "..\compiler\Converter.h"
+#include "..\renderer\graphics.h"
+#include "..\sprites\SpriteBatch.h"
 
 namespace ds {
 

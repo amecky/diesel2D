@@ -3,6 +3,7 @@
 #include "..\particles\Particle.h"
 #include "..\lib\DataContainer.h"
 #include "Sprite.h"
+#include "..\renderer\shader.h"
 
 namespace ds {
 
@@ -12,6 +13,10 @@ class Renderer;
 namespace sprites {
 
 	void init();
+
+	int getDescriptorID();
+
+	void setDescriptorID(int id);
 
 	void draw(const Vector2f& pos, int textureID, const Vector4f& uv, const Vector2f& dim, float rotation = 0.0f, float scaleX = 1.0f, float scaleY = 1.0f, const Color& color = Color::WHITE, const Vector2f& center = Vector2f(0, 0));
 

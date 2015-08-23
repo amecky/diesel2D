@@ -22,7 +22,8 @@ namespace ds {
 		AT_WAIT,
 		AT_MOVE_WITH,
 		AT_ROTATE,
-		AT_FOLLOW_STRAIGHT_PATH
+		AT_FOLLOW_STRAIGHT_PATH,
+		AT_KILL
 	};
 
 	enum RepeatType {
@@ -45,6 +46,7 @@ namespace ds {
 	class FollowTargetAction;
 	class FollowStraightPathAction;
 	class ColorFadeToAction;
+	class RemoveAfterAction;
 
 	typedef void (*MoveFunc)(Vector2f&,float*,float);
 
@@ -80,10 +82,12 @@ namespace ds {
 	public:
 		World();
 		~World(void);
-		SID create(const Vector2f& pos,const Texture& r,int type = -1);
-		SID create(const Vector2f& pos, const char* templateName);
+		SID create(const Vector2f& pos, const Texture& r, int type = -1, int layer = 0);
+		SID create(const Vector2f& pos, const char* templateName, int layer = 0);
 		void remove(SID sid);
 		void render();
+		void renderLayers(int* layers,int num_layers);
+		void renderSingleLayer(int layer);
 
 		void setBoundingRect(const Rect& r);
 
@@ -137,6 +141,10 @@ namespace ds {
 		void rotateTo(SID sid, const Vector2f& target, float ttl, const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
 		void rotate(SID sid, float angleVelocity, float ttl,int mode = 0);
 
+		void removeAfter(SID sid, float ttl);
+
+		void attachTo(SID sid, SID parent);
+
 		void setColor(SID sid,const Color& clr) {
 			sar::setColor(m_Data,sid,clr);
 		}
@@ -165,16 +173,20 @@ namespace ds {
 			return m_Buffer;
 		}
 
-		void attachCollider(SID sid, const Vector2f& extent, int type) {
-			m_Physics.attachCollider(sid, extent, type);
+		void attachCollider(SID sid, const Vector2f& extent, int type,int layer) {
+			m_Physics.attachCollider(sid, extent, type,layer);
 		}
 
-		void attachCollider(SID sid, int type){
-			m_Physics.attachCollider(sid, type);
+		void attachCollider(SID sid, int type, int layer){
+			m_Physics.attachCollider(sid, type, layer);
 		}
 
 		void ignoreCollisions(int firstType, int secondType) {
 			m_Physics.ignore(firstType, secondType);
+		}
+
+		void ignoreLayer(int layer) {
+			m_Physics.ignoreLayer(layer);
 		}
 
 		bool hasCollisions() {
@@ -218,6 +230,7 @@ namespace ds {
 		FollowTargetAction* m_FollowTargetAction;
 		FollowStraightPathAction* m_FollowStraightPathAction;
 		ColorFadeToAction* m_ColorFadeToAction;
+		RemoveAfterAction* _removeAfterAction;
 		Actions m_Actions;
 
 	};

@@ -2,6 +2,7 @@
 #include "ParticleSystem.h"
 #include "..\compiler\AssetCompiler.h"
 #include "..\io\Serializer.h"
+#include "..\renderer\graphics.h"
 
 namespace ds {
 	
@@ -17,9 +18,6 @@ public:
 	void start(uint32 id,const Vector3f& pos);
 	void stop(uint32 id);
 	void load(BinaryLoader* loader);
-	void setRenderer(Renderer* renderer) {
-		m_Renderer = renderer;
-	}
 	void setBlendState(int blendState) {
 		m_BlendState = blendState;
 	}
@@ -33,7 +31,6 @@ private:
 	void end();
 	void flush();
 	void begin();
-	Renderer* m_Renderer;
 	ParticleSystems m_Systems;
 	int m_BlendState;
 	int m_Index[512];

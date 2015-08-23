@@ -174,7 +174,7 @@ namespace ds {
 			color = clr;
 			scale = scl;
 			rotationIndex.x = rot;
-			rotationIndex.y = index;
+			rotationIndex.y = static_cast<float>(index);
 			dimension = dim;
 		}
 	};

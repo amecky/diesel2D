@@ -1,7 +1,7 @@
 #pragma once
 #include "..\renderer\render_types.h"
-#include "..\renderer\Renderer.h"
 #include "..\sprites\Sprite.h"
+#include "..\renderer\BitmapFont.h"
 
 namespace ds {
 

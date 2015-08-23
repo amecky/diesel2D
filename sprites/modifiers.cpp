@@ -24,7 +24,7 @@ namespace ds {
 			Vector2f* p = container.getChannel<Vector2f>(posIdx);
 			Vector2f* v = container.getChannel<Vector2f>(velIdx);
 			float* r = container.getChannel<float>(radiusIdx);
-			for (int i = 0; i < container.size(); ++i) {
+			for (uint32 i = 0; i < container.size(); ++i) {
 				if (p->x < ( left + *r ) || p->x > ( right - *r )) {
 					v->x *= -1.0f;
 				}
@@ -83,7 +83,7 @@ namespace ds {
 		void move(DataContainer& container,int posIdx,int velIdx,float dt) {
 			Vector2f* position = container.getChannel<Vector2f>(posIdx);
 			Vector2f* velocity = container.getChannel<Vector2f>(velIdx);
-			for ( int i = 0; i < container.size();++i) {
+			for (uint32 i = 0; i < container.size(); ++i) {
 				*position += *velocity * dt;
 				++position;
 				++velocity;
@@ -282,7 +282,7 @@ namespace ds {
 		void separate(DataContainer& container,int posIndex,int velocityIndex,float radius,float dt) {
 			Vector2f* position = container.getChannel<Vector2f>(posIndex);
 			Vector2f* velocity = container.getChannel<Vector2f>(velocityIndex);
-			for (int i = 0; i < container.size(); ++i) {
+			for (uint32 i = 0; i < container.size(); ++i) {
 				int idx = findNearest(*position, radius, container,posIndex, i);
 				if (idx != -1) {
 					ID id = container.getID(idx);
@@ -304,7 +304,7 @@ namespace ds {
 
 		void separateByRelaxation(DataContainer& container,int posIndex, float radius, float relaxation) {
 			Vector2f* position = container.getChannel<Vector2f>(posIndex);
-			for (int i = 0; i < container.size(); ++i) {
+			for (uint32 i = 0; i < container.size(); ++i) {
 				int idx = findNearest(*position, radius, container,posIndex, i);
 				if (idx != -1) {
 					ID id = container.getID(idx);
@@ -345,7 +345,7 @@ namespace ds {
 			int ret = -1;
 			float min = 2000.0f * 2000.0f;
 			const Vector2f* positions = container.getChannel<Vector2f>(posIndex);
-			for (int i = 0; i < container.size(); ++i) {
+			for (uint32 i = 0; i < container.size(); ++i) {
 				if (i != self) {
 					Vector2f diff = pos - *positions;
 					float distSq = sqr_length(diff);

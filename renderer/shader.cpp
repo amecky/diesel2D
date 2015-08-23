@@ -1,75 +1,199 @@
 #include "shader.h"
 #include "..\utils\StringUtils.h"
+#include "graphics.h"
+
+#ifdef DEBUG
+DWORD SHADER_FLAGS = D3DXFX_NOT_CLONEABLE | D3DXSHADER_DEBUG;
+#else
+DWORD SHADER_FLAGS = D3DXFX_NOT_CLONEABLE;
+#endif
 
 namespace ds {
 
-	namespace shader {
+	Shader::Shader(const char* name) : _hashName(0), _FX(0), _constants(0), _constantCount(0) {
+		_hashName = string::murmur_hash(name);
+	}
 
-		bool setVector3f(Shader& shader,const char* name,const Vector3f& v) {
-			D3DXHANDLE handle = findHandle(shader,name);
-			if ( handle != 0 ) {
-				shader.m_FX->SetValue(handle,&v,sizeof(Vector3f));
-				return true;
+	bool Shader::setFloat(const char* name, float value) {
+		D3DXHANDLE handle = findHandle(name);
+		if (handle != 0) {
+			_FX->SetFloat(handle, value);
+			return true;
+		}
+		return false;
+	}
+
+	bool Shader::setVector3f(const char* name, const Vector3f& v) {
+		D3DXHANDLE handle = findHandle(name);
+		if (handle != 0) {
+			_FX->SetValue(handle, &v, sizeof(Vector3f));
+			return true;
+		}
+		return false;
+	}
+
+	bool Shader::setVector2f(const char* name, const Vector2f& v) {
+		D3DXHANDLE handle = findHandle(name);
+		if (handle != 0) {
+			_FX->SetValue(handle, &v, sizeof(Vector2f));
+			return true;
+		}
+		return false;
+	}
+
+	bool Shader::setValue(const char* name, void* data, UINT size) {
+		D3DXHANDLE handle = findHandle(name);
+		if (handle != 0) {
+			_FX->SetValue(handle, &data, size);
+			return true;
+		}
+		return false;
+	}
+
+	bool Shader::setTexture(const char* name, int textureID) {
+		D3DXHANDLE handle = findHandle(name);
+		if (handle != 0) {
+			_FX->SetTexture(handle, renderer::getDirectTexture(textureID));
+			return true;
+		}
+		return false;
+	}
+
+	bool Shader::setMatrix(const char* name, const mat4& m) {
+		D3DXHANDLE handle = findHandle(name);
+		if (handle != 0) {
+			_FX->SetValue(handle, m,sizeof(mat4));
+			return true;
+		}
+		return false;
+	}
+
+	bool Shader::setColor(const char* name, const Color& color) {
+		D3DXHANDLE handle = findHandle(name);
+		if (handle != 0) {
+			_FX->SetValue(handle, &color, sizeof(Color));
+			return true;
+		}
+		return false;
+	}
+
+	bool Shader::contains(const char* name) {
+		return findHandle(name) != 0;
+	}
+
+	D3DXHANDLE Shader::findHandle(const char* name) {
+		IdString hashName = string::murmur_hash(name);
+		ShaderConstant* sh = _constants;
+		for (uint32 i = 0; i < _constantCount; ++i) {
+			if (hashName == sh->name) {
+				return sh->handle;
 			}
+			++sh;
+		}
+		return 0;
+	}
+
+	void Shader::initialize(const char* techName) {
+		LOGC("renderer") << "initializing shader using tech: " << techName;
+		_hTech = _FX->GetTechniqueByName(techName);
+		D3DXEFFECT_DESC effectDesc;
+		_FX->GetDesc(&effectDesc);
+		UINT nc = effectDesc.Parameters;
+		_constants = new ShaderConstant[nc];
+		_constantCount = nc;
+		LOGC("renderer") << "Got Description - number of parameters: " << nc;
+		for (UINT i = 0; i < effectDesc.Parameters; ++i) {
+			D3DXHANDLE hParam = _FX->GetParameter(NULL, i);
+			D3DXPARAMETER_DESC pDesc;
+			// get parameter description
+			_FX->GetParameterDesc(hParam, &pDesc);
+			LOGC("renderer") << "Parameter : " << pDesc.Name << " Type: " << pDesc.Type;
+			_constants[i].handle = hParam;
+			_constants[i].name = string::murmur_hash(pDesc.Name);
+		}
+		LOGC("renderer") << "Shader finally loaded";
+
+	}
+
+	uint32 Shader::start() {
+		HR(_FX->SetTechnique(_hTech));
+		UINT numPasses = 0;
+		HR(_FX->Begin(&numPasses, 0));
+		return numPasses;
+	}
+
+	void Shader::end() {
+		HR(_FX->End());
+	}
+
+	void Shader::release() {
+		delete[] _constants;
+		SAFE_RELEASE(_FX);
+	}
+
+	void Shader::createFromText(const char* buffer, const char* techName) {
+		// FIXME: do not use techName
+		_hashName = string::murmur_hash(techName);
+		UINT dwBufferSize = (UINT)strlen(buffer) + 1;
+		ID3DXBuffer* errors = 0;
+		D3DXCreateEffect(renderer::getDevice(), buffer, dwBufferSize, 0, 0, SHADER_FLAGS, 0, &_FX, &errors);
+		if (errors != 0) {
+			LOGEC("Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
+		}
+		else {
+			LOGC("Renderer") << "Shader created";
+			initialize(techName);
+		}
+	}
+
+	bool Shader::loadShader(const char* fxName, const char* techName) {
+		char fileName[256];
+		sprintf(fileName, "content\\effects\\%s.fx", fxName);
+		ID3DXBuffer* errors = 0;
+		HRESULT hr = D3DXCreateEffectFromFileA(renderer::getDevice(), fileName, 0, 0, SHADER_FLAGS, 0, &_FX, &errors);
+		if (errors != 0) {
+			LOGEC("Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
 			return false;
 		}
 
-		bool setVector2f(Shader& shader, const char* name, const Vector2f& v) {
-			D3DXHANDLE handle = findHandle(shader, name);
-			if (handle != 0) {
-				shader.m_FX->SetValue(handle, &v, sizeof(Vector2f));
-				return true;
-			}
-			return false;
-		}
+		LOGC("Renderer") << "Shader created";
+		initialize(techName);
+		return true;
+	}
 
-		bool setValue(Shader& shader,const char* name,void* data,UINT size) {
-			D3DXHANDLE handle = findHandle(shader,name);
-			if ( handle != 0 ) {
-				shader.m_FX->SetValue(handle,&data,size);
-				return true;
-			}
-			return false;
-		}
+	void Shader::beginPass(UINT p) {
+		HR(_FX->BeginPass(p));
+	}
 
-		bool setTexture(Shader& shader,const char* name,int textureID) {
-			D3DXHANDLE handle = findHandle(shader,name);
-			if ( handle != 0 ) {
-				shader.m_FX->SetTexture(handle,renderer::getDirectTexture(textureID));
-				return true;
-			}
-			return false;
-		}
+	void Shader::endPass() {
+		HR(_FX->EndPass());
+	}
 
-		bool setColor(Shader& shader,const char* name,const Color& color) {
-			D3DXHANDLE handle = findHandle(shader,name);
-			if ( handle != 0 ) {
-				shader.m_FX->SetValue(handle,&color,sizeof(Color));
-				return true;
-			}
-			return false;
-		}
+	void Shader::commitChanges() {
+		_FX->CommitChanges();
+	}
 
-		bool setFloat(Shader& shader,const char* name,float value) {
-			D3DXHANDLE handle = findHandle(shader,name);
-			if ( handle != 0 ) {
-				shader.m_FX->SetFloat(handle,value);
-				return true;
-			}
-			return false;
-		}
-
-		D3DXHANDLE findHandle(const Shader& shader,const char* name) {
-			IdString hashName = string::murmur_hash(name);
-			ShaderConstant* sh = shader.constants;
-			for ( uint32 i = 0; i < shader.constantCount; ++i ) {
-				if ( hashName == sh->name ) {
-					return sh->handle;
+	void Shader::load(BinaryLoader* loader) {
+		// FIXME: clean up before
+		while (loader->openChunk() == 0) {
+			if (loader->getChunkID() == CHNK_SPRITE) {
+				std::string name;
+				std::string tech;
+				std::string code;
+				loader->read(name);
+				loader->read(tech);
+				loader->read(code);	
+				if (_FX != 0) {
+					LOG << "reloading shader - gotta clean up first";
+					release();
 				}
-				++sh;
-			}				
-			return 0;
+				createFromText(code.c_str(), tech.c_str());
+			}
+			loader->closeChunk();
 		}
+	}
+
+	namespace shader {
 
 		int createTransformedTextureColorShader(int textureId) {
 			const char* g_strBuffer = 
@@ -105,8 +229,8 @@ namespace ds {
 				"}\r\n"
 				"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "TTCVTech");
-			Shader sh = renderer::getShader(ret);
-			shader::setTexture(sh,"gTex",textureId);
+			Shader* sh = renderer::getShader(ret);
+			sh->setTexture("gTex",textureId);
 			return ret;
 		}
 
@@ -198,9 +322,9 @@ namespace ds {
 				"	}\r\n"
 				"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "PTCTech");
-			Shader sh = renderer::getShader(ret);
+			Shader* sh = renderer::getShader(ret);
 			if ( textureId != -1 ) {
-				shader::setTexture(sh,"gTex",textureId);
+				sh->setTexture("gTex",textureId);
 			}
 			return ret;
 		}
@@ -241,9 +365,9 @@ namespace ds {
 			"	}\r\n"
 			"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "BloomTech");
-			Shader sh = renderer::getShader(ret);
-			shader::setTexture(sh,"gTex",textureID);
-			shader::setFloat(sh,"Threshold",threshold);
+			Shader* sh = renderer::getShader(ret);
+			sh->setTexture("gTex",textureID);
+			sh->setFloat("Threshold",threshold);
 			return ret;
 		}
 
@@ -288,8 +412,8 @@ namespace ds {
 			"	}\r\n"
 			"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "BlurTech");
-			Shader sh = renderer::getShader(ret);
-			shader::setTexture(sh,"gTex",textureID);
+			Shader* sh = renderer::getShader(ret);
+			sh->setTexture("gTex",textureID);
 			return ret;
 		}
 
@@ -350,9 +474,9 @@ namespace ds {
 			"	}\r\n"
 			"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "BCTech");
-			Shader sh = renderer::getShader(ret);
-			shader::setTexture(sh,"gTex",bloomTextureID);
-			shader::setTexture(sh,"ColorMap",colorTextureID);
+			Shader* sh = renderer::getShader(ret);
+			sh->setTexture("gTex",bloomTextureID);
+			sh->setTexture("ColorMap",colorTextureID);
 			return ret;
 		}
 
@@ -403,9 +527,9 @@ namespace ds {
 				"	}\r\n"
 				"}\r\n";
 			int ret = renderer::createShaderFromText(g_strBuffer, "BCTech");
-			Shader sh = renderer::getShader(ret);
-			shader::setTexture(sh, "LightMap",  lightTextureID);
-			shader::setTexture(sh, "ColorMap",  colorTextureID);
+			Shader* sh = renderer::getShader(ret);
+			sh->setTexture("LightMap",  lightTextureID);
+			sh->setTexture("ColorMap",  colorTextureID);
 			return ret;
 		}
 	}

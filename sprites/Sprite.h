@@ -19,8 +19,9 @@ namespace ds {
 		Color color;
 		int type;
 		AABBox box;
+		int layer;
 
-		Sprite() : id(0) , position(0,0) , scale(1,1) , rotation(0.0f) , color(Color::WHITE) , type(0) {}
+		Sprite() : id(0) , position(0,0) , scale(1,1) , rotation(0.0f) , color(Color::WHITE) , type(0) , layer(0) {}
 
 	};
 	

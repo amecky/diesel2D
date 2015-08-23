@@ -2,7 +2,7 @@
 #include "vertex_types.h"
 #include "..\math\math_types.h"
 #include "..\utils\Log.h"
-#include "Renderer.h"
+#include "..\renderer\graphics.h"
 
 namespace ds {
 	

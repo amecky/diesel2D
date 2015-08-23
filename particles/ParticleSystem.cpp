@@ -2,6 +2,8 @@
 #include "..\io\FileWatcher.h"
 #include "..\compiler\Converter.h"
 #include "..\utils\Profiler.h"
+#include "..\sprites\SpriteBatch.h"
+#include "..\renderer\graphics.h"
 #include <stdarg.h>
 
 namespace ds {

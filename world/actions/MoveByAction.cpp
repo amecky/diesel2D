@@ -1,7 +1,6 @@
 #include "MoveByAction.h"
 #include "..\..\utils\Log.h"
 #include "..\..\math\GameMath.h"
-#include "..\..\renderer\Renderer.h"
 
 namespace ds {
 	// -------------------------------------------------------

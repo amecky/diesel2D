@@ -2,6 +2,8 @@
 #include "..\utils\StringUtils.h"
 #include "..\utils\font.h"
 #include "..\utils\Log.h"
+#include "..\renderer\graphics.h"
+#include "..\sprites\SpriteBatch.h"
 
 namespace ds {
 

@@ -1,6 +1,5 @@
 #pragma once
 #include "EventStream.h"
-#include "..\renderer\Renderer.h"
 #include "..\audio\AudioManager.h"
 
 namespace ds {
@@ -16,9 +15,6 @@ class GameObject {
 public:
 	GameObject() {}
 	virtual ~GameObject() {}	
-	void setRenderer(Renderer* renderer) {
-		m_Renderer = renderer;
-	}
 	//void setParticleManager(ParticleManager* particleManager) {
 		//m_Particles = particleManager;
 	//}
@@ -48,7 +44,6 @@ public:
 	}
 protected:
 	EventStream m_Events;
-	Renderer* m_Renderer;
 	//ParticleManager* m_Particles;
 	AssetCompiler* m_Assets;
 	AudioManager* m_Audio;

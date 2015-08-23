@@ -1,6 +1,5 @@
 #include "AbstractAction.h"
 #include "..\..\utils\Log.h"
-#include "..\..\renderer\Renderer.h"
 
 namespace ds {
 

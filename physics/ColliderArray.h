@@ -60,6 +60,7 @@ namespace ds {
 		T* previous;
 		T* extents;
 		int* types;
+		int* layers;
 		ColliderShape* shapeTypes;
 		char* buffer;
 
@@ -69,7 +70,7 @@ namespace ds {
 		ColliderArray() : num(0) , total(0) , buffer(0) {								
 		}
 		
-		CID create(SID sid,const T& pos,const T& extent,int type,ColliderShape shape = CS_CIRCLE) {
+		CID create(SID sid,const T& pos,const T& extent,int type,int layer,ColliderShape shape = CS_CIRCLE) {
 			ColliderArrayIndex &in = indices[free_dequeue];
 			free_dequeue = in.next;
 			in.index = num++;
@@ -79,6 +80,7 @@ namespace ds {
 			previous[in.index] = pos;
 			extents[in.index] = extent;			
 			types[in.index] = type;			
+			layers[in.index] = layer;
 			shapeTypes[in.index] = shape;
 			return in.id;
 		}
@@ -101,6 +103,7 @@ namespace ds {
 			previous[in.index] = previous[next.index];
 			extents[in.index] = extents[next.index];			
 			types[in.index] = types[next.index];			
+			layers[in.index] = layers[next.index];
 			shapeTypes[in.index] = shapeTypes[next.index];
 			--num;
 			indices[currentID & INDEX_MASK].index = in.index;

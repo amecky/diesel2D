@@ -3,6 +3,7 @@
 #include "..\utils\Log.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\compiler\AssetCompiler.h"
+#include "..\renderer\graphics.h"
 
 namespace ds {
 
@@ -48,8 +49,8 @@ int BloomComponent::init(int baseTarget,int texID) {
 	m_BloomShader = renderer::getShader(m_BloomShaderID);
 	m_BlurHShaderID = shader::createBlurShader(m_BloomTexture);
 	m_BlurHShader = renderer::getShader(m_BlurHShaderID);
-	shader::setTexture(m_BlurHShader,"gTex",m_BloomTexture);
-	shader::setFloat(m_BlurHShader,"BlurDistance",1.0f/1024.0f);
+	m_BlurHShader->setTexture("gTex", m_BloomTexture);
+	m_BlurHShader->setFloat("BlurDistance", 1.0f / 1024.0f);
 	m_BlurHTexture = renderer::createRenderTarget(currentTarget + 1, clr);
 	// Bloom combine	
 	m_BloomCombineTexture = renderer::createRenderTarget(currentTarget + 2, clr);
@@ -60,11 +61,11 @@ int BloomComponent::init(int baseTarget,int texID) {
 }
 
 void BloomComponent::update(float elapsed) {
-	shader::setFloat(m_BloomShader,"Threshold",m_Settings.threshold);
-	shader::setFloat(m_BloomCombineShader,"BloomIntensity",m_Settings.intensity);
-	shader::setFloat(m_BloomCombineShader,"OriginalIntensity",m_Settings.originalIntensity);
-	shader::setFloat(m_BloomCombineShader,"BloomSaturation",m_Settings.saturation);
-	shader::setFloat(m_BloomCombineShader,"OriginalSaturation",m_Settings.originalSaturation);
+	m_BloomShader->setFloat("Threshold", m_Settings.threshold);
+	m_BloomCombineShader->setFloat("BloomIntensity", m_Settings.intensity);
+	m_BloomCombineShader->setFloat("OriginalIntensity", m_Settings.originalIntensity);
+	m_BloomCombineShader->setFloat("BloomSaturation", m_Settings.saturation);
+	m_BloomCombineShader->setFloat("OriginalSaturation", m_Settings.originalSaturation);
 }
 
 void BloomComponent::render() {

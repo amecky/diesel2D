@@ -1,12 +1,12 @@
 #pragma once
 #include "..\dxstdafx.h"
 #include <vector>
-#include "..\renderer\Renderer.h"
 #include "..\utils\mtrand.h"
 #include "..\dialogs\DialogManager.h"
 #include "..\audio\AudioManager.h"
 #include "GameObject.h"
 #include "..\compiler\AssetCompiler.h"
+#include "..\renderer\graphics.h"
 
 namespace ds {
 

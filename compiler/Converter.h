@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable:4996)
 #include "..\utils\StringUtils.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\io\BinaryWriter.h"

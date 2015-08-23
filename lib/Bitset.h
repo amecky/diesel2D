@@ -8,6 +8,7 @@ class Bitset {
 public:
 	Bitset() {
 		numBuckets = SIZE / 32;
+		reset();
 	}
 	~Bitset() {}
 

@@ -46,7 +46,6 @@ inline List<type>::List(uint32 granularity) {
 template<class type>
 inline List<type>::~List() {
 	clear();
-	delete m_Data;
 }
 
 // ----------------------------------------------------

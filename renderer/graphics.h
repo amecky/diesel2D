@@ -12,6 +12,7 @@
 #include "..\sprites\SpriteTemplates.h"
 #include "..\utils\StringUtils.h"
 #include "..\compiler\AssetCompiler.h"
+#include "Camera.h"
 
 namespace ds {
 
@@ -356,13 +357,13 @@ namespace ds {
 
 		VDStruct& getVertexDeclaration(int declarationType);
 
-		void initializeShader(int id, const char* techName);
-
 		int createShaderFromText(const char* buffer, const char* techName);
 
-		Shader& getShader(int id);
+		Shader* getShader(int id);
 
-		int loadShader(const char* fxName, const char* techName);
+		//int loadShader(const char* fxName, const char* techName);
+
+		int createEmptyShader(const char* name);
 
 		int getDefaultShaderID();
 
@@ -434,10 +435,6 @@ namespace ds {
 		Color getColor(D3DLOCKED_RECT& lockedRect, int x, int y, int height);
 
 		void setShaderParameter(Shader* shader, int textureID);
-
-		uint32 startShader(int shaderID);
-
-		void endShader(int shaderID);
 
 		void setCurrentShader(int shaderID);
 		

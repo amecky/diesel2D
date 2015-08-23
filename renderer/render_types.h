@@ -157,27 +157,6 @@ namespace ds {
 	};
 
 	// -------------------------------------------------------
-	// Shader constant
-	// -------------------------------------------------------
-	struct ShaderConstant {
-		D3DXHANDLE handle;
-		IdString name;
-	};
-	// -------------------------------------------------------
-	// Shader
-	// -------------------------------------------------------
-	struct Shader {
-
-		IdString hashName;
-		ID3DXEffect* m_FX;
-		D3DXHANDLE m_hTech;
-		ShaderConstant* constants;
-		uint32 constantCount;
-
-		Shader() : hashName(0) , m_FX(0), constants(0), constantCount(0) {}
-	};
-
-	// -------------------------------------------------------
 	// Render target
 	// -------------------------------------------------------
 	struct RenderTarget {

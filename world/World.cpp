@@ -14,6 +14,7 @@
 #include "actions\FollowTargetAction.h"
 #include "actions\FollowStraightPathAction.h"
 #include "actions\ColorFadeToAction.h"
+#include "actions\RemoveAfterAction.h"
 #include "..\physics\ColliderArray.h"
 #include "..\utils\Profiler.h"
 
@@ -46,6 +47,8 @@ namespace ds {
 		m_Actions.push_back(m_FollowStraightPathAction);
 		m_ColorFadeToAction = new ColorFadeToAction;
 		m_Actions.push_back(m_ColorFadeToAction);
+		_removeAfterAction = new RemoveAfterAction;
+		m_Actions.push_back(_removeAfterAction);
 		
 	}
 
@@ -65,7 +68,7 @@ namespace ds {
 	void World::allocate(int size) {
 		if ( size > m_Data.total ) {
 			SpriteArray sad;
-			int sz = size * (sizeof(SpriteArrayIndex) + sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(float) + sizeof(Texture) + sizeof(Color) + sizeof(float) + sizeof(int));
+			int sz = size * (sizeof(SpriteArrayIndex) + sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(float) + sizeof(Texture) + sizeof(Color) + sizeof(float) + sizeof(int) + sizeof(int));
 			sad.buffer = new char[sz];
 			sad.total = size;
 			sad.num = 0;
@@ -78,6 +81,7 @@ namespace ds {
 			sad.colors = (ds::Color*)(sad.textures + size);
 			sad.timers = (float*)(sad.colors + size);
 			sad.types = (int*)(sad.timers + size);
+			sad.layers = (int*)(sad.types + size);
 			if ( m_Data.buffer != 0 ) {
 				memcpy(sad.indices, m_Data.indices, m_Data.num * sizeof(SpriteArrayIndex));
 				memcpy(sad.ids, m_Data.ids, m_Data.num * sizeof(SID));
@@ -88,6 +92,7 @@ namespace ds {
 				memcpy(sad.colors, m_Data.colors, m_Data.num * sizeof(Color));
 				memcpy(sad.timers, m_Data.timers, m_Data.num * sizeof(float));
 				memcpy(sad.types, m_Data.types, m_Data.num * sizeof(int));
+				memcpy(sad.layers, m_Data.layers, m_Data.num * sizeof(int));
 				sad.free_dequeue = m_Data.free_dequeue;
 				sad.free_enqueue = m_Data.free_enqueue;
 				sad.num = m_Data.num;
@@ -102,17 +107,17 @@ namespace ds {
 	}
 
 	
-	SID World::create(const Vector2f& pos,const Texture& r,int type) {
+	SID World::create(const Vector2f& pos,const Texture& r,int type,int layer) {
 		if ( m_Data.total == 0 ) {
 			allocate(256);
 		}
 		if ( m_Data.num >= m_Data.total ) {
 			allocate(m_Data.total * 2);
 		}
-		return sar::create(m_Data,pos,r,type);		
+		return sar::create(m_Data,pos,r,type,layer);		
 	}
 
-	SID World::create(const Vector2f& pos, const char* templateName) {
+	SID World::create(const Vector2f& pos, const char* templateName,int layer) {
 		if (m_Data.total == 0) {
 			allocate(256);
 		}
@@ -121,7 +126,8 @@ namespace ds {
 		}
 		Sprite sp;
 		if (renderer::getSpriteTemplate(templateName, &sp)) {
-			SID sid = sar::create(m_Data, pos, sp.texture, sp.type);
+			SID sid = sar::create(m_Data, pos, sp.texture, sp.type,layer);
+			sp.layer = layer;
 			sar::set(m_Data, sid, sp);
 			sar::setPosition(m_Data, sid, pos);
 			return sid;
@@ -138,6 +144,28 @@ namespace ds {
 		sar::remove(m_Data,id);
 	}
 
+	void World::renderSingleLayer(int layer) {
+		PR_START("World:render")
+		for (int i = 0; i < m_Data.num; ++i) {
+			if (m_Data.layers[i] == layer) {
+				sprites::draw(m_Data.positions[i], m_Data.textures[i], m_Data.rotations[i], m_Data.scales[i].x, m_Data.scales[i].y, m_Data.colors[i]);
+			}
+		}
+		PR_END("World:render")
+	}
+
+	void World::renderLayers(int* layers, int num_layers) {
+		PR_START("World:render")
+		for (int j = 0; j < num_layers; ++j) {
+			for (int i = 0; i < m_Data.num; ++i) {
+				if (m_Data.layers[i] == layers[j]) {					
+					sprites::draw(m_Data.positions[i], m_Data.textures[i], m_Data.rotations[i], m_Data.scales[i].x, m_Data.scales[i].y, m_Data.colors[i]);
+				}
+			}
+		}
+		PR_END("World:render")
+	}
+
 	void World::render() {
 		PR_START("World:render")
 		for ( int i = 0; i < m_Data.num; ++i ) {
@@ -151,6 +179,13 @@ namespace ds {
 		m_Buffer.reset();
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->update(m_Data, dt, m_Buffer);
+		}
+		// FIXME: handle AT_KILL
+		for (int i = 0; i < m_Buffer.num; ++i) {
+			const ActionEvent& e = m_Buffer.events[i];
+			if (e.type == AT_KILL) {
+				remove(e.sid);
+			}
 		}
 		m_Physics.tick(dt);
 		PR_END("World:tick")
@@ -209,6 +244,14 @@ namespace ds {
 		Vector2f n = normalize(target);
 		float angle = vector::calculateRotation(n);
 		rotateTo(sid, angle, ttl, 0, tweeningType);
+	}
+
+	void World::removeAfter(SID sid, float ttl) {
+		_removeAfterAction->attach(sid, ttl);
+	}
+
+	void World::attachTo(SID sid, SID parent) {
+		
 	}
 
 	void World::fadeAlphaTo(SID sid,float startAlpha,float endAlpha,float ttl,int mode,const tweening::TweeningType& tweeningType) {

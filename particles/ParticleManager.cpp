@@ -2,6 +2,8 @@
 #include "..\utils\Profiler.h"
 #include "..\renderer\shader.h"
 #include "..\math\matrix.h"
+#include "..\renderer\graphics.h"
+#include "..\sprites\SpriteBatch.h"
 
 namespace ds {
 

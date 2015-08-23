@@ -7,12 +7,7 @@
 #include "..\utils\ObjLoader.h"
 #include "..\utils\FileUtils.h"
 #include "..\compiler\AssetCompiler.h"
-
-#ifdef DEBUG
-DWORD SHADER_FLAGS = D3DXFX_NOT_CLONEABLE | D3DXSHADER_DEBUG;
-#else
-DWORD SHADER_FLAGS = D3DXFX_NOT_CLONEABLE;
-#endif
+#include "..\sprites\SpriteBatch.h"
 
 namespace ds {
 
@@ -62,7 +57,7 @@ namespace ds {
 		DrawCounter drawCounter;
 		D3DFORMAT format;
 		VDStruct vdStructs[MAX_VERDECLS];
-		dVector<Shader> shaders;
+		std::vector<Shader*> shaders;
 		int defaultShaderID;
 		int currentShaderID;
 		dVector<Viewport> viewPorts;
@@ -321,9 +316,9 @@ namespace ds {
 				}
 			}
 			LOGC("Renderer") << "Releasing shaders";
-			for (int i = 0; i < renderContext->shaders.size(); ++i) {
-				delete renderContext->shaders[i].constants;
-				SAFE_RELEASE(renderContext->shaders[i].m_FX);
+			for (int i = 0; i < renderContext->shaders.size(); ++i) {				
+				renderContext->shaders[i]->release();
+				delete renderContext->shaders[i];
 			}
 			LOGC("Renderer") << "Releasing vertex declarations";
 			for (int i = 0; i < MAX_VERDECLS; ++i) {
@@ -482,57 +477,25 @@ namespace ds {
 			return renderContext->vdStructs[declarationType];
 		}
 
-		void initializeShader(int id, const char* techName) {
-			LOGC("renderer") << "initializing shader: " << id << " using tech: " << techName;
-			Shader* shader = &renderContext->shaders[id];
-			shader->m_hTech = shader->m_FX->GetTechniqueByName(techName);
-			D3DXEFFECT_DESC effectDesc;
-			shader->m_FX->GetDesc(&effectDesc);
-			UINT nc = effectDesc.Parameters;
-			shader->constants = new ShaderConstant[nc];
-			shader->constantCount = nc;
-			LOGC("renderer") << "Got Description - number of parameters: " << nc;
-			for (UINT i = 0; i < effectDesc.Parameters; ++i) {
-				D3DXHANDLE hParam = shader->m_FX->GetParameter(NULL, i);
-				D3DXPARAMETER_DESC pDesc;
-				// get parameter description
-				shader->m_FX->GetParameterDesc(hParam, &pDesc);
-				LOGC("renderer") << "Parameter : " << pDesc.Name << " Type: " << pDesc.Type;
-				shader->constants[i].handle = hParam;
-				shader->constants[i].name = string::murmur_hash(pDesc.Name);
-			}
-			LOGC("renderer") << "Shader finally loaded";
-
-		}
-
 		// FIXME: add name as parameter
 		int createShaderFromText(const char* buffer, const char* techName) {
-			int id = renderContext->shaders.create();
-			Shader* shader = &renderContext->shaders[id];
-			// FIXME: do not use techName
-			shader->hashName = string::murmur_hash(techName);
-			UINT dwBufferSize = (UINT)strlen(buffer) + 1;
-			ID3DXBuffer* errors = 0;
-			D3DXCreateEffect(renderContext->device, buffer, dwBufferSize, 0, 0, SHADER_FLAGS, 0, &shader->m_FX, &errors);
-			if (errors != 0) {
-				LOGEC("Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
-				return -1;
-			}
-			LOGC("Renderer") << "Shader created - id: " << id;
-			initializeShader(id, techName);
+			int id = renderContext->shaders.size();
+			Shader* shader = new Shader(techName);
+			renderContext->shaders.push_back(shader);
+			shader->createFromText(buffer, techName);
 			return id;
 		}
 
 		int getShaderID(IdString hash) {
 			for (int i = 0; i < renderContext->shaders.size(); ++i) {
-				if (renderContext->shaders[i].hashName == hash) {
+				if (renderContext->shaders[i]->getHashName() == hash) {
 					return i;
 				}
 			}
 			return -1;
 		}
 
-		Shader& getShader(int id) {
+		Shader* getShader(int id) {
 			return renderContext->shaders[id];
 		}
 
@@ -540,25 +503,24 @@ namespace ds {
 			return renderContext->defaultShaderID;
 		}
 
-		int loadShader(const char* fxName, const char* techName) {
-			char fileName[256];
-			sprintf(fileName, "content\\effects\\%s.fx", fxName);
-			int id = renderContext->shaders.create();
-			Shader* shader = &renderContext->shaders[id];
-			shader->hashName = string::murmur_hash(fxName);
-			ID3DXBuffer* errors = 0;
-			HRESULT hr = D3DXCreateEffectFromFileA(renderContext->device, fileName, 0, 0, SHADER_FLAGS, 0, &shader->m_FX, &errors);
-			//if ( hr != S_OK && errors != 0 ) {
-			if (errors != 0) {
-				LOGEC("Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
-				return -1;
-			}
-
-			LOGC("Renderer") << "Shader created - id: " << id;
-			initializeShader(id, techName);
-			return id;
+		int createEmptyShader(const char* name) {
+			int id = renderContext->shaders.size();
+			Shader* shader = new Shader(name);
+			renderContext->shaders.push_back(shader);
+			return id;			
 		}
-
+		/*
+		int loadShader(const char* fxName, const char* techName) {
+			
+			int id = renderContext->shaders.size();
+			Shader* shader = new Shader(fxName);
+			renderContext->shaders.push_back(shader);
+			if (shader->loadShader(fxName, techName)) {
+				return id;
+			}
+			return -1;			
+		}
+		*/
 		int createViewport(int width, int height) {
 			int idx = renderContext->viewPorts.size();
 			Viewport v;
@@ -878,70 +840,43 @@ namespace ds {
 		// -------------------------------------------------------
 		// Apply shader and set some constants
 		// -------------------------------------------------------
-		void setShaderParameter(Shader* shader, int textureID) {
-			D3DXHANDLE hndl = shader->m_FX->GetParameterByName(0, "gWVP");
-			if (hndl != NULL) {
-				shader->m_FX->SetValue(hndl, &renderContext->matWorldViewProj, sizeof(mat4));
-			}
-			hndl = shader->m_FX->GetParameterByName(0, "gWorld");
-			if (hndl != NULL) {
-				shader->m_FX->SetValue(hndl, &renderContext->matWorld, sizeof(mat4));
-			}
-			hndl = shader->m_FX->GetParameterByName(0, "gCameraPos");
-			if (hndl != NULL) {
-				shader->m_FX->SetValue(hndl, &renderContext->camera->getPosition(), sizeof(Vector3f));
-			}
-			hndl = shader->m_FX->GetParameterByName(0, "gCameraUp");
-			if (hndl != NULL) {
-				shader->m_FX->SetValue(hndl, &renderContext->camera->getUpVector(), sizeof(Vector3f));
-			}
+		void setShaderParameter(Shader* shader, int textureID) {			
+			shader->setMatrix("gWVP", renderContext->matWorldViewProj);
+			shader->setMatrix("gWorld", renderContext->matWorld);		
+			shader->setVector3f("gCameraPos", renderContext->camera->getPosition());
+			shader->setVector3f("gCameraUp", renderContext->camera->getUpVector());
 			if (textureID != -1) {
-				hndl = shader->m_FX->GetParameterByName(0, "gTex");
-				if (hndl != NULL) {
-					shader->m_FX->SetTexture(hndl, getDirectTexture(textureID));
-				}
+				shader->setTexture("gTex",textureID);
 			}
-			hndl = shader->m_FX->GetParameterByName(0, "gWorldInverseTranspose");
-			if (hndl != NULL) {
+			if (shader->contains("gWorldInverseTranspose")) {
 				D3DXMATRIX worldInverseTranspose;
 				D3DXMatrixInverse(&worldInverseTranspose, 0, &matrix::convert(renderContext->matWorld));
 				D3DXMatrixTranspose(&worldInverseTranspose, &worldInverseTranspose);
-				shader->m_FX->SetMatrix(hndl, &worldInverseTranspose);
+				shader->setValue("gWorldInverseTranspose", &worldInverseTranspose, sizeof(D3DXMATRIX));
 			}
-			hndl = shader->m_FX->GetParameterByName(0, "gWorldInverse");
-			if (hndl != NULL) {
+			if (shader->contains("gWorldInverse")) {
 				D3DXMATRIX worldInverse;
 				D3DXMatrixInverse(&worldInverse, 0, &matrix::convert(renderContext->matWorld));
-				shader->m_FX->SetValue(hndl, &worldInverse, sizeof(mat4));
+				shader->setValue("gWorldInverse", worldInverse,sizeof(D3DXMATRIX));
 			}
-			//hndl = shader->m_FX->GetParameterByName(0, "gWorld");
-			//if (hndl != NULL) {
-				//shader->m_FX->SetValue(hndl, &renderContext->matWorld, sizeof(mat4));
-			//}
-			hndl = shader->m_FX->GetParameterByName(0, "gView");
-			if (hndl != NULL) {
-				shader->m_FX->SetValue(hndl, &renderContext->matView, sizeof(mat4));
-			}
-			hndl = shader->m_FX->GetParameterByName(0, "gProjection");
-			if (hndl != NULL) {
-				shader->m_FX->SetValue(hndl, &renderContext->matProjection, sizeof(mat4));
-			}
-			shader->m_FX->CommitChanges();
+			shader->setMatrix("gView", renderContext->matView);
+			shader->setMatrix("gProjection", renderContext->matProjection);
+			shader->commitChanges();
 		}
 
 
 		void draw(const Descriptor& desc,int size,int numPrimitives) {
-			Shader* shader = &renderer::getShader(desc.shader);
+			Shader* shader = renderer::getShader(desc.shader);
 			D3DPRIMITIVETYPE pt = D3DPT_TRIANGLELIST;
-			shader::setVector2f(*shader, "viewportPosition", renderer::getSelectedViewport().getPosition());
-			uint32 numPasses = renderer::startShader(desc.shader);
+			shader->setVector2f("viewportPosition", renderer::getSelectedViewport().getPosition());
+			uint32 numPasses = shader->start();
 			for (UINT p = 0; p < numPasses; ++p) {
-				HR(shader->m_FX->BeginPass(p));
+				shader->beginPass(p);
 				setShaderParameter(shader,desc.texture);
 				HR(renderContext->device->DrawIndexedPrimitive(pt, 0, 0, size, 0, numPrimitives));
-				HR(shader->m_FX->EndPass());
+				shader->endPass();
 			}
-			renderer::endShader(desc.shader);
+			shader->end();
 		}
 
 		void draw_render_target_common(int rtID, int shaderID,int blendState) {
@@ -970,16 +905,16 @@ namespace ds {
 			if (sid == -1) {
 				sid = renderContext->defaultShaderID;
 			}
-			Shader* shader = &renderer::getShader(sid);
-			shader::setVector2f(*shader, "viewportPosition", renderer::getSelectedViewport().getPosition());
-			uint32 numPasses = renderer::startShader(sid);
+			Shader* shader = renderer::getShader(sid);
+			shader->setVector2f("viewportPosition", renderer::getSelectedViewport().getPosition());
+			uint32 numPasses = shader->start();
 			for (UINT p = 0; p < numPasses; ++p) {
-				HR(shader->m_FX->BeginPass(p));
+				shader->beginPass(p);
 				setShaderParameter(shader, rt.textureID);
 				HR(renderContext->device->DrawIndexedPrimitive(pt, 0, 0, 4, 0, numPrimitives));
-				HR(shader->m_FX->EndPass());
+				shader->endPass();
 			}
-			renderer::endShader(sid);
+			shader->end();
 			renderer::setBlendState(current);
 			PR_END("draw_render_target")
 		}
@@ -1160,20 +1095,7 @@ namespace ds {
 			initializeBitmapFont(font, textureId, fillColor);
 			return &renderContext->bitmapFonts.back();
 		}
-
-		uint32 startShader(int shaderID) {
-			const Shader& s = renderContext->shaders[shaderID];
-			HR(s.m_FX->SetTechnique(s.m_hTech));
-			UINT numPasses = 0;
-			HR(s.m_FX->Begin(&numPasses, 0));
-			return numPasses;
-		}
-
-		void endShader(int shaderID) {
-			const Shader& s = renderContext->shaders[shaderID];
-			HR(s.m_FX->End());
-		}
-
+		
 		void setCurrentShader(int shaderID) {
 			renderContext->currentShaderID = shaderID;
 			sprites::setShaderID(shaderID);
@@ -1188,15 +1110,9 @@ namespace ds {
 		// -------------------------------------------------------
 		void setTexture(int shaderID, const char* handleName, int textureID) {
 			assert(textureID != -1);
-			Shader* shader = &renderContext->shaders[shaderID];
+			Shader* shader = renderContext->shaders[shaderID];
 			IdString hashName = string::murmur_hash(handleName);
-			ShaderConstant* sh = shader->constants;
-			for (int i = 0; i < shader->constantCount; ++i) {
-				if (hashName == sh->name) {
-					shader->m_FX->SetTexture(sh->handle, getDirectTexture(textureID));
-				}
-				++sh;
-			}
+			shader->setTexture(handleName,textureID);
 		}
 
 		// ---------------------------------------------------------

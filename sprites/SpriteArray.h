@@ -26,6 +26,7 @@ namespace ds {
 		Color* colors;
 		float* timers;
 		int* types;
+		int* layers;
 		char* buffer;
 
 		unsigned short free_enqueue;
@@ -94,7 +95,7 @@ namespace ds {
 
 		void set(SpriteArray& array,SID sid,const Sprite& sprite);
 
-		SID create(SpriteArray& array,const Vector2f& pos,const Texture& r,int type = 0);
+		SID create(SpriteArray& array,const Vector2f& pos,const Texture& r,int type = 0,int layer = 0);
 
 		void remove(SpriteArray& array,SID id);
 

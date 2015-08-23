@@ -3,6 +3,7 @@
 #include "ColliderArray.h"
 #include <map>
 #include "..\sprites\SpriteBatch.h"
+#include "..\math\Bitset.h"
 
 namespace ds {
 
@@ -31,9 +32,10 @@ namespace ds {
 		PhysicalWorld();
 		~PhysicalWorld();
 		void ignore(int firstType, int secondType);
+		void ignoreLayer(int layer);
 		void setDataPtr(SpriteArray* sprites);
-		void attachCollider(SID sid, const Vector2f& extent, int type);
-		void attachCollider(SID sid, int type);
+		void attachCollider(SID sid, const Vector2f& extent, int type,int layer);
+		void attachCollider(SID sid, int type,int layer);
 		bool hasCollisions() {
 			return m_NumCollisions > 0;
 		}
@@ -60,6 +62,7 @@ namespace ds {
 		Collision m_Collisions[256];
 		IgnoredCollisions m_Ignored;
 		int m_NumCollisions;
+		Bits _ignoredLayers;
 	};
 
 }

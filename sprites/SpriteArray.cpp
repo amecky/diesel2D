@@ -79,6 +79,7 @@ namespace ds {
 			sprite.texture = array.textures[in.index];
 			sprite.color = array.colors[in.index];
 			sprite.type = array.types[in.index];
+			sprite.layer = array.layers[in.index];
 			return sprite;
 		}
 
@@ -92,9 +93,10 @@ namespace ds {
 			array.textures[in.index] = sprite.texture;
 			array.colors[in.index] = sprite.color;
 			array.types[in.index] = sprite.type;
+			array.layers[in.index] = sprite.layer;
 		}
 
-		SID create(SpriteArray& array,const Vector2f& pos,const Texture& r,int type) {
+		SID create(SpriteArray& array,const Vector2f& pos,const Texture& r,int type,int layer) {
 			SpriteArrayIndex &in = array.indices[array.free_dequeue];
 			array.free_dequeue = in.next;
 			in.index = array.num++;
@@ -106,6 +108,7 @@ namespace ds {
 			array.colors[in.index] = Color::WHITE;
 			array.timers[in.index] = 0.0f;
 			array.types[in.index] = type;
+			array.layers[in.index] = layer;
 			return in.id;
 		}
 
@@ -122,6 +125,7 @@ namespace ds {
 			array.colors[in.index] = array.colors[next.index];
 			array.timers[in.index] = array.timers[next.index];
 			array.types[in.index] = array.types[next.index];
+			array.layers[in.index] = array.layers[next.index];
 			--array.num;
 			array.indices[currentID & INDEX_MASK].index = in.index;
 			in.index = USHRT_MAX;
@@ -145,6 +149,7 @@ namespace ds {
 			LOG << "rotation: " << RADTODEG(array.rotations[in.index]);
 			LOG << "color   : " << DBG_CLR(array.colors[in.index]);
 			LOG << "type    : " << array.types[in.index];
+			LOG << "layer   : " << array.layers[in.index];
 		}
 
 	}

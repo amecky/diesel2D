@@ -25,9 +25,6 @@
     <ClCompile Include="renderer\GraphicsDevice.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
-    <ClCompile Include="renderer\Renderer.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="renderer\VertexDeclaration.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
@@ -93,9 +90,6 @@
     </ClCompile>
     <ClCompile Include="renderer\Camera2D.cpp">
       <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="world\components\LightComponent.cpp">
-      <Filter>world\components</Filter>
     </ClCompile>
     <ClCompile Include="memory\DataBlockAllocator.cpp">
       <Filter>memory</Filter>
@@ -277,6 +271,9 @@
     <ClCompile Include="utils\Trails.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="world\actions\RemoveAfterAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
@@ -303,9 +300,6 @@
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="renderer\GraphicsDevice.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer\Renderer.h">
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="renderer\VertexDeclaration.h">
@@ -412,9 +406,6 @@
     </ClInclude>
     <ClInclude Include="math\Bitset.h">
       <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="world\components\LightComponent.h">
-      <Filter>world\components</Filter>
     </ClInclude>
     <ClInclude Include="utils\GameTimer.h">
       <Filter>utils</Filter>
@@ -658,6 +649,9 @@
     </ClInclude>
     <ClInclude Include="utils\Trails.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\RemoveAfterAction.h">
+      <Filter>world\actions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
