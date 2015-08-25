@@ -156,7 +156,6 @@ void AssetCompiler::reload(FileWatch* watch) {
 	int signature[] = {0,8,15};
 	if ( loader.open(watch->binaryName,signature,3)) {
 		//watch->serializer->load(loader);
-		loader.close();
 	}
 }
 
@@ -209,7 +208,6 @@ void AssetCompiler::load(const char* fileName,Serializer* serializer,uint32 type
 		if ( loader.open(buffer,signature,3) == 0 ) {
 			serializer->load(&loader);
 		}
-		loader.close();
 	}
 	else {
 		LOGEC("AssetCompiler") << "Cannot find file: " << buffer;
@@ -238,7 +236,6 @@ void AssetCompiler::update() {
 				int signature[] = {0,8,15};
 				if ( loader.open(buffer,signature,3) == 0 ) {
 					watch->serializer->load(&loader);
-					loader.close();
 				}
 				else {
 					LOGEC("AssetCompiler") << "Cannot reload binary file " << buffer;

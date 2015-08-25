@@ -54,12 +54,6 @@ public:
         return m_CurrentHeader->version;
     }
     /*
-     * Closes the file
-     * 
-     * @return IO_OK in case of success or an error code
-     */
-    uint32 close();
-    /*
      * Returns the current error code 
      * 
      * @return current error code
@@ -98,9 +92,13 @@ private:
     uint32 m_StartPos;
     ChunkHeader* m_CurrentHeader;
     int m_CurrentPos;
-    FILE* m_Stream;
+    //FILE* m_Stream;
     uint32 m_ErrorCode;
     uint32 m_Index;
+
+	DWORD _size;
+	char* _data;
+	DWORD _index;
 };
 
 #endif	/* BINARYLOADER_H */

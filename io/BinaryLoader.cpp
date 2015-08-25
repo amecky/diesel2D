@@ -6,8 +6,9 @@
  */
 
 #include "BinaryLoader.h"
+#include "..\utils\Log.h"
 
-BinaryLoader::BinaryLoader() : m_Stream(0) {
+BinaryLoader::BinaryLoader() : _data(0) {
     m_CurrentHeader = new ChunkHeader();
 }
 
@@ -18,38 +19,46 @@ BinaryLoader::~BinaryLoader() {
 	if ( m_CurrentHeader != 0 ) {
 		delete m_CurrentHeader;
 	}
-    close();
+	if (_data != 0) {
+		delete[] _data;
+	}
 }
 
 // ------------------------------------------------------
 // Open file
 // ------------------------------------------------------
 uint32 BinaryLoader::open(const char* name, int* signature, uint32 signatureLength) {
-    if (m_Stream != 0) {
+	_index = 0;
+	HANDLE hFile = CreateFile(name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile != INVALID_HANDLE_VALUE) {
+		_size = GetFileSize(hFile, 0);
+		LOG << "Size of " << name << " : " << _size;
+		_data = new char[_size];
+		DWORD read;
+		if (ReadFile(hFile, _data, _size, &read, 0)) {
+			LOG << "Data read: " << read;
+		}
+		else {
+			delete[] _data;
+			_data = 0;
+		}
+		CloseHandle(hFile);
+		
+	}
+	else {
         m_ErrorCode = IO_ALREADY_OPEN;
         return m_ErrorCode;
     }
-    // open stream
-    m_Stream = fopen(name, "rb");
-    if (!m_Stream) {
-        m_ErrorCode = IO_ERROR;
-        return m_ErrorCode;
-    }
-    
     int* tmp = new int[signatureLength];
-    m_CurrentPos = signatureLength * sizeof(int);
-    if (fread(tmp, signatureLength * sizeof(int), 1, m_Stream) != 1) {
-        m_ErrorCode = IO_WRITE_ERROR;
-        return m_ErrorCode;
-    }
-    for ( int i = 0; i < signatureLength; ++i ) {
-        if ( tmp[i] != signature[i] ) {
-            delete[] tmp;
-            close();
-            return IO_INVALID_FILE;
-        }
-    }
-    m_StartPos = ftell(m_Stream);
+	int current = 0;
+	for (int i = 0; i < signatureLength; ++i) {
+		read(&current);
+		if (signature[i] != current) {
+			return IO_INVALID_FILE;
+		}
+	}
+	m_CurrentPos = _index;
+	m_StartPos = _index;
     delete[] tmp;
     return IO_OK;
 }
@@ -58,16 +67,18 @@ uint32 BinaryLoader::open(const char* name, int* signature, uint32 signatureLeng
 // Open chunk
 // ------------------------------------------------------
 uint32 BinaryLoader::openChunk() {
-    if ( m_Stream == 0 ) {
+    if ( _data == 0 ) {
         m_ErrorCode = IO_NO_STREAM;
         return m_ErrorCode;
     }
-    if ( fread(m_CurrentHeader,sizeof(ChunkHeader),1,m_Stream) != 1 ) {
-        m_ErrorCode = IO_ERROR;
-        return m_ErrorCode;
-    }
-    //printf("current header id: %d version %d size %d\n",m_CurrentHeader->id,m_CurrentHeader->version,m_CurrentHeader->size);
-    return IO_OK;
+	m_CurrentPos = _index;
+	if (readBuffer(m_CurrentHeader, sizeof(ChunkHeader)) == IO_OK) {
+		return IO_OK;
+	}
+	else {
+		m_ErrorCode = IO_ERROR;
+		return m_ErrorCode;
+	}
 }
 
 void BinaryLoader::read(float* value) {
@@ -176,40 +187,30 @@ void BinaryLoader::read(std::string& str) {
 // ------------------------------------------------------
 void BinaryLoader::closeChunk() {
     int pos = m_CurrentPos + m_CurrentHeader->size;
-    fseek(m_Stream,pos,SEEK_SET);
-    m_CurrentPos = pos;
-}
-
-// ------------------------------------------------------
-// Close 
-// ------------------------------------------------------
-uint32 BinaryLoader::close() {
-    if ( m_Stream != 0 ) {
-        fclose(m_Stream);
-    }
-    m_Stream = 0;
-    return IO_OK;
+	_index = pos;
 }
 
 // ------------------------------------------------------
 // Reset 
 // ------------------------------------------------------
 void BinaryLoader::reset() {
-   fseek(m_Stream,m_StartPos,SEEK_SET);
-   m_CurrentPos = m_StartPos;
+   _index = m_StartPos;
 }
 
 // ------------------------------------------------------
 // Read 
 // ------------------------------------------------------
 uint32 BinaryLoader::readBuffer(void* buffer, uint32 size) {
-    if ( m_Stream == 0 ) {
+	if (_data == 0) {
+		m_ErrorCode = IO_NO_STREAM;
+		return m_ErrorCode;
+	}
+	if (_index + size <= _size) {
+		memcpy(buffer, _data + _index, size);
+		_index += size;
+	}
+	else {
         m_ErrorCode = IO_NO_STREAM;
-        return m_ErrorCode;
-    }
-    int realSize = fread(buffer,size,1,m_Stream);
-    if ( realSize != size ) {
-        m_ErrorCode = IO_INVALID_DATA;
         return m_ErrorCode;
     }
     return IO_OK;
