@@ -36,6 +36,7 @@ BaseApp::BaseApp() {
 	rand.seed(GetTickCount());
 	audio = new AudioManager;
 	m_Fullscreen = false;
+	_totalTime = 0.0f;
 }
 
 // -------------------------------------------------------
@@ -154,7 +155,7 @@ void BaseApp::updateTime() {
 	m_LastTime = m_CurTime;
 	m_GameTime.elapsed = g_fElapsedTime;
 	m_GameTime.elapsedMillis = static_cast<uint32>(g_fElapsedTime * 1000.0f);
-	m_GameTime.totalTime += m_GameTime.elapsedMillis;
+	m_GameTime.totalTime += m_GameTime.elapsed;
 }
 
 // -------------------------------------------------------
@@ -205,32 +206,20 @@ void BaseApp::buildFrame() {
 	}
 	sprites::begin();
 	if ( m_Running ) {
+		_totalTime += m_GameTime.elapsed;
 		PR_START("UPDATE")
 		gui.updateMousePos(getMousePos());
-		PR_START("GameObjects::update")
-		//if ( !m_Paused ) {
-			for ( size_t i = 0; i < m_GameObjects.size(); ++i ) {
-				GameObject* obj = m_GameObjects[i];
-				obj->resetEvents();
-				if (obj->isActive()) {				
-					obj->update(m_GameTime.elapsed);
-				}
-			}
-		//}
-	
 		PR_END("GameObjects::update")
 		PR_START("Game::update")
-		update(m_GameTime);
+		update(m_GameTime.elapsed);
 		PR_END("Game::update")
-		PRS("Collisions::check")
-		PRE("Collisions::check")
 		PR_END("UPDATE")
 	}
 	PR_START("RENDER")
 	renderer::beginRendering(m_ClearColor);	
 	renderer::setupMatrices();
 	PR_START("RENDER_GAME")
-	draw(m_GameTime);
+	draw();
 	PR_END("RENDER_GAME")
 	//m_World.draw();
 	PRS("RENDER_GUI")

@@ -3,7 +3,6 @@
 #include "..\lib\container\List.h"
 #include "..\io\Serializer.h"
 #include <IPath.h>
-#include "..\base\GameObject.h"
 #include "..\data\Gizmo.h"
 #include "Particle.h"
 #include "..\renderer\Camera2D.h"

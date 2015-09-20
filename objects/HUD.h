@@ -3,7 +3,6 @@
 #include "..\utils\GameTimer.h"
 #include "..\io\Serializer.h"
 #include "..\sprites\Sprite.h"
-#include "..\base\GameObject.h"
 #include "..\renderer\BitmapFont.h"
 
 namespace ds {
@@ -13,7 +12,7 @@ const int MAX_TIMER = 8;
 const int MAX_HUD_IMAGES = 64;
 const int MAX_HUD_NUMBERS = 8;
 
-class HUD : public GameObject , public Serializer {
+class HUD : public Serializer {
 
 struct NumberDef {
 	float start;

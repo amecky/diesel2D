@@ -163,19 +163,7 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	//flag |= _CRTDBG_DELAY_FREE_MEM_DF;
 	_CrtSetDbgFlag(flag); // Set flag to the new value
 #endif
-	
-	//_CrtSetBreakAlloc(101);
-	//initCPU();
 
-	// Make sure we're running in the exe's path
-	/*
-	char path[MAX_PATH];
-	if (GetModuleFileName(NULL, path, sizeof(path))){
-		char *slash = strrchr(path, '\\');
-		if (slash) *slash = '\0';
-        chdir(path);
-	}
-	*/
 	WNDCLASS wincl;
 	wincl.hInstance = hThisInst;
 	wincl.lpszClassName = "Diesel";

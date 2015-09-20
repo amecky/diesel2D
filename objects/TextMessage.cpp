@@ -7,7 +7,7 @@
 
 namespace ds {
 
-TextMessage::TextMessage() : GameObject() , m_TextCounter(0) , m_Total(0) {	
+TextMessage::TextMessage() : m_TextCounter(0) , m_Total(0) {	
 }
 
 void TextMessage::init(const char* fontName,int textureID) {
@@ -92,13 +92,11 @@ void TextMessage::setColor(uint32 id,const Color& color) {
 // Render
 // -------------------------------------------------------
 void TextMessage::render() {
-	if ( isActive() ) {
-		for ( size_t i = 0; i < m_TextEntries.size(); ++i ) {
-			TextEntry* te = &m_TextEntries[i];
-			if ( te->active ) {
-				for ( size_t j = 0; j < te->sprites.size(); ++j ) {
-					sprites::draw(te->sprites[j]);
-				}
+	for ( size_t i = 0; i < m_TextEntries.size(); ++i ) {
+		TextEntry* te = &m_TextEntries[i];
+		if ( te->active ) {
+			for ( size_t j = 0; j < te->sprites.size(); ++j ) {
+				sprites::draw(te->sprites[j]);
 			}
 		}
 	}

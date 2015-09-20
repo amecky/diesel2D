@@ -3,7 +3,6 @@
 #include <vector>
 #include "..\renderer\render_types.h"
 #include "..\sprites\Sprite.h"
-#include "..\base\GameObject.h"
 #include "..\renderer\BitmapFont.h"
 
 namespace ds {
@@ -24,7 +23,7 @@ struct TextEntry {
 // -------------------------------------------------------
 // TextEntity
 // -------------------------------------------------------
-class TextMessage : public GameObject {
+class TextMessage {
 
 typedef std::vector<TextEntry> TextEntries;
 

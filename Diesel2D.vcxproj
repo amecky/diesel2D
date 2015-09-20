@@ -317,7 +317,6 @@
     <ClInclude Include="audio\Sound.h" />
     <ClInclude Include="base\ApplicationContext.h" />
     <ClInclude Include="base\EventStream.h" />
-    <ClInclude Include="base\GameObject.h" />
     <ClInclude Include="base\GameState.h" />
     <ClInclude Include="base\Settings.h" />
     <ClInclude Include="collision\BroadPhaseDetector.h" />

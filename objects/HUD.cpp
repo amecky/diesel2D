@@ -11,7 +11,7 @@
 
 namespace ds {
 
-HUD::HUD() : GameObject() {}
+HUD::HUD() {}
 
 
 HUD::~HUD() {

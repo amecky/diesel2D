@@ -290,6 +290,11 @@ namespace ds {
 		return Vector2f(vx,vy);
 	}
 
+	void radial_velocity(float angle, float velocity,v2* vel) {
+		vel->x = (float)cos(angle)*velocity;
+		vel->y = (float)sin(angle)*velocity;
+	}
+
 	float getAngle(float x1,float y1,float x2,float y2) {
 		double x = x2 - x1;
 		double y = y2 - y1;	
@@ -325,10 +330,9 @@ namespace ds {
 		}
 	}
 
-	float getTargetAngle(const Vector2f& v1,const Vector2f& v2) {	
-		Vector2f diff = v2 - v1;
-		//LOG << "diff " << DBG_V2(diff);
-		float angle = getAngle(V2_RIGHT,diff);// + PI;// + D3DX_PI;
+	float getTargetAngle(const Vector2f& target,const Vector2f& pos) {	
+		Vector2f diff = target - pos;
+		float angle = getAngle(V2_RIGHT,diff);
 		if ( angle >= TWO_PI ) {
 			angle -= TWO_PI;
 		}
@@ -514,6 +518,12 @@ namespace ds {
 			float r = minf + (maxf - minf)* (float)rand();
 			return static_cast<int>(r);
 		}
+
+		bool chanceRoll(int min) {
+			int r = random(0, 100);
+			return r <= min;
+		}
+
 
 
 		bool solveQuadraticFormula(const float a,const float b,const float c,float* r1,float* r2) {

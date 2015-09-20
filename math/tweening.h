@@ -1,6 +1,6 @@
 #pragma once
 #include <Vector.h>
-
+// http://gizma.com/easing/
 namespace tweening {
 
 	typedef float (*TweeningType)(float,float,float);

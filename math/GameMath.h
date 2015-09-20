@@ -24,6 +24,9 @@ namespace ds {
 		void clamp(int* value,int min,int max);
 		void clamp(float* value,float min,float max);
 		float clamp(float value,float min = 0.0f,float max = 1.0f);
+
+		void radial_velocity(float angle, float velocity, v2* vel);
+
 		Vector2f getRadialVelocity(float angle,float vel);
 		Vector2f getTargetVelocity(const Vector2f& targetPosition,const Vector2f& currentPosition,float* angle,float vel);
 		float getAngle(float x1,float y1,float x2,float y2);
@@ -68,6 +71,10 @@ namespace ds {
 		// Get random int between min and max
 		// -------------------------------------------------------
 		int random(int min,int max);
+		// -------------------------------------------------------
+		// get random between 0 - 100 and returns true if below min
+		// -------------------------------------------------------
+		bool chanceRoll(int min);
 		// -------------------------------------------------------
 		// Check if two circles overlap
 		// -------------------------------------------------------

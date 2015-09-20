@@ -4,7 +4,6 @@
 #include "..\utils\mtrand.h"
 #include "..\dialogs\DialogManager.h"
 #include "..\audio\AudioManager.h"
-#include "GameObject.h"
 #include "..\compiler\AssetCompiler.h"
 #include "..\renderer\graphics.h"
 
@@ -16,12 +15,10 @@ class StateMachine;
 struct GameTime {
 	float elapsed;
 	uint32 elapsedMillis;
-	uint32 totalTime;
+	float totalTime;
 };
 
 class BaseApp {
-
-typedef std::vector<GameObject*> GameObjects;
 
 struct DebugInfo {
 	bool showProfiler;
@@ -57,8 +54,8 @@ public:
 	virtual bool loadContent() {
 		return true;
 	}
-	virtual void update(const GameTime& gameTime) {}
-	virtual void draw(const GameTime& gameTime) {}
+	virtual void update(float dt) {}
+	virtual void draw() {}
 	virtual void handleCollisions() {}
 	void setInstance(const HINSTANCE hInst){ 
 		hInstance = hInst; 
@@ -95,24 +92,13 @@ public:
 		m_TwistedMousePos.y = renderer::getScreenHeight() - static_cast<float>(y);
 		renderer::setMousePosition(m_TwistedMousePos.x, m_TwistedMousePos.y);
 	}
-	float random(float min,float max) {
-		return min + (max - min)* (float)rand();
-	}	
 	template<class S>
-	void createGameObject(S* obj);
-	//void createParticleSystem(const char* fileName,int textureID,ParticleSystem* entity,int maxParticles,int blendState = -1);
 	StateMachine* getStateMachine() const {
 		return stateMachine;
 	}
 	DialogManager* getGUI() {
 		return &gui;
 	}
-	//Renderer* getRenderer() {
-		//return renderer;
-	//}
-	//AssetCompiler* getAssets() {
-		//return &assets;
-	//}
 	AudioManager* getAudio() {
 		return audio;
 	}
@@ -126,10 +112,8 @@ protected:
 	virtual void OnKeyUp( WPARAM wParam ) {}
 	virtual void onGUIButton(DialogID dlgID,int button) {}
 	virtual void OnChar(char ascii,unsigned int keyState) {}
-	//Renderer* renderer;
 	DialogManager gui;
 	AudioManager* audio;
-	//AssetCompiler assets;
 	HINSTANCE hInstance;
 	HWND m_hWnd;
 	bool m_Active;
@@ -140,6 +124,7 @@ protected:
 	GameTime m_GameTime;
 	Color m_ClearColor;
 	StateMachine* stateMachine;
+	float _totalTime;
 private:
 	Vector2f m_MousePos;
 	Vector2f m_TwistedMousePos;
@@ -151,19 +136,8 @@ private:
 	DebugInfo m_DebugInfo;
 	ButtonState m_ButtonState;
 	MTRand_open rand;		
-	GameObjects m_GameObjects;
 	bool m_Running;
 	
 }; 
-
-template<class S>
-void BaseApp::createGameObject(S* obj) {
-	//obj->setParticleManager(particles);
-	//obj->setAssetCompiler(&assets);
-	obj->setAudioManager(audio);
-	obj->init();
-	obj->GameObject::setActive(true);
-	m_GameObjects.push_back(obj);
-}
 
 };

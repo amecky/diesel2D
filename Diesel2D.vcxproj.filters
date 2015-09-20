@@ -437,9 +437,6 @@
     <ClInclude Include="base\ApplicationContext.h">
       <Filter>base</Filter>
     </ClInclude>
-    <ClInclude Include="base\GameObject.h">
-      <Filter>base</Filter>
-    </ClInclude>
     <ClInclude Include="objects\HUD.h">
       <Filter>objects</Filter>
     </ClInclude>
