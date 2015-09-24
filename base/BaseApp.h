@@ -7,10 +7,10 @@
 #include "..\compiler\AssetCompiler.h"
 #include "..\renderer\graphics.h"
 
+
 namespace ds {
 
-class GameStateManager;
-class StateMachine;
+class GameStateMachine;
 
 struct GameTime {
 	float elapsed;
@@ -92,16 +92,6 @@ public:
 		m_TwistedMousePos.y = renderer::getScreenHeight() - static_cast<float>(y);
 		renderer::setMousePosition(m_TwistedMousePos.x, m_TwistedMousePos.y);
 	}
-	template<class S>
-	StateMachine* getStateMachine() const {
-		return stateMachine;
-	}
-	DialogManager* getGUI() {
-		return &gui;
-	}
-	AudioManager* getAudio() {
-		return audio;
-	}
 protected:
 	void loadSprites();
 	void initializeGUI();
@@ -114,6 +104,7 @@ protected:
 	virtual void OnChar(char ascii,unsigned int keyState) {}
 	DialogManager gui;
 	AudioManager* audio;
+	GameStateMachine* stateMachine;
 	HINSTANCE hInstance;
 	HWND m_hWnd;
 	bool m_Active;
@@ -123,7 +114,6 @@ protected:
 	bool m_Fullscreen;
 	GameTime m_GameTime;
 	Color m_ClearColor;
-	StateMachine* stateMachine;
 	float _totalTime;
 private:
 	Vector2f m_MousePos;

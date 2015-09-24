@@ -9,6 +9,7 @@
 #include "..\particles\ParticleSystem.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\renderer\graphics.h"
+#include "GameStateMachine.h"
 
 namespace ds {
 
@@ -37,6 +38,7 @@ BaseApp::BaseApp() {
 	audio = new AudioManager;
 	m_Fullscreen = false;
 	_totalTime = 0.0f;
+	stateMachine = new GameStateMachine;
 }
 
 // -------------------------------------------------------
@@ -44,6 +46,7 @@ BaseApp::BaseApp() {
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
 	LOGC("BaseApp") << "Destructing all elements";
+	delete stateMachine;
 	//delete gProfiler;
 	delete audio;
 	renderer::shutdown();	
@@ -186,6 +189,7 @@ void BaseApp::buildFrame() {
 		m_KeyStates.onChar = false;
 		// if any dialog has processed the char then do not propagate it
 		if ( !gui.OnChar(m_KeyStates.ascii,0) ) {
+			stateMachine->onChar(m_KeyStates.ascii);
 			OnChar(m_KeyStates.ascii,0);
 		}
 	}
@@ -193,14 +197,17 @@ void BaseApp::buildFrame() {
 	if ( !m_ButtonState.processed ) {
 		m_ButtonState.processed = true;
 		if ( m_ButtonState.down ) {
+			stateMachine->onButtonDown(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
 			OnButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);
 			DialogID did;
 			int selected;
 			if ( gui.onButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y,&did,&selected) ) {			
 				onGUIButton(did,selected);
+				stateMachine->onGUIButton(did, selected);
 			}
 		}
 		else {
+			stateMachine->onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
 			OnButtonUp(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);
 		}
 	}
@@ -212,6 +219,7 @@ void BaseApp::buildFrame() {
 		PR_END("GameObjects::update")
 		PR_START("Game::update")
 		update(m_GameTime.elapsed);
+		stateMachine->update(m_GameTime.elapsed);
 		PR_END("Game::update")
 		PR_END("UPDATE")
 	}
@@ -220,6 +228,9 @@ void BaseApp::buildFrame() {
 	renderer::setupMatrices();
 	PR_START("RENDER_GAME")
 	draw();
+	ds::sprites::begin();	
+	stateMachine->render();
+	ds::sprites::flush();
 	PR_END("RENDER_GAME")
 	//m_World.draw();
 	PRS("RENDER_GUI")

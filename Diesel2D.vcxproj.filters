@@ -650,6 +650,9 @@
     <ClInclude Include="world\actions\RemoveAfterAction.h">
       <Filter>world\actions</Filter>
     </ClInclude>
+    <ClInclude Include="base\GameStateMachine.h">
+      <Filter>base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico" />

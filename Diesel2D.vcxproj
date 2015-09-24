@@ -318,6 +318,7 @@
     <ClInclude Include="base\ApplicationContext.h" />
     <ClInclude Include="base\EventStream.h" />
     <ClInclude Include="base\GameState.h" />
+    <ClInclude Include="base\GameStateMachine.h" />
     <ClInclude Include="base\Settings.h" />
     <ClInclude Include="collision\BroadPhaseDetector.h" />
     <ClInclude Include="collision\CollisionDetectionSystem.h" />
