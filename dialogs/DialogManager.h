@@ -27,7 +27,7 @@ public:
 	void toggle(const char* oldDialogName,const char* newDialogName);
 	void activate(const char* dialogName);
 	void deactivate(const char* dialogName);
-	bool onButtonDown(int button,int x,int y,DialogID* dlgId,int* selected);
+	bool onButtonUp(int button,int x,int y,DialogID* dlgId,int* selected);
 	bool OnChar(char ascii,unsigned int keyState);
 	void updateMousePos(const Vector2f& mousePos);
 	GUIDialog* get(const char* dialogName);

@@ -198,17 +198,19 @@ void BaseApp::buildFrame() {
 		m_ButtonState.processed = true;
 		if ( m_ButtonState.down ) {
 			stateMachine->onButtonDown(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
-			OnButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);
-			DialogID did;
-			int selected;
-			if ( gui.onButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y,&did,&selected) ) {			
-				onGUIButton(did,selected);
-				stateMachine->onGUIButton(did, selected);
-			}
+			OnButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);			
 		}
 		else {
-			stateMachine->onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
-			OnButtonUp(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);
+			DialogID did;
+			int selected;
+			if (gui.onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y, &did, &selected)) {
+				onGUIButton(did, selected);
+				stateMachine->onGUIButton(did, selected);
+			}
+			else {
+				stateMachine->onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
+				OnButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
+			}
 		}
 	}
 	sprites::begin();

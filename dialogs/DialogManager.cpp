@@ -107,7 +107,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// On button down
 	// -------------------------------------------------------
-	bool DialogManager::onButtonDown(int button,int x,int y,DialogID* dlgId,int* selected) {
+	bool DialogManager::onButtonUp(int button,int x,int y,DialogID* dlgId,int* selected) {
 		for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
 			GUIDialog* dlg = m_Dialogs[i];
 			if ( dlg->isActive() ) {
