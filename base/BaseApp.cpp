@@ -60,7 +60,7 @@ BaseApp::~BaseApp() {
 // Init
 // -------------------------------------------------------
 void BaseApp::init() {
-	LOGC("BaseApp") << "----------------- Init ----------------------";
+	LOGC("BaseApp") << "---> Init <---";
 	Settings settings;
 	settings.fullscreen = m_Fullscreen;
 	settings.height = m_Height;
@@ -73,14 +73,11 @@ void BaseApp::init() {
 
 	profiler::init();
 	sprites::init();
-	initialize();		
-	LOGC("BaseApp") << "------------ Loading content  ---------------";
+	LOGC("BaseApp") << "---> Start loading content <---";
 	loadContent();	
-	LOGC("BaseApp") << "------------ Loading content  ---------------";
+	LOGC("BaseApp") << "---> End loading content   <---";
 	m_Loading = false;
-	LOGC("BaseApp") << "------------ Initialize  ---------------";
-	initialize();
-	LOGC("BaseApp") << "------------ Initialize  ---------------";	
+	stateMachine->initializeStates();
 	m_Running = true;
 }
 

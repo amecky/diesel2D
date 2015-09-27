@@ -32,13 +32,9 @@ uint32 BinaryLoader::open(const char* name, int* signature, uint32 signatureLeng
 	HANDLE hFile = CreateFile(name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile != INVALID_HANDLE_VALUE) {
 		_size = GetFileSize(hFile, 0);
-		LOG << "Size of " << name << " : " << _size;
 		_data = new char[_size];
 		DWORD read;
-		if (ReadFile(hFile, _data, _size, &read, 0)) {
-			LOG << "Data read: " << read;
-		}
-		else {
+		if (!ReadFile(hFile, _data, _size, &read, 0)) {
 			delete[] _data;
 			_data = 0;
 		}

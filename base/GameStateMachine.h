@@ -28,8 +28,13 @@ public:
 	}
 	void add(GameState* gameState) {
 		gameState->setStateMachine(this);
-		gameState->init();
+		//gameState->init();
 		_gameStates.push_back(gameState);
+	}
+	void initializeStates() {
+		for (size_t i = 0; i < _gameStates.size(); ++i) {
+			_gameStates[i]->init();
+		}
 	}
 	void activate(const char* name) {
 		int idx = find(name);

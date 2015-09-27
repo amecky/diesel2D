@@ -56,6 +56,7 @@ int HUD::addText(int x,int y,const std::string& txt,const ds::Color& color,float
 		}
 	}
 	if ( id != -1 ) {
+		LOGC("HUD") << "adding text - id: " << id;
 		HUDText* ht = &m_TextEntries[id];
 		ht->entryID = createEntry(Vector2f(x,y),scale,color);		
 		ht->text = txt;	
@@ -77,6 +78,7 @@ void HUD::addText(int id,int x,int y,const std::string& txt,const ds::Color& col
 		}
 	}
 	if ( index != -1 ) {
+		LOGC("HUD") << "adding text - id: " << id;
 		HUDText* ht = &m_TextEntries[index];
 		ht->id = id;
 		ht->entryID = createEntry(Vector2f(x,y),scale,color);		
@@ -104,6 +106,7 @@ void HUD::setText(int id,const std::string& txt) {
 // -------------------------------------------------------
 void HUD::addCounter(int id,int x,int y,int length,int value,const ds::Color& color,float scale) {
 	assert(id >= 0 && id < MAX_COUNTER);
+	LOGC("HUD") << "adding counter - id: " << id;
 	HUDCounter* hc = &m_Counter[id];
 	assert(hc->flag == -1);
 	hc->entryID = createEntry(Vector2f(x,y),scale,color);
@@ -119,6 +122,7 @@ void HUD::addCounter(int id,int x,int y,int length,int value,const ds::Color& co
 // -------------------------------------------------------
 void HUD::addImage(int id,int x,int y,const Rect& texturRect,const Color& color,float scale) {
 	assert(id >= 0 && id < MAX_HUD_IMAGES);
+	LOGC("HUD") << "adding image - id: " << id;
 	HUDImage* hi = &m_Images[id];
 	assert(hi->flag == -1);
 	hi->entryID = createEntry(Vector2f(x,y),scale,color);
@@ -137,6 +141,7 @@ void HUD::addImage(int id,int x,int y,const Rect& texturRect,const Color& color,
 // -------------------------------------------------------
 void HUD::addTimer(int id,int x,int y,const ds::Color& color,float scale) {
 	assert(id >= 0 && id < MAX_TIMER);
+	LOGC("HUD") << "adding timer - id: " << id;
 	HUDTimer* hc = &m_Timer[id];
 	assert(hc->flag == -1);
 	hc->entryID = createEntry(Vector2f(x,y),scale,color);

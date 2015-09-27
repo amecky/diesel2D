@@ -48,9 +48,6 @@ public:
 	BaseApp();
 	virtual ~BaseApp();
 	void init();
-	bool virtual initialize() {
-		return true;
-	}
 	virtual bool loadContent() {
 		return true;
 	}
