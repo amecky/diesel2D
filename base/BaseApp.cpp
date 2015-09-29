@@ -59,7 +59,7 @@ BaseApp::~BaseApp() {
 // -------------------------------------------------------
 // Init
 // -------------------------------------------------------
-void BaseApp::init() {
+void BaseApp::prepare() {
 	LOGC("BaseApp") << "---> Init <---";
 	Settings settings;
 	settings.fullscreen = m_Fullscreen;
@@ -76,8 +76,9 @@ void BaseApp::init() {
 	LOGC("BaseApp") << "---> Start loading content <---";
 	loadContent();	
 	LOGC("BaseApp") << "---> End loading content   <---";
-	m_Loading = false;
 	stateMachine->initializeStates();
+	m_Loading = false;	
+	init();
 	m_Running = true;
 }
 

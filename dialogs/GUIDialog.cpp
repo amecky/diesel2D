@@ -130,17 +130,13 @@ namespace ds {
 	void GUIDialog::updateText(int id,const std::string& text) {	
 		GUIItem* item = findByID(id);
 		assert(item != 0);
-		Vector2f p(0, 0);// = item->pos;
-		/*
 		if ( item->centered ) {
 			Vector2f size = font::calculateSize(*m_BitmapFont,text,4,item->scale,item->scale);
-			p.x = (renderer::getScreenWidth() - size.x) * 0.5f;
+			item->pos.x = (renderer::getScreenWidth() - size.x) * 0.5f;
 
 		}
-		item->pos.x = p.x;
-		*/
 		item->sprites.clear();
-		font::createText(*m_BitmapFont,p,text,item->color,item->sprites,item->scale,item->scale);	
+		font::createText(*m_BitmapFont,v2(0,0), text, item->color, item->sprites, item->scale, item->scale);
 	}
 
 	// -------------------------------------------------------

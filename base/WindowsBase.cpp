@@ -181,13 +181,9 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	}
 	app->setInstance(hThisInst);
 	app->createWindow();
-	app->init();
+	app->prepare();
 	// Initialize timer
 	app->initTimer();
-
-	//app->loadConfig();
-	//app->initGUI();
-
 	/*
 		Force the main thread to always run on CPU 0.
 		This is done because on some systems QueryPerformanceCounter returns a bit different counter values

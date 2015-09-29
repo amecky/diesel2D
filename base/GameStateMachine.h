@@ -99,7 +99,6 @@ public:
 private:
 	void handleStateTransition(int outcome) {
 		if (outcome != 0) {
-			LOG << "check transition from: " << _currentIndex << " outcome: " << outcome;
 			for (size_t i = 0; i < _connections.size(); ++i) {
 				const FSMConnection& con = _connections[i];
 				if (con.firstStateIndex == _currentIndex && con.outcome == outcome) {

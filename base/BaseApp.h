@@ -47,7 +47,8 @@ struct ButtonState {
 public:
 	BaseApp();
 	virtual ~BaseApp();
-	void init();
+	virtual void init() {}
+	void prepare();
 	virtual bool loadContent() {
 		return true;
 	}
