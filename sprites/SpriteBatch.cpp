@@ -38,8 +38,9 @@ namespace sprites {
 		int index;
 		int maxVertices;
 		int descriptorID;
+		BitmapFont* font;
 
-		SpriteBatchContext() : size(0) {}
+		SpriteBatchContext() : size(0) , font(0) {}
 
 		~SpriteBatchContext() {}
 	};
@@ -56,6 +57,10 @@ namespace sprites {
 		desc.texture = 0;
 		spriteCtx.descriptorID = renderer::addDescriptor(desc);
 		spriteCtx.bufferIndex = renderer::createVertexBuffer(VD_PTC,MAX_SPRITES * 4);
+	}
+
+	void initializeTextSystem(int textureID, const char* fontName) {
+		spriteCtx.font = renderer::loadBitmapFont(fontName, textureID);		
 	}
 
 	int getDescriptorID() {
@@ -91,6 +96,21 @@ namespace sprites {
 	void flush() {
 		end();
 		begin();
+	}
+
+	void drawText(int x, int y, const char* text, float scaleX, float scaleY, const Color& color) {
+		assert(spriteCtx.font != 0);
+		float padding = 0.0f;
+		int len = strlen(text);
+		for (int cnt = 0; cnt < len; ++cnt) {
+			char c = text[cnt];
+			CharDef cd = spriteCtx.font->getCharDef(c);
+			padding = (cd.width + 2)  * scaleX;
+			float dimX = cd.width * scaleX;
+			float dimY = spriteCtx.font->getCharHeight() * scaleY;
+			draw(Vector2f(x + dimX * 0.5f, y + dimY * 0.5f), math::buildTexture(cd.texureRect), 0.0f, scaleX, scaleY, color);
+			x += dimX + 4;
+		}
 	}
 
 	void draw(const Vector2f& pos, int textureID, const Vector4f& uv, const Vector2f& dim, float rotation, float scaleX, float scaleY, const Color& color, const Vector2f& center) {

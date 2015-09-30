@@ -68,6 +68,18 @@ public:
 			handleStateTransition(transition);
 		}
 	}
+	void onKeyDown(WPARAM virtualKey) {
+		if (_activeState != 0) {
+			int transition = _activeState->onKeyDown(virtualKey);
+			handleStateTransition(transition);
+		}
+	}
+	void onKeyUp(WPARAM virtualKey) {
+		if (_activeState != 0) {
+			int transition = _activeState->onKeyUp(virtualKey);
+			handleStateTransition(transition);
+		}
+	}
 	void onButtonUp(int button, int x, int y) {
 		if (_activeState != 0) {
 			int transition = _activeState->onButtonUp(button, x, y);

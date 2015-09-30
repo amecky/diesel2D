@@ -177,10 +177,12 @@ void BaseApp::buildFrame() {
 	PR_START("INPUT")
 	if ( m_KeyStates.keyDown ) {
 		m_KeyStates.keyDown = false;
+		stateMachine->onKeyDown(m_KeyStates.keyPressed);
 		OnKeyDown(m_KeyStates.keyPressed);
 	}
 	if ( m_KeyStates.keyUp ) {
 		m_KeyStates.keyUp = false;
+		stateMachine->onKeyUp(m_KeyStates.keyReleased);
 		OnKeyUp(m_KeyStates.keyReleased);
 	}
 	if ( m_KeyStates.onChar ) {
@@ -227,8 +229,8 @@ void BaseApp::buildFrame() {
 	renderer::beginRendering(m_ClearColor);	
 	renderer::setupMatrices();
 	PR_START("RENDER_GAME")
-	draw();
-	ds::sprites::begin();	
+	ds::sprites::begin();
+	draw();		
 	stateMachine->render();
 	ds::sprites::flush();
 	PR_END("RENDER_GAME")

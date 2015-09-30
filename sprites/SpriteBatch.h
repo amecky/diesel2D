@@ -14,6 +14,8 @@ namespace sprites {
 
 	void init();
 
+	void initializeTextSystem(int textureID, const char* fontName);
+
 	int getDescriptorID();
 
 	void setDescriptorID(int id);
@@ -35,6 +37,8 @@ namespace sprites {
 	void draw(const Texture& texture,const ParticleArray& array);
 
 	void drawTemplate(int id);
+
+	void drawText(int x, int y, const char* text,float scaleX = 1.0f, float scaleY = 1.0f, const Color& color = Color::WHITE);
 
 	void setShaderID(int shaderID);
 

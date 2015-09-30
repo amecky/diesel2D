@@ -34,6 +34,12 @@ public:
 	virtual int onGUIButton(ds::DialogID dlgID, int button) {
 		return 0;
 	}
+	virtual int onKeyDown(WPARAM virtualKey) {
+		return 0;
+	}
+	virtual int onKeyUp(WPARAM virtualKey) {
+		return 0;
+	}
 	IdString getHash() const {
 		return _hash;
 	}
