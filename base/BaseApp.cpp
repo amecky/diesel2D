@@ -187,11 +187,8 @@ void BaseApp::buildFrame() {
 	}
 	if ( m_KeyStates.onChar ) {
 		m_KeyStates.onChar = false;
-		// if any dialog has processed the char then do not propagate it
-		if ( !gui.OnChar(m_KeyStates.ascii,0) ) {
-			stateMachine->onChar(m_KeyStates.ascii);
-			OnChar(m_KeyStates.ascii,0);
-		}
+		stateMachine->onChar(m_KeyStates.ascii);
+		OnChar(m_KeyStates.ascii,0);
 	}
 	PR_END("INPUT")
 	if ( !m_ButtonState.processed ) {

@@ -45,13 +45,6 @@ namespace ds {
 	}
 
 	// -------------------------------------------------------
-	// Toggle the state of two dialogs
-	// -------------------------------------------------------
-	void DialogManager::toggle(const char* oldDialogName,const char* newDialogName) {
-		deactivate(oldDialogName);
-		activate(newDialogName);
-	}
-	// -------------------------------------------------------
 	// Activate dialog
 	// -------------------------------------------------------
 	void DialogManager::activate(const char* dialogName) {
@@ -115,34 +108,11 @@ namespace ds {
 				if ( ret != -1 ) {
 					*dlgId = dlg->getDialogID();
 					*selected = ret;
-					// check if we have a toggleAction
-					for ( size_t j = 0; j < m_ToggleActions.size(); ++j ) {
-						ToggleAction* ta = &m_ToggleActions[j];
-						if ( ta->buttonId == ret && ta->oldDialog->getHashName() == dlg->getHashName() ) {
-							ta->oldDialog->deactivate();
-							ta->newDialog->activate();
-						}
-					}
 					return true;
 				}
 			}
 		}
 		return false;
-	}
-
-	// -------------------------------------------------------
-	// Add direct toggle action
-	// -------------------------------------------------------
-	void DialogManager::addToggleAction(const char* oldDialogName,const char* newDialogName,int buttonId) {
-		GUIDialog* oldDlg = get(oldDialogName);
-		GUIDialog* newDlg = get(newDialogName);
-		assert(oldDlg != 0);
-		assert(newDlg != 0);
-		ToggleAction ta;
-		ta.oldDialog = oldDlg;
-		ta.newDialog = newDlg;
-		ta.buttonId = buttonId;
-		m_ToggleActions.push_back(ta);	
 	}
 
 	// -------------------------------------------------------
@@ -169,19 +139,6 @@ namespace ds {
 			}
 		}
 		return 0;
-	}
-
-	// -------------------------------------------------------
-	// OnChar
-	// -------------------------------------------------------
-	bool DialogManager::OnChar(char ascii,unsigned int keyState) {
-		for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
-			GUIDialog* dlg = m_Dialogs[i];
-			if ( dlg->OnChar(ascii) ) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	void DialogManager::load(BinaryLoader* loader) {

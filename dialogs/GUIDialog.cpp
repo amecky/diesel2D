@@ -160,36 +160,7 @@ namespace ds {
 		}	
 		return -1;
 	}
-
-	// -------------------------------------------------------
-	// OnChar
-	// -------------------------------------------------------
-	bool GUIDialog::OnChar(char ascii) {
-		/*
-		if ( m_Active && !m_InputFields.empty() && m_SelectedInput != -1 ) {
-			LOG << "dialog char " << (int)ascii;
-			for ( size_t i = 0; i < m_InputFields.size(); ++i ) {
-				InputField* input = &m_InputFields[i];
-				if ( input->id == m_SelectedInput ) {
-					if ( ascii == 8 ) {
-						if ( input->text.length() > 0 ) {
-							input->text.erase(input->text.length()-1,1);	
-						}
-					}
-					else {
-						if ( input->text.length() < input->size ) {
-							input->text += ascii;
-						}
-					}
-					// FIXME: adapt to new method
-					//updateText(input->textIndex,input->text,false);
-					return true;
-				}
-			}
-		}
-		*/
-		return false;
-	}
+	
 	// -------------------------------------------------------
 	// Set button texture
 	// -------------------------------------------------------

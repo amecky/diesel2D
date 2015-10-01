@@ -129,7 +129,6 @@ public:
 		return m_HashName;
 	}
 	void updateMousePos(const Vector2f& mousePos);
-	bool OnChar(char ascii);
 	const DialogID& getDialogID() const {
 		return m_ID;
 	}
