@@ -3,28 +3,23 @@
 
 namespace ds {
 
-struct Settings {
-	int width;
-	int height;
-	LPCSTR title;
-	int mode;
-	bool synched;
-	Color clearColor;
-	bool fullscreen;
-	bool postProcessing;
-	bool readPlainResources;
-	Settings() { 
-		width = 800; 
-		height = 800; 
-		title = "Title"; 
-		mode = 0; 
-		synched = false; 
-		clearColor = Color(0.0f,0.0f,0.0f,1.0f); 
-		fullscreen = false; 
-		postProcessing = false;
-		readPlainResources = true;
-	}
-};
+	struct Settings {
 
-};
+		Color clearColor;
+		int screenWidth;
+		int screenHeight;
+		bool fullScreen;
+		bool synched;
+		int mode;
 
+		Settings() {
+			int screenWidth = 1024;
+			int screenHeight = 768;
+			clearColor = Color(100, 149, 237);
+			fullScreen = false;
+			synched = true;
+			mode = 1;
+		}
+	};
+
+}

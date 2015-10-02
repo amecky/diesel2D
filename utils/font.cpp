@@ -11,14 +11,16 @@ namespace ds {
 		// -------------------------------------------------------
 		Vector2f calculateSize(const BitmapFont& bitmapFont,const std::string& text,int padding,float scaleX,float scaleY) {
 			float cPadding = 0.0f;
-			Vector2f ret(0.0f,0.0f);
+			v2 ret(0.0f,0.0f);
 			ret.y = bitmapFont.getCharHeight() * scaleY;
 			for ( size_t cnt = 0; cnt < text.length(); ++cnt ) {
 				char c = text[cnt];
-				CharDef cd = bitmapFont.getCharDef(c);
-				cPadding = (cd.width+padding)  * scaleX;		
-				float dimX = cd.width * scaleX;
-				ret.x += dimX + padding;				
+				if (bitmapFont.contains(c)) {
+					CharDef cd = bitmapFont.getCharDef(c);
+					cPadding = (cd.width + padding)  * scaleX;
+					float dimX = cd.width * scaleX;
+					ret.x += dimX + padding;
+				}
 			}
 			return ret;
 		}
@@ -33,18 +35,20 @@ namespace ds {
 			float z = 0.0f;			
 			for ( size_t cnt = 0; cnt < text.length(); ++cnt ) {
 				char c = text[cnt];
-				CharDef cd = bitmapFont.getCharDef(c);
-				padding = (cd.width+2)  * scaleX;		
-				float dimX = cd.width * scaleX;
-				float dimY = bitmapFont.getCharHeight() * scaleY;
-				// quad buffer is centered by default so adjust position!
-				Sprite sp;
-				sp.position = (Vector2f(x + dimX * 0.5f ,y + dimY * 0.5f));
-				sp.texture = math::buildTexture(cd.texureRect);
-				sp.color = color;
-				sp.scale = Vector2f(scaleX,scaleY);
-				sprites.push_back(sp);		
-				x += dimX + 4;
+				if (bitmapFont.contains(c)) {
+					CharDef cd = bitmapFont.getCharDef(c);
+					padding = (cd.width + 2)  * scaleX;
+					float dimX = cd.width * scaleX;
+					float dimY = bitmapFont.getCharHeight() * scaleY;
+					// quad buffer is centered by default so adjust position!
+					Sprite sp;
+					sp.position = (Vector2f(x + dimX * 0.5f, y + dimY * 0.5f));
+					sp.texture = math::buildTexture(cd.texureRect);
+					sp.color = color;
+					sp.scale = Vector2f(scaleX, scaleY);
+					sprites.push_back(sp);
+					x += dimX + 4;
+				}
 			}
 		}
 

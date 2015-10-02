@@ -19,15 +19,15 @@ enum GUIItemType {
 
 struct GUIItem {
 	uint32 id;
-	Vector2f pos;
+	v2 pos;
 	bool centered;
 	Color color;
 	float scale;
 	GUIItemType type;
 	Rect boundingRect;
 	std::vector<Sprite> sprites;
-
-	GUIItem() : id(-1) , pos(0,0) , centered(true) , color(Color::WHITE) , scale(1.0f) {}
+	v2 size;
+	GUIItem() : id(-1) , pos(0,0) , centered(true) , color(Color::WHITE) , scale(1.0f) , size(0,0) {}
 };
 
 // -------------------------------------------------------
@@ -115,6 +115,7 @@ public:
 	void addText(int id,int x,int y,const std::string& text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f,bool centered = true);
 	void updateText(int id,int x,int y,const std::string& text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f,bool centered = true);
 	void updateText(int id,const std::string& text);
+	v2 getTextSize(int id);
 
 	uint32 addImageLink(int id,int x,int y,const char* taItem,bool centered = true);
 	

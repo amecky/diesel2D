@@ -247,13 +247,13 @@ namespace ds {
 			}
 			// create the internal device
 			renderer::initializeDevice(settings);
-			int vp = renderer::createViewport(settings.width, settings.height, settings.width, settings.height);
+			int vp = renderer::createViewport(settings.screenWidth, settings.screenHeight, settings.screenWidth, settings.screenHeight);
 			//int centerX = settings.width / 2;
 			//int centerY = settings.height / 2;
 			//renderContext->viewPort.setPosition(centerX,centerY);
 			// the camera
-			float aspect = (float)settings.width / (float)settings.height;
-			renderContext->camera = new Camera(settings.width, settings.height);
+			float aspect = (float)settings.screenWidth / (float)settings.screenHeight;
+			renderContext->camera = new Camera(settings.screenWidth, settings.screenHeight);
 			renderContext->camera->setLens(D3DX_PI * 0.25f, aspect, 0.1f, 1000.0f);
 			renderContext->device->SetTransform(D3DTS_PROJECTION, &matrix::convert(renderContext->camera->getProjectionMatrix()));
 			renderContext->matWorld = matrix::m4identity();
@@ -379,8 +379,8 @@ namespace ds {
 			else if (SUCCEEDED(renderContext->pD3D->CheckDeviceFormat(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, adapterFormat, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, D3DFMT_D16))) {
 				m_pp.AutoDepthStencilFormat = D3DFMT_D16;
 			}
-			m_pp.BackBufferWidth = settings.width;
-			m_pp.BackBufferHeight = settings.height;
+			m_pp.BackBufferWidth = settings.screenWidth;
+			m_pp.BackBufferHeight = settings.screenHeight;
 			m_pp.BackBufferFormat = adapterFormat;
 			m_pp.BackBufferCount = 1;
 			DWORD total;
@@ -397,7 +397,7 @@ namespace ds {
 			}
 			m_pp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 			m_pp.hDeviceWindow = renderContext->hwnd;
-			if (settings.fullscreen) {
+			if (settings.fullScreen) {
 				m_pp.Windowed = false;
 			}
 			else {
@@ -435,8 +435,8 @@ namespace ds {
 			std::string info = "xxxxx";
 			HR(renderContext->device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR));
 			HR(renderContext->device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR));
-			renderContext->screenWidth = settings.width;
-			renderContext->screenHeight = settings.height;
+			renderContext->screenWidth = settings.screenWidth;
+			renderContext->screenHeight = settings.screenHeight;
 			writeInfo(settings, info);
 
 		}
@@ -451,8 +451,8 @@ namespace ds {
 			LOG << "Pixel shader version: " << ((renderContext->deviceCaps.PixelShaderVersion >> 8) & 0xFF) << "." << ((renderContext->deviceCaps.PixelShaderVersion >> 0) & 0xFF);
 			LOG << "Settings";
 			LOG << "Format: " << info;
-			LOG << "Width: " << settings.width;
-			LOG << "Height " << settings.height;
+			LOG << "Width: " << settings.screenWidth;
+			LOG << "Height " << settings.screenHeight;
 			LOG << "Mode: " << settings.mode;
 			LOG << "Synched: " << settings.synched;
 		}

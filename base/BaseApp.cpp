@@ -27,7 +27,6 @@ BaseApp::BaseApp() {
 	m_LastTime = 0;
 	m_Loading = true;
 	//gProfiler = new NewProfiler();
-	m_ClearColor = Color(100,149,237,255);
 	m_DebugInfo.showProfiler = false;
 	m_DebugInfo.printProfiler = false;
 	m_DebugInfo.showDrawCounter = false;
@@ -36,7 +35,6 @@ BaseApp::BaseApp() {
 	m_MousePos = Vector2f(0,0);
 	rand.seed(GetTickCount());
 	audio = new AudioManager;
-	m_Fullscreen = false;
 	_totalTime = 0.0f;
 	stateMachine = new GameStateMachine;
 }
@@ -61,14 +59,8 @@ BaseApp::~BaseApp() {
 // -------------------------------------------------------
 void BaseApp::prepare() {
 	LOGC("BaseApp") << "---> Init <---";
-	Settings settings;
-	settings.fullscreen = m_Fullscreen;
-	settings.height = m_Height;
-	settings.width = m_Width;
-	settings.synched = true;
-	settings.mode = 1;
-	settings.postProcessing = false;
-	renderer::initialize(m_hWnd,settings);   
+	//settings.mode = 1;	
+	renderer::initialize(m_hWnd,_settings);   
 	audio->initialize(m_hWnd);
 
 	profiler::init();
@@ -100,8 +92,8 @@ void BaseApp::createWindow() {
 	// Create the application's window
 	m_hWnd = CreateWindow( "Diesel", "Diesel",
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
-		(DesktopSize.right - m_Width) / 2,(DesktopSize.bottom - m_Height) / 2,
-		m_Width, m_Height,
+		(DesktopSize.right - _settings.screenWidth) / 2,(DesktopSize.bottom - _settings.screenHeight) / 2,
+		_settings.screenWidth, _settings.screenHeight,
 		NULL, NULL, hInstance, NULL );
 
 	if (!m_hWnd) 	{
@@ -112,7 +104,7 @@ void BaseApp::createWindow() {
 	}
 
 	// Adjust to desired size
-	RECT rect = { 0, 0, m_Width, m_Height };
+	RECT rect = { 0, 0, _settings.screenWidth, _settings.screenHeight };
 	AdjustWindowRect( &rect, GetWindowLong( m_hWnd, GWL_STYLE ), FALSE );
 	SetWindowPos( m_hWnd, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, 
 		SWP_NOZORDER | SWP_NOMOVE  );
@@ -187,8 +179,10 @@ void BaseApp::buildFrame() {
 	}
 	if ( m_KeyStates.onChar ) {
 		m_KeyStates.onChar = false;
-		stateMachine->onChar(m_KeyStates.ascii);
-		OnChar(m_KeyStates.ascii,0);
+		if (m_KeyStates.ascii >= 0 && m_KeyStates.ascii < 256) {
+			stateMachine->onChar(m_KeyStates.ascii);
+			OnChar(m_KeyStates.ascii, 0);
+		}
 	}
 	PR_END("INPUT")
 	if ( !m_ButtonState.processed ) {
@@ -223,7 +217,7 @@ void BaseApp::buildFrame() {
 		PR_END("UPDATE")
 	}
 	PR_START("RENDER")
-	renderer::beginRendering(m_ClearColor);	
+	renderer::beginRendering(_settings.clearColor);	
 	renderer::setupMatrices();
 	PR_START("RENDER_GAME")
 	ds::sprites::begin();

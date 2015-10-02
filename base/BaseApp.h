@@ -6,7 +6,7 @@
 #include "..\audio\AudioManager.h"
 #include "..\compiler\AssetCompiler.h"
 #include "..\renderer\graphics.h"
-
+#include "Settings.h"
 
 namespace ds {
 
@@ -107,12 +107,9 @@ protected:
 	HWND m_hWnd;
 	bool m_Active;
 	WINDOWPLACEMENT m_wp;	
-	int m_Width;
-	int m_Height;
-	bool m_Fullscreen;
 	GameTime m_GameTime;
-	Color m_ClearColor;
 	float _totalTime;
+	Settings _settings;
 private:
 	Vector2f m_MousePos;
 	Vector2f m_TwistedMousePos;

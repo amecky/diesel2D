@@ -37,6 +37,10 @@ public:
 		cd.texureRect = Rect(static_cast<float>(startY),static_cast<float>(startX),static_cast<float>(width),static_cast<float>(charHeight));
 		definitions.append(cd);
 	}
+	const bool contains(char c) const {
+		int idx = (int)c - startChar;
+		return idx >= 0 && idx < definitions.size();
+	}
 	const CharDef& getCharDef(char c) const {
 		return definitions[(int)c-startChar];
 	}

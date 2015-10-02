@@ -1,7 +1,6 @@
 #pragma once
 #include "..\dxstdafx.h"
 #include "buffer_types.h"
-#include "..\base\Settings.h"
 #include <vector>
 #include "..\utils\Color.h"
 #include "render_types.h"
@@ -13,6 +12,7 @@
 #include "..\utils\StringUtils.h"
 #include "..\compiler\AssetCompiler.h"
 #include "Camera.h"
+#include "..\base\Settings.h"
 
 namespace ds {
 
