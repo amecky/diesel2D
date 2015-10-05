@@ -77,6 +77,11 @@ namespace sprites {
 		spriteCtx.index = 0;
 	}
 
+	void setTexture(int textureID) {
+		flush();		
+		renderer::getDescriptorData()->textures[spriteCtx.descriptorID] = textureID;
+	}
+
 	void setShaderID(int shader) {
 		// the shader in desctiptor
 		renderer::getDescriptorData()->shaders[spriteCtx.descriptorID] = shader;
@@ -104,12 +109,30 @@ namespace sprites {
 		int len = strlen(text);
 		for (int cnt = 0; cnt < len; ++cnt) {
 			char c = text[cnt];
-			CharDef cd = spriteCtx.font->getCharDef(c);
-			padding = (cd.width + 2)  * scaleX;
-			float dimX = cd.width * scaleX;
-			float dimY = spriteCtx.font->getCharHeight() * scaleY;
-			draw(Vector2f(x + dimX * 0.5f, y + dimY * 0.5f), math::buildTexture(cd.texureRect), 0.0f, scaleX, scaleY, color);
-			x += dimX + 4;
+			if (spriteCtx.font->contains(c)) {
+				CharDef cd = spriteCtx.font->getCharDef(c);
+				padding = (cd.width + 2)  * scaleX;
+				float dimX = cd.width * scaleX;
+				float dimY = spriteCtx.font->getCharHeight() * scaleY;
+				draw(Vector2f(x + dimX * 0.5f, y + dimY * 0.5f), math::buildTexture(cd.texureRect), 0.0f, scaleX, scaleY, color);
+				x += dimX + 4;
+			}
+		}
+	}
+	
+	void drawText(BitmapFont* font,int x, int y, const char* text,int padding, float scaleX, float scaleY, const Color& color) {
+		assert(font != 0);
+		int len = strlen(text);
+		for (int cnt = 0; cnt < len; ++cnt) {
+			char c = text[cnt];
+			if (font->contains(c)) {
+				CharDef cd = font->getCharDef(c);
+				//padding = (cd.width + 2)  * scaleX;
+				float dimX = cd.width * scaleX;
+				float dimY = font->getCharHeight() * scaleY;
+				draw(v2(x + dimX * 0.5f, y + dimY * 0.5f), math::buildTexture(cd.texureRect,font->getTextureSize(),font->getTextureSize(),false), 0.0f, scaleX, scaleY, color);
+				x += dimX + padding;
+			}
 		}
 	}
 

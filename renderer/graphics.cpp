@@ -1075,6 +1075,7 @@ namespace ds {
 				}
 			}
 			HR(texture->texture->UnlockRect(0));
+			LOG << "found characters: " << (ascii - bitmapFont.getStartChar());
 		}
 
 		// -------------------------------------------------------
