@@ -24,6 +24,29 @@ namespace ds {
 			}
 			return ret;
 		}
+
+		// -------------------------------------------------------
+		// Calculate size of text
+		// -------------------------------------------------------
+		Vector2f calculateLimitedSize(const BitmapFont& bitmapFont, const std::string& text, int chars, int padding, float scaleX, float scaleY) {
+			float cPadding = 0.0f;
+			v2 ret(0.0f, 0.0f);
+			ret.y = bitmapFont.getCharHeight() * scaleY;
+			int total = chars;
+			if (total >= text.length()) {
+				total = text.length();
+			}
+			for (size_t cnt = 0; cnt < total; ++cnt) {
+				char c = text[cnt];
+				if (bitmapFont.contains(c)) {
+					CharDef cd = bitmapFont.getCharDef(c);
+					cPadding = (cd.width + padding)  * scaleX;
+					float dimX = cd.width * scaleX;
+					ret.x += dimX + padding;
+				}
+			}
+			return ret;
+		}
 		
 		// -------------------------------------------------------
 		// Create text
