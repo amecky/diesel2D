@@ -88,9 +88,9 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</EmbedManifest>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(LibraryPath)</LibraryPath>
-    <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(ReferencePath)</ReferencePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\math;C:\devtools\DirectX\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX\Lib\x86;$(LibraryPath)</LibraryPath>
+    <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX\Lib\x86;$(ReferencePath)</ReferencePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\math;C:\devtools\DirectX_SDK\Include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(LibraryPath)</LibraryPath>
     <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(ReferencePath)</ReferencePath>
@@ -283,6 +283,7 @@
     <ClCompile Include="sprites\SpriteBatch.cpp" />
     <ClCompile Include="sprites\SpriteTemplates.cpp" />
     <ClCompile Include="tasks\TaskManager.cpp" />
+    <ClCompile Include="ui\IMGUI.cpp" />
     <ClCompile Include="utils\Color.cpp" />
     <ClCompile Include="utils\FileUtils.cpp" />
     <ClCompile Include="base\Input.cpp" />
@@ -411,6 +412,7 @@
     <ClInclude Include="sprites\Sprite.h" />
     <ClInclude Include="sprites\SpriteTemplates.h" />
     <ClInclude Include="tasks\TaskManager.h" />
+    <ClInclude Include="ui\IMGUI.h" />
     <ClInclude Include="utils\Color.h" />
     <ClInclude Include="utils\FileUtils.h" />
     <ClInclude Include="utils\font.h" />
@@ -444,7 +446,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico" />
-    <None Include="TODO.txt" />
+    <None Include="TODO.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

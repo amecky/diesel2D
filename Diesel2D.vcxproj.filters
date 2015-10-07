@@ -274,6 +274,9 @@
     <ClCompile Include="world\actions\RemoveAfterAction.cpp">
       <Filter>world\actions</Filter>
     </ClCompile>
+    <ClCompile Include="ui\IMGUI.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
@@ -318,9 +321,6 @@
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="base\Input.h">
-      <Filter>base</Filter>
-    </ClInclude>
-    <ClInclude Include="base\Settings.h">
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="lib\container\GridArray.h">
@@ -653,10 +653,16 @@
     <ClInclude Include="base\GameStateMachine.h">
       <Filter>base</Filter>
     </ClInclude>
+    <ClInclude Include="base\Settings.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\IMGUI.h">
+      <Filter>ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico" />
-    <None Include="TODO.txt" />
+    <None Include="TODO.md" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="utils">
@@ -724,6 +730,9 @@
     </Filter>
     <Filter Include="tasks">
       <UniqueIdentifier>{a533f33a-9f33-48e6-857d-831e1586eb3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{b51108ab-afc9-4563-8fef-82e56fd08bec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

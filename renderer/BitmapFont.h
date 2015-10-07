@@ -4,6 +4,18 @@
 
 namespace ds {
 
+struct FontDefinition {
+	int startChar;
+	int endChar;
+	int width;
+	int height;
+	int padding;
+	int textureSize;
+	int charHeight;
+	int startX;
+	int startY;
+	int gridHeight;
+};
 // -------------------------------------------------------
 // Character definition
 // -------------------------------------------------------
@@ -24,6 +36,7 @@ class BitmapFont : public Serializer {
 public:
 	BitmapFont() : hashName(0) {}
 	~BitmapFont() {}
+	void intialize(const FontDefinition& definition);
 	void addChar(uint32 ascii,int startX,int startY,int width) {
 		CharDef cd;
 		cd.ascii = ascii;
