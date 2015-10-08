@@ -27,6 +27,8 @@ namespace gui {
 
 	void InputRect(int id, const char* label, ds::Rect* v);
 
+	void InputColor(int id, const char* label, ds::Color* v);
+
 	void ComboBox(int id,const std::vector<std::string>& entries, int* selected);
 
 	void DropDownBox(int id, const std::vector<std::string>& entries, int* selected,int* state);
