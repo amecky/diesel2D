@@ -17,9 +17,15 @@ namespace gui {
 
 	bool Button(int id,const char* label);
 
+	void CheckBox(int id, const char* label,bool* selected);
+
 	void InputFloat(int id,const char* label, float* v);
 
+	void InputFloat(int id, const char* label, float* v, float minValue, float maxValue, float step);
+
 	void InputInt(int id, const char* label, int* v);
+
+	void InputInt(int id, const char* label, int* v,int minValue, int maxValue, int step);
 
 	void InputVec2(int id, const char* label, v2* v);
 
@@ -34,6 +40,8 @@ namespace gui {
 	void DropDownBox(int id, const std::vector<std::string>& entries, int* selected,int* state);
 
 	void sendKey(unsigned char c);
+
+	void sendSpecialKey(WPARAM wParam);
 
 	void end();
 }
