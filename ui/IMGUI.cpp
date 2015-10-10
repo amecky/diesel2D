@@ -28,12 +28,13 @@ namespace gui {
 		int padding;
 	};
 
+	const int MAX_DRAW_CALLS = 256;
 	// -------------------------------------------------------
 	// GUIWindow
 	// -------------------------------------------------------
 	struct GUIWindow {
 
-		DrawCall calls[64];
+		DrawCall calls[MAX_DRAW_CALLS];
 		int num;
 
 		void reset() {
@@ -41,33 +42,39 @@ namespace gui {
 		}
 
 		void addBox(const v2& position,const v2& size, const ds::Color& color) {
-			DrawCall& call = calls[num++];
-			call.type = 1;
-			call.color = color;
-			call.size = size;
-			call.position = position;
-			call.padding = 2;
+			if (num < MAX_DRAW_CALLS) {
+				DrawCall& call = calls[num++];
+				call.type = 1;
+				call.color = color;
+				call.size = size;
+				call.position = position;
+				call.padding = 2;
+			}
 		}
 
 		void addImage(const v2& position, const ds::Texture& texture) {
-			DrawCall& call = calls[num++];
-			call.type = 3;
-			call.color = ds::Color::WHITE;
-			call.size = v2(1,1);
-			call.position = position;
-			call.texture = texture;
-			call.padding = 1;
+			if (num < MAX_DRAW_CALLS) {
+				DrawCall& call = calls[num++];
+				call.type = 3;
+				call.color = ds::Color::WHITE;
+				call.size = v2(1, 1);
+				call.position = position;
+				call.texture = texture;
+				call.padding = 1;
+			}
 		}
 
 		void addText(const v2& position,const char* text, const v2& size) {
-			DrawCall& call = calls[num++];
-			call.type = 2;
-			call.color = ds::Color::WHITE;
-			call.size = size;
-			sprintf_s(call.text,32,text);
-			call.position = position;
-			call.position.y -= TEXT_OFFSET;
-			call.padding = CHAR_PADDING;
+			if (num < MAX_DRAW_CALLS) {
+				DrawCall& call = calls[num++];
+				call.type = 2;
+				call.color = ds::Color::WHITE;
+				call.size = size;
+				sprintf_s(call.text, 32, text);
+				call.position = position;
+				call.position.y -= TEXT_OFFSET;
+				call.padding = CHAR_PADDING;
+			}
 		}
 
 		
@@ -113,10 +120,7 @@ namespace gui {
 
 		ds::BitmapFont* font;
 		int textureID;
-		GUIWindow windows[8];
-		GUIWindow* currentWindow;
-		int windowIndex;
-		int windowCount;
+		GUIWindow window;
 		v2 cursorPosition;
 		bool buttonPressed;
 		bool clicked;
@@ -139,17 +143,17 @@ namespace gui {
 		GUIContext() {
 			textureID = -1;
 			ready = false;
+			keyInput.num = 0;
 		}
 
 		void reset() {
-			windowIndex = 0;
-			windowCount = 0;	
-			currentWindow = 0;
 			cursorPosition = ds::renderer::getMousePosition();
-			clicked = false;
+			//clicked = false;
 			grouped = false;
 			visible = false;
 			dim = v2(0, 0);
+			window.reset();
+			hot = -1;
 		}
 
 		void calculateDimension(const v2& position, const v2& size) {
@@ -163,24 +167,10 @@ namespace gui {
 			}
 		}
 
-		void pushWindow() {
-			currentWindow = &windows[windowIndex++];
-			currentWindow->reset();
-			++windowCount;
-		}
-
-		void popWindow() {
-			if (windowIndex > 0) {
-				--windowIndex;
-			}
-		}
-
-		
-
 		void addBox(const v2& position, const v2& size, const ds::Color& color) {
 			v2 p = position;
 			p.x += size.x * 0.5f;
-			currentWindow->addBox(p, size, color);
+			window.addBox(p, size, color);
 			calculateDimension(p, size);
 
 		}
@@ -189,7 +179,7 @@ namespace gui {
 			v2 p = position;
 			p.x += offsetX;
 			p.y += offsetY;
-			currentWindow->addImage(p, texture);
+			window.addImage(p, texture);
 			calculateDimension(p, texture.dim);
 		}
 
@@ -198,11 +188,11 @@ namespace gui {
 			v2 p = position;
 			p.x += TEXT_PADDING;
 			addText(p, text, size);
-			calculateDimension(p, size);
+			//calculateDimension(p, size);
 		}
 
 		void addText(const v2& position, const char* text, const v2& size) {
-			currentWindow->addText(position, text, size);
+			window.addText(position, text, size);
 			calculateDimension(position, size);
 		}
 
@@ -211,9 +201,8 @@ namespace gui {
 				position.y -= LINE_HEIGHT;
 			}
 			else {
-				if (currentWindow != 0 && currentWindow->num > 0) {
-					position.x += currentWindow->calls[currentWindow->num - 1].size.x + 50.0f;
-				}
+				position.x += window.calls[window.num - 1].size.x + 50.0f;
+				
 			}
 		}
 	};
@@ -222,7 +211,6 @@ namespace gui {
 
 	void sendKey(unsigned char c) {
 		if (guiContext->keyInput.num < 256) {
-			LOG << "key: " << (int)c;
 			guiContext->keyInput.keys[guiContext->keyInput.num++] = c;
 		}
 	}
@@ -292,8 +280,11 @@ namespace gui {
 	// -------------------------------------------------------
 	// check if widget is hot
 	// -------------------------------------------------------
-	bool isHot(int id, const v2& pos, const v2& size) {
-		if (isCursorInside(pos, size)) {
+	bool isHot(int id, const v2& pos, const v2& size,float offsetX = 0.0f,float offsetY = 0.0f) {
+		v2 p = pos;
+		p.x += offsetX;
+		p.y += offsetY;		
+		if (isCursorInside(p, size)) {
 			guiContext->hot = id;
 			return true;
 		}
@@ -322,27 +313,33 @@ namespace gui {
 				return true;
 			}
 		}
-		if (isCursorInside(pos, size)) {
-			guiContext->hot = id;
-		}
 		return false;
 	}
 
 	// -------------------------------------------------------
 	// handle mouse interaction
 	// -------------------------------------------------------
-	bool isSelected(int id, const v2& pos, const v2& size) {
+	bool isSelected(int id, const v2& pos, const v2& size,bool setActive = true) {
 		if (guiContext->clicked && isCursorInside(pos, size)) {
+			if (setActive) {
+				guiContext->active = id;
+			}
 			return true;
 		}		
 		return false;
 	}
 
-	bool isBoxSelected(int id, const v2& pos, const v2& size) {
-		v2 p = pos;
-		p.x += size.x * 0.5f;
-		if (guiContext->clicked && isCursorInside(p, size)) {
-			return true;
+	bool isBoxSelected(int id, const v2& pos, const v2& size,bool setActive = true) {
+		if (guiContext->clicked) {
+			v2 p = pos;
+			p.x += size.x * 0.5f;
+			if (guiContext->clicked && isCursorInside(p, size)) {
+				if (setActive) {
+					guiContext->active = id;
+					guiContext->clicked = false;
+				}
+				return true;
+			}
 		}
 		return false;
 	}
@@ -355,7 +352,6 @@ namespace gui {
 		guiContext->reset();
 		guiContext->startPosition = startPos;
 		guiContext->position = startPos;
-		guiContext->pushWindow();
 		guiContext->header = header;
 		if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
 			guiContext->buttonPressed = true;
@@ -392,8 +388,9 @@ namespace gui {
 	// -------------------------------------------------------
 	// Label
 	// -------------------------------------------------------
-	void Label(const char* text) {
+	void Label(int id,const char* text) {
 		v2 p = guiContext->position;
+		bool hot = isHot(id,p, getTextSize(text));
 		guiContext->addText(p, text);
 		guiContext->nextPosition();
 	}
@@ -459,14 +456,14 @@ namespace gui {
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
-		int prev = guiContext->active;
-		bool active = handleMouse(new_id, p, v2(width, BOX_HEIGHT));
-		if (prev != guiContext->active) {
+		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT),width * 0.5f);
+		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
+		if (selected) {
 			sprintf_s(guiContext->inputText, 32, "%d", *v);
 			guiContext->caretPos = strlen(guiContext->inputText);
+			guiContext->active = new_id;
 		}
 		if (guiContext->active == new_id) {
-			guiContext->pushWindow();
 			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT_EDIT]);
 			handleTextInput();
 			*v = atoi(guiContext->inputText);
@@ -476,7 +473,6 @@ namespace gui {
 			cp.y -= 2.0f;
 			guiContext->addBox(cp, v2(2, 18.0f), ds::Color(192, 0, 0, 255));
 			guiContext->addText(p, guiContext->inputText);
-			guiContext->popWindow();
 		}
 		else {
 			char buffer[32];
@@ -493,14 +489,15 @@ namespace gui {
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
-		int prev = guiContext->active;
-		bool active = handleMouse(new_id, p, v2(width, BOX_HEIGHT));
-		if (prev != guiContext->active) {
+		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT), width * 0.5f);
+		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
+		//if (prev != guiContext->active) {
+		if ( selected) {
 			sprintf_s(guiContext->inputText, 32, "%.2f", *v);
 			guiContext->caretPos = strlen(guiContext->inputText);
+			guiContext->active = new_id;
 		}
 		if (guiContext->active == new_id) {
-			guiContext->pushWindow();
 			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT_EDIT]);
 			handleTextInput();
 			*v = atoi(guiContext->inputText);
@@ -510,7 +507,6 @@ namespace gui {
 			cp.y -= 2.0f;
 			guiContext->addBox(cp, v2(2, BOX_HEIGHT), ds::Color(192, 0, 0, 255));
 			guiContext->addText(p, guiContext->inputText);
-			guiContext->popWindow();
 		}
 		else {
 			char buffer[32];
@@ -549,10 +545,7 @@ namespace gui {
 		v2 p = guiContext->position;
 		guiContext->addImage(p, guiContext->textures[ICN_MINUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
-			*v -= step;
-			if (*v < minValue) {
-				*v = minValue;
-			}
+			*v -= step;			
 		}
 		float width = 100.0f;
 		p.x += BOX_HEIGHT;
@@ -560,10 +553,13 @@ namespace gui {
 		p.x += 100.0f;
 		guiContext->addImage(p, guiContext->textures[ICN_PLUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
-			*v += step;
-			if (*v > maxValue) {
-				*v = maxValue;
-			}
+			*v += step;			
+		}
+		if (*v < minValue) {
+			*v = minValue;
+		}
+		if (*v > maxValue) {
+			*v = maxValue;
 		}
 		char buffer[16];
 		sprintf_s(buffer, 16, "%.2f", *v);
@@ -584,10 +580,7 @@ namespace gui {
 		v2 p = guiContext->position;
 		guiContext->addImage(p, guiContext->textures[ICN_MINUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
-			*v -= step;
-			if (*v < minValue) {
-				*v = minValue;
-			}
+			*v -= step;			
 		}
 		float width = 100.0f;
 		p.x += BOX_HEIGHT;
@@ -595,10 +588,13 @@ namespace gui {
 		p.x += 100.0f;
 		guiContext->addImage(p, guiContext->textures[ICN_PLUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
-			*v += step;
-			if (*v > maxValue) {
-				*v = maxValue;
-			}
+			*v += step;			
+		}
+		if (*v < minValue) {
+			*v = minValue;
+		}
+		if (*v > maxValue) {
+			*v = maxValue;
 		}
 		char buffer[16];
 		sprintf_s(buffer, 16, "%d", *v);
@@ -688,6 +684,7 @@ namespace gui {
 		p.y -= height / 2.0f - BOX_HEIGHT / 2.0f;
 		guiContext->addBox(p, v2(width, height), guiContext->colors[CLR_INPUT]);
 		p = guiContext->position;
+		bool hot = isHot(id, p, v2(width, height));
 		for (size_t i = 0; i < max; ++i) {
 			if (isBoxSelected(id, p, v2(width, BOX_HEIGHT))) {
 				*selected = i;
@@ -709,15 +706,16 @@ namespace gui {
 		int max = entries.size();
 		float width = 200.0f;
 		v2 p = guiContext->position;
+		bool hot = isHot(id, p, v2(width, BOX_HEIGHT),width * 0.5f);
 		if (isBoxSelected(id, p, v2(width, BOX_HEIGHT))) {
 			if (*state == 0) {
 				*state = 1;
 			}
 			else {
+				guiContext->active = -1;
 				*state = 0;
 			}
-		}		
-		bool hot = isHot(id, p, v2(width, BOX_HEIGHT));
+		}				
 		guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
 		if (*state == 0) {					
 			guiContext->addImage(p, guiContext->textures[ICN_ARROW_LEFT],width - 10.0f);
@@ -732,26 +730,25 @@ namespace gui {
 		else {
 			guiContext->addText(p, entries[idx].c_str());
 		}
+		
 		if (*state == 1) {		
-			
 			float height = max * BOX_HEIGHT;
 			p.y -= height / 2.0f + BOX_HEIGHT * 0.5f;
 			guiContext->addBox(p, v2(width, height), guiContext->colors[CLR_INPUT_EDIT]);
 			p = guiContext->position;
 			p.y -= BOX_HEIGHT;
 			for (size_t i = 0; i < max; ++i) {
-				if (isBoxSelected(id, p, v2(width, BOX_HEIGHT))) {
+				if (isBoxSelected(id, p, v2(width, BOX_HEIGHT),false)) {
 					*selected = i;
 				}
 				if (*selected == i) {
-					v2 selp = p;
-					guiContext->addBox(selp, v2(width, BOX_HEIGHT), ds::Color(128, 0, 128, 255));
+					guiContext->addBox(p, v2(width, BOX_HEIGHT), ds::Color(128, 0, 128, 255));
 				}
 				guiContext->addText(p, entries[i].c_str());
 				p.y -= BOX_HEIGHT;
 			}
 			guiContext->position.y -= height;
-			guiContext->position.y -= BOX_HEIGHT * 0.5f;
+			guiContext->position.y -= BOX_HEIGHT * 0.5f;			
 		}
 		guiContext->nextPosition();
 	}
@@ -770,7 +767,10 @@ namespace gui {
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
 			*selected = !*selected;
 		}
-		p.x += BOX_HEIGHT;
+		v2 textDim = getTextSize(label);
+		textDim.x += BOX_HEIGHT;
+		bool hot = isHot(id, p, textDim,textDim.x * 0.5f);
+		p.x += BOX_HEIGHT;		
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
@@ -783,18 +783,17 @@ namespace gui {
 		v2 textDim = getTextSize(label);
 		float width = textDim.x + BUTTON_PADDING * 2.0f;
 		v2 p = guiContext->position;
-		bool hot = isHot(id, p, v2(width, BUTTON_HEIGHT));
+		bool hot = isHot(id, p, v2(width, BUTTON_HEIGHT),width * 0.5f);
 		if (hot) {
 			guiContext->addBox(p, v2(width, BUTTON_HEIGHT), guiContext->colors[CLR_BUTTON_HOVER]);
 		}
 		else {
 			guiContext->addBox(p, v2(width, BUTTON_HEIGHT), guiContext->colors[CLR_BUTTON]);
 		}
-		bool inside = isCursorInside(p, v2(width, BUTTON_HEIGHT));
 		p.x = guiContext->position.x + (width - textDim.x) / 2.0f;
 		guiContext->addText(p,label, textDim);
 		guiContext->nextPosition();
-		return handleMouse(id, p, v2(width, BUTTON_HEIGHT));
+		return isBoxSelected(id, p, v2(width, BUTTON_HEIGHT));
 	}
 
 	// -------------------------------------------------------
@@ -843,11 +842,22 @@ namespace gui {
 		guiContext->ready = true;
 	}
 
+	void debugWindow() {
+		GUIWindow& win = guiContext->window;
+		if (win.num > 0) {
+			for (int i = 0; i < win.num; ++i) {
+				const DrawCall& call = win.calls[i];
+				LOG << "type: " << call.type << " position: " << DBG_V2(call.position) << " size: " << DBG_V2(call.size);
+			}
+
+		}
+	}
+
 	// -------------------------------------------------------
 	// end panel
 	// -------------------------------------------------------	
 	void end() {
-		
+		assert(guiContext->ready);
 		// get dimension of entire panel
 		v2 dim = guiContext->dim;
 		if (dim.x == 0.0f) {
@@ -885,31 +895,29 @@ namespace gui {
 			center.y = guiContext->startPosition.y - dim.y / 2.0f * sy - 10.0f;
 			ds::sprites::draw(center, buildBoxTexture(dim.x, dim.y), 0.0f, sx, sy, guiContext->colors[CLR_PANEL_BACKGROUND]);
 		}
-		for (int w = 0; w < guiContext->windowCount; ++w) {
-			GUIWindow& win = guiContext->windows[w];
-			if (win.num > 0) {				
-				for (int i = 0; i < win.num; ++i) {
-					const DrawCall& call = win.calls[i];
-					if (call.type == 1) {
-						ds::sprites::draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, 1.0f, 1.0f, call.color);
-					}
-					else if (call.type == 2) {
-						ds::sprites::drawText(guiContext->font, call.position.x, call.position.y, call.text, call.padding);
-					}
-					else if (call.type == 3) {
-						ds::sprites::draw(call.position, call.texture, 0.0f, 1.0f, 1.0f, call.color);
-					}
+		GUIWindow& win = guiContext->window;
+		if (win.num > 0) {				
+			for (int i = 0; i < win.num; ++i) {
+				const DrawCall& call = win.calls[i];
+				if (call.type == 1) {
+					ds::sprites::draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, 1.0f, 1.0f, call.color);
 				}
-				
+				else if (call.type == 2) {
+					ds::sprites::drawText(guiContext->font, call.position.x, call.position.y, call.text, call.padding);
+				}
+				else if (call.type == 3) {
+					ds::sprites::draw(call.position, call.texture, 0.0f, 1.0f, 1.0f, call.color);
+				}
 			}
-		}
-		guiContext->hot = -1;
+				
+		}		
 		if (guiContext->hot == -1 && guiContext->clicked) {
 			guiContext->active = -1;
 		}
 		if (guiContext->clicked) {
 			guiContext->clicked = false;
 		}
+		guiContext->hot = -1;
 	}
 
 }

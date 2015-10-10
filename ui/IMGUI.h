@@ -9,7 +9,7 @@ namespace gui {
 
 	bool begin(const char* header,int* state,const v2& startPos = v2(10,750));
 
-	void Label(const char* text);
+	void Label(int id,const char* text);
 
 	void beginGroup();
 
@@ -42,6 +42,8 @@ namespace gui {
 	void sendKey(unsigned char c);
 
 	void sendSpecialKey(WPARAM wParam);
+
+	void debugWindow();
 
 	void end();
 }
