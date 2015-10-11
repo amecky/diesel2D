@@ -14,6 +14,7 @@ namespace gui {
 	const int CHAR_PADDING = 0;
 	const float BOX_HEIGHT = 18.0f;
 	const float WHITE_BOX_SIZE = 256.0f;
+	const float INPUT_BOX_WIDTH = 80.0f;
 	// -------------------------------------------------------
 	// DrawCall
 	// -------------------------------------------------------
@@ -188,7 +189,6 @@ namespace gui {
 			v2 p = position;
 			p.x += TEXT_PADDING;
 			addText(p, text, size);
-			//calculateDimension(p, size);
 		}
 
 		void addText(const v2& position, const char* text, const v2& size) {
@@ -452,7 +452,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// input scalar
 	// -------------------------------------------------------
-	void InputScalar(int id,int index, int* v,float width = 100.0f) {
+	void InputScalar(int id, int index, int* v, float width = INPUT_BOX_WIDTH) {
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
@@ -485,7 +485,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// input scalar
 	// -------------------------------------------------------
-	void InputScalar(int id, int index, float* v,float width = 100.0f) {
+	void InputScalar(int id, int index, float* v, float width = INPUT_BOX_WIDTH) {
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
@@ -533,7 +533,7 @@ namespace gui {
 	void InputInt(int id, const char* label, int* v) {		
 		InputScalar(id, 0, v);
 		v2 p = guiContext->position;
-		p.x += 110.0f;
+		p.x += INPUT_BOX_WIDTH + 10.0f;
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
@@ -547,10 +547,10 @@ namespace gui {
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
 			*v -= step;			
 		}
-		float width = 100.0f;
+		float width = INPUT_BOX_WIDTH;
 		p.x += BOX_HEIGHT;
 		guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
-		p.x += 100.0f;
+		p.x += INPUT_BOX_WIDTH;
 		guiContext->addImage(p, guiContext->textures[ICN_PLUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
 			*v += step;			
@@ -565,10 +565,10 @@ namespace gui {
 		sprintf_s(buffer, 16, "%.2f", *v);
 		v2 dim = getTextSize(buffer);
 		p = guiContext->position;
-		p.x += BOX_HEIGHT + (100.0f - dim.x) * 0.5f;
+		p.x += BOX_HEIGHT + (INPUT_BOX_WIDTH - dim.x) * 0.5f;
 		guiContext->addText(p, buffer);
 		p = guiContext->position;
-		p.x += 140.0f;
+		p.x += INPUT_BOX_WIDTH + BOX_HEIGHT * 2.0f + 10.0f;
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
@@ -582,10 +582,10 @@ namespace gui {
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
 			*v -= step;			
 		}
-		float width = 100.0f;
+		float width = INPUT_BOX_WIDTH;
 		p.x += BOX_HEIGHT;
 		guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);		
-		p.x += 100.0f;
+		p.x += INPUT_BOX_WIDTH;
 		guiContext->addImage(p, guiContext->textures[ICN_PLUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
 			*v += step;			
@@ -600,10 +600,10 @@ namespace gui {
 		sprintf_s(buffer, 16, "%d", *v);
 		v2 dim = getTextSize(buffer);
 		p = guiContext->position;
-		p.x += BOX_HEIGHT + (100.0f - dim.x) * 0.5f;
+		p.x += BOX_HEIGHT + (INPUT_BOX_WIDTH - dim.x) * 0.5f;
 		guiContext->addText(p, buffer);
 		p = guiContext->position;
-		p.x += 140.0f;
+		p.x += INPUT_BOX_WIDTH + BOX_HEIGHT * 2.0f + 10.0f;
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
@@ -615,7 +615,7 @@ namespace gui {
 		InputScalar(id, 0, &v->x);
 		InputScalar(id, 1, &v->y);	
 		v2 p = guiContext->position;
-		p.x += 220.0f;		
+		p.x += (INPUT_BOX_WIDTH + 10.0f) * 2.0f;
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
@@ -636,7 +636,7 @@ namespace gui {
 		v2 p = guiContext->position;
 		p.x += 200.0f;
 		guiContext->addBox(p, v2(BOX_HEIGHT, BOX_HEIGHT), *v);
-		p.x += 2.0f * BOX_HEIGHT;
+		p.x += BOX_HEIGHT;
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
@@ -649,7 +649,7 @@ namespace gui {
 		InputScalar(id, 1, &v->y);
 		InputScalar(id, 2, &v->z);
 		v2 p = guiContext->position;
-		p.x += 330.0f;
+		p.x += (INPUT_BOX_WIDTH + 10.0f) * 3.0f;
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
@@ -668,7 +668,7 @@ namespace gui {
 		InputScalar(id, 3, &height);
 		*v = ds::Rect(top, left, width, height);
 		v2 p = guiContext->position;
-		p.x += 440.0f;
+		p.x += (INPUT_BOX_WIDTH + 10.0f) * 4.0f;
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}

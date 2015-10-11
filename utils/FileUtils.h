@@ -48,6 +48,26 @@ namespace file {
 	void logFileTime(const char* fileName);
 
 	void logFileTime(const FILETIME& time);
+
+	template<class T>
+	void saveBinary(const char* fileName, const T& t) {
+		IdString str = ds::string::murmur_hash(fileName);
+		char buffer[128];
+		sprintf_s(buffer, 128, "data\\%d", str);
+		FILE* f = fopen(buffer, "wb");
+		fwrite(&t, sizeof(T), 1, f);
+		fclose(f);
+	}
+
+	template<class T>
+	void loadBinary(const char* fileName, T* t) {
+		IdString str = ds::string::murmur_hash(fileName);
+		char buffer[128];
+		sprintf_s(buffer, 128, "data\\%d", str);
+		FILE* f = fopen(buffer, "rb");
+		fread(&t, sizeof(T), 1, f);
+		fclose(f);
+	}
 }
 
 class FSDirectory {
