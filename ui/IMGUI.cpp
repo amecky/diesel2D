@@ -199,6 +199,7 @@ namespace gui {
 		void nextPosition() {
 			if (!grouped) {
 				position.y -= LINE_HEIGHT;
+				position.x = startPosition.x;
 			}
 			else {
 				position.x += window.calls[window.num - 1].size.x + 50.0f;
@@ -275,6 +276,7 @@ namespace gui {
 	// -------------------------------------------------------
 	void endGroup() {
 		guiContext->grouped = false;
+		guiContext->nextPosition();
 	}
 
 	// -------------------------------------------------------
@@ -343,30 +345,43 @@ namespace gui {
 		}
 		return false;
 	}
-	// -------------------------------------------------------
-	// begin panel
-	// -------------------------------------------------------
-	bool begin(const char* header,int* state,const v2& startPos) {
-		assert(guiContext->ready);
-		ds::sprites::setTexture(guiContext->textureID);
-		guiContext->reset();
+
+	void start(const v2& startPos) {
+		assert(guiContext->ready);		
+		if (guiContext->hot == -1 && guiContext->clicked) {
+			guiContext->active = -1;
+		}
+		if (guiContext->clicked) {
+			guiContext->clicked = false;
+		}
+		guiContext->hot = -1;
 		guiContext->startPosition = startPos;
-		guiContext->position = startPos;
-		guiContext->header = header;
+		guiContext->position = startPos;		
 		if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
 			guiContext->buttonPressed = true;
 		}
 		else {
 			if (guiContext->buttonPressed) {
+				LOG << "clicked on ";
 				guiContext->clicked = true;
 			}
 			guiContext->buttonPressed = false;
 		}
+	}
+	// -------------------------------------------------------
+	// begin panel
+	// -------------------------------------------------------
+	bool begin(const char* header,int* state) {
+		guiContext->reset();
+		guiContext->header = header;
+		
 		// build panel header
 		float width = 200.0f;
 		v2 p = guiContext->position;
-		p.x += width / 2.0f;
-		bool active = handleMouse(0, p, v2(width, BOX_HEIGHT));
+		guiContext->startPosition = p;
+		//p.x += width / 2.0f;
+		//bool active = handleMouse(0, p, v2(width, BOX_HEIGHT));
+		bool active = isBoxSelected(0, p, v2(width, BOX_HEIGHT));
 		if (active) {
 			if (*state == 0) {
 				*state = 1;
@@ -377,6 +392,9 @@ namespace gui {
 		}		
 		if (*state == 1) {
 			guiContext->visible = true;
+		}
+		else {
+			guiContext->visible = false;
 		}
 		guiContext->nextPosition();
 		return *state == 1;
@@ -858,6 +876,8 @@ namespace gui {
 	// -------------------------------------------------------	
 	void end() {
 		assert(guiContext->ready);
+		int current = ds::sprites::getCurrentTextureID();
+		ds::sprites::setTexture(guiContext->textureID);
 		// get dimension of entire panel
 		v2 dim = guiContext->dim;
 		if (dim.x == 0.0f) {
@@ -911,13 +931,9 @@ namespace gui {
 			}
 				
 		}		
-		if (guiContext->hot == -1 && guiContext->clicked) {
-			guiContext->active = -1;
-		}
-		if (guiContext->clicked) {
-			guiContext->clicked = false;
-		}
-		guiContext->hot = -1;
+		
+		ds::sprites::setTexture(current);
+		guiContext->position.y -= 10.0f;
 	}
 
 }

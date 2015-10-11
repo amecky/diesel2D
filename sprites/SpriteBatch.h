@@ -49,6 +49,8 @@ namespace sprites {
 	void flush();
 
 	void setTexture(int textureID);
+
+	int getCurrentTextureID();
 }
 
 }

@@ -65,8 +65,10 @@ namespace file {
 		char buffer[128];
 		sprintf_s(buffer, 128, "data\\%d", str);
 		FILE* f = fopen(buffer, "rb");
-		fread(&t, sizeof(T), 1, f);
-		fclose(f);
+		if (f) {
+			fread(&t, sizeof(T), 1, f);
+			fclose(f);
+		}
 	}
 }
 
