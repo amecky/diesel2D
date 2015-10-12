@@ -183,7 +183,9 @@ namespace ds {
 
 	Texture buildTexture(float top, float left, float width, float height, float textureWidth, float textureHeight, bool useHalfTexel) {
 		Texture ret;		
-		ret.uv = getTextureCoordinates(Rect(top,left,width,height),textureWidth,textureHeight);
+		Rect r(top, left, width, height);
+		ret.rect = r;
+		ret.uv = getTextureCoordinates(r,textureWidth,textureHeight);
 		ret.textureID = 0;
 		ret.dim = Vector2f(width ,height);
 		return ret;
@@ -191,6 +193,7 @@ namespace ds {
 
 	Texture buildTexture(const Rect& r, float textureWidth, float textureHeight, bool useHalfTexel) {
 		Texture ret;
+		ret.rect = r;
 		ret.uv = getTextureCoordinates(r, textureWidth, textureHeight);
 		ret.textureID = 0;
 		ret.dim = Vector2f(r.width(), r.height());

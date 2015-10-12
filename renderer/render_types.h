@@ -139,11 +139,12 @@ namespace ds {
 	struct Texture {
 
 		IdString hashName;
-		Vector4f uv;
-		Vector2f dim;
+		v4 uv;
+		v2 dim;
 		int textureID;
+		Rect rect;
 
-		Texture() : hashName(0) , uv(0, 0, 1, 1), dim(32, 32), textureID(0) {}
+		Texture() : hashName(0) , uv(0, 0, 1, 1), dim(32, 32), textureID(0) , rect(0,0,32,32) {}
 
 		const Vector2f getUV(int idx) const {
 			switch (idx) {

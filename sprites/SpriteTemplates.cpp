@@ -88,7 +88,7 @@ namespace ds {
 			IdString hash = string::murmur_hash(name);
 			if (_map.find(hash) != _map.end()) {
 				Sprite& sprite = _map[hash];
-				ds::Rect r(0, 0, 256, 256);
+				ds::Rect r = sprite.texture.rect;
 				gui::InputInt(2, "Texture_id", &sprite.texture.textureID);
 				gui::InputVec2(3, "Position", &sprite.position);
 				gui::InputRect(4, "TextureRect", &r);

@@ -291,14 +291,10 @@ namespace sprites {
 	}
 
 	void drawTemplate(const char* name) {
-		/*
 		Sprite sp;
-		if (renderer::hasSpriteTemplate(name)) {
-
-			renderer::getSpriteTemplate(id)
+		if (renderer::getSpriteTemplates()->get(name,&sp)) {
 			draw(sp);
 		}
-		*/
 	}
 }
 
