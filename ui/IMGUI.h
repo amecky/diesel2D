@@ -7,7 +7,7 @@ namespace gui {
 
 	void initialize();
 
-	void start(const v2& startPos);
+	void start(v2* startPos);
 
 	bool begin(const char* header, int* state);
 

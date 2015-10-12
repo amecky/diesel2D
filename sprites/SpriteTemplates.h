@@ -17,7 +17,7 @@ namespace ds {
 		const bool contains(int id) const;
 		//const Sprite& get(int id) const;
 		bool get(const char* name,Sprite* sprite);
-		void showDialog(const char* name);
+		void showDialog(v2* pos,const char* name);
 	private:
 		Names _names;
 		TemplateMap _map;

@@ -82,8 +82,8 @@ namespace ds {
 	"type" : "-1"
 	}
 	*/
-	void SpriteTemplates::showDialog(const char* name) {
-		gui::start(v2(100, 600));
+	void SpriteTemplates::showDialog(v2* pos,const char* name) {
+		gui::start(pos);
 		if (gui::begin("Sprite Templates", &_state)) {		
 			IdString hash = string::murmur_hash(name);
 			if (_map.find(hash) != _map.end()) {
