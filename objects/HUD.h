@@ -12,6 +12,14 @@ const int MAX_TIMER = 8;
 const int MAX_HUD_IMAGES = 64;
 const int MAX_HUD_NUMBERS = 8;
 
+enum HudEntryType {
+	HET_NUMBER,
+	HET_IMAGE,
+	HET_COUNTER,
+	HET_TIMER,
+	HET_TEXT
+};
+
 class HUD : public Serializer {
 
 struct NumberDef {
@@ -38,6 +46,7 @@ struct HUDEntry {
 	ds::Color color;
 	float scale;
 	int flag;
+	HudEntryType type;
 	std::vector<Sprite> sprites;
 };
 
@@ -108,7 +117,7 @@ public:
 	void load(BinaryLoader* loader);	
 
 private:	
-	int createEntry(const Vector2f& pos,float scale = 1.0f,const ds::Color& color = ds::Color::WHITE);
+	int createEntry(HudEntryType type,const Vector2f& pos,float scale = 1.0f,const ds::Color& color = ds::Color::WHITE);
 	void createText(HUDEntry* entry,const std::string& text,bool clear = true);
 
 	int getTextIndex(int id);

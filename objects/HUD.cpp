@@ -58,7 +58,7 @@ int HUD::addText(int x,int y,const std::string& txt,const ds::Color& color,float
 	if ( id != -1 ) {
 		LOGC("HUD") << "adding text - id: " << id;
 		HUDText* ht = &m_TextEntries[id];
-		ht->entryID = createEntry(Vector2f(x,y),scale,color);		
+		ht->entryID = createEntry(HET_TEXT,v2(x,y),scale,color);		
 		ht->text = txt;	
 		ht->flag = 0;
 		HUDEntry* he = &m_HUDEntries[ht->entryID];
@@ -81,7 +81,7 @@ void HUD::addText(int id,int x,int y,const std::string& txt,const ds::Color& col
 		LOGC("HUD") << "adding text - id: " << id;
 		HUDText* ht = &m_TextEntries[index];
 		ht->id = id;
-		ht->entryID = createEntry(Vector2f(x,y),scale,color);		
+		ht->entryID = createEntry(HET_TEXT, v2(x,y),scale,color);		
 		ht->text = txt;	
 		ht->flag = 0;
 		HUDEntry* he = &m_HUDEntries[ht->entryID];
@@ -109,7 +109,7 @@ void HUD::addCounter(int id,int x,int y,int length,int value,const ds::Color& co
 	LOGC("HUD") << "adding counter - id: " << id;
 	HUDCounter* hc = &m_Counter[id];
 	assert(hc->flag == -1);
-	hc->entryID = createEntry(Vector2f(x,y),scale,color);
+	hc->entryID = createEntry(HET_COUNTER, v2(x,y),scale,color);
 	hc->id = id;
 	hc->length = length;
 	hc->value = -1;		
@@ -125,7 +125,7 @@ void HUD::addImage(int id,int x,int y,const Rect& texturRect,const Color& color,
 	LOGC("HUD") << "adding image - id: " << id;
 	HUDImage* hi = &m_Images[id];
 	assert(hi->flag == -1);
-	hi->entryID = createEntry(Vector2f(x,y),scale,color);
+	hi->entryID = createEntry(HET_IMAGE, v2(x,y),scale,color);
 	hi->id = id;
 	HUDEntry* entry = &m_HUDEntries[hi->entryID];
 	Sprite sp;
@@ -144,7 +144,7 @@ void HUD::addTimer(int id,int x,int y,const ds::Color& color,float scale) {
 	LOGC("HUD") << "adding timer - id: " << id;
 	HUDTimer* hc = &m_Timer[id];
 	assert(hc->flag == -1);
-	hc->entryID = createEntry(Vector2f(x,y),scale,color);
+	hc->entryID = createEntry(HET_TIMER, v2(x,y),scale,color);
 	hc->id = id;			
 	hc->flag = 0;	
 	hc->gameTimer.reset();		
@@ -330,7 +330,7 @@ void HUD::defineNumber(int index, float top, float left, float width, float heig
 // -------------------------------------------------------
 // Create new HUD entry
 // -------------------------------------------------------
-int HUD::createEntry(const Vector2f& pos,float scale,const ds::Color& color) {
+int HUD::createEntry(HudEntryType type, const Vector2f& pos, float scale, const ds::Color& color) {
 	int id = -1;
 	for ( int i = 0; i < 128; ++i ) {
 		if ( m_HUDEntries[i].flag == -1 && id == -1 ) {
@@ -338,6 +338,7 @@ int HUD::createEntry(const Vector2f& pos,float scale,const ds::Color& color) {
 		}
 	}
 	if ( id != -1 ) {
+		m_HUDEntries[id].type = type;
 		m_HUDEntries[id].color = color;
 		m_HUDEntries[id].pos = pos;
 		m_HUDEntries[id].flag = 0;
