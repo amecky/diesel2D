@@ -6,15 +6,15 @@
 namespace gui {
 
 	const float BUTTON_HEIGHT = 24.0f;
-	const float TEXTFIELD_HEIGHT = 24.0f;
+	const float TEXTFIELD_HEIGHT = 16.0f;
 	const float TEXT_PADDING = 4.0f;
 	const float BUTTON_PADDING = 20.0f;
 	const float LINE_HEIGHT = 26.0f;
-	const float TEXT_OFFSET = 8.0f;
+	const float TEXT_OFFSET = 7.0f;
 	const int CHAR_PADDING = 0;
-	const float BOX_HEIGHT = 18.0f;
+	const float BOX_HEIGHT = 16.0f;
 	const float WHITE_BOX_SIZE = 256.0f;
-	const float INPUT_BOX_WIDTH = 80.0f;
+	const float INPUT_BOX_WIDTH = 70.0f;
 	// -------------------------------------------------------
 	// DrawCall
 	// -------------------------------------------------------
@@ -210,12 +210,23 @@ namespace gui {
 
 	static GUIContext* guiContext;
 
+	// -------------------------------------------------------
+	// send key
+	// -------------------------------------------------------
 	void sendKey(unsigned char c) {
-		if (guiContext->keyInput.num < 256) {
-			guiContext->keyInput.keys[guiContext->keyInput.num++] = c;
+		if (guiContext->ready) {
+			if (guiContext->keyInput.num < 256) {
+				guiContext->keyInput.keys[guiContext->keyInput.num++] = c;
+			}
+			else {
+				guiContext->keyInput.num = 0;
+			}
 		}
 	}
 	
+	// -------------------------------------------------------
+	// send special key
+	// -------------------------------------------------------
 	void sendSpecialKey(WPARAM wParam) {
 		if (wParam == VK_BACK) {
 			gui::sendKey(128);
@@ -296,31 +307,6 @@ namespace gui {
 	// -------------------------------------------------------
 	// handle mouse interaction
 	// -------------------------------------------------------
-	bool handleMouse(int id, const v2& pos, const v2& size) {
-		if (guiContext->active == id) {
-			if (guiContext->clicked && guiContext->hot == id) {
-				if (isCursorInside(pos, size)) {
-					return true;
-				}
-				else {
-					guiContext->active = -1;
-				}
-			}
-		}
-		else if (guiContext->hot == id) {
-			//if (guiContext->buttonPressed) {
-			if (guiContext->clicked) {
-				guiContext->keyInput.num = 0;
-				guiContext->active = id;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// -------------------------------------------------------
-	// handle mouse interaction
-	// -------------------------------------------------------
 	bool isSelected(int id, const v2& pos, const v2& size,bool setActive = true) {
 		if (guiContext->clicked && isCursorInside(pos, size)) {
 			if (setActive) {
@@ -331,6 +317,9 @@ namespace gui {
 		return false;
 	}
 
+	// -------------------------------------------------------
+	// is box selected
+	// -------------------------------------------------------
 	bool isBoxSelected(int id, const v2& pos, const v2& size,bool setActive = true) {
 		if (guiContext->clicked) {
 			v2 p = pos;
@@ -346,6 +335,9 @@ namespace gui {
 		return false;
 	}
 
+	// -------------------------------------------------------
+	// start
+	// -------------------------------------------------------
 	void start(const v2& startPos) {
 		assert(guiContext->ready);		
 		if (guiContext->hot == -1 && guiContext->clicked) {
@@ -509,7 +501,6 @@ namespace gui {
 		p.x += (width + 10.0f) * index;
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT), width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
-		//if (prev != guiContext->active) {
 		if ( selected) {
 			sprintf_s(guiContext->inputText, 32, "%.2f", *v);
 			guiContext->caretPos = strlen(guiContext->inputText);
@@ -535,12 +526,54 @@ namespace gui {
 	}
 
 	// -------------------------------------------------------
+	// input scalar
+	// -------------------------------------------------------
+	void InputScalar(int id, int index, char* v,int maxLength,float width = INPUT_BOX_WIDTH) {
+		int new_id = id + 1024 * index;
+		v2 p = guiContext->position;
+		p.x += (width + 10.0f) * index;
+		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT), width * 0.5f);
+		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
+		if (selected) {
+			sprintf_s(guiContext->inputText, maxLength, "%s", v);
+			guiContext->caretPos = strlen(guiContext->inputText);
+			guiContext->active = new_id;
+		}
+		if (guiContext->active == new_id) {
+			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT_EDIT]);
+			handleTextInput();
+			*v = atoi(guiContext->inputText);
+			v2 cp = p;
+			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
+			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x;
+			cp.y -= 2.0f;
+			guiContext->addBox(cp, v2(2, BOX_HEIGHT), ds::Color(192, 0, 0, 255));
+			guiContext->addText(p, guiContext->inputText);
+			sprintf_s(v, maxLength, "%s", guiContext->inputText);
+		}
+		else {
+			char buffer[32];
+			sprintf_s(buffer, 32, "%s", v);
+			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
+			guiContext->addText(p, buffer);
+		}
+	}
+
+	void Input(int id, const char* label, char* str, int maxLength) {
+		InputScalar(id, 0, str, maxLength,400.0f);
+		v2 p = guiContext->position;
+		p.x += 410.0f;
+		guiContext->addText(p, label);
+		guiContext->nextPosition();
+	}
+
+	// -------------------------------------------------------
 	// input float
 	// -------------------------------------------------------
 	void InputFloat(int id, const char* label, float* v) {
 		InputScalar(id, 0, v);
 		v2 p = guiContext->position;
-		p.x += 110.0f;
+		p.x += INPUT_BOX_WIDTH + 10.0f;
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
@@ -801,6 +834,7 @@ namespace gui {
 		v2 textDim = getTextSize(label);
 		float width = textDim.x + BUTTON_PADDING * 2.0f;
 		v2 p = guiContext->position;
+		p.y -= 4.0f;
 		bool hot = isHot(id, p, v2(width, BUTTON_HEIGHT),width * 0.5f);
 		if (hot) {
 			guiContext->addBox(p, v2(width, BUTTON_HEIGHT), guiContext->colors[CLR_BUTTON_HOVER]);
@@ -823,6 +857,7 @@ namespace gui {
 		assert(guiContext->textureID != -1);
 		guiContext->font = ds::renderer::createBitmapFont("gui_font");		
 		ds::FontDefinition fdf;
+		/*
 		fdf.startChar = 32;
 		fdf.endChar = 128;
 		fdf.width = 222;
@@ -833,6 +868,18 @@ namespace gui {
 		fdf.startX = 0;
 		fdf.startY = 0;
 		fdf.gridHeight = 16;
+		*/
+		fdf.startChar = 32;
+		fdf.endChar = 128;
+		fdf.width = 209;
+		fdf.height = 92;
+		fdf.padding = 1;
+		fdf.textureSize = 512.0f;
+		fdf.charHeight = 14;
+		fdf.startX = 0;
+		fdf.startY = 0;
+		fdf.gridHeight = 14;
+
 		guiContext->font->intialize(fdf);
 		ds::renderer::initializeBitmapFont(*guiContext->font, guiContext->textureID);
 		guiContext->clicked = false;
@@ -841,17 +888,17 @@ namespace gui {
 		guiContext->active = -1;
 		guiContext->hot = -1;
 		// some pre build icons / textures
-		guiContext->textures[ICN_ARROW_RIGHT] = ds::math::buildTexture(18.0f, 256.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
-		guiContext->textures[ICN_ARROW_DOWN]  = ds::math::buildTexture(18.0f, 272.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
-		guiContext->textures[ICN_ARROW_LEFT]  = ds::math::buildTexture(18.0f, 292.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
-		guiContext->textures[ICN_ARROW_UP]    = ds::math::buildTexture(18.0f, 310.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
-		guiContext->textures[ICN_PLUS]        = ds::math::buildTexture(18.0f, 346.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
-		guiContext->textures[ICN_MINUS]       = ds::math::buildTexture(18.0f, 328.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
-		guiContext->textures[ICN_CHECKBOX]    = ds::math::buildTexture(18.0f, 364.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
-		guiContext->textures[ICN_CHECKBOX_SELECTED] = ds::math::buildTexture(18.0f, 382.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
+		guiContext->textures[ICN_ARROW_RIGHT] = ds::math::buildTexture(16.0f, 256.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
+		guiContext->textures[ICN_ARROW_DOWN]  = ds::math::buildTexture(16.0f, 272.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
+		guiContext->textures[ICN_ARROW_LEFT]  = ds::math::buildTexture(16.0f, 288.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
+		guiContext->textures[ICN_ARROW_UP]    = ds::math::buildTexture(16.0f, 304.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
+		guiContext->textures[ICN_PLUS]        = ds::math::buildTexture(16.0f, 336.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
+		guiContext->textures[ICN_MINUS]       = ds::math::buildTexture(16.0f, 320.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
+		guiContext->textures[ICN_CHECKBOX]    = ds::math::buildTexture(16.0f, 352.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
+		guiContext->textures[ICN_CHECKBOX_SELECTED] = ds::math::buildTexture(16.0f, 368.0f, BOX_HEIGHT, BOX_HEIGHT, 512.0f, 512.0f);
 		
-		guiContext->colors[CLR_PANEL_BACKGROUND] = ds::Color(16, 16, 16, 255);
-		guiContext->colors[CLR_PANEL_HEADER] = ds::Color(80, 139, 199, 255);
+		guiContext->colors[CLR_PANEL_BACKGROUND] = ds::Color(32, 32, 32, 255);
+		guiContext->colors[CLR_PANEL_HEADER] = ds::Color(0, 111, 204, 255);
 		guiContext->colors[CLR_INPUT] = ds::Color(41, 46, 52, 255);
 		guiContext->colors[CLR_INPUT_EDIT] = ds::Color(128, 128, 128, 255);
 		guiContext->colors[CLR_BUTTON] = ds::Color(89, 101, 117, 255);
@@ -893,7 +940,7 @@ namespace gui {
 		}		
 		p.x = guiContext->startPosition.x + dim.x / 2.0f * sx - 10.0f;
 		ds::sprites::draw(p, buildBoxTexture(dim.x, BOX_HEIGHT), 0.0f, sx, 1.0f, guiContext->colors[CLR_PANEL_HEADER]);
-		p.x = guiContext->startPosition.x + 2.0f;
+		p.x = guiContext->startPosition.x - 2.0f;
 		if (guiContext->visible) {
 			ds::sprites::draw(p, guiContext->textures[ICN_ARROW_DOWN]);
 		}

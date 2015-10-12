@@ -50,25 +50,33 @@ namespace file {
 	void logFileTime(const FILETIME& time);
 
 	template<class T>
-	void saveBinary(const char* fileName, const T& t) {
+	bool saveBinary(const char* fileName, T* t) {
 		IdString str = ds::string::murmur_hash(fileName);
 		char buffer[128];
 		sprintf_s(buffer, 128, "data\\%d", str);
+		LOG << "saving binary file: " << buffer;
 		FILE* f = fopen(buffer, "wb");
-		fwrite(&t, sizeof(T), 1, f);
-		fclose(f);
+		if (f) {
+			fwrite(t, sizeof(T), 1, f);
+			fclose(f);
+			return true;
+		}
+		return false;
 	}
 
 	template<class T>
-	void loadBinary(const char* fileName, T* t) {
+	bool loadBinary(const char* fileName, T* t) {
 		IdString str = ds::string::murmur_hash(fileName);
 		char buffer[128];
 		sprintf_s(buffer, 128, "data\\%d", str);
+		LOG << "loading binary file: " << buffer;
 		FILE* f = fopen(buffer, "rb");
 		if (f) {
-			fread(&t, sizeof(T), 1, f);
+			fread(t, sizeof(T), 1, f);
 			fclose(f);
+			return true;
 		}
+		return false;
 	}
 }
 

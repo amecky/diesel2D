@@ -23,6 +23,8 @@ namespace gui {
 
 	void InputFloat(int id,const char* label, float* v);
 
+	void Input(int id, const char* label, char* str,int maxLength);
+
 	void InputFloat(int id, const char* label, float* v, float minValue, float maxValue, float step);
 
 	void InputInt(int id, const char* label, int* v);

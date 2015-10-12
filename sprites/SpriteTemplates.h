@@ -8,7 +8,8 @@ namespace ds {
 	class SpriteTemplates : public Serializer {
 
 	typedef std::map<IdString, Sprite> TemplateMap;
-	
+	typedef std::vector<std::string> Names;
+
 	public:
 		SpriteTemplates();
 		~SpriteTemplates();
@@ -16,11 +17,14 @@ namespace ds {
 		const bool contains(int id) const;
 		//const Sprite& get(int id) const;
 		bool get(const char* name,Sprite* sprite);
+		void showDialog(const char* name);
 	private:
-		TemplateMap m_Map;
-		Sprite m_Sprites[256];
-		int m_Num;
-		int m_IDs[256];
+		Names _names;
+		TemplateMap _map;
+		Sprite _sprites[256];
+		int _num;
+		int _IDs[256];
+		int _state;
 	};
 
 }

@@ -10,6 +10,7 @@
 #include "..\sprites\SpriteBatch.h"
 #include "..\renderer\graphics.h"
 #include "GameStateMachine.h"
+#include "..\ui\IMGUI.h"
 
 namespace ds {
 
@@ -274,6 +275,7 @@ void BaseApp::sendButton(int button,int x,int y,bool down) {
 void BaseApp::sendOnChar(char ascii,unsigned int state) {
 	m_KeyStates.ascii = ascii;
 	m_KeyStates.onChar = true;
+	gui::sendKey(ascii);
 }
 
 void BaseApp::sendKeyDown(WPARAM virtualKey) {
@@ -308,6 +310,7 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 void BaseApp::sendKeyUp(WPARAM virtualKey) {
 	m_KeyStates.keyUp = true;
 	m_KeyStates.keyReleased = virtualKey;
+	gui::sendSpecialKey(virtualKey);
 }
 
 }
