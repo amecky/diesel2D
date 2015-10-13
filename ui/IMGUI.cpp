@@ -2,6 +2,7 @@
 #include "..\renderer\graphics.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\utils\font.h"
+#include "..\utils\Profiler.h"
 
 namespace gui {
 
@@ -112,7 +113,9 @@ namespace gui {
 		CLR_INPUT_EDIT,
 		CLR_INPUT,
 		CLR_BUTTON,
-		CLR_BUTTON_HOVER
+		CLR_BUTTON_HOVER,
+		CLR_SELECTED_LINE,
+		CLR_SLIDER
 	};
 
 	// -------------------------------------------------------
@@ -348,7 +351,7 @@ namespace gui {
 		else {
 			if (guiContext->buttonPressed) {
 				if (!guiContext->dragging) {
-					LOG << "clicked on ";
+					//LOG << "clicked on ";
 					guiContext->clicked = true;
 				}
 				else {
@@ -737,11 +740,80 @@ namespace gui {
 		guiContext->nextPosition();
 	}
 
+	void prepareComboBox(int id,int* offset,int size) {
+		int max = 5;
+		float width = 200.0f;
+		v2 p = guiContext->position;
+		float height = max * BOX_HEIGHT;
+		p.y -= height / 2.0f - BOX_HEIGHT / 2.0f;
+		guiContext->addBox(p, v2(width, height), guiContext->colors[CLR_INPUT]);
+		p = guiContext->position;
+		p.x += width + BOX_HEIGHT * 0.5f;
+
+		guiContext->addImage(p, guiContext->textures[ICN_ARROW_UP]);
+		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
+			*offset -= 1;
+			if (*offset < 0) {
+				*offset = 0;
+			}
+		}
+		float sideHeight = height - 2.0f * BOX_HEIGHT;
+		p.y -= sideHeight * 0.5f;
+		p.y -= BOX_HEIGHT * 0.5f;
+		p.x -= BOX_HEIGHT * 0.5f;
+		guiContext->addBox(p, v2(BOX_HEIGHT, sideHeight), guiContext->colors[CLR_SLIDER]);
+
+		p.x += BOX_HEIGHT * 0.5f;
+		p.y = guiContext->position.y - (max - 1) * BOX_HEIGHT;
+		guiContext->addImage(p, guiContext->textures[ICN_ARROW_DOWN]);
+		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
+			if ((*offset + max) < size) {
+				*offset += 1;
+			}
+		}
+
+		float f = static_cast<float>(*offset) / static_cast<float>(size - max);
+		sideHeight = height - 3.0f * BOX_HEIGHT;
+		float slid = sideHeight * f;
+		p = guiContext->position;
+		p.y -= BOX_HEIGHT;
+		p.x += width + BOX_HEIGHT * 0.5f;
+		p.y -= slid;
+		guiContext->addImage(p, guiContext->textures[ICN_ARROW_LEFT]);
+	}
 	// -------------------------------------------------------
 	// combo box
 	// -------------------------------------------------------	
-	void ComboBox(int id, const std::vector<std::string>& entries, int* selected) {
-		int max = entries.size();
+	void ComboBox(int id, AbstractComponentModel* model,int *offset,int max) {
+		prepareComboBox(id, offset, model->size());
+		float width = 200.0f;
+		v2 p = guiContext->position;
+		float height = max * BOX_HEIGHT;		
+		bool hot = isHot(id, p, v2(width, height));
+		int start = *offset;
+		int end = *offset + max;
+		if (end >= model->size()) {
+			end = model->size();
+		}
+		for (int i = start; i < end; ++i) {
+			if (isBoxSelected(id, p, v2(width, BOX_HEIGHT))) {
+				model->select(i);
+			}
+			if (model->isSelected(i)) {
+				guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_SLIDER]);
+			}
+			guiContext->addText(p, model->getLabel(i));
+			p.y -= BOX_HEIGHT;
+		}
+		guiContext->position.y -= height;
+		guiContext->position.y -= 8.0f;
+	}
+
+	// -------------------------------------------------------
+	// combo box
+	// -------------------------------------------------------	
+	void ComboBox(int id, const std::vector<std::string>& entries, int* selected,int *offset,int max) {
+		prepareComboBox(id, offset, entries.size());
 		float width = 200.0f;
 		v2 p = guiContext->position;
 		float height = max * BOX_HEIGHT;
@@ -749,12 +821,17 @@ namespace gui {
 		guiContext->addBox(p, v2(width, height), guiContext->colors[CLR_INPUT]);
 		p = guiContext->position;
 		bool hot = isHot(id, p, v2(width, height));
-		for (size_t i = 0; i < max; ++i) {
+		int start = *offset;
+		int end = *offset + max;
+		if (end >= entries.size()) {
+			end = entries.size();
+		}
+		for (int i = start; i < end; ++i) {
 			if (isBoxSelected(id, p, v2(width, BOX_HEIGHT))) {
 				*selected = i;
 			}
 			if (*selected == i) {
-				guiContext->addBox(p, v2(width, BOX_HEIGHT), ds::Color(128, 0, 128, 255));
+				guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_SLIDER]);
 			}				
 			guiContext->addText(p, entries[i].c_str());			
 			p.y -= BOX_HEIGHT;
@@ -806,7 +883,7 @@ namespace gui {
 					*selected = i;
 				}
 				if (*selected == i) {
-					guiContext->addBox(p, v2(width, BOX_HEIGHT), ds::Color(128, 0, 128, 255));
+					guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_SELECTED_LINE]);
 				}
 				guiContext->addText(p, entries[i].c_str());
 				p.y -= BOX_HEIGHT;
@@ -918,7 +995,8 @@ namespace gui {
 		guiContext->colors[CLR_INPUT_EDIT]       = ds::Color(128, 128, 128, 255);
 		guiContext->colors[CLR_BUTTON]           = ds::Color(89, 101, 117, 255);
 		guiContext->colors[CLR_BUTTON_HOVER]     = ds::Color(66, 76, 88, 255);
-
+		guiContext->colors[CLR_SELECTED_LINE]    = ds::Color(128, 0, 128, 255);
+		guiContext->colors[CLR_SLIDER]           = ds::Color(48, 48, 48, 255);
 		guiContext->ready = true;
 	}
 
@@ -937,6 +1015,7 @@ namespace gui {
 	// end panel
 	// -------------------------------------------------------	
 	void end() {
+		PR_START("IMGUI::end")
 		assert(guiContext->ready);
 		int current = ds::sprites::getCurrentTextureID();
 		ds::sprites::setTexture(guiContext->textureID);
@@ -1000,6 +1079,7 @@ namespace gui {
 		
 		ds::sprites::setTexture(current);
 		guiContext->position.y -= 10.0f;
+		PR_END("IMGUI::end")
 	}
 
 }

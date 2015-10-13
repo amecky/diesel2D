@@ -4,6 +4,61 @@
 #include "..\renderer\BitmapFont.h"
 
 namespace gui {
+	
+	class AbstractComponentModel {
+
+	public:
+		AbstractComponentModel() : _selected(-1) {}
+		bool hasSelection() const {
+			return _selected != -1;
+		}
+		void select(int idx) {
+			_selected = idx;
+		}
+		bool isSelected(int idx) const {
+			return idx == _selected;
+		}
+		virtual size_t size() const = 0;
+		virtual const char* getLabel(int idx) const = 0;
+	protected:
+		int _selected;
+	};
+
+	template<class T>
+	class ComponentModel : public AbstractComponentModel {
+
+		struct ModelEntry {
+			char name[20];
+			T value;
+		};
+
+		typedef std::vector<ModelEntry> Entries;
+
+	public:
+		ComponentModel() : AbstractComponentModel() {}
+		void add(const char* label, const T& t) {
+			ModelEntry entry;
+			strcpy(entry.name, label);
+			entry.value = t;
+			_entries.push_back(entry);
+		}
+		size_t size() const {
+			return _entries.size();
+		}
+		const char* getLabel(int idx) const {
+			return _entries[idx].name;
+		}
+		const T& getValue(int idx) const {
+			return _entries[idx].value;
+		}
+		const T& getSelectedValue() const {
+			assert(hasSelection());
+			return _entries[_selected].value;
+		}
+	private:
+		Entries _entries;
+		
+	};
 
 	void initialize();
 
@@ -39,7 +94,9 @@ namespace gui {
 
 	void InputColor(int id, const char* label, ds::Color* v);
 
-	void ComboBox(int id,const std::vector<std::string>& entries, int* selected);
+	void ComboBox(int id,const std::vector<std::string>& entries, int* selected,int *offset,int max = 5);
+
+	void ComboBox(int id, AbstractComponentModel* model,int *offset,int max = 5);
 
 	void DropDownBox(int id, const std::vector<std::string>& entries, int* selected,int* state);
 
