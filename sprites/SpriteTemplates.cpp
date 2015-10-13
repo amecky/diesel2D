@@ -73,18 +73,6 @@ namespace ds {
 		}
 	}
 
-	/*
-	"sprite" {
-	"name" : "background" ,
-	"texture_id" : "0" ,
-	"position" : "512,384" ,
-	"rect" : "0,512,512,384" ,
-	"scale" : "2,2" ,
-	"rotation" : "0" ,
-	"color" : "32,32,32,255" ,
-	"type" : "-1"
-	}
-	*/
 	void SpriteTemplates::showDialog(v2* pos) {
 		gui::start(pos);
 		if (gui::begin("Sprite Templates", &_state)) {

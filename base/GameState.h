@@ -43,6 +43,9 @@ public:
 	IdString getHash() const {
 		return _hash;
 	}
+	const char* getName() const {
+		return _name;
+	}
 private:
 	const char* _name;
 	IdString _hash;
