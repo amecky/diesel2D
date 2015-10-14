@@ -428,7 +428,7 @@ namespace ds {
 
 		BitmapFont* loadBitmapFont(const char* name, int textureId, const Color& fillColor = Color(1.0f, 0.0f, 1.0f, 1.0f));
 
-		void initializeBitmapFont(BitmapFont& bitmapFont, int textureID, const Color& fillColor = Color(1.0f, 0.0f, 1.0f, 1.0f));
+		void initializeBitmapFont(BitmapFont* bitmapFont, int textureID, const Color& fillColor = Color(1.0f, 0.0f, 1.0f, 1.0f));
 
 		bool isFillColor(const Color& fillColor, const Color& currentColor);
 		

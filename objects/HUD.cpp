@@ -317,7 +317,7 @@ void HUD::createText(HUDEntry* entry,const std::string& text,bool clear) {
 	if ( clear ) {
 		entry->sprites.clear();
 	}
-	font::createText(*m_Font,entry->pos,text,entry->color,entry->sprites,entry->scale,entry->scale);	
+	font::createText(*m_Font, entry->pos, text.c_str(), entry->color, entry->sprites, entry->scale, entry->scale);
 }
 
 void HUD::defineNumber(int index, float top, float left, float width, float height) {

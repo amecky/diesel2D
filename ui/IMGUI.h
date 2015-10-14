@@ -20,6 +20,7 @@ namespace gui {
 		}
 		virtual size_t size() const = 0;
 		virtual const char* getLabel(int idx) const = 0;
+		virtual void clear() = 0;
 	protected:
 		int _selected;
 	};
@@ -55,6 +56,9 @@ namespace gui {
 			assert(hasSelection());
 			return _entries[_selected].value;
 		}
+		void clear() {
+			_entries.clear();
+		}
 	private:
 		Entries _entries;
 		
@@ -62,7 +66,7 @@ namespace gui {
 
 	void initialize();
 
-	void start(v2* startPos);
+	void start(int id,v2* startPos);
 
 	bool begin(const char* header, int* state);
 
@@ -107,4 +111,8 @@ namespace gui {
 	void debugWindow();
 
 	void end();
+
+	void shutdown();
+
+	void endFrame();
 }

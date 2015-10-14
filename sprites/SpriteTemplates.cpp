@@ -74,7 +74,7 @@ namespace ds {
 	}
 
 	void SpriteTemplates::showDialog(v2* pos) {
-		gui::start(pos);
+		gui::start(100,pos);
 		if (gui::begin("Sprite Templates", &_state)) {
 			gui::ComboBox(20, &_model,&_offset);
 		}

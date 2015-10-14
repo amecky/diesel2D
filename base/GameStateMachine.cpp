@@ -1,17 +1,19 @@
 #include "GameStateMachine.h"
 #include "..\utils\Log.h"
+#include "..\utils\Profiler.h"
 
 namespace ds {
 
 	GameStateMachine::GameStateMachine() {
 		_activeState = 0;
 		_currentIndex = -1;
-		_dialogPos = v2(100, 600);
+		_dialogPos = v2(50, 700);
 		_dialogState = 1;
 		_offset = 0;
 	}
 
 	GameStateMachine::~GameStateMachine() {
+		_model.clear();
 		GameStates::iterator it = _gameStates.begin();
 		while (it != _gameStates.end()) {
 			delete (*it);
@@ -139,14 +141,18 @@ namespace ds {
 	}
 
 	void GameStateMachine::showDialog() {
-		gui::start(&_dialogPos);
+		PR_START("GameStateMachine::showDialog")
+		gui::start(101,&_dialogPos);
 		if (gui::begin("GameStates", &_dialogState)) {
-			gui::ComboBox(1, &_model, &_offset);
-			if (gui::Button(2, "Activate")) {
-				LOG << "OK pressed";
+			gui::ComboBox(100, &_model, &_offset);
+			if (gui::Button(101, "Activate")) {
+				if (_model.hasSelection()) {
+					GameState* state = _model.getSelectedValue();
+					activate(state->getName());
+				}
 			}
-
 		}
 		gui::end();
+		PR_END("GameStateMachine::showDialog")
 	}
 }

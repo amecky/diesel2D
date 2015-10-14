@@ -5,15 +5,16 @@
 namespace ds {
 
 	namespace font {
-
+	
 		// -------------------------------------------------------
 		// Calculate size of text
 		// -------------------------------------------------------
-		Vector2f calculateSize(const BitmapFont& bitmapFont,const std::string& text,int padding,float scaleX,float scaleY) {
+		v2 calculateSize(const BitmapFont& bitmapFont, const char* text, int padding, float scaleX, float scaleY) {
 			float cPadding = 0.0f;
-			v2 ret(0.0f,0.0f);
+			v2 ret(0.0f, 0.0f);
+			int len = strlen(text);
 			ret.y = bitmapFont.getCharHeight() * scaleY;
-			for ( size_t cnt = 0; cnt < text.length(); ++cnt ) {
+			for (size_t cnt = 0; cnt < len; ++cnt) {
 				char c = text[cnt];
 				if (bitmapFont.contains(c)) {
 					CharDef cd = bitmapFont.getCharDef(c);
@@ -28,13 +29,14 @@ namespace ds {
 		// -------------------------------------------------------
 		// Calculate size of text
 		// -------------------------------------------------------
-		Vector2f calculateLimitedSize(const BitmapFont& bitmapFont, const std::string& text, int chars, int padding, float scaleX, float scaleY) {
+		v2 calculateLimitedSize(const BitmapFont& bitmapFont, const char* text, int chars, int padding, float scaleX, float scaleY) {
 			float cPadding = 0.0f;
 			v2 ret(0.0f, 0.0f);
 			ret.y = bitmapFont.getCharHeight() * scaleY;
 			int total = chars;
-			if (total >= text.length()) {
-				total = text.length();
+			int len = strlen(text);
+			if (total >= len) {
+				total = len;
 			}
 			for (size_t cnt = 0; cnt < total; ++cnt) {
 				char c = text[cnt];
@@ -51,12 +53,13 @@ namespace ds {
 		// -------------------------------------------------------
 		// Create text
 		// -------------------------------------------------------
-		void createText(const BitmapFont& bitmapFont,const Vector2f& pos,const std::string& text,const Color& color,std::vector<Sprite>& sprites,float scaleX,float scaleY) {
+		void createText(const BitmapFont& bitmapFont, const v2& pos, const char* text, const Color& color, std::vector<Sprite>& sprites, float scaleX, float scaleY) {
 			float x = pos.x;
 			float y = pos.y;
 			float padding = 0.0f;
 			float z = 0.0f;			
-			for ( size_t cnt = 0; cnt < text.length(); ++cnt ) {
+			int len = strlen(text);
+			for ( size_t cnt = 0; cnt < len; ++cnt ) {
 				char c = text[cnt];
 				if (bitmapFont.contains(c)) {
 					CharDef cd = bitmapFont.getCharDef(c);
@@ -75,7 +78,7 @@ namespace ds {
 			}
 		}
 
-		void createCharacter(const BitmapFont& bitmapFont, const Vector2f& pos, char c, const Color& color, std::vector<Sprite>& sprites, float scaleX, float scaleY) {
+		void createCharacter(const BitmapFont& bitmapFont, const v2& pos, char c, const Color& color, std::vector<Sprite>& sprites, float scaleX, float scaleY) {
 			float x = pos.x;
 			float y = pos.y;
 			float padding = 0.0f;

@@ -49,6 +49,7 @@ BaseApp::~BaseApp() {
 	//delete gProfiler;
 	delete audio;
 	renderer::shutdown();	
+	gui::shutdown();
 	delete gFileWatcher;	
 	delete gBlockMemory;
 
@@ -221,9 +222,9 @@ void BaseApp::buildFrame() {
 	renderer::beginRendering(_settings.clearColor);	
 	renderer::setupMatrices();
 	PR_START("RENDER_GAME")
-	ds::sprites::begin();
-	draw();		
+	ds::sprites::begin();		
 	stateMachine->render();
+	draw();
 	ds::sprites::flush();
 	PR_END("RENDER_GAME")
 	//m_World.draw();
@@ -245,8 +246,9 @@ void BaseApp::buildFrame() {
 	}		
 #endif
 	
-	PR_END("DEBUG_RENDER")		
+	PR_END("DEBUG_RENDER")
 	PR_END("RENDER")
+	gui::endFrame();
 	renderer::endRendering();
 	profiler::finalize();
 	//PR_END("MAIN")

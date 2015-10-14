@@ -144,7 +144,9 @@ namespace gui {
 		ds::Texture textures[16];
 		ds::Color colors[16];
 		bool ready;
-		bool dragging;
+		int dragging;
+		bool started;
+		char tempBuffer[64];
 
 		GUIContext() {
 			textureID = -1;
@@ -162,8 +164,11 @@ namespace gui {
 			hot = -1;
 		}
 
-		void calculateDimension(const v2& position, const v2& size) {
+		void calculateDimension(const v2& position, const v2& size,bool halfSize = false) {
 			float endX = position.x + size.x - startPosition.x;
+			if (halfSize) {
+				endX = position.x + size.x * 0.5f - startPosition.x;
+			}
 			float endY = startPosition.y - position.y - size.y;
 			if (endX > dim.x) {
 				dim.x = endX;
@@ -177,7 +182,7 @@ namespace gui {
 			v2 p = position;
 			p.x += size.x * 0.5f;
 			window.addBox(p, size, color);
-			calculateDimension(p, size);
+			calculateDimension(p, size, true);
 
 		}
 
@@ -201,9 +206,9 @@ namespace gui {
 			calculateDimension(position, size);
 		}
 
-		void nextPosition() {
+		void nextPosition(float height = LINE_HEIGHT) {
 			if (!grouped) {
-				position.y -= LINE_HEIGHT;
+				position.y -= height;
 				position.x = startPosition.x;
 			}
 			else {
@@ -213,7 +218,7 @@ namespace gui {
 		}
 	};
 
-	static GUIContext* guiContext;
+	static GUIContext* guiContext = 0;
 
 	// -------------------------------------------------------
 	// send key
@@ -331,41 +336,50 @@ namespace gui {
 		return false;
 	}
 
+	void endFrame() {
+		if (guiContext != 0 && guiContext->ready) {
+			guiContext->started = false;
+		}
+	}
 	// -------------------------------------------------------
 	// start
 	// -------------------------------------------------------
-	void start(v2* startPos) {
+	void start(int id,v2* startPos) {
 		assert(guiContext->ready);		
-		if (guiContext->hot == -1 && guiContext->clicked) {
-			guiContext->active = -1;
-		}
-		if (guiContext->clicked) {
-			guiContext->clicked = false;
-		}
-		guiContext->hot = -1;
-		guiContext->startPosition = *startPos;
-		guiContext->position = *startPos;		
-		if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
-			guiContext->buttonPressed = true;
-		}
-		else {
-			if (guiContext->buttonPressed) {
-				if (!guiContext->dragging) {
-					//LOG << "clicked on ";
-					guiContext->clicked = true;
-				}
-				else {
-					guiContext->dragging = false;
-				}
+		if (!guiContext->started) {
+			guiContext->started = true;
+			if (guiContext->hot == -1 && guiContext->clicked) {
+				guiContext->active = -1;
 			}
-			guiContext->buttonPressed = false;
+			if (guiContext->clicked) {
+				guiContext->clicked = false;
+			}
+			guiContext->hot = -1;
+
+			if ((GetKeyState(VK_LBUTTON) & 0x80) != 0) {
+				guiContext->buttonPressed = true;
+			}
+			else {
+				if (guiContext->buttonPressed) {
+					if (guiContext->dragging == -1) {
+						//LOG << "clicked on ";
+						guiContext->clicked = true;
+					}
+					else {
+						guiContext->dragging = -1;
+					}
+				}
+				guiContext->buttonPressed = false;
+			}
 		}
+		guiContext->startPosition = *startPos;
+		guiContext->position = *startPos;
 		v2 dragBoxPos = *startPos;
 		dragBoxPos.x += 100.0f;
-		if (!guiContext->dragging && guiContext->buttonPressed && isCursorInside(dragBoxPos, v2(200.0f, BOX_HEIGHT))) {
-			guiContext->dragging = true;
+		if (guiContext->dragging == -1 && guiContext->buttonPressed && isCursorInside(dragBoxPos, v2(200.0f, BOX_HEIGHT))) {
+			guiContext->dragging = id;
 		}
-		if ( guiContext->dragging) {
+		if ( guiContext->dragging == id) {
 			v2 correctPos = guiContext->cursorPosition;
 			correctPos.x -= 100.0f;
 			guiContext->startPosition = correctPos;
@@ -478,10 +492,13 @@ namespace gui {
 		}
 	}
 
+
+
 	// -------------------------------------------------------
 	// input scalar
 	// -------------------------------------------------------
 	void InputScalar(int id, int index, int* v, float width = INPUT_BOX_WIDTH) {
+		PR_START("IMGUI::InputScalar-I")
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
@@ -503,17 +520,18 @@ namespace gui {
 			guiContext->addText(p, guiContext->inputText);
 		}
 		else {
-			char buffer[32];
-			sprintf_s(buffer, 32, "%d", *v);
+			sprintf_s(guiContext->tempBuffer, 64, "%d", *v);
 			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
-			guiContext->addText(p, buffer);
+			guiContext->addText(p, guiContext->tempBuffer);
 		}		
+		PR_END("IMGUI::InputScalar-I")
 	}
 
 	// -------------------------------------------------------
 	// input scalar
 	// -------------------------------------------------------
 	void InputScalar(int id, int index, float* v, float width = INPUT_BOX_WIDTH) {
+		PR_START("IMGUI::InputScalar-F")
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
@@ -535,17 +553,18 @@ namespace gui {
 			guiContext->addText(p, guiContext->inputText);
 		}
 		else {
-			char buffer[32];
-			sprintf_s(buffer, 32, "%.2f", *v);
+			sprintf_s(guiContext->tempBuffer, 64, "%.2f", *v);
 			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
-			guiContext->addText(p, buffer);
+			guiContext->addText(p, guiContext->tempBuffer);
 		}
+		PR_END("IMGUI::InputScalar-F")
 	}
 
 	// -------------------------------------------------------
 	// input scalar
 	// -------------------------------------------------------
 	void InputScalar(int id, int index, char* v,int maxLength,float width = INPUT_BOX_WIDTH) {
+		PR_START("IMGUI::InputScalar-C")
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
@@ -568,13 +587,16 @@ namespace gui {
 			sprintf_s(v, maxLength, "%s", guiContext->inputText);
 		}
 		else {
-			char buffer[32];
-			sprintf_s(buffer, 32, "%s", v);
+			sprintf_s(guiContext->tempBuffer, 64, "%s", v);
 			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
-			guiContext->addText(p, buffer);
+			guiContext->addText(p, guiContext->tempBuffer);
 		}
+		PR_END("IMGUI::InputScalar-C")
 	}
 
+	// -------------------------------------------------------
+	// input string
+	// -------------------------------------------------------
 	void Input(int id, const char* label, char* str, int maxLength) {
 		InputScalar(id, 0, str, maxLength,400.0f);
 		v2 p = guiContext->position;
@@ -628,12 +650,11 @@ namespace gui {
 		if (*v > maxValue) {
 			*v = maxValue;
 		}
-		char buffer[16];
-		sprintf_s(buffer, 16, "%.2f", *v);
-		v2 dim = getTextSize(buffer);
+		sprintf_s(guiContext->tempBuffer, 64, "%.2f", *v);
+		v2 dim = getTextSize(guiContext->tempBuffer);
 		p = guiContext->position;
 		p.x += BOX_HEIGHT + (INPUT_BOX_WIDTH - dim.x) * 0.5f;
-		guiContext->addText(p, buffer);
+		guiContext->addText(p, guiContext->tempBuffer);
 		p = guiContext->position;
 		p.x += INPUT_BOX_WIDTH + BOX_HEIGHT * 2.0f + 10.0f;
 		guiContext->addText(p, label);
@@ -663,12 +684,11 @@ namespace gui {
 		if (*v > maxValue) {
 			*v = maxValue;
 		}
-		char buffer[16];
-		sprintf_s(buffer, 16, "%d", *v);
-		v2 dim = getTextSize(buffer);
+		sprintf_s(guiContext->tempBuffer, 64, "%d", *v);
+		v2 dim = getTextSize(guiContext->tempBuffer);
 		p = guiContext->position;
 		p.x += BOX_HEIGHT + (INPUT_BOX_WIDTH - dim.x) * 0.5f;
-		guiContext->addText(p, buffer);
+		guiContext->addText(p, guiContext->tempBuffer);
 		p = guiContext->position;
 		p.x += INPUT_BOX_WIDTH + BOX_HEIGHT * 2.0f + 10.0f;
 		guiContext->addText(p, label);
@@ -740,52 +760,60 @@ namespace gui {
 		guiContext->nextPosition();
 	}
 
-	void prepareComboBox(int id,int* offset,int size) {
-		int max = 5;
+	// -------------------------------------------------------
+	// prepare combo box
+	// -------------------------------------------------------
+	void prepareComboBox(int id,int* offset,int size,int max) {		
+		PR_START("IMGUI::prepareComboBox")
 		float width = 200.0f;
 		v2 p = guiContext->position;
 		float height = max * BOX_HEIGHT;
 		p.y -= height / 2.0f - BOX_HEIGHT / 2.0f;
 		guiContext->addBox(p, v2(width, height), guiContext->colors[CLR_INPUT]);
-		p = guiContext->position;
-		p.x += width + BOX_HEIGHT * 0.5f;
+		if (size > max)  {
+			p = guiContext->position;
+			p.x += width + BOX_HEIGHT * 0.5f;
 
-		guiContext->addImage(p, guiContext->textures[ICN_ARROW_UP]);
-		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
-			*offset -= 1;
-			if (*offset < 0) {
-				*offset = 0;
+			guiContext->addImage(p, guiContext->textures[ICN_ARROW_UP]);
+			if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
+				*offset -= 1;
+				if (*offset < 0) {
+					*offset = 0;
+				}
 			}
-		}
-		float sideHeight = height - 2.0f * BOX_HEIGHT;
-		p.y -= sideHeight * 0.5f;
-		p.y -= BOX_HEIGHT * 0.5f;
-		p.x -= BOX_HEIGHT * 0.5f;
-		guiContext->addBox(p, v2(BOX_HEIGHT, sideHeight), guiContext->colors[CLR_SLIDER]);
+			float sideHeight = height - 2.0f * BOX_HEIGHT;
+			p.y -= sideHeight * 0.5f;
+			p.y -= BOX_HEIGHT * 0.5f;
+			p.x -= BOX_HEIGHT * 0.5f;
+			guiContext->addBox(p, v2(BOX_HEIGHT, sideHeight), guiContext->colors[CLR_SLIDER]);
 
-		p.x += BOX_HEIGHT * 0.5f;
-		p.y = guiContext->position.y - (max - 1) * BOX_HEIGHT;
-		guiContext->addImage(p, guiContext->textures[ICN_ARROW_DOWN]);
-		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
-			if ((*offset + max) < size) {
-				*offset += 1;
+			p.x += BOX_HEIGHT * 0.5f;
+			p.y = guiContext->position.y - (max - 1) * BOX_HEIGHT;
+			guiContext->addImage(p, guiContext->textures[ICN_ARROW_DOWN]);
+			if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
+				if ((*offset + max) < size) {
+					*offset += 1;
+				}
 			}
-		}
 
-		float f = static_cast<float>(*offset) / static_cast<float>(size - max);
-		sideHeight = height - 3.0f * BOX_HEIGHT;
-		float slid = sideHeight * f;
-		p = guiContext->position;
-		p.y -= BOX_HEIGHT;
-		p.x += width + BOX_HEIGHT * 0.5f;
-		p.y -= slid;
-		guiContext->addImage(p, guiContext->textures[ICN_ARROW_LEFT]);
+			float f = static_cast<float>(*offset) / static_cast<float>(size - max);
+			sideHeight = height - 3.0f * BOX_HEIGHT;
+			float slid = sideHeight * f;
+			p = guiContext->position;
+			p.y -= BOX_HEIGHT;
+			p.x += width + BOX_HEIGHT * 0.5f;
+			p.y -= slid;
+			guiContext->addImage(p, guiContext->textures[ICN_ARROW_LEFT]);
+		}
+		PR_END("IMGUI::prepareComboBox")
 	}
+
 	// -------------------------------------------------------
 	// combo box
 	// -------------------------------------------------------	
 	void ComboBox(int id, AbstractComponentModel* model,int *offset,int max) {
-		prepareComboBox(id, offset, model->size());
+		PR_START("IMGUI::ComboBox")
+		prepareComboBox(id, offset, model->size(),max);
 		float width = 200.0f;
 		v2 p = guiContext->position;
 		float height = max * BOX_HEIGHT;		
@@ -800,20 +828,21 @@ namespace gui {
 				model->select(i);
 			}
 			if (model->isSelected(i)) {
-				guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_SLIDER]);
+				guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_SELECTED_LINE]);
 			}
 			guiContext->addText(p, model->getLabel(i));
 			p.y -= BOX_HEIGHT;
 		}
 		guiContext->position.y -= height;
 		guiContext->position.y -= 8.0f;
+		PR_END("IMGUI::ComboBox")
 	}
 
 	// -------------------------------------------------------
 	// combo box
 	// -------------------------------------------------------	
 	void ComboBox(int id, const std::vector<std::string>& entries, int* selected,int *offset,int max) {
-		prepareComboBox(id, offset, entries.size());
+		prepareComboBox(id, offset, entries.size(),max);
 		float width = 200.0f;
 		v2 p = guiContext->position;
 		float height = max * BOX_HEIGHT;
@@ -831,7 +860,7 @@ namespace gui {
 				*selected = i;
 			}
 			if (*selected == i) {
-				guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_SLIDER]);
+				guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_SELECTED_LINE]);
 			}				
 			guiContext->addText(p, entries[i].c_str());			
 			p.y -= BOX_HEIGHT;
@@ -920,7 +949,6 @@ namespace gui {
 	// button
 	// -------------------------------------------------------	
 	bool Button(int id,const char* label) {
-		// get text size
 		v2 textDim = getTextSize(label);
 		float width = textDim.x + BUTTON_PADDING * 2.0f;
 		v2 p = guiContext->position;
@@ -934,7 +962,7 @@ namespace gui {
 		}
 		p.x = guiContext->position.x + (width - textDim.x) / 2.0f;
 		guiContext->addText(p,label, textDim);
-		guiContext->nextPosition();
+		guiContext->nextPosition(LINE_HEIGHT + 4.0f);
 		return isBoxSelected(id, p, v2(width, BUTTON_HEIGHT));
 	}
 
@@ -942,6 +970,7 @@ namespace gui {
 	// intialize gui
 	// -------------------------------------------------------	
 	void initialize() {
+		assert(guiContext == 0);
 		guiContext = new GUIContext;
 		guiContext->textureID = ds::renderer::loadTexture("gui");
 		assert(guiContext->textureID != -1);
@@ -971,7 +1000,7 @@ namespace gui {
 		fdf.gridHeight = 14;
 
 		guiContext->font->intialize(fdf);
-		ds::renderer::initializeBitmapFont(*guiContext->font, guiContext->textureID);
+		ds::renderer::initializeBitmapFont(guiContext->font, guiContext->textureID);
 		guiContext->clicked = false;
 		guiContext->released = false;
 		guiContext->buttonPressed = false;
@@ -998,6 +1027,12 @@ namespace gui {
 		guiContext->colors[CLR_SELECTED_LINE]    = ds::Color(128, 0, 128, 255);
 		guiContext->colors[CLR_SLIDER]           = ds::Color(48, 48, 48, 255);
 		guiContext->ready = true;
+	}
+
+	void shutdown() {
+		if (guiContext != 0)  {
+			delete guiContext;
+		}
 	}
 
 	void debugWindow() {

@@ -34,21 +34,21 @@ void TextMessage::updateIntText(uint32 id,int value,int length) {
 // ----------------------------------------------------------
 Vector2f TextMessage::getDimension(uint32 id) {
 	TextEntry* te = &m_TextEntries[id];
-	return font::calculateSize(*m_BitmapFont,te->text,te->scale);	
+	return font::calculateSize(*m_BitmapFont, te->text.c_str(), te->scale);
 }
 
 // ----------------------------------------------------------
 // Calculate size
 // ----------------------------------------------------------
 Vector2f TextMessage::calculateSize(const std::string& text,float scale) {
-	return font::calculateSize(*m_BitmapFont,text,4,scale,scale);	
+	return font::calculateSize(*m_BitmapFont, text.c_str(), 4, scale, scale);
 }
 // -------------------------------------------------------
 // Creates vertices for text entry
 // -------------------------------------------------------
 void TextMessage::createText(TextEntry* textEntry,const std::string& text) {
 	textEntry->sprites.clear();
-	font::createText(*m_BitmapFont,textEntry->pos,text,textEntry->color,textEntry->sprites,textEntry->scale,textEntry->scale);	
+	font::createText(*m_BitmapFont, textEntry->pos, text.c_str(), textEntry->color, textEntry->sprites, textEntry->scale, textEntry->scale);
 }
 
 // -------------------------------------------------------

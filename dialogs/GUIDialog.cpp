@@ -87,7 +87,7 @@ namespace ds {
 	void GUIDialog::addText(int id,int x,int y,const std::string& text,const Color& color,float scale,bool centered) {
 		assert(!containsItem(id));
 		Vector2f p = Vector2f(x,y);
-		v2 size = font::calculateSize(*m_BitmapFont, text, 4, scale, scale);
+		v2 size = font::calculateSize(*m_BitmapFont, text.c_str(), 4, scale, scale);
 		if ( centered ) {			
 			p.x = (renderer::getScreenWidth() - size.x) * 0.5f;
 
@@ -96,7 +96,7 @@ namespace ds {
 		item.pos = p;
 		item.type = GIT_TEXT;
 		p = Vector2f(0, 0);
-		font::createText(*m_BitmapFont,p,text,color,item.sprites,scale,scale);
+		font::createText(*m_BitmapFont, p, text.c_str(), color, item.sprites, scale, scale);
 		item.id = id;
 		item.centered = centered;
 		item.color = color;
@@ -110,13 +110,13 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::updateText(int id,int x,int y,const std::string& text,const Color& color,float scale,bool centered) {
 		Vector2f p = Vector2f(x,y);
-		Vector2f size = font::calculateSize(*m_BitmapFont, text, 4, scale, scale);
+		Vector2f size = font::calculateSize(*m_BitmapFont, text.c_str(), 4, scale, scale);
 		if ( centered ) {			
 			p.x = ( renderer::getScreenWidth() - size.x ) * 0.5f;
 		}
 		GUIItem* item = findByID(id);
 		assert(item != 0);
-		item->size = font::calculateSize(*m_BitmapFont, text, 4, item->scale, item->scale);
+		item->size = font::calculateSize(*m_BitmapFont, text.c_str(), 4, item->scale, item->scale);
 		if (item->centered) {
 			item->pos.x = (renderer::getScreenWidth() - item->size.x) * 0.5f;
 		}
@@ -126,7 +126,7 @@ namespace ds {
 		item->pos = p;
 		item->size = size;
 		item->sprites.clear();
-		font::createText(*m_BitmapFont,Vector2f(0,0),text,color,item->sprites,scale,scale);	
+		font::createText(*m_BitmapFont, Vector2f(0, 0), text.c_str(), color, item->sprites, scale, scale);
 	}
 
 	// -------------------------------------------------------
@@ -135,12 +135,12 @@ namespace ds {
 	void GUIDialog::updateText(int id,const std::string& text) {	
 		GUIItem* item = findByID(id);
 		assert(item != 0);
-		item->size = font::calculateSize(*m_BitmapFont, text, 4, item->scale, item->scale);
+		item->size = font::calculateSize(*m_BitmapFont, text.c_str(), 4, item->scale, item->scale);
 		if ( item->centered ) {
 			item->pos.x = (renderer::getScreenWidth() - item->size.x) * 0.5f;
 		}
 		item->sprites.clear();
-		font::createText(*m_BitmapFont,v2(0,0), text, item->color, item->sprites, item->scale, item->scale);
+		font::createText(*m_BitmapFont, v2(0, 0), text.c_str(), item->color, item->sprites, item->scale, item->scale);
 	}
 
 	v2 GUIDialog::getTextSize(int id) {
@@ -210,10 +210,10 @@ namespace ds {
 		s.position = Vector2f(0, 0);
 		s.texture = math::buildTexture(textureRect);
 		item.sprites.push_back(s);		
-		Vector2f size = font::calculateSize(*m_BitmapFont, text, textScale);
+		Vector2f size = font::calculateSize(*m_BitmapFont, text.c_str(), textScale);
 		float ty = y - size.y * 0.5f;
 		p = Vector2f(size.x * -0.5f, -size.y * 0.5f);
-		font::createText(*m_BitmapFont, p, text, textColor, item.sprites, textScale, textScale);
+		font::createText(*m_BitmapFont, p, text.c_str(), textColor, item.sprites, textScale, textScale);
 		item.id = id;
 		item.centered = true;
 		item.color = Color::WHITE;

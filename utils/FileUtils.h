@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include <Windows.h>
+#include "Log.h"
+#include <stdio.h>
 
 namespace ds {
 
