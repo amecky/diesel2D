@@ -40,6 +40,8 @@ namespace sprites {
 
 	void drawText(int x, int y, const char* text,float scaleX = 1.0f, float scaleY = 1.0f, const Color& color = Color::WHITE);
 
+	v2 getTextSize(const char* text, float scaleX = 1.0f, float scaleY = 1.0f);
+
 	void drawText(BitmapFont* font,int x, int y, const char* text, int padding = 4, float scaleX = 1.0f, float scaleY = 1.0f, const Color& color = Color::WHITE);
 
 	void setShaderID(int shaderID);
@@ -51,6 +53,8 @@ namespace sprites {
 	void setTexture(int textureID);
 
 	int getCurrentTextureID();
+
+	void shutdown();
 }
 
 }

@@ -45,6 +45,7 @@ BaseApp::BaseApp() {
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
 	LOGC("BaseApp") << "Destructing all elements";
+	sprites::shutdown();
 	delete stateMachine;
 	//delete gProfiler;
 	delete audio;
