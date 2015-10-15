@@ -545,7 +545,7 @@ namespace gui {
 		if (guiContext->active == new_id) {
 			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT_EDIT]);
 			handleTextInput();
-			*v = atoi(guiContext->inputText);
+			*v = atof(guiContext->inputText);
 			v2 cp = p;
 			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
 			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x;
@@ -929,10 +929,10 @@ namespace gui {
 	void CheckBox(int id, const char* label, bool* selected) {
 		v2 p = guiContext->position;
 		if (*selected) {
-			guiContext->addImage(p, guiContext->textures[ICN_CHECKBOX],BOX_HEIGHT * 0.5f);
+			guiContext->addImage(p, guiContext->textures[ICN_CHECKBOX_SELECTED], BOX_HEIGHT * 0.5f);			
 		}
 		else {
-			guiContext->addImage(p, guiContext->textures[ICN_CHECKBOX_SELECTED], BOX_HEIGHT * 0.5f);
+			guiContext->addImage(p, guiContext->textures[ICN_CHECKBOX], BOX_HEIGHT * 0.5f);
 		}
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
 			*selected = !*selected;
