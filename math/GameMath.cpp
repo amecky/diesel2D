@@ -438,6 +438,22 @@ namespace ds {
 		return ret;
 	}
 
+	bool isInside(Vector2f& pos, const Rect& rect) {
+		if (pos.x > rect.right) {
+			return false;
+		}
+		if (pos.x < rect.left) {
+			return false;
+		}
+		if (pos.y < rect.bottom) {
+			return false;
+		}
+		if (pos.y > rect.top) {
+			return false;
+		}
+		return true;
+	}
+
 	bool addClamped(float *value,float add,float max,float newValue) {
 		*value += add;
 		if ( *value >= max ) {
@@ -570,6 +586,36 @@ namespace ds {
 				return true;
 			}
 			return false;
+		}
+
+		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const Rect& rectangle) {
+			// special conversion since Rect assumes 0/0 to be top/left and we need it to be bottom/left
+			Rect r = rectangle;
+			r.bottom = r.top - r.height();
+			float height = r.top - r.bottom;
+			float rx = r.left + (r.right - r.left) * 0.5f;
+			float ry = r.top - (r.top - r.bottom) * 0.5f;
+			float cdx = abs(circlePos.x - rx);
+			float cdy = abs(circlePos.y - ry);
+
+			if (cdx > (r.width() / 2.0f + radius)) { 
+				return false; 
+			}
+			if (cdy > (height / 2.0f + radius)) {
+				return false; 
+			}
+
+			if (cdx <= (r.width() / 2.0f)) { 
+				return true; 
+			}
+			if (cdy <= (height / 2.0f)) {
+				return true; 
+			}
+
+			float cornerDistance_sq = (cdx - r.width() / 2.0f) *  (cdx - r.width() / 2.0f) +
+				(cdy - height / 2.0f) * (cdy - height / 2.0f);
+
+			return (cornerDistance_sq <= (radius * radius));
 		}
 
 		Vector2f getShiftVector(const Vector2f& p1,float r1,const Vector2f& p2,float r2) {

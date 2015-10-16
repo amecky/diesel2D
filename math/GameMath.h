@@ -53,7 +53,10 @@ namespace ds {
 		void move_towards(const Vector2f& targetPos, Vector2f& newPos, float* angle, float velocity, float dt);
 
 		void clipToRect(Vector2f& newPos,const Rect& rect);
+
 		bool isOutside(Vector2f& pos,const Rect& rect);
+		bool isInside(Vector2f& pos, const Rect& rect);
+
 		float reflect(float angle);
 		//void interpolateColor(const Color& firstCol,const Color& secondColor,float t,Color* outColor);
 		bool outside(float value,float min,float max);
@@ -75,6 +78,11 @@ namespace ds {
 		// get random between 0 - 100 and returns true if below min
 		// -------------------------------------------------------
 		bool chanceRoll(int min);
+
+		// -------------------------------------------------------
+		// Check if circle and box overlap
+		// -------------------------------------------------------
+		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const Rect& rectangle);
 		// -------------------------------------------------------
 		// Check if two circles overlap
 		// -------------------------------------------------------
