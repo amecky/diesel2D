@@ -250,8 +250,9 @@ void BaseApp::buildFrame() {
 	PR_END("DEBUG_RENDER")
 	PR_END("RENDER")
 	gui::endFrame();
-	renderer::endRendering();
 	profiler::finalize();
+	renderer::endRendering();
+	//profiler::finalize();
 	//PR_END("MAIN")
 	if ( m_DebugInfo.printProfiler ) {
 		m_DebugInfo.printProfiler = false;

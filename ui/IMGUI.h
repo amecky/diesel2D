@@ -104,6 +104,8 @@ namespace gui {
 
 	void DropDownBox(int id, const std::vector<std::string>& entries, int* selected,int* state);
 
+	void Histogram(int id, float* values, int num, float minValue, float maxValue, float step);
+
 	void sendKey(unsigned char c);
 
 	void sendSpecialKey(WPARAM wParam);

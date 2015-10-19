@@ -133,9 +133,11 @@ namespace ds {
 
 	void GameStateMachine::switchState(int newIndex) {
 		if (_activeState != 0) {
+			LOGC("GameStateMachine") << "deactivating " << _activeState->getName();
 			_activeState->deactivate();
 		}
 		_activeState = _gameStates[newIndex];
+		LOGC("GameStateMachine") << "activating " << _activeState->getName();
 		_activeState->activate();
 		_currentIndex = newIndex;
 	}

@@ -588,6 +588,32 @@ namespace ds {
 			return false;
 		}
 
+		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const v2& pos, const v2& dim) {
+			float rx = pos.x;
+			float ry = pos.y;
+			float cdx = abs(circlePos.x - rx);
+			float cdy = abs(circlePos.y - ry);
+
+			if (cdx > (dim.x / 2.0f + radius)) {
+				return false;
+			}
+			if (cdy > (dim.y / 2.0f + radius)) {
+				return false;
+			}
+
+			if (cdx <= (dim.x / 2.0f)) {
+				return true;
+			}
+			if (cdy <= (dim.y / 2.0f)) {
+				return true;
+			}
+
+			float cornerDistance_sq = (cdx - dim.x / 2.0f) *  (cdx - dim.x / 2.0f) +
+				(cdy - dim.y / 2.0f) * (cdy - dim.y / 2.0f);
+
+			return (cornerDistance_sq <= (radius * radius));
+		}
+
 		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const Rect& rectangle) {
 			// special conversion since Rect assumes 0/0 to be top/left and we need it to be bottom/left
 			Rect r = rectangle;

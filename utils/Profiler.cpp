@@ -31,6 +31,9 @@ namespace profiler {
 		int current;
 		LARGE_INTEGER frequency;
 		float totalTime;
+		float totalTimes[32];
+		int numTimes;
+		int totalTimesIndex;
 	};
 
 	static ProfileContext ctx;
@@ -39,6 +42,11 @@ namespace profiler {
 	// initialize profiling system
 	// -------------------------------------------------------
 	void init() {
+		ctx.numTimes = 0;
+		ctx.totalTimesIndex = 0;
+		for (int i = 0; i < 32; ++i) {
+			ctx.totalTimes[i] = 0.0f;
+		}
 		ProfileData& pd = ctx.data[0];
 		pd.name = "root";
 		pd.level = 0;
@@ -149,8 +157,29 @@ namespace profiler {
 		float elapsed = LIToSecs(time);
 		ctx.totalTime = elapsed;
 		ctx.data[0].totalTime = elapsed;
+		ctx.totalTimes[ctx.totalTimesIndex++] = elapsed;
+		if (ctx.totalTimesIndex >= 32) {
+			ctx.totalTimesIndex = 0;
+		}
+		if (ctx.numTimes < 32) {
+			++ctx.numTimes;
+		}
 	}
 
+	// -------------------------------------------------------
+	// get total times array
+	// -------------------------------------------------------
+	int get_total_times(float* values, int max) {
+		int end = ctx.numTimes;
+		if (end > max) {
+			end = max;
+		}
+		int cnt = 0;
+		for (int i = 0; i < end; ++i) {
+			values[cnt++] = ctx.totalTimes[i];
+		}
+		return cnt;
+	}
 	// -------------------------------------------------------
 	// format percentage
 	// -------------------------------------------------------

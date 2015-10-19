@@ -966,6 +966,48 @@ namespace gui {
 		return isBoxSelected(id, p, v2(width, BUTTON_HEIGHT));
 	}
 
+	void Histogram(int id, float* values, int num, float minValue, float maxValue, float step) {
+		v2 p = guiContext->position;
+		// FIXME: calculate width
+		float width = 200.0f;
+		float height = 100.0f;
+		float barWidth = 6.0f;
+		p.y -= height / 2.0f;
+		// FIXME: calculate width of individual box
+		float st = width / static_cast<float>(num - 1);
+		int d = (maxValue - minValue) / step + 1;
+		guiContext->addBox(p, v2(width + barWidth, height), guiContext->colors[CLR_INPUT]);
+		p.x += width + BOX_HEIGHT;
+		p.y += height / 2.0f;
+		char buffer[16];
+		sprintf_s(buffer, 16, "%.2f", maxValue);
+		guiContext->addText(p, buffer);
+		p.y -= height;
+		sprintf_s(buffer, 16, "%.2f", minValue);
+		guiContext->addText(p, buffer);
+		for (int i = 0; i < num; ++i) {
+			float v = values[i];
+			if (v > maxValue) {
+				v = maxValue;
+			}
+			float current = v / (maxValue - minValue);
+			float yp = current * height;
+			p = guiContext->position;
+			p.y -= ( height - yp * 0.5f);
+			p.x += static_cast<float>(i) * st;// (st - barWidth * 0.5f);
+			guiContext->addBox(p, v2(barWidth, yp), guiContext->colors[CLR_SELECTED_LINE]);
+		}
+		for (int i = 0; i < d; ++i) {
+			p = guiContext->position;
+			float current = 1.0f - (step*i) / (maxValue - minValue);
+			float yp = current * height;
+			p.y -= yp;
+			guiContext->addBox(p, v2(width + barWidth, 1.0f), guiContext->colors[CLR_INPUT_EDIT]);
+		}
+		guiContext->position.y -= height;
+		guiContext->nextPosition();
+	}
+
 	// -------------------------------------------------------
 	// intialize gui
 	// -------------------------------------------------------	

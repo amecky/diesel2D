@@ -16,6 +16,8 @@ namespace profiler {
 	void finalize();
 
 	void print();
+
+	int get_total_times(float* values, int max);
 }
 
 #define PRS(name) profiler::start(name);
