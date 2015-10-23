@@ -56,6 +56,20 @@ namespace ds {
 		return item.id;
 	}
 
+	void GUIDialog::updateImage(int id, int x, int y, const Rect& textureRect, bool centered) {
+		GUIItem* item = findByID(id);
+		assert(item != 0);
+		Vector2f p = Vector2f(x, y);
+		if (centered) {
+			p.x = renderer::getScreenWidth() * 0.5f;
+		}
+		item->pos = p;
+		Sprite& sp  = item->sprites[0];
+		sp.position = Vector2f(0, 0);
+		sp.texture = math::buildTexture(textureRect);
+		sp.color = Color::WHITE;
+	}
+
 	// -------------------------------------------------------
 	// Add image link
 	// -------------------------------------------------------

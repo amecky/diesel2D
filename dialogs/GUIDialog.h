@@ -106,6 +106,8 @@ public:
 	
 
 	uint32 addImage(int id,int x,int y,const Rect& textureRect,bool centered = true);	
+	void updateImage(int id, int x, int y, const Rect& textureRect, bool centered = true);
+
 	uint32 addImageLink(int id,int x,int y,const Rect& textureRect,bool centered = true);
 
 	// FIXME: add button with x and y position
