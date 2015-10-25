@@ -11,7 +11,14 @@
 
 namespace ds {
 
-HUD::HUD() {}
+HUD::HUD() : _offset(0), _state(1), _showAdd(false) {
+	_availableElements.push_back("Image");
+	_availableElements.push_back("Text");
+	_availableElements.push_back("Counter");
+	_availableElements.push_back("Timer");
+	_selectedElement = 0;
+	_elementOffset = 0;
+}
 
 
 HUD::~HUD() {
@@ -129,7 +136,7 @@ void HUD::addImage(int id,int x,int y,const Rect& texturRect,const Color& color,
 	hi->id = id;
 	HUDEntry* entry = &m_HUDEntries[hi->entryID];
 	Sprite sp;
-	sp.position = Vector2f(x,y);
+	sp.position = v2(0, 0);
 	sp.texture = math::buildTexture(texturRect);
 	sp.color = color;
 	sp.scale = Vector2f(scale,scale);
@@ -246,10 +253,10 @@ void HUD::stopTimer(int id) {
 // -------------------------------------------------------
 // Set counter value
 // -------------------------------------------------------
-void HUD::setCounterValue(int id,int value) {
+void HUD::setCounterValue(int id,int value,bool force) {
 	assert(id >= 0 && id < MAX_COUNTER);
 	HUDCounter* hc = &m_Counter[id];
-	if ( hc->value != value ) {
+	if ( hc->value != value || force ) {
 		hc->value = value;
 		std::string text;
 		string::formatInt(value,text,hc->length);
@@ -279,8 +286,9 @@ void HUD::render() {
 		if ( m_HUDEntries[i].flag != -1 ) {
 			HUDEntry* entry = &m_HUDEntries[i];
 			for ( size_t j = 0; j < entry->sprites.size(); ++j ) {
-				//m_Renderer->draw(entry->sprites[j]);
-				sprites::draw(entry->sprites[j]);// .getPosition(), entry->sprites[j].getTextureID(), entry->sprites[j].getUV(), entry->sprites[j].getDimension(), 0.0f, entry->scale, entry->scale, entry->color);
+				v2 p = entry->sprites[j].position;
+				p += entry->pos;
+				sprites::draw(p, entry->sprites[j].texture, 0.0f, entry->sprites[j].scale.x, entry->sprites[j].scale.y, entry->color);
 			}
 		}
 	}
@@ -317,7 +325,7 @@ void HUD::createText(HUDEntry* entry,const std::string& text,bool clear) {
 	if ( clear ) {
 		entry->sprites.clear();
 	}
-	font::createText(*m_Font, entry->pos, text.c_str(), entry->color, entry->sprites, entry->scale, entry->scale);
+	font::createText(*m_Font, v2(0,0), text.c_str(), entry->color, entry->sprites, entry->scale, entry->scale);
 }
 
 void HUD::defineNumber(int index, float top, float left, float width, float height) {
@@ -347,8 +355,20 @@ int HUD::createEntry(HudEntryType type, const Vector2f& pos, float scale, const 
 	return id;
 }
 
+// -------------------------------------------------------
+// remove
+// -------------------------------------------------------
+void HUD::remove(uint32 id, HudEntryType type) {
+
+}
+
+// -------------------------------------------------------
+// load binary file
+// -------------------------------------------------------
 void HUD::load(BinaryLoader* loader) {	
 	clear();
+	_model.clear();
+	char buffer[32];
 	while ( loader->openChunk() == 0 ) {
 		if (loader->getChunkID() == 5) {
 			Rect r;
@@ -370,28 +390,146 @@ void HUD::load(BinaryLoader* loader) {
 				int length = 6;
 				loader->read(&length);
 				addCounter(id,pos.x,pos.y,length,0,clr,scale);
+				sprintf_s(buffer, 32, "Counter %d", id);
+				HudGUIElement hge;
+				hge.id = id;
+				hge.type = HET_COUNTER;
+				_model.add(buffer, hge);
 			}
 			else if ( loader->getChunkID() == 2 ) {							
 				addTimer(id,pos.x,pos.y,clr,scale);
+				sprintf_s(buffer, 32, "Timer %d", id);
+				HudGUIElement hge;
+				hge.id = id;
+				hge.type = HET_TIMER;
+				_model.add(buffer, hge);
 			}
 			else if ( loader->getChunkID() == 3 ) {							
 				std::string str;
 				loader->read(str);
 				addText(id,pos.x,pos.y,str,clr,scale);
+				sprintf_s(buffer, 32, "Text %d", id);
+				HudGUIElement hge;
+				hge.id = id;
+				hge.type = HET_TEXT;
+				_model.add(buffer, hge);
 			}
 			else if ( loader->getChunkID() == 4 ) {	
 				Rect rect;
 				loader->read(&rect);
 				addImage(id,pos.x,pos.y,rect,clr,scale);
+				sprintf_s(buffer, 32, "Image %d", id);
+				HudGUIElement hge;
+				hge.id = id;
+				hge.type = HET_IMAGE;
+				_model.add(buffer, hge);
 			}		
 			else if (loader->getChunkID() == 6) {
 				int length = -1;
 				loader->read(&length);
 				addNumber(id, pos.x, pos.y, length, clr, scale);
+				sprintf_s(buffer, 32, "Number %d", id);
+				HudGUIElement hge;
+				hge.id = id;
+				hge.type = HET_NUMBER;
+				_model.add(buffer, hge);
 			}
 		}
 		loader->closeChunk();
 	}		
+}
+
+// -------------------------------------------------------
+// show add new item dialog
+// -------------------------------------------------------
+void HUD::showAddDialog() {
+	if (_showAdd) {
+		if (gui::begin("Add element", &_state)) {
+			gui::ComboBox(1, _availableElements, &_selectedElement, &_elementOffset);
+			gui::beginGroup();
+			if (gui::Button(21, "OK")) {
+				if (_selectedElement != -1) {
+
+				}
+				LOG << "OK pressed";
+			}
+			if (gui::Button(22, "Cancel")) {
+				_showAdd = false;
+			}
+			gui::endGroup();
+		}
+		gui::end();
+	}
+}
+// -------------------------------------------------------
+// show dialog
+// -------------------------------------------------------
+void HUD::showDialog(v2* pos) {
+	gui::start(101, pos);
+	if (gui::begin("HUD", &_state)) {
+		gui::ComboBox(1, &_model, &_offset);
+		gui::beginGroup();
+		if (gui::Button(2, "Save")) {
+			LOG << "Save pressed";
+		}
+		if (gui::Button(20, "Add")) {
+			_showAdd = !_showAdd;
+		}
+		gui::endGroup();
+	}
+	gui::end();
+	
+	showAddDialog();
+
+	if (_model.hasSelection()) {
+		if (gui::begin("HUD Element", &_state)) {		
+			HudGUIElement element = _model.getSelectedValue();
+			if ( element.type == HET_COUNTER) {
+				HUDCounter& counter = m_Counter[element.id];
+				HUDEntry& entry = m_HUDEntries[counter.entryID];
+				gui::InputVec2(3, "Position", &entry.pos);
+				gui::InputFloat(4, "Scale", &entry.scale);
+				gui::InputColor(5, "Color", &entry.color);
+				gui::InputInt(6, "Length", &counter.length);
+				setCounterValue(counter.id, 0, true);
+			}
+			else if (element.type == HET_IMAGE) {
+				HUDImage& image = m_Images[element.id];
+				HUDEntry& entry = m_HUDEntries[image.entryID];
+				Sprite& sprite = entry.sprites[0];
+				gui::InputVec2(3, "Position", &entry.pos);
+				gui::InputFloat(4, "Scale", &entry.scale);
+				gui::InputColor(5, "Color", &entry.color);
+				ds::Rect r = sprite.texture.rect;
+				gui::InputRect(6, "TextureRect", &r);
+				sprite.texture = math::buildTexture(r);
+			}
+			else if (element.type == HET_TIMER) {
+				HUDTimer& timer = m_Timer[element.id];
+				HUDEntry& entry = m_HUDEntries[timer.entryID];
+				Sprite& sprite = entry.sprites[0];
+				gui::InputVec2(3, "Position", &entry.pos);
+				gui::InputFloat(4, "Scale", &entry.scale);
+				gui::InputColor(5, "Color", &entry.color);
+			}
+			else if (element.type == HET_TEXT) {
+				HUDText& txt = m_TextEntries[element.id];
+				HUDEntry& entry = m_HUDEntries[txt.entryID];
+				Sprite& sprite = entry.sprites[0];
+				gui::InputVec2(3, "Position", &entry.pos);
+				gui::InputFloat(4, "Scale", &entry.scale);
+				gui::InputColor(5, "Color", &entry.color);
+			}
+			if (gui::Button(23, "Remove")) {
+				LOG << "Remove pressed";
+				remove(element.id, element.type);
+				// FIXME: remove from model
+				
+				_model.select(-1);
+			}
+		}
+	}
+	gui::end();	
 }
 
 

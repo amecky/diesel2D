@@ -4,6 +4,7 @@
 #include "..\io\Serializer.h"
 #include "..\sprites\Sprite.h"
 #include "..\renderer\BitmapFont.h"
+#include "..\ui\IMGUI.h"
 
 namespace ds {
 
@@ -12,12 +13,19 @@ const int MAX_TIMER = 8;
 const int MAX_HUD_IMAGES = 64;
 const int MAX_HUD_NUMBERS = 8;
 
+
+
 enum HudEntryType {
 	HET_NUMBER,
 	HET_IMAGE,
 	HET_COUNTER,
 	HET_TIMER,
 	HET_TEXT
+};
+
+struct HudGUIElement {
+	uint32 id;
+	HudEntryType type;
 };
 
 class HUD : public Serializer {
@@ -106,7 +114,8 @@ public:
 	
 	void addTimer(int id,int x,int y,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
 	
-	void setCounterValue(int id,int value);
+	void setCounterValue(int id,int value,bool force = false);
+
 	void setTimer(int id,int minutes,int seconds);
 	void stopTimer(int id);
 	void startTimer(int id);
@@ -116,11 +125,16 @@ public:
 
 	void load(BinaryLoader* loader);	
 
+	void showDialog(v2* pos);
+
+	void remove(uint32 id, HudEntryType type);
+
 private:	
 	int createEntry(HudEntryType type,const Vector2f& pos,float scale = 1.0f,const ds::Color& color = ds::Color::WHITE);
 	void createText(HUDEntry* entry,const std::string& text,bool clear = true);
 
 	int getTextIndex(int id);
+	void showAddDialog();
 	
 	BitmapFont* m_Font;
 	HUDText m_TextEntries[32];
@@ -130,6 +144,14 @@ private:
 	HUDTimer m_Timer[MAX_TIMER];
 	NumberDef m_Definitions[10];
 	HUDNumber m_Numbers[MAX_HUD_NUMBERS];
+
+	int _state;
+	gui::ComponentModel<HudGUIElement> _model;
+	int _offset;
+	bool _showAdd;
+	std::vector<std::string> _availableElements;
+	int _selectedElement;
+	int _elementOffset;
 };
 
 }
