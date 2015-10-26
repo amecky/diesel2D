@@ -7,6 +7,7 @@
 #include "..\compiler\AssetCompiler.h"
 #include "..\renderer\graphics.h"
 #include "Settings.h"
+#include "..\objects\HUD.h"
 
 namespace ds {
 
@@ -19,6 +20,13 @@ struct GameTime {
 };
 
 class BaseApp {
+
+struct GameEditor {
+	v2 dialogPos;
+	v2 position;
+	int dialogIndex;
+	int state;
+};
 
 struct DebugInfo {
 	bool showProfiler;
@@ -93,6 +101,7 @@ public:
 protected:
 	void loadSprites();
 	void initializeGUI();
+	void initializeHUD(int textureID, const char* fontName);
 	virtual const char* getTitle() = 0;
 	virtual void OnButtonDown(int button,int x,int y) {}
 	virtual void OnButtonUp(int button,int x,int y) {}
@@ -110,7 +119,9 @@ protected:
 	GameTime m_GameTime;
 	float _totalTime;
 	Settings _settings;
+	HUD hud;
 private:
+	void showEditor();
 	Vector2f m_MousePos;
 	Vector2f m_TwistedMousePos;
 	DWORD m_CurTime;
@@ -122,6 +133,8 @@ private:
 	ButtonState m_ButtonState;
 	MTRand_open rand;		
 	bool m_Running;
+
+	GameEditor _editor;
 	
 }; 
 

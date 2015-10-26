@@ -1,13 +1,14 @@
 #include "GameStateMachine.h"
 #include "..\utils\Log.h"
 #include "..\utils\Profiler.h"
+#include "..\DialogResources.h"
 
 namespace ds {
 
 	GameStateMachine::GameStateMachine() {
 		_activeState = 0;
 		_currentIndex = -1;
-		_dialogPos = v2(50, 700);
+		_dialogPos = v2(1050, 690);
 		_dialogState = 1;
 		_offset = 0;
 	}
@@ -144,7 +145,7 @@ namespace ds {
 
 	void GameStateMachine::showDialog() {
 		PR_START("GameStateMachine::showDialog")
-		gui::start(101,&_dialogPos);
+		gui::start(GAMESTATE_ID,&_dialogPos);
 		if (gui::begin("GameStates", &_dialogState)) {
 			gui::ComboBox(100, &_model, &_offset);
 			if (gui::Button(101, "Activate")) {

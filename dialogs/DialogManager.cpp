@@ -6,6 +6,7 @@
 #include "..\compiler\Converter.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\renderer\graphics.h"
+#include "..\DialogResources.h"
 
 namespace ds {
 
@@ -13,6 +14,9 @@ namespace ds {
 	// Constructor
 	// -------------------------------------------------------
 	DialogManager::DialogManager(void) : m_Index(0) , m_Initialized(false) {
+		_dialogPos = v2(1050, 690);
+		_dialogState = 1;
+		_offset = 0;
 	}
 
 	// -------------------------------------------------------
@@ -86,14 +90,12 @@ namespace ds {
 	// -------------------------------------------------------
 	void DialogManager::render() {
 		if ( m_Initialized && !m_Dialogs.empty() ) {
-			//m_SpriteBatch->begin();
 			for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
 				GUIDialog* dlg = m_Dialogs[i];
 				if ( dlg->isActive() ) {
 					dlg->render();
 				}
 			}
-			//m_SpriteBatch->end();
 		}
 	}
 
@@ -164,6 +166,7 @@ namespace ds {
 				LOGC("DialogManager") << "Creating new dialog: " << dialogName;
 				createDialog(dialogName.c_str(),id,dialog);
 				ds::assets::load(file.c_str(),dialog,CVT_DIALOG);
+				_model.add(dialogName.c_str(), dialog);
 
 			}	
 			loader->closeChunk();
@@ -173,6 +176,30 @@ namespace ds {
 	void DialogManager::tick(float dt) {
 		for (size_t i = 0; i < m_Dialogs.size(); ++i) {
 			m_Dialogs[i]->tick(dt);
+		}
+	}
+
+	void DialogManager::showDialog() {
+		gui::start(DIALOG_MANAGER_ID, &_dialogPos);
+		if (gui::begin("Dialogs", &_dialogState)) {
+			gui::ComboBox(100, &_model, &_offset);
+			if (gui::Button(101, "Activate")) {
+				if (_model.hasSelection()) {
+					GUIDialog* dlg = _model.getSelectedValue();
+					dlg->activate();					
+				}
+			}
+			if (gui::Button(103, "Deactivate")) {
+				if (_model.hasSelection()) {
+					GUIDialog* dlg = _model.getSelectedValue();
+					dlg->deactivate();
+				}
+			}
+		}
+		gui::end();
+		if (_model.hasSelection()) {
+			GUIDialog* dlg = _model.getSelectedValue();
+			dlg->showDialog();
 		}
 	}
 }

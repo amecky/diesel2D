@@ -5,6 +5,7 @@
 #include "..\utils\PlainTextReader.h"
 #include "..\io\Serializer.h"
 #include "..\compiler\AssetCompiler.h"
+#include "..\ui\IMGUI.h"
 
 namespace ds {
 
@@ -24,6 +25,7 @@ public:
 	GUIDialog* get(const char* dialogName);
 	void load(BinaryLoader* loader);
 	void tick(float dt);
+	void showDialog();
 private:	
 	void setActiveFlag(const char* name,bool active);	
 	void createDialog(const char* name,int id,GUIDialog* dialog);
@@ -31,6 +33,11 @@ private:
 	bool m_Initialized;
 	Dialogs m_Dialogs;
 	uint32 m_Index;
+
+	gui::ComponentModel<GUIDialog*> _model;
+	v2 _dialogPos;
+	int _dialogState;
+	int _offset;
 };
 
 }

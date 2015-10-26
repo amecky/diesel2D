@@ -8,6 +8,7 @@
 #include "..\utils\Profiler.h"
 #include "..\renderer\graphics.h"
 #include "..\sprites\SpriteBatch.h"
+#include "..\DialogResources.h"
 
 namespace ds {
 
@@ -78,22 +79,29 @@ int HUD::addText(int x,int y,const std::string& txt,const ds::Color& color,float
 // Add text
 // -------------------------------------------------------
 void HUD::addText(int id,int x,int y,const std::string& txt,const ds::Color& color,float scale) {
-	int index = -1;
-	for ( int i = 0; i < 32 ; ++i ) {
-		if ( m_TextEntries[i].flag == -1 && index == -1 ) {
-			index = i;
-		}
-	}
-	if ( index != -1 ) {
-		LOGC("HUD") << "adding text - id: " << id;
-		HUDText* ht = &m_TextEntries[index];
-		ht->id = id;
-		ht->entryID = createEntry(HET_TEXT, v2(x,y),scale,color);		
-		ht->text = txt;	
-		ht->flag = 0;
-		HUDEntry* he = &m_HUDEntries[ht->entryID];
-		createText(he,txt,false);
-	}
+	assert(id >= 0 && id < 32);
+	LOGC("HUD") << "adding text - id: " << id;
+	HUDText* ht = &m_TextEntries[id];
+	assert(ht->flag == -1);
+	ht->id = id;
+	ht->entryID = createEntry(HET_TEXT, v2(x,y),scale,color);		
+	ht->text = txt;	
+	ht->flag = 0;
+	HUDEntry* he = &m_HUDEntries[ht->entryID];
+	createText(he,txt,false);
+}
+
+// -------------------------------------------------------
+// remove text
+// -------------------------------------------------------
+void HUD::removeText(int id) {
+	assert(id >= 0 && id < 32);
+	LOGC("HUD") << "removing text - id: " << id;
+	HUDText* hi = &m_TextEntries[id];
+	hi->flag = -1;
+	HUDEntry* entry = &m_HUDEntries[hi->entryID];
+	entry->sprites.clear();
+	entry->flag = -1;
 }
 
 // -------------------------------------------------------
@@ -125,6 +133,19 @@ void HUD::addCounter(int id,int x,int y,int length,int value,const ds::Color& co
 }
 
 // -------------------------------------------------------
+// remove counter
+// -------------------------------------------------------
+void HUD::removeCounter(int id) {
+	assert(id >= 0 && id < MAX_HUD_IMAGES);
+	LOGC("HUD") << "removing counter - id: " << id;
+	HUDCounter* hi = &m_Counter[id];
+	hi->flag = -1;
+	HUDEntry* entry = &m_HUDEntries[hi->entryID];
+	entry->sprites.clear();
+	entry->flag = -1;
+}
+
+// -------------------------------------------------------
 // Add image
 // -------------------------------------------------------
 void HUD::addImage(int id,int x,int y,const Rect& texturRect,const Color& color,float scale) {
@@ -134,6 +155,7 @@ void HUD::addImage(int id,int x,int y,const Rect& texturRect,const Color& color,
 	assert(hi->flag == -1);
 	hi->entryID = createEntry(HET_IMAGE, v2(x,y),scale,color);
 	hi->id = id;
+	hi->flag = 1;
 	HUDEntry* entry = &m_HUDEntries[hi->entryID];
 	Sprite sp;
 	sp.position = v2(0, 0);
@@ -141,6 +163,19 @@ void HUD::addImage(int id,int x,int y,const Rect& texturRect,const Color& color,
 	sp.color = color;
 	sp.scale = Vector2f(scale,scale);
 	entry->sprites.push_back(sp);	
+}
+
+// -------------------------------------------------------
+// remove image
+// -------------------------------------------------------
+void HUD::removeImage(int id) {
+	assert(id >= 0 && id < MAX_HUD_IMAGES);
+	LOGC("HUD") << "removing image - id: " << id;
+	HUDImage* hi = &m_Images[id];
+	hi->flag = -1;
+	HUDEntry* entry = &m_HUDEntries[hi->entryID];
+	entry->sprites.clear();
+	entry->flag = -1;
 }
 
 // -------------------------------------------------------
@@ -159,6 +194,22 @@ void HUD::addTimer(int id,int x,int y,const ds::Color& color,float scale) {
 	setTimer(id,0,0);	
 }
 
+// -------------------------------------------------------
+// remove timer
+// -------------------------------------------------------
+void HUD::removeTimer(int id) {
+	assert(id >= 0 && id < MAX_HUD_IMAGES);
+	LOGC("HUD") << "removing timer - id: " << id;
+	HUDTimer* hi = &m_Timer[id];
+	hi->flag = -1;
+	HUDEntry* entry = &m_HUDEntries[hi->entryID];
+	entry->sprites.clear();
+	entry->flag = -1;
+}
+
+// -------------------------------------------------------
+// add number
+// -------------------------------------------------------
 void HUD::addNumber(int id, int x, int y, int length, const ds::Color& color, float scale) {
 	HUDNumber& n = m_Numbers[id];
 	n.position = Vector2f(x, y);
@@ -169,6 +220,9 @@ void HUD::addNumber(int id, int x, int y, int length, const ds::Color& color, fl
 	setNumber(id, 0);
 }
 
+// -------------------------------------------------------
+// set number
+// -------------------------------------------------------
 void HUD::setNumber(int id, int value) {
 	HUDNumber& n = m_Numbers[id];
 	int div = 1;
@@ -328,6 +382,9 @@ void HUD::createText(HUDEntry* entry,const std::string& text,bool clear) {
 	font::createText(*m_Font, v2(0,0), text.c_str(), entry->color, entry->sprites, entry->scale, entry->scale);
 }
 
+// -------------------------------------------------------
+// define number
+// -------------------------------------------------------
 void HUD::defineNumber(int index, float top, float left, float width, float height) {
 	assert(index >= 0 && index < 10);
 	NumberDef& def = m_Definitions[index];
@@ -359,7 +416,47 @@ int HUD::createEntry(HudEntryType type, const Vector2f& pos, float scale, const 
 // remove
 // -------------------------------------------------------
 void HUD::remove(uint32 id, HudEntryType type) {
+	switch (type) {
+		case HET_IMAGE: removeImage(id); break;
+		case HET_TIMER: removeTimer(id); break;
+		case HET_COUNTER: removeCounter(id); break;
+		case HET_TEXT: removeText(id); break;
+	}
+}
 
+// -------------------------------------------------------
+// find next available ID by type
+// -------------------------------------------------------
+int HUD::findFreeIndex(HudEntryType type) {
+	if (type == HET_IMAGE) {
+		for (int i = 0; i < MAX_HUD_IMAGES; ++i) {
+			if (m_Images[i].flag == -1) {
+				return i;
+			}
+		}
+	}
+	else if (type == HET_TEXT) {
+		for (int i = 0; i < 32; ++i) {
+			if (m_TextEntries[i].flag == -1) {
+				return i;
+			}
+		}
+	}
+	else if (type == HET_COUNTER) {
+		for (int i = 0; i < MAX_COUNTER; ++i) {
+			if (m_Counter[i].flag == -1) {
+				return i;
+			}
+		}
+	}
+	else if (type == HET_TIMER) {
+		for (int i = 0; i < MAX_TIMER; ++i) {
+			if (m_Timer[i].flag == -1) {
+				return i;
+			}
+		}
+	}
+	return -1;
 }
 
 // -------------------------------------------------------
@@ -390,53 +487,45 @@ void HUD::load(BinaryLoader* loader) {
 				int length = 6;
 				loader->read(&length);
 				addCounter(id,pos.x,pos.y,length,0,clr,scale);
-				sprintf_s(buffer, 32, "Counter %d", id);
-				HudGUIElement hge;
-				hge.id = id;
-				hge.type = HET_COUNTER;
-				_model.add(buffer, hge);
+				addToModel(id, HET_COUNTER, "Counter");
 			}
 			else if ( loader->getChunkID() == 2 ) {							
 				addTimer(id,pos.x,pos.y,clr,scale);
-				sprintf_s(buffer, 32, "Timer %d", id);
-				HudGUIElement hge;
-				hge.id = id;
-				hge.type = HET_TIMER;
-				_model.add(buffer, hge);
+				addToModel(id, HET_TIMER, "Timer");
 			}
 			else if ( loader->getChunkID() == 3 ) {							
 				std::string str;
 				loader->read(str);
 				addText(id,pos.x,pos.y,str,clr,scale);
-				sprintf_s(buffer, 32, "Text %d", id);
-				HudGUIElement hge;
-				hge.id = id;
-				hge.type = HET_TEXT;
-				_model.add(buffer, hge);
+				addToModel(id, HET_TEXT, "Text");				
 			}
 			else if ( loader->getChunkID() == 4 ) {	
 				Rect rect;
 				loader->read(&rect);
 				addImage(id,pos.x,pos.y,rect,clr,scale);
-				sprintf_s(buffer, 32, "Image %d", id);
-				HudGUIElement hge;
-				hge.id = id;
-				hge.type = HET_IMAGE;
-				_model.add(buffer, hge);
+				addToModel(id, HET_IMAGE, "Image");
 			}		
 			else if (loader->getChunkID() == 6) {
 				int length = -1;
 				loader->read(&length);
 				addNumber(id, pos.x, pos.y, length, clr, scale);
-				sprintf_s(buffer, 32, "Number %d", id);
-				HudGUIElement hge;
-				hge.id = id;
-				hge.type = HET_NUMBER;
-				_model.add(buffer, hge);
+				addToModel(id, HET_NUMBER, "Number");
 			}
 		}
 		loader->closeChunk();
 	}		
+}
+
+// -------------------------------------------------------
+// add model entry
+// -------------------------------------------------------
+void HUD::addToModel(int id, HudEntryType type, const char* prefix) {
+	char buffer[32];
+	sprintf_s(buffer, 32, "%s %d",prefix, id);
+	HudGUIElement hge;
+	hge.id = id;
+	hge.type = type;
+	_model.add(buffer, hge);
 }
 
 // -------------------------------------------------------
@@ -449,9 +538,36 @@ void HUD::showAddDialog() {
 			gui::beginGroup();
 			if (gui::Button(21, "OK")) {
 				if (_selectedElement != -1) {
-
+					if (_selectedElement == 0) {
+						int id = findFreeIndex(HET_IMAGE);
+						if (id != -1) {
+							addImage(id, 512, 384, ds::Rect(0, 0, 50, 50));
+							addToModel(id, HET_IMAGE, "Image");
+						}
+					}
+					else if (_selectedElement == 1) {
+						int id = findFreeIndex(HET_TEXT);
+						if (id != -1) {
+							addText(id, 512, 384, "Test");
+							addToModel(id, HET_TEXT, "Text");
+						}
+					}
+					else if (_selectedElement == 2) {
+						int id = findFreeIndex(HET_COUNTER);
+						if (id != -1) {
+							addCounter(id, 512, 384, 1, 1);
+							addToModel(id, HET_COUNTER, "Counter");
+						}
+					}
+					else if (_selectedElement == 3) {
+						int id = findFreeIndex(HET_TIMER);
+						if (id != -1) {
+							addTimer(id, 512, 384);
+							addToModel(id, HET_TIMER, "Timer");
+						}
+					}
 				}
-				LOG << "OK pressed";
+				_showAdd = false;
 			}
 			if (gui::Button(22, "Cancel")) {
 				_showAdd = false;
@@ -465,7 +581,7 @@ void HUD::showAddDialog() {
 // show dialog
 // -------------------------------------------------------
 void HUD::showDialog(v2* pos) {
-	gui::start(101, pos);
+	gui::start(HUD_ID, pos);
 	if (gui::begin("HUD", &_state)) {
 		gui::ComboBox(1, &_model, &_offset);
 		gui::beginGroup();
@@ -523,8 +639,7 @@ void HUD::showDialog(v2* pos) {
 			if (gui::Button(23, "Remove")) {
 				LOG << "Remove pressed";
 				remove(element.id, element.type);
-				// FIXME: remove from model
-				
+				_model.remove(_model.getSelection());
 				_model.select(-1);
 			}
 		}

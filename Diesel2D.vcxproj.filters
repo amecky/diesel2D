@@ -277,6 +277,12 @@
     <ClCompile Include="ui\IMGUI.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="base\GameStateMachine.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="math\hex.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
@@ -659,6 +665,10 @@
     <ClInclude Include="ui\IMGUI.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="math\hex.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogResources.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico" />

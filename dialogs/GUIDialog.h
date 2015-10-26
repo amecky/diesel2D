@@ -5,6 +5,7 @@
 #include "..\sprites\Sprite.h"
 #include "..\math\tweening.h"
 #include "..\renderer\BitmapFont.h"
+#include "..\ui\IMGUI.h"
 
 namespace ds {
 
@@ -28,6 +29,11 @@ struct GUIItem {
 	std::vector<Sprite> sprites;
 	v2 size;
 	GUIItem() : id(-1) , pos(0,0) , centered(true) , color(Color::WHITE) , scale(1.0f) , size(0,0) {}
+};
+
+struct GUIModelItem {
+	uint32 id;
+	GUIItemType type;
 };
 
 // -------------------------------------------------------
@@ -98,7 +104,11 @@ typedef std::vector<GUIItem> Items;
 typedef std::vector<GUIEffect*> Effects;
 
 public:
-	GUIDialog() {}
+	GUIDialog() {
+		_state = 1;
+		_offset = 0;
+		_position = v2(1050, 690);
+	}
 	~GUIDialog(void);
 	void init(const char* name,const DialogID& id,BitmapFont* bitmapFont);
 	void render();
@@ -150,7 +160,9 @@ public:
 			m_Effects.push_back(t);
 		}
 	}
+	void showDialog();
 private:
+	void addToModel(int id, GUIItemType type,const char* prefix);
 	GUIItem* findByID(int id);
 	int findFreeID();
 	bool containsItem(int id);
@@ -166,6 +178,13 @@ private:
 	int m_Selected;
 	bool m_SupportHover;
 	int m_SelectedInput;
+
+	gui::ComponentModel<GUIModelItem> _model;
+	int _state;
+	int _offset;
+	v2 _position;
+
+	
 };
 
 }

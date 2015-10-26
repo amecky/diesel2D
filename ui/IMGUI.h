@@ -18,9 +18,13 @@ namespace gui {
 		bool isSelected(int idx) const {
 			return idx == _selected;
 		}
+		int getSelection() const {
+			return _selected;
+		}
 		virtual size_t size() const = 0;
 		virtual const char* getLabel(int idx) const = 0;
 		virtual void clear() = 0;
+		virtual void remove(int idx) = 0;
 	protected:
 		int _selected;
 	};
@@ -58,6 +62,9 @@ namespace gui {
 		}
 		void clear() {
 			_entries.clear();
+		}
+		void remove(int idx) {
+			_entries.erase(_entries.begin() + idx);
 		}
 	private:
 		Entries _entries;

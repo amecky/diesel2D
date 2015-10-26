@@ -54,6 +54,8 @@ namespace ds {
 		LPDIRECT3DSURFACE9 backBuffer;
 		int screenWidth;
 		int screenHeight;
+		int viewportWidth;
+		int viewportHeight;
 		DrawCounter drawCounter;
 		D3DFORMAT format;
 		VDStruct vdStructs[MAX_VERDECLS];
@@ -232,6 +234,7 @@ namespace ds {
 		void initialize(HWND hWnd, const Settings& settings) {
 			renderContext = new RenderContext;
 			renderContext->hwnd = hWnd;
+
 			LOG << "RenderDevice::RenderDevice";
 			LOG << "Preparing internal structs";
 			for (int i = 0; i < MAX_TEXTURES; ++i) {
@@ -248,6 +251,11 @@ namespace ds {
 			// create the internal device
 			renderer::initializeDevice(settings);
 			int vp = renderer::createViewport(settings.screenWidth, settings.screenHeight, settings.screenWidth, settings.screenHeight);
+			renderContext->viewportWidth = settings.screenWidth;
+			if (settings.showEditor) {
+				renderContext->viewportWidth -= 500;
+			}
+			renderContext->viewportHeight = settings.screenHeight;
 			//int centerX = settings.width / 2;
 			//int centerY = settings.height / 2;
 			//renderContext->viewPort.setPosition(centerX,centerY);
@@ -465,7 +473,7 @@ namespace ds {
 		}
 
 		int getScreenWidth() {
-			return renderContext->screenWidth;
+			return renderContext->viewportWidth;
 		}
 
 		int getScreenHeight() {

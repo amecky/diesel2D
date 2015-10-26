@@ -94,33 +94,49 @@ public:
 	void init(int textureID,const char* fontName);
 
 	void update(float elapsed);
+
 	void render();
 
 	void defineNumber(int index, float top, float left, float width, float height);
 
+	// text
 	int addText(int x,int y,const std::string& txt,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
-			
-	void addImage(int id,int x,int y,const Rect& texturRect,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
 	
+	void addText(int id, int x, int y, const std::string& txt, const ds::Color& color = ds::Color(1.0f, 1.0f, 1.0f, 1.0f), float scale = 1.0f);
+
+	void setText(int id, const std::string& txt);
+
+	void removeText(int id);
+
+	// image
+	void addImage(int id,int x,int y,const Rect& texturRect,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
+
+	void removeImage(int id);
+	
+	// counter
 	void addCounter(int id,int x,int y,int length,int value,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
 	
-	void addText(int id,int x,int y,const std::string& txt,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
+	void setCounterValue(int id, int value, bool force = false);
 
 	void addNumber(int id, int x, int y, int length, const ds::Color& color = ds::Color(1.0f, 1.0f, 1.0f, 1.0f), float scale = 1.0f);
 
 	void setNumber(int id, int value);
+
+	void removeCounter(int id);
 	
-	void setText(int id,const std::string& txt);
-	
-	void addTimer(int id,int x,int y,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);
-	
-	void setCounterValue(int id,int value,bool force = false);
+	// timer
+	void addTimer(int id,int x,int y,const ds::Color& color = ds::Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f);	
 
 	void setTimer(int id,int minutes,int seconds);
+
 	void stopTimer(int id);
+
 	void startTimer(int id);
+
 	GameTimer* getTimer(int id);
-	//! Clears all elements	 
+
+	void removeTimer(int id);
+
 	void clear();
 
 	void load(BinaryLoader* loader);	
@@ -132,10 +148,11 @@ public:
 private:	
 	int createEntry(HudEntryType type,const Vector2f& pos,float scale = 1.0f,const ds::Color& color = ds::Color::WHITE);
 	void createText(HUDEntry* entry,const std::string& text,bool clear = true);
-
+	int findFreeIndex(HudEntryType type);
 	int getTextIndex(int id);
 	void showAddDialog();
-	
+	void addToModel(int id, HudEntryType type, const char* prefix);
+
 	BitmapFont* m_Font;
 	HUDText m_TextEntries[32];
 	HUDImage m_Images[MAX_HUD_IMAGES];

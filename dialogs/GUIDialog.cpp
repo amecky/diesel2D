@@ -7,6 +7,7 @@
 #include "..\compiler\Converter.h"
 #include "..\renderer\graphics.h"
 #include "..\sprites\SpriteBatch.h"
+#include "..\DialogResources.h"
 
 namespace ds {
 
@@ -377,6 +378,7 @@ namespace ds {
 					centered = true;
 				}
 				addImage(id,p.x,p.y,r,centered);
+				addToModel(id, GIT_IMAGE, "Image");
 			}
 			if (loader->getChunkID() == CHNK_DLG_IMAGE_LINK) {
 				int id = 0;
@@ -392,6 +394,7 @@ namespace ds {
 					centered = true;
 				}
 				addImageLink(id, p.x, p.y, r, centered);
+				addToModel(id, GIT_IMAGELINK, "Link");
 			}
 			else if ( loader->getChunkID() == CHNK_DLG_BUTTON ) {
 				int id = 0;
@@ -411,6 +414,7 @@ namespace ds {
 					centered = true;
 				}
 				addButton(id,p.x,p.y,txt,r,c,1.0f,centered);
+				addToModel(id, GIT_BUTTON, "Button");
 			}
 			else if ( loader->getChunkID() == CHNK_DLG_TEXT ) {
 				int id = 0;
@@ -430,11 +434,34 @@ namespace ds {
 					centered = true;
 				}			
 				addText(id,pos.x,pos.y,str,clr,scale,centered);
+				addToModel(id, GIT_TEXT, "Text");
 			}		
 			loader->closeChunk();
 		}	
 	}
 
 	
+	void GUIDialog::addToModel(int id, GUIItemType type,const char* prefix) {
+		char buffer[32];
+		sprintf_s(buffer, 32, "%s %d", prefix, id);
+		GUIModelItem hge;
+		hge.id = id;
+		hge.type = type;
+		_model.add(buffer, hge);
+	}
 
+	void GUIDialog::showDialog() {
+		if (gui::begin("GUI Dialog", &_state)) {
+			gui::ComboBox(1, &_model, &_offset);
+			gui::beginGroup();
+			if (gui::Button(2, "Save")) {
+				LOG << "Save pressed";
+			}
+			if (gui::Button(20, "Add")) {
+				//_showAdd = !_showAdd;
+			}
+			gui::endGroup();
+		}
+		gui::end();
+	}
 }

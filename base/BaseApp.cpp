@@ -38,6 +38,10 @@ BaseApp::BaseApp() {
 	audio = new AudioManager;
 	_totalTime = 0.0f;
 	stateMachine = new GameStateMachine;
+	_editor.dialogPos = v2(1050, 690);
+	_editor.position = v2(1050, 750);
+	_editor.dialogIndex = -1;
+	_editor.state = 1;
 }
 
 // -------------------------------------------------------
@@ -62,7 +66,7 @@ BaseApp::~BaseApp() {
 // -------------------------------------------------------
 void BaseApp::prepare() {
 	LOGC("BaseApp") << "---> Init <---";
-	//settings.mode = 1;	
+	//settings.mode = 1;		
 	renderer::initialize(m_hWnd,_settings);   
 	audio->initialize(m_hWnd);
 
@@ -83,6 +87,10 @@ void BaseApp::prepare() {
 void BaseApp::loadSprites() {
 }
 
+void BaseApp::initializeHUD(int textureID, const char* fontName) {
+	hud.init(textureID, fontName);
+}
+
 void BaseApp::initializeGUI() {
 	ds::assets::load("gui", &gui, CVT_GUI);
 }
@@ -90,6 +98,9 @@ void BaseApp::initializeGUI() {
 // Creates the window
 // -------------------------------------------------------
 void BaseApp::createWindow() {
+	if (_settings.showEditor) {
+		_settings.screenWidth += 500;
+	}
 	RECT DesktopSize;
 	GetClientRect(GetDesktopWindow(),&DesktopSize);
 	// Create the application's window
@@ -232,6 +243,11 @@ void BaseApp::buildFrame() {
 	PRS("RENDER_GUI")
 	gui.render();
 	PRE("RENDER_GUI")
+	PRS("RENDER_EDITOR")
+	if (_settings.showEditor) {
+		showEditor();
+	}
+	PRE("RENDER_EDITOR")
 	debug::drawDebugMessages();
 	PRS("RENDER_FLUSH")
 	renderer::flush();
@@ -315,6 +331,34 @@ void BaseApp::sendKeyUp(WPARAM virtualKey) {
 	m_KeyStates.keyUp = true;
 	m_KeyStates.keyReleased = virtualKey;
 	gui::sendSpecialKey(virtualKey);
+}
+
+void BaseApp::showEditor() {
+	gui::start(102, &_editor.position);
+	if (gui::begin("Game", &_editor.state)) {
+		gui::beginGroup();
+		if (gui::Button(2, "HUD")) {
+			_editor.dialogIndex = 1;
+		}
+		if (gui::Button(3, "GSM")) {
+			_editor.dialogIndex = 2;
+		}
+		if (gui::Button(4, "DLG")) {
+			_editor.dialogIndex = 3;
+		}
+		gui::endGroup();
+	}
+	gui::end();
+
+	if (_editor.dialogIndex == 1) {
+		hud.showDialog(&_editor.dialogPos);
+	}
+	if (_editor.dialogIndex == 2)  {
+		stateMachine->showDialog();
+	}
+	if (_editor.dialogIndex == 3)  {
+		gui.showDialog();
+	}
 }
 
 }
