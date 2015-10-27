@@ -52,6 +52,7 @@ public:
 	uint32 write(const ds::Color& color);
 	uint32 write(const ds::Rect& r);
 	uint32 write(const std::string& str);
+	uint32 write(const char* str);
 	uint32 write(const ds::ColorPath& path);
 	uint32 write(const ds::Vector2fPath& path);
 	uint32 write(const ds::FloatArray& path);

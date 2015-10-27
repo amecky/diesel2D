@@ -11,6 +11,7 @@
 #include "..\renderer\graphics.h"
 #include "GameStateMachine.h"
 #include "..\ui\IMGUI.h"
+#include "..\DialogResources.h"
 
 namespace ds {
 
@@ -334,17 +335,23 @@ void BaseApp::sendKeyUp(WPARAM virtualKey) {
 }
 
 void BaseApp::showEditor() {
-	gui::start(102, &_editor.position);
+	gui::start(EDITOR_ID, &_editor.position);
 	if (gui::begin("Game", &_editor.state)) {
 		gui::beginGroup();
-		if (gui::Button(2, "HUD")) {
+		if (gui::Button(EDITOR_ID + 2, "HUD")) {
 			_editor.dialogIndex = 1;
 		}
-		if (gui::Button(3, "GSM")) {
+		if (gui::Button(EDITOR_ID + 3, "GSM")) {
 			_editor.dialogIndex = 2;
 		}
-		if (gui::Button(4, "DLG")) {
+		if (gui::Button(EDITOR_ID + 4, "DLG")) {
 			_editor.dialogIndex = 3;
+		}
+		if (gui::Button(EDITOR_ID + 5, "SPT")) {
+			_editor.dialogIndex = 4;
+		}
+		if (gui::Button(EDITOR_ID + 6, "SCG")) {
+			_editor.dialogIndex = 5;
 		}
 		gui::endGroup();
 	}
@@ -358,6 +365,12 @@ void BaseApp::showEditor() {
 	}
 	if (_editor.dialogIndex == 3)  {
 		gui.showDialog();
+	}
+	if (_editor.dialogIndex == 4) {
+		renderer::getSpriteTemplates()->showDialog();
+	}
+	if (_editor.dialogIndex == 5) {
+		renderer::getSpriteGroupContainer()->showDialog();
 	}
 }
 

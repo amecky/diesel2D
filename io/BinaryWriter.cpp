@@ -134,6 +134,16 @@ uint32 BinaryWriter::write(const std::string& v) {
 	return IO_OK;
 }
 
+uint32 BinaryWriter::write(const char* v) {
+	int length = strlen(v);
+	write(length);
+	for (int i = 0; i < length; ++i) {
+		char c = v[i] - 32;
+		fwrite(&c, sizeof(char), 1, m_Stream);
+	}
+	return IO_OK;
+}
+
 uint32 BinaryWriter::write(const ds::Color& v) {
 	ds::Color tmp = v;
 	if (v.r > 1.0f) {

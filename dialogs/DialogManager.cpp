@@ -182,14 +182,14 @@ namespace ds {
 	void DialogManager::showDialog() {
 		gui::start(DIALOG_MANAGER_ID, &_dialogPos);
 		if (gui::begin("Dialogs", &_dialogState)) {
-			gui::ComboBox(100, &_model, &_offset);
-			if (gui::Button(101, "Activate")) {
+			gui::ComboBox(DIALOG_MANAGER_ID + 1, &_model, &_offset);
+			if (gui::Button(DIALOG_MANAGER_ID + 2, "Activate")) {
 				if (_model.hasSelection()) {
 					GUIDialog* dlg = _model.getSelectedValue();
 					dlg->activate();					
 				}
 			}
-			if (gui::Button(103, "Deactivate")) {
+			if (gui::Button(DIALOG_MANAGER_ID + 3, "Deactivate")) {
 				if (_model.hasSelection()) {
 					GUIDialog* dlg = _model.getSelectedValue();
 					dlg->deactivate();

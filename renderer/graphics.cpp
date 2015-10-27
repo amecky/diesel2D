@@ -9,6 +9,7 @@
 #include "..\compiler\AssetCompiler.h"
 #include "..\sprites\SpriteBatch.h"
 
+
 namespace ds {
 
 	typedef std::map<D3DRENDERSTATETYPE, DWORD> RenderStates;
@@ -94,6 +95,7 @@ namespace ds {
 		DebugMessages debugMessages;
 		RenderTargetQuad renderTargetQuad;
 		SpriteTemplates spriteTemplates;
+		SpriteGroupContainer spriteGroudContainer;
 		DebugContext debugContext;
 		dVector<MeshData> meshData;
 		MeshArray meshes;
@@ -1697,6 +1699,20 @@ namespace ds {
 
 		void setMousePosition(int x, int y) {
 			renderContext->mousePosition = Vector2f(x, y);
+		}
+
+		SpriteGroupContainer* getSpriteGroupContainer() {
+			return &renderContext->spriteGroudContainer;
+		}
+
+		SpriteGroup* getSpriteGroup(const char* name) {
+			if (renderContext->spriteGroudContainer.contains(name)) {
+				LOG << "found existing sprite group";
+				return renderContext->spriteGroudContainer.get(name);
+			}
+			SpriteGroup* group = renderContext->spriteGroudContainer.create(name);
+			group->load();
+			return group;
 		}
 	}
 

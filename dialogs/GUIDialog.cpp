@@ -452,12 +452,12 @@ namespace ds {
 
 	void GUIDialog::showDialog() {
 		if (gui::begin("GUI Dialog", &_state)) {
-			gui::ComboBox(1, &_model, &_offset);
+			gui::ComboBox(GUI_DIALOG_ID + 1, &_model, &_offset);
 			gui::beginGroup();
-			if (gui::Button(2, "Save")) {
+			if (gui::Button(GUI_DIALOG_ID + 2, "Save")) {
 				LOG << "Save pressed";
 			}
-			if (gui::Button(20, "Add")) {
+			if (gui::Button(GUI_DIALOG_ID + 3, "Add")) {
 				//_showAdd = !_showAdd;
 			}
 			gui::endGroup();

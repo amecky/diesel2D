@@ -147,10 +147,12 @@ namespace gui {
 		int dragging;
 		bool started;
 		char tempBuffer[64];
+		bool editorMode;
 
 		GUIContext() {
 			textureID = -1;
 			ready = false;
+			editorMode = false;
 			keyInput.num = 0;
 		}
 
@@ -219,6 +221,10 @@ namespace gui {
 	};
 
 	static GUIContext* guiContext = 0;
+
+	void switchEditorMode(bool editorMode) {
+		guiContext->editorMode = editorMode;
+	}
 
 	// -------------------------------------------------------
 	// send key
@@ -371,19 +377,27 @@ namespace gui {
 				}
 				guiContext->buttonPressed = false;
 			}
+			if (guiContext->editorMode) {
+				guiContext->startPosition = v2(1050,750);
+				guiContext->position = v2(1050, 750);
+			}
+			else {
+				guiContext->startPosition = *startPos;
+				guiContext->position = *startPos;
+			}
 		}
-		guiContext->startPosition = *startPos;
-		guiContext->position = *startPos;
-		v2 dragBoxPos = *startPos;
-		dragBoxPos.x += 100.0f;
-		if (guiContext->dragging == -1 && guiContext->buttonPressed && isCursorInside(dragBoxPos, v2(200.0f, BOX_HEIGHT))) {
-			guiContext->dragging = id;
-		}
-		if ( guiContext->dragging == id) {
-			v2 correctPos = guiContext->cursorPosition;
-			correctPos.x -= 100.0f;
-			guiContext->startPosition = correctPos;
-			*startPos = correctPos;
+		if (!guiContext->editorMode) {
+			v2 dragBoxPos = *startPos;
+			dragBoxPos.x += 100.0f;
+			if (guiContext->dragging == -1 && guiContext->buttonPressed && isCursorInside(dragBoxPos, v2(200.0f, BOX_HEIGHT))) {
+				guiContext->dragging = id;
+			}
+			if (guiContext->dragging == id) {
+				v2 correctPos = guiContext->cursorPosition;
+				correctPos.x -= 100.0f;
+				guiContext->startPosition = correctPos;
+				*startPos = correctPos;
+			}
 		}
 	}
 	// -------------------------------------------------------
@@ -1011,7 +1025,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// intialize gui
 	// -------------------------------------------------------	
-	void initialize() {
+	void initialize(bool editorMode) {
 		assert(guiContext == 0);
 		guiContext = new GUIContext;
 		guiContext->textureID = ds::renderer::loadTexture("gui");
@@ -1068,6 +1082,8 @@ namespace gui {
 		guiContext->colors[CLR_BUTTON_HOVER]     = ds::Color(66, 76, 88, 255);
 		guiContext->colors[CLR_SELECTED_LINE]    = ds::Color(128, 0, 128, 255);
 		guiContext->colors[CLR_SLIDER]           = ds::Color(48, 48, 48, 255);
+
+		guiContext->editorMode = editorMode;
 		guiContext->ready = true;
 	}
 
@@ -1102,6 +1118,9 @@ namespace gui {
 			dim.x = 200.0f;
 		}
 		dim += v2(20, 20);
+		if (guiContext->editorMode) {
+			dim.x = 500.0f;
+		}
 		// draw header box
 		v2 p = guiContext->startPosition;
 		float sx = 1.0f;
@@ -1110,10 +1129,13 @@ namespace gui {
 			dim.x = WHITE_BOX_SIZE;
 		}		
 		p.x = guiContext->startPosition.x + dim.x / 2.0f * sx - 10.0f;
+		if (guiContext->editorMode) {
+			p.x -= 15.0f;
+		}
 		p.y -= 2.0f;
 		ds::sprites::draw(p, buildBoxTexture(dim.x, BOX_HEIGHT), 0.0f, sx, 1.0f, guiContext->colors[CLR_PANEL_HEADER]);
 		// draw icon
-		p.x = guiContext->startPosition.x - 2.0f;
+		p.x = guiContext->startPosition.x - BOX_HEIGHT;
 		if (guiContext->visible) {
 			ds::sprites::draw(p, guiContext->textures[ICN_ARROW_DOWN]);
 		}
@@ -1134,6 +1156,9 @@ namespace gui {
 			}
 			v2 center;
 			center.x = guiContext->startPosition.x + dim.x / 2.0f * sx - 10.0f;
+			if (guiContext->editorMode) {
+				center.x -= 15.0f;
+			}
 			center.y = guiContext->startPosition.y - dim.y / 2.0f * sy - 10.0f;
 			ds::sprites::draw(center, buildBoxTexture(dim.x, dim.y), 0.0f, sx, sy, guiContext->colors[CLR_PANEL_BACKGROUND]);
 		}
@@ -1155,7 +1180,9 @@ namespace gui {
 		}		
 		
 		ds::sprites::setTexture(current);
-		guiContext->position.y -= 10.0f;
+		if (!guiContext->editorMode) {
+			guiContext->position.y -= 10.0f;
+		}
 		PR_END("IMGUI::end")
 	}
 

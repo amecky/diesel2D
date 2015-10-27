@@ -1,6 +1,6 @@
 #include "SpriteTemplates.h"
 #include "..\compiler\Converter.h"
-
+#include "..\DialogResources.h"
 
 namespace ds {
 
@@ -73,38 +73,38 @@ namespace ds {
 		}
 	}
 
-	void SpriteTemplates::showDialog(v2* pos) {
-		gui::start(100,pos);
+	void SpriteTemplates::showDialog() {
 		if (gui::begin("Sprite Templates", &_state)) {
-			gui::ComboBox(20, &_model,&_offset);
+			gui::ComboBox(SPRITE_TEMPLATES_ID + 20, &_model, &_offset);
 		}
 		gui::end();
 
-		if (gui::begin("Sprite", &_state)) {		
-			if (_model.hasSelection()) {
+		if (_model.hasSelection()) {
+			if (gui::begin("Sprite", &_state)) {					
 				IdString hash = _model.getSelectedValue();
 				if (_map.find(hash) != _map.end()) {
 					Sprite& sprite = _map[hash];
 					ds::Rect r = sprite.texture.rect;
-					gui::InputInt(2, "Texture_id", &sprite.texture.textureID);
-					gui::InputVec2(3, "Position", &sprite.position);
-					gui::InputRect(4, "TextureRect", &r);
-					gui::InputVec2(5, "Scale", &sprite.scale);
-					gui::InputFloat(6, "Rotation", &sprite.rotation);
-					gui::InputColor(7, "Color", &sprite.color);
-					gui::InputInt(8, "Type", &sprite.type);
+					gui::InputInt(SPRITE_TEMPLATES_ID + 2, "Texture_id", &sprite.texture.textureID);
+					gui::InputVec2(SPRITE_TEMPLATES_ID + 3, "Position", &sprite.position);
+					gui::InputRect(SPRITE_TEMPLATES_ID + 4, "TextureRect", &r);
+					gui::InputVec2(SPRITE_TEMPLATES_ID + 5, "Scale", &sprite.scale);
+					gui::InputFloat(SPRITE_TEMPLATES_ID + 6, "Rotation", &sprite.rotation);
+					gui::InputColor(SPRITE_TEMPLATES_ID + 7, "Color", &sprite.color);
+					gui::InputInt(SPRITE_TEMPLATES_ID + 8, "Type", &sprite.type);
 					sprite.texture = math::buildTexture(r);
 					gui::beginGroup();
-					if (gui::Button(9, "OK")) {
+					if (gui::Button(SPRITE_TEMPLATES_ID + 9, "OK")) {
 						LOG << "OK pressed";
 					}
-					if (gui::Button(10, "Cancel")) {
+					if (gui::Button(SPRITE_TEMPLATES_ID + 10, "Cancel")) {
 						LOG << "Cancel clicked";
 					}
 					gui::endGroup();
 				}
 			}
+			gui::end();
 		}
-		gui::end();
+		
 	}
 }

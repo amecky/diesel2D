@@ -283,6 +283,9 @@
     <ClCompile Include="math\hex.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="sprites\SpriteGroup.cpp">
+      <Filter>sprites</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
@@ -669,6 +672,9 @@
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="DialogResources.h" />
+    <ClInclude Include="sprites\SpriteGroup.h">
+      <Filter>sprites</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXUT\Optional\directx.ico" />

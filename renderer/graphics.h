@@ -13,6 +13,7 @@
 #include "..\compiler\AssetCompiler.h"
 #include "Camera.h"
 #include "..\base\Settings.h"
+#include "..\sprites\SpriteGroup.h"
 
 namespace ds {
 
@@ -504,6 +505,13 @@ namespace ds {
 		Vector2f& getMousePosition();
 
 		void setMousePosition(int x, int y);
+
+		// -------------------------------------------------
+		// sprite group
+		// -------------------------------------------------
+		SpriteGroup* getSpriteGroup(const char* name);
+
+		SpriteGroupContainer* getSpriteGroupContainer();
 	}
 
 	namespace debug {

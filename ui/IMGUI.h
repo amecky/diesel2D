@@ -71,7 +71,14 @@ namespace gui {
 		
 	};
 
-	void initialize();
+	enum GUIDisplayMode {
+		GDM_EDITOR,
+		GDM_FLOATING
+	};
+
+	void initialize(bool editorMode = false);
+
+	void switchEditorMode(bool editorMode);
 
 	void start(int id,v2* startPos);
 

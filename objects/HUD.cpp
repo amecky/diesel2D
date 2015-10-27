@@ -534,9 +534,9 @@ void HUD::addToModel(int id, HudEntryType type, const char* prefix) {
 void HUD::showAddDialog() {
 	if (_showAdd) {
 		if (gui::begin("Add element", &_state)) {
-			gui::ComboBox(1, _availableElements, &_selectedElement, &_elementOffset);
+			gui::ComboBox(HUD_ID + 24, _availableElements, &_selectedElement, &_elementOffset);
 			gui::beginGroup();
-			if (gui::Button(21, "OK")) {
+			if (gui::Button(HUD_ID + 25, "OK")) {
 				if (_selectedElement != -1) {
 					if (_selectedElement == 0) {
 						int id = findFreeIndex(HET_IMAGE);
@@ -569,7 +569,7 @@ void HUD::showAddDialog() {
 				}
 				_showAdd = false;
 			}
-			if (gui::Button(22, "Cancel")) {
+			if (gui::Button(HUD_ID + 26, "Cancel")) {
 				_showAdd = false;
 			}
 			gui::endGroup();
@@ -583,12 +583,12 @@ void HUD::showAddDialog() {
 void HUD::showDialog(v2* pos) {
 	gui::start(HUD_ID, pos);
 	if (gui::begin("HUD", &_state)) {
-		gui::ComboBox(1, &_model, &_offset);
+		gui::ComboBox(HUD_ID + 1, &_model, &_offset);
 		gui::beginGroup();
-		if (gui::Button(2, "Save")) {
+		if (gui::Button(HUD_ID + 2, "Save")) {
 			LOG << "Save pressed";
 		}
-		if (gui::Button(20, "Add")) {
+		if (gui::Button(HUD_ID + 20, "Add")) {
 			_showAdd = !_showAdd;
 		}
 		gui::endGroup();
@@ -603,40 +603,40 @@ void HUD::showDialog(v2* pos) {
 			if ( element.type == HET_COUNTER) {
 				HUDCounter& counter = m_Counter[element.id];
 				HUDEntry& entry = m_HUDEntries[counter.entryID];
-				gui::InputVec2(3, "Position", &entry.pos);
-				gui::InputFloat(4, "Scale", &entry.scale);
-				gui::InputColor(5, "Color", &entry.color);
-				gui::InputInt(6, "Length", &counter.length);
+				gui::InputVec2(HUD_ID + 3, "Position", &entry.pos);
+				gui::InputFloat(HUD_ID + 4, "Scale", &entry.scale);
+				gui::InputColor(HUD_ID + 5, "Color", &entry.color);
+				gui::InputInt(HUD_ID + 6, "Length", &counter.length);
 				setCounterValue(counter.id, 0, true);
 			}
 			else if (element.type == HET_IMAGE) {
 				HUDImage& image = m_Images[element.id];
 				HUDEntry& entry = m_HUDEntries[image.entryID];
 				Sprite& sprite = entry.sprites[0];
-				gui::InputVec2(3, "Position", &entry.pos);
-				gui::InputFloat(4, "Scale", &entry.scale);
-				gui::InputColor(5, "Color", &entry.color);
+				gui::InputVec2(HUD_ID + 3, "Position", &entry.pos);
+				gui::InputFloat(HUD_ID + 4, "Scale", &entry.scale);
+				gui::InputColor(HUD_ID + 5, "Color", &entry.color);
 				ds::Rect r = sprite.texture.rect;
-				gui::InputRect(6, "TextureRect", &r);
+				gui::InputRect(HUD_ID + 6, "TextureRect", &r);
 				sprite.texture = math::buildTexture(r);
 			}
 			else if (element.type == HET_TIMER) {
 				HUDTimer& timer = m_Timer[element.id];
 				HUDEntry& entry = m_HUDEntries[timer.entryID];
 				Sprite& sprite = entry.sprites[0];
-				gui::InputVec2(3, "Position", &entry.pos);
-				gui::InputFloat(4, "Scale", &entry.scale);
-				gui::InputColor(5, "Color", &entry.color);
+				gui::InputVec2(HUD_ID + 3, "Position", &entry.pos);
+				gui::InputFloat(HUD_ID + 4, "Scale", &entry.scale);
+				gui::InputColor(HUD_ID + 5, "Color", &entry.color);
 			}
 			else if (element.type == HET_TEXT) {
 				HUDText& txt = m_TextEntries[element.id];
 				HUDEntry& entry = m_HUDEntries[txt.entryID];
 				Sprite& sprite = entry.sprites[0];
-				gui::InputVec2(3, "Position", &entry.pos);
-				gui::InputFloat(4, "Scale", &entry.scale);
-				gui::InputColor(5, "Color", &entry.color);
+				gui::InputVec2(HUD_ID + 3, "Position", &entry.pos);
+				gui::InputFloat(HUD_ID + 4, "Scale", &entry.scale);
+				gui::InputColor(HUD_ID + 5, "Color", &entry.color);
 			}
-			if (gui::Button(23, "Remove")) {
+			if (gui::Button(HUD_ID + 23, "Remove")) {
 				LOG << "Remove pressed";
 				remove(element.id, element.type);
 				_model.remove(_model.getSelection());
