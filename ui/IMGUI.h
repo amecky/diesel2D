@@ -66,6 +66,14 @@ namespace gui {
 		void remove(int idx) {
 			_entries.erase(_entries.begin() + idx);
 		}
+		void swap(int currentIndex, int newIndex) {
+			if (currentIndex >= 0 && currentIndex < size() && newIndex >= 0 && newIndex < size()) {
+				ModelEntry current = _entries[currentIndex];
+				ModelEntry next = _entries[newIndex];
+				_entries[newIndex] = current;
+				_entries[currentIndex] = next;
+			}
+		}
 	private:
 		Entries _entries;
 		

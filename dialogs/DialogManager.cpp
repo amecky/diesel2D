@@ -165,7 +165,7 @@ namespace ds {
 				GUIDialog* dialog = new GUIDialog();
 				LOGC("DialogManager") << "Creating new dialog: " << dialogName;
 				createDialog(dialogName.c_str(),id,dialog);
-				ds::assets::load(file.c_str(),dialog,CVT_DIALOG);
+				//ds::assets::load(file.c_str(),dialog,CVT_DIALOG);
 				_model.add(dialogName.c_str(), dialog);
 
 			}	

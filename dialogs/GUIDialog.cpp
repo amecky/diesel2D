@@ -32,7 +32,7 @@ namespace ds {
 		m_HashName = string::murmur_hash(name);
 		m_SupportHover = false;
 		m_SelectedInput = -1;
-		//load();
+		load();
 	}
 
 
@@ -253,7 +253,11 @@ namespace ds {
 			for ( size_t i = 0; i < m_Items.size(); ++i ) {
 				GUIItem* gi = &m_Items[i];
 				if (gi->type == GIT_IMAGE) {
-					sprites::draw(gi->pos, gi->texture, 0.0f, gi->scale, gi->scale, gi->color);
+					v2 p = gi->pos;
+					if (gi->centered) {
+						p.x = renderer::getScreenWidth() * 0.5f;
+					}
+					sprites::draw(p, gi->texture, 0.0f, gi->scale, gi->scale, gi->color);
 				}
 				else if (gi->type == GIT_BUTTON) {
 					v2 p = gi->pos;
@@ -261,7 +265,7 @@ namespace ds {
 						p.x = renderer::getScreenWidth() * 0.5f;
 					}
 					sprites::draw(p, gi->texture, 0.0f, gi->scale, gi->scale, gi->color);					
-					v2 size = font::calculateSize(*m_BitmapFont, gi->label, 1.0f);
+					v2 size = font::calculateSize(*m_BitmapFont, gi->label, gi->scale);
 					float ty = p.y - size.y * 0.5f;
 					p += v2(size.x * -0.5f, -size.y * 0.5f);
 					ds::sprites::drawText(m_BitmapFont, p.x, p.y, gi->label, 2.0f);
@@ -271,10 +275,10 @@ namespace ds {
 					if (gi->centered) {
 						p.x = renderer::getScreenWidth() * 0.5f;
 					}
-					v2 size = font::calculateSize(*m_BitmapFont, gi->label, 1.0f);
+					v2 size = font::calculateSize(*m_BitmapFont, gi->label, 4, gi->scale, gi->scale);
 					float ty = p.y - size.y * 0.5f;
 					p += v2(size.x * -0.5f, -size.y * 0.5f);
-					ds::sprites::drawText(m_BitmapFont, p.x, p.y, gi->label, 2.0f,gi->scale,gi->scale,gi->color);
+					ds::sprites::drawText(m_BitmapFont, p.x, p.y, gi->label, 4,gi->scale,gi->scale,gi->color);
 				}
 			}
 		}
@@ -336,6 +340,21 @@ namespace ds {
 	}
 
 	// -------------------------------------------------------
+	// Find by id
+	// -------------------------------------------------------
+	int GUIDialog::getNextID() {
+		int id = 0;
+		for (size_t i = 0; i < m_Items.size(); ++i) {
+			GUIItem* gi = &m_Items[i];
+			if (gi->id > id ) {
+				id = gi->id;
+			}
+		}
+		++id;
+		return id;
+	}
+
+	// -------------------------------------------------------
 	// contains item
 	// -------------------------------------------------------
 	bool GUIDialog::containsItem(int id) {
@@ -359,8 +378,19 @@ namespace ds {
 		return m_Items.size();
 	}
 
+	bool GUIDialog::swap(int currentIndex, int newIndex) {
+		if (currentIndex >= 0 && currentIndex < m_Items.size() && newIndex >= 0 && newIndex < m_Items.size()) {
+			GUIItem current = m_Items[currentIndex];
+			GUIItem next = m_Items[newIndex];
+			m_Items[newIndex] = current;
+			m_Items[currentIndex] = next;
+			return true;
+		}
+		return false;
+	}
+
 	// -------------------------------------------------------
-	// Find by id
+	// old load method
 	// -------------------------------------------------------
 	void GUIDialog::load(BinaryLoader* loader) {
 		clear();
@@ -450,6 +480,21 @@ namespace ds {
 				gui::ComboBox(GUI_DIALOG_ID + 24, _availableElements, &_selectedElement, &_elementOffset);
 				gui::beginGroup();
 				if (gui::Button(GUI_DIALOG_ID + 25, "OK")) {
+					if (_selectedElement != -1) {
+						int id = getNextID();
+						if (_selectedElement == 0) {
+							addImage(id, 512, 384, Rect(0,0,50,50), true);
+							addToModel(id, GIT_IMAGE, "Image");
+						}
+						else if (_selectedElement == 1) {
+							addText(id, 512, 384, "Text", Color::WHITE, 1.0f, true);
+							addToModel(id, GIT_TEXT, "Text");
+						}
+						else if (_selectedElement == 2) {
+							addButton(id, 512, 384, "Text", Rect(0,0,50,50), Color::WHITE, 1.0f, true);
+							addToModel(id, GIT_BUTTON, "Button");
+						}
+					}
 					_showAdd = false;
 				}
 				if (gui::Button(GUI_DIALOG_ID + 26, "Cancel")) {
@@ -461,7 +506,9 @@ namespace ds {
 		}
 	}
 
-	
+	// -------------------------------------------------------
+	// add to model
+	// -------------------------------------------------------
 	void GUIDialog::addToModel(int id, GUIItemType type,const char* prefix) {
 		char buffer[32];
 		sprintf_s(buffer, 32, "%s %d", prefix, id);
@@ -471,6 +518,9 @@ namespace ds {
 		_model.add(buffer, hge);
 	}
 
+	// -------------------------------------------------------
+	// show dialog
+	// -------------------------------------------------------
 	void GUIDialog::showDialog() {
 		if (gui::begin("GUI Dialog", &_state)) {
 			gui::ComboBox(GUI_DIALOG_ID + 1, &_model, &_offset);
@@ -484,6 +534,24 @@ namespace ds {
 			if (gui::Button(GUI_DIALOG_ID + 10, "Add")) {
 				_showAdd = !_showAdd;
 			}
+			if (gui::Button(GUI_DIALOG_ID + 12, "Up")) {
+				if (_model.hasSelection()) {
+					int index = _model.getSelection();
+					if (swap(index, index - 1)) {
+						_model.swap(index, index - 1);
+						_model.select(index - 1);
+					}
+				}
+			}
+			if (gui::Button(GUI_DIALOG_ID + 13, "Down")) {
+				if (_model.hasSelection()) {
+					int index = _model.getSelection();
+					if (swap(index, index + 1)) {
+						_model.swap(index, index + 1);
+						_model.select(index + 1);
+					}
+				}
+			}
 			gui::endGroup();
 		}
 		gui::end();
@@ -493,27 +561,27 @@ namespace ds {
 		if (_model.hasSelection()) {
 			if (gui::begin("GUI Element", &_state)) {
 				GUIModelItem element = _model.getSelectedValue();
-				if (element.type == GIT_BUTTON) {
-					GUIItem* item = findByID(element.id);
-					gui::InputVec2(GUI_DIALOG_ID + 3, "Position", &item->pos);
-					gui::InputFloat(GUI_DIALOG_ID + 4, "Scale", &item->scale);
-					gui::InputColor(GUI_DIALOG_ID + 5, "Color", &item->color);
-					gui::CheckBox(GUI_DIALOG_ID + 6, "Centered", &item->centered);
-					gui::Input(GUI_DIALOG_ID + 7, "Label", item->label, 32);
+				GUIItem* item = findByID(element.id);
+				char buffer[32];
+				sprintf_s(buffer, 32, "ID: %d", item->id);
+				gui::Label(GUI_DIALOG_ID + 8, buffer);
+				gui::InputVec2(GUI_DIALOG_ID + 3, "Position", &item->pos);
+				gui::InputFloat(GUI_DIALOG_ID + 4, "Scale", &item->scale);
+				gui::InputColor(GUI_DIALOG_ID + 5, "Color", &item->color);
+				gui::CheckBox(GUI_DIALOG_ID + 6, "Centered", &item->centered);				
+				if (element.type == GIT_IMAGE) {
+					Rect r = item->texture.rect;
+					gui::InputRect(GUI_DIALOG_ID + 8, "Texture", &r);
+					item->texture = math::buildTexture(r);
 				}
-				else if (element.type == GIT_IMAGE) {
-					GUIItem* item = findByID(element.id);
-					gui::InputVec2(GUI_DIALOG_ID + 3, "Position", &item->pos);
-					gui::InputFloat(GUI_DIALOG_ID + 4, "Scale", &item->scale);
-					gui::InputColor(GUI_DIALOG_ID + 5, "Color", &item->color);
-					gui::CheckBox(GUI_DIALOG_ID + 6, "Centered", &item->centered);
+				else if (element.type == GIT_BUTTON) {
+					Rect r = item->texture.rect;
+					gui::InputRect(GUI_DIALOG_ID + 8, "Texture", &r);
+					item->texture = math::buildTexture(r);
+					gui::Input(GUI_DIALOG_ID + 7, "Label", item->label, 32);
 				}
 				else if (element.type == GIT_TEXT) {
 					GUIItem* item = findByID(element.id);
-					gui::InputVec2(GUI_DIALOG_ID + 3, "Position", &item->pos);
-					gui::InputFloat(GUI_DIALOG_ID + 4, "Scale", &item->scale);
-					gui::InputColor(GUI_DIALOG_ID + 5, "Color", &item->color);
-					gui::CheckBox(GUI_DIALOG_ID + 6, "Centered", &item->centered);
 					gui::Input(GUI_DIALOG_ID + 7, "Label", item->label,32);
 				}
 			}
@@ -521,6 +589,9 @@ namespace ds {
 		}
 	}
 
+	// -------------------------------------------------------
+	// save
+	// -------------------------------------------------------
 	void GUIDialog::save() {
 		char buffer[64];
 		sprintf(buffer, "assets\\%u", m_HashName);
@@ -537,8 +608,9 @@ namespace ds {
 				int cnt = 0;
 				if (gi->centered) {
 					cnt = 1;
-				}
+				}				
 				writer.write(cnt);
+				writer.write(gi->scale);
 				writer.closeChunk();
 			}			
 			else if (gi->type == GIT_BUTTON) {
@@ -553,6 +625,7 @@ namespace ds {
 					cnt = 1;
 				}
 				writer.write(cnt);
+				writer.write(gi->scale);
 				writer.closeChunk();
 			}
 			else if (gi->type == GIT_TEXT) {
@@ -566,12 +639,16 @@ namespace ds {
 					cnt = 1;
 				}
 				writer.write(cnt);
+				writer.write(gi->scale);
 				writer.closeChunk();
 			}			
 		}
 		writer.close();
 	}
 
+	// -------------------------------------------------------
+	// load
+	// -------------------------------------------------------
 	void GUIDialog::load() {
 		clear();
 		_model.clear();
@@ -594,6 +671,8 @@ namespace ds {
 				if (cnt == 1) {
 					centered = true;
 				}
+				float s = 1.0f;
+				loader.read(&s);
 				addImage(id, p.x, p.y, r, centered);
 				addToModel(id, GIT_IMAGE, "Image");
 			}
@@ -614,7 +693,9 @@ namespace ds {
 				if (cnt == 1) {
 					centered = true;
 				}
-				addButton(id, p.x, p.y, text, r, clr, 1.0f, centered);
+				float s = 1.0f;
+				loader.read(&s);
+				addButton(id, p.x, p.y, text, r, clr, s, centered);
 				addToModel(id, GIT_TEXT, "Button");
 			}
 			else if (loader.getChunkID() == CHNK_DLG_TEXT) {
@@ -632,7 +713,9 @@ namespace ds {
 				if (cnt == 1) {
 					centered = true;
 				}
-				addText(id, p.x, p.y, text, clr, 1.0f, centered);
+				float s = 1.0f;
+				loader.read(&s);
+				addText(id, p.x, p.y, text, clr, s, centered);
 				addToModel(id, GIT_TEXT, "Text");
 			}
 			loader.closeChunk();

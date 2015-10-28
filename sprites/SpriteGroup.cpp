@@ -25,7 +25,7 @@ namespace ds {
 
 	void SpriteGroup::load() {
 		char buffer[128];
-		sprintf_s(buffer, 128, "data\\%u", _name);
+		sprintf_s(buffer, 128, "assets\\%u", _name);
 		LOG << "loading binary file: " << buffer;
 		FILE* f = fopen(buffer, "rb");
 		if (f) {
@@ -45,7 +45,7 @@ namespace ds {
 
 	void SpriteGroup::save() {
 		char buffer[128];
-		sprintf_s(buffer, 128, "data\\%u", _name);
+		sprintf_s(buffer, 128, "assets\\%u", _name);
 		LOG << "saving binary file: " << buffer;
 		FILE* f = fopen(buffer, "wb");
 		if (f) {

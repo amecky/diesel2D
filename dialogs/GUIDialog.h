@@ -169,6 +169,8 @@ private:
 	GUIItem* findByID(int id);
 	int findFreeID();
 	bool containsItem(int id);
+	int getNextID();
+	bool swap(int currentIndex, int newIndex);
 
 	DialogID m_ID;
 	IdString m_HashName;
