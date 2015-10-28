@@ -75,6 +75,7 @@ public:
 	void read(ds::Rect* value);
 	void read(ds::Texture* value);
 	void read(std::string& str);
+	void read(char* str);
     /*
      * Reads data into buffer
      * 

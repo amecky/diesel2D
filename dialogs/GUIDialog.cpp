@@ -10,7 +10,18 @@
 #include "..\DialogResources.h"
 
 namespace ds {
-
+	GUIDialog::GUIDialog() {
+		_state = 1;
+		_offset = 0;
+		_position = v2(1050, 690);
+		_availableElements.push_back("Image");
+		_availableElements.push_back("Text");
+		_availableElements.push_back("Button");
+		_availableElements.push_back("ImageLink");
+		_showAdd = false;
+		_selectedElement = 0;
+		_elementOffset = 0;
+	}
 	// -------------------------------------------------------
 	// Init
 	// -------------------------------------------------------
@@ -21,6 +32,7 @@ namespace ds {
 		m_HashName = string::murmur_hash(name);
 		m_SupportHover = false;
 		m_SelectedInput = -1;
+		//load();
 	}
 
 
@@ -47,28 +59,24 @@ namespace ds {
 		GUIItem item;
 		item.type = GIT_IMAGE;
 		item.pos = p;
-		Sprite sp;
-		sp.position = Vector2f(0,0);
-		sp.texture = math::buildTexture(textureRect);
-		sp.color = Color::WHITE;
-		item.sprites.push_back(sp);
 		item.id = id;
+		item.texture = math::buildTexture(textureRect);
+		item.centered = centered;
+		item.color = Color::WHITE;
+		item.scale = 1.0f;
 		m_Items.push_back(item);
 		return item.id;
 	}
 
+	// -------------------------------------------------------
+	// update image
+	// -------------------------------------------------------
 	void GUIDialog::updateImage(int id, int x, int y, const Rect& textureRect, bool centered) {
 		GUIItem* item = findByID(id);
 		assert(item != 0);
-		Vector2f p = Vector2f(x, y);
-		if (centered) {
-			p.x = renderer::getScreenWidth() * 0.5f;
-		}
-		item->pos = p;
-		Sprite& sp  = item->sprites[0];
-		sp.position = Vector2f(0, 0);
-		sp.texture = math::buildTexture(textureRect);
-		sp.color = Color::WHITE;
+		item->pos = v2(x,y);
+		item->texture = math::buildTexture(textureRect);
+		item->centered = centered;
 	}
 
 	// -------------------------------------------------------
@@ -83,11 +91,6 @@ namespace ds {
 		GUIItem item;
 		item.type = GIT_IMAGELINK;
 		item.pos = p;
-		Sprite sp;
-		sp.position = Vector2f(0, 0);
-		sp.texture = math::buildTexture(textureRect);
-		sp.color = Color::WHITE;
-		item.sprites.push_back(sp);
 		item.id = id;
 		float w = textureRect.width();
 		float h = textureRect.height();
@@ -102,21 +105,16 @@ namespace ds {
 	void GUIDialog::addText(int id,int x,int y,const std::string& text,const Color& color,float scale,bool centered) {
 		assert(!containsItem(id));
 		Vector2f p = Vector2f(x,y);
-		v2 size = font::calculateSize(*m_BitmapFont, text.c_str(), 4, scale, scale);
-		if ( centered ) {			
-			p.x = (renderer::getScreenWidth() - size.x) * 0.5f;
-
-		}
 		GUIItem item;
 		item.pos = p;
 		item.type = GIT_TEXT;
-		p = Vector2f(0, 0);
-		font::createText(*m_BitmapFont, p, text.c_str(), color, item.sprites, scale, scale);
+		strcpy(item.label, text.c_str());
+		item.textSize = text.size();
 		item.id = id;
 		item.centered = centered;
 		item.color = color;
 		item.scale = scale;
-		item.size = size;
+		//item.size = size;
 		m_Items.push_back(item);
 	}
 
@@ -124,24 +122,15 @@ namespace ds {
 	// Update text
 	// -------------------------------------------------------
 	void GUIDialog::updateText(int id,int x,int y,const std::string& text,const Color& color,float scale,bool centered) {
-		Vector2f p = Vector2f(x,y);
-		Vector2f size = font::calculateSize(*m_BitmapFont, text.c_str(), 4, scale, scale);
-		if ( centered ) {			
-			p.x = ( renderer::getScreenWidth() - size.x ) * 0.5f;
-		}
 		GUIItem* item = findByID(id);
 		assert(item != 0);
-		item->size = font::calculateSize(*m_BitmapFont, text.c_str(), 4, item->scale, item->scale);
-		if (item->centered) {
-			item->pos.x = (renderer::getScreenWidth() - item->size.x) * 0.5f;
-		}
 		item->centered = centered;
 		item->color = color;
 		item->scale = scale;
-		item->pos = p;
-		item->size = size;
-		item->sprites.clear();
-		font::createText(*m_BitmapFont, Vector2f(0, 0), text.c_str(), color, item->sprites, scale, scale);
+		item->pos = v2(x,y);
+		//item->size = size;
+		strcpy(item->label, text.c_str());
+		item->textSize = text.size();
 	}
 
 	// -------------------------------------------------------
@@ -150,12 +139,8 @@ namespace ds {
 	void GUIDialog::updateText(int id,const std::string& text) {	
 		GUIItem* item = findByID(id);
 		assert(item != 0);
-		item->size = font::calculateSize(*m_BitmapFont, text.c_str(), 4, item->scale, item->scale);
-		if ( item->centered ) {
-			item->pos.x = (renderer::getScreenWidth() - item->size.x) * 0.5f;
-		}
-		item->sprites.clear();
-		font::createText(*m_BitmapFont, v2(0, 0), text.c_str(), item->color, item->sprites, item->scale, item->scale);
+		strcpy(item->label, text.c_str());
+		item->textSize = text.size();
 	}
 
 	v2 GUIDialog::getTextSize(int id) {
@@ -204,7 +189,7 @@ namespace ds {
 		for (size_t i = 0; i < m_Items.size(); ++i) {
 			GUIItem& item = m_Items[i];
 			if (item.type == GIT_BUTTON && item.id == id) {
-				item.sprites[0].texture = math::buildTexture(textureRect);
+				item.texture = math::buildTexture(textureRect);
 			}
 		}
 	}
@@ -212,7 +197,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// add button 
 	// -------------------------------------------------------
-	void GUIDialog::addButton(int id,float x,float y, const std::string& text, const Rect& textureRect, const Color& textColor, float textScale, bool centered) {
+	void GUIDialog::addButton(int id,float x,float y, const char* text, const Rect& textureRect, const Color& textColor, float textScale, bool centered) {
 		assert(!containsItem(id));
 		if (centered) {
 			x = renderer::getScreenWidth() * 0.5f;
@@ -221,18 +206,13 @@ namespace ds {
 		GUIItem item;
 		item.pos = p;
 		item.type = GIT_BUTTON;
-		Sprite s;
-		s.position = Vector2f(0, 0);
-		s.texture = math::buildTexture(textureRect);
-		item.sprites.push_back(s);		
-		Vector2f size = font::calculateSize(*m_BitmapFont, text.c_str(), textScale);
-		float ty = y - size.y * 0.5f;
-		p = Vector2f(size.x * -0.5f, -size.y * 0.5f);
-		font::createText(*m_BitmapFont, p, text.c_str(), textColor, item.sprites, textScale, textScale);
-		item.id = id;
-		item.centered = true;
-		item.color = Color::WHITE;
+		item.texture = math::buildTexture(textureRect);
 		item.scale = 1.0f;
+		item.centered = centered;
+		strcpy(item.label, text);
+		item.textSize = strlen(text);
+		item.id = id;
+		item.color = Color::WHITE;
 		float w = textureRect.width();
 		float h = textureRect.height();
 		item.boundingRect = Rect(h * 0.5f, w * -0.5f, w, -h);
@@ -272,8 +252,29 @@ namespace ds {
 		if ( m_Active ) {
 			for ( size_t i = 0; i < m_Items.size(); ++i ) {
 				GUIItem* gi = &m_Items[i];
-				for ( size_t j =0; j < gi->sprites.size(); ++j ) {
-					sprites::draw(gi->sprites[j].position + gi->pos, gi->sprites[j].texture, gi->sprites[j].rotation, gi->sprites[j].scale.x, gi->sprites[j].scale.y, gi->sprites[j].color);
+				if (gi->type == GIT_IMAGE) {
+					sprites::draw(gi->pos, gi->texture, 0.0f, gi->scale, gi->scale, gi->color);
+				}
+				else if (gi->type == GIT_BUTTON) {
+					v2 p = gi->pos;
+					if (gi->centered) {
+						p.x = renderer::getScreenWidth() * 0.5f;
+					}
+					sprites::draw(p, gi->texture, 0.0f, gi->scale, gi->scale, gi->color);					
+					v2 size = font::calculateSize(*m_BitmapFont, gi->label, 1.0f);
+					float ty = p.y - size.y * 0.5f;
+					p += v2(size.x * -0.5f, -size.y * 0.5f);
+					ds::sprites::drawText(m_BitmapFont, p.x, p.y, gi->label, 2.0f);
+				}
+				else if (gi->type == GIT_TEXT) {
+					v2 p = gi->pos;
+					if (gi->centered) {
+						p.x = renderer::getScreenWidth() * 0.5f;
+					}
+					v2 size = font::calculateSize(*m_BitmapFont, gi->label, 1.0f);
+					float ty = p.y - size.y * 0.5f;
+					p += v2(size.x * -0.5f, -size.y * 0.5f);
+					ds::sprites::drawText(m_BitmapFont, p.x, p.y, gi->label, 2.0f,gi->scale,gi->scale,gi->color);
 				}
 			}
 		}
@@ -413,7 +414,7 @@ namespace ds {
 				if (cnt == 1) {
 					centered = true;
 				}
-				addButton(id,p.x,p.y,txt,r,c,1.0f,centered);
+				addButton(id,p.x,p.y,txt.c_str(),r,c,1.0f,centered);
 				addToModel(id, GIT_BUTTON, "Button");
 			}
 			else if ( loader->getChunkID() == CHNK_DLG_TEXT ) {
@@ -440,6 +441,26 @@ namespace ds {
 		}	
 	}
 
+	// -------------------------------------------------------
+	// show add new item dialog
+	// -------------------------------------------------------
+	void GUIDialog::showAddDialog() {
+		if (_showAdd) {
+			if (gui::begin("Add element", &_state)) {
+				gui::ComboBox(GUI_DIALOG_ID + 24, _availableElements, &_selectedElement, &_elementOffset);
+				gui::beginGroup();
+				if (gui::Button(GUI_DIALOG_ID + 25, "OK")) {
+					_showAdd = false;
+				}
+				if (gui::Button(GUI_DIALOG_ID + 26, "Cancel")) {
+					_showAdd = false;
+				}
+				gui::endGroup();
+			}
+			gui::end();
+		}
+	}
+
 	
 	void GUIDialog::addToModel(int id, GUIItemType type,const char* prefix) {
 		char buffer[32];
@@ -455,13 +476,166 @@ namespace ds {
 			gui::ComboBox(GUI_DIALOG_ID + 1, &_model, &_offset);
 			gui::beginGroup();
 			if (gui::Button(GUI_DIALOG_ID + 2, "Save")) {
-				LOG << "Save pressed";
+				save();
 			}
-			if (gui::Button(GUI_DIALOG_ID + 3, "Add")) {
-				//_showAdd = !_showAdd;
+			if (gui::Button(GUI_DIALOG_ID + 11, "Load")) {
+				load();
+			}
+			if (gui::Button(GUI_DIALOG_ID + 10, "Add")) {
+				_showAdd = !_showAdd;
 			}
 			gui::endGroup();
 		}
 		gui::end();
+
+		showAddDialog();
+
+		if (_model.hasSelection()) {
+			if (gui::begin("GUI Element", &_state)) {
+				GUIModelItem element = _model.getSelectedValue();
+				if (element.type == GIT_BUTTON) {
+					GUIItem* item = findByID(element.id);
+					gui::InputVec2(GUI_DIALOG_ID + 3, "Position", &item->pos);
+					gui::InputFloat(GUI_DIALOG_ID + 4, "Scale", &item->scale);
+					gui::InputColor(GUI_DIALOG_ID + 5, "Color", &item->color);
+					gui::CheckBox(GUI_DIALOG_ID + 6, "Centered", &item->centered);
+					gui::Input(GUI_DIALOG_ID + 7, "Label", item->label, 32);
+				}
+				else if (element.type == GIT_IMAGE) {
+					GUIItem* item = findByID(element.id);
+					gui::InputVec2(GUI_DIALOG_ID + 3, "Position", &item->pos);
+					gui::InputFloat(GUI_DIALOG_ID + 4, "Scale", &item->scale);
+					gui::InputColor(GUI_DIALOG_ID + 5, "Color", &item->color);
+					gui::CheckBox(GUI_DIALOG_ID + 6, "Centered", &item->centered);
+				}
+				else if (element.type == GIT_TEXT) {
+					GUIItem* item = findByID(element.id);
+					gui::InputVec2(GUI_DIALOG_ID + 3, "Position", &item->pos);
+					gui::InputFloat(GUI_DIALOG_ID + 4, "Scale", &item->scale);
+					gui::InputColor(GUI_DIALOG_ID + 5, "Color", &item->color);
+					gui::CheckBox(GUI_DIALOG_ID + 6, "Centered", &item->centered);
+					gui::Input(GUI_DIALOG_ID + 7, "Label", item->label,32);
+				}
+			}
+			gui::end();
+		}
+	}
+
+	void GUIDialog::save() {
+		char buffer[64];
+		sprintf(buffer, "assets\\%u", m_HashName);
+		BinaryWriter writer;
+		int signature[] = { 0, 8, 15 };
+		writer.open(buffer, signature, 3);
+		for (size_t i = 0; i < m_Items.size(); ++i) {
+			GUIItem* gi = &m_Items[i];
+			if (gi->type == GIT_IMAGE) {
+				writer.startChunk(CHNK_DLG_IMAGE, 1);
+				writer.write(gi->id);
+				writer.write(gi->texture.rect);
+				writer.write(gi->pos);
+				int cnt = 0;
+				if (gi->centered) {
+					cnt = 1;
+				}
+				writer.write(cnt);
+				writer.closeChunk();
+			}			
+			else if (gi->type == GIT_BUTTON) {
+				writer.startChunk(CHNK_DLG_BUTTON, 1);
+				writer.write(gi->id);
+				writer.write(gi->texture.rect);
+				writer.write(gi->pos);
+				writer.write(gi->label);
+				writer.write(gi->color);
+				int cnt = 0;
+				if (gi->centered) {
+					cnt = 1;
+				}
+				writer.write(cnt);
+				writer.closeChunk();
+			}
+			else if (gi->type == GIT_TEXT) {
+				writer.startChunk(CHNK_DLG_TEXT, 1);
+				writer.write(gi->id);
+				writer.write(gi->pos);
+				writer.write(gi->label);
+				writer.write(gi->color);
+				int cnt = 0;
+				if (gi->centered) {
+					cnt = 1;
+				}
+				writer.write(cnt);
+				writer.closeChunk();
+			}			
+		}
+		writer.close();
+	}
+
+	void GUIDialog::load() {
+		clear();
+		_model.clear();
+		BinaryLoader loader;
+		char buffer[64];
+		sprintf(buffer, "assets\\%u", m_HashName);
+		int signature[] = { 0, 8, 15 };
+		loader.open(buffer, signature, 3);
+		while (loader.openChunk() == 0) {
+			if (loader.getChunkID() == CHNK_DLG_IMAGE) {
+				int id = 0;
+				loader.read(&id);
+				Rect r;
+				loader.read(&r);
+				Vector2f p;
+				loader.read(&p);
+				int cnt = 0;
+				loader.read(&cnt);
+				bool centered = false;
+				if (cnt == 1) {
+					centered = true;
+				}
+				addImage(id, p.x, p.y, r, centered);
+				addToModel(id, GIT_IMAGE, "Image");
+			}
+			else if (loader.getChunkID() == CHNK_DLG_BUTTON) {
+				char text[32];
+				int id = 0;
+				loader.read(&id);
+				Rect r;
+				loader.read(&r);
+				Vector2f p;
+				loader.read(&p);
+				loader.read(text);				
+				Color clr = Color::WHITE;
+				loader.read(&clr);
+				int cnt = 0;
+				loader.read(&cnt);
+				bool centered = false;
+				if (cnt == 1) {
+					centered = true;
+				}
+				addButton(id, p.x, p.y, text, r, clr, 1.0f, centered);
+				addToModel(id, GIT_TEXT, "Button");
+			}
+			else if (loader.getChunkID() == CHNK_DLG_TEXT) {
+				char text[32];
+				int id = 0;
+				loader.read(&id);
+				Vector2f p;
+				loader.read(&p);
+				loader.read(text);
+				Color clr = Color::WHITE;
+				loader.read(&clr);
+				int cnt = 0;
+				loader.read(&cnt);
+				bool centered = false;
+				if (cnt == 1) {
+					centered = true;
+				}
+				addText(id, p.x, p.y, text, clr, 1.0f, centered);
+				addToModel(id, GIT_TEXT, "Text");
+			}
+			loader.closeChunk();
+		}
 	}
 }

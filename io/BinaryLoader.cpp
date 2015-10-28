@@ -177,6 +177,17 @@ void BinaryLoader::read(std::string& str) {
 	}
 }
 
+void BinaryLoader::read(char* str) {
+	int length = 0;
+	read(&length);
+	char c;
+	for (int i = 0; i < length; ++i) {
+		readBuffer(&c, sizeof(char));
+		char f = c + 32;
+		str[i] = f;
+	}
+	str[length] = '\0';
+}
 
 // ------------------------------------------------------
 // Close chunk

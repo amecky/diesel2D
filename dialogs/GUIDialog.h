@@ -26,8 +26,11 @@ struct GUIItem {
 	float scale;
 	GUIItemType type;
 	Rect boundingRect;
-	std::vector<Sprite> sprites;
+	char label[32];
+	int textSize;
 	v2 size;
+	Texture texture;
+
 	GUIItem() : id(-1) , pos(0,0) , centered(true) , color(Color::WHITE) , scale(1.0f) , size(0,0) {}
 };
 
@@ -104,11 +107,7 @@ typedef std::vector<GUIItem> Items;
 typedef std::vector<GUIEffect*> Effects;
 
 public:
-	GUIDialog() {
-		_state = 1;
-		_offset = 0;
-		_position = v2(1050, 690);
-	}
+	GUIDialog();
 	~GUIDialog(void);
 	void init(const char* name,const DialogID& id,BitmapFont* bitmapFont);
 	void render();
@@ -121,7 +120,7 @@ public:
 	uint32 addImageLink(int id,int x,int y,const Rect& textureRect,bool centered = true);
 
 	// FIXME: add button with x and y position
-	void addButton(int id,float x,float y,const std::string& text,const Rect& textureRect,const Color& textColor = Color(1.0f,1.0f,1.0f,1.0f),float textScale = 1.0f,bool centered = true);
+	void addButton(int id,float x,float y,const char* text,const Rect& textureRect,const Color& textColor = Color(1.0f,1.0f,1.0f,1.0f),float textScale = 1.0f,bool centered = true);
 	void setButtonTexture(int id,const Rect& textureRect);
 
 	void addText(int id,int x,int y,const std::string& text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f,bool centered = true);
@@ -161,8 +160,12 @@ public:
 		}
 	}
 	void showDialog();
+	
 private:
+	void save();
+	void load();
 	void addToModel(int id, GUIItemType type,const char* prefix);
+	void showAddDialog();
 	GUIItem* findByID(int id);
 	int findFreeID();
 	bool containsItem(int id);
@@ -179,10 +182,14 @@ private:
 	bool m_SupportHover;
 	int m_SelectedInput;
 
+	std::vector<std::string> _availableElements;
+	int _selectedElement;
+	int _elementOffset;
 	gui::ComponentModel<GUIModelItem> _model;
 	int _state;
 	int _offset;
 	v2 _position;
+	bool _showAdd;
 
 	
 };

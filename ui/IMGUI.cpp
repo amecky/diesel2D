@@ -139,7 +139,6 @@ namespace gui {
 		int caretPos;
 		v2 position;
 		const char* header;
-		v2 dim;
 		v2 startPosition;
 		ds::Texture textures[16];
 		ds::Color colors[16];
@@ -161,30 +160,14 @@ namespace gui {
 			//clicked = false;
 			grouped = false;
 			visible = false;
-			dim = v2(0, 0);
 			window.reset();
 			hot = -1;
-		}
-
-		void calculateDimension(const v2& position, const v2& size,bool halfSize = false) {
-			float endX = position.x + size.x - startPosition.x;
-			if (halfSize) {
-				endX = position.x + size.x * 0.5f - startPosition.x;
-			}
-			float endY = startPosition.y - position.y - size.y;
-			if (endX > dim.x) {
-				dim.x = endX;
-			}
-			if (endY > dim.y) {
-				dim.y = endY;
-			}
 		}
 
 		void addBox(const v2& position, const v2& size, const ds::Color& color) {
 			v2 p = position;
 			p.x += size.x * 0.5f;
 			window.addBox(p, size, color);
-			calculateDimension(p, size, true);
 
 		}
 
@@ -193,7 +176,6 @@ namespace gui {
 			p.x += offsetX;
 			p.y += offsetY;
 			window.addImage(p, texture);
-			calculateDimension(p, texture.dim);
 		}
 
 		void addText(const v2& position, const char* text) {
@@ -205,13 +187,12 @@ namespace gui {
 
 		void addText(const v2& position, const char* text, const v2& size) {
 			window.addText(position, text, size);
-			calculateDimension(position, size);
 		}
 
 		void nextPosition(float height = LINE_HEIGHT) {
 			if (!grouped) {
 				position.y -= height;
-				position.x = startPosition.x;
+				position.x = startPosition.x;				
 			}
 			else {
 				position.x += window.calls[window.num - 1].size.x + 50.0f;
@@ -823,7 +804,7 @@ namespace gui {
 	}
 
 	// -------------------------------------------------------
-	// combo box
+	// combo box with model
 	// -------------------------------------------------------	
 	void ComboBox(int id, AbstractComponentModel* model,int *offset,int max) {
 		PR_START("IMGUI::ComboBox")
@@ -847,21 +828,18 @@ namespace gui {
 			guiContext->addText(p, model->getLabel(i));
 			p.y -= BOX_HEIGHT;
 		}
-		guiContext->position.y -= height;
-		guiContext->position.y -= 8.0f;
+		guiContext->nextPosition(height + BOX_HEIGHT);
 		PR_END("IMGUI::ComboBox")
 	}
 
 	// -------------------------------------------------------
-	// combo box
+	// combo box strings
 	// -------------------------------------------------------	
 	void ComboBox(int id, const std::vector<std::string>& entries, int* selected,int *offset,int max) {
 		prepareComboBox(id, offset, entries.size(),max);
 		float width = 200.0f;
 		v2 p = guiContext->position;
-		float height = max * BOX_HEIGHT;
-		p.y -= height / 2.0f - BOX_HEIGHT / 2.0f;
-		guiContext->addBox(p, v2(width, height), guiContext->colors[CLR_INPUT]);
+		float height = max * BOX_HEIGHT;		
 		p = guiContext->position;
 		bool hot = isHot(id, p, v2(width, height));
 		int start = *offset;
@@ -879,8 +857,7 @@ namespace gui {
 			guiContext->addText(p, entries[i].c_str());			
 			p.y -= BOX_HEIGHT;
 		}
-		guiContext->position.y -= height;
-		guiContext->position.y -= 8.0f;
+		guiContext->nextPosition(height + BOX_HEIGHT);
 	}
 
 	// -------------------------------------------------------
@@ -966,7 +943,7 @@ namespace gui {
 		v2 textDim = getTextSize(label);
 		float width = textDim.x + BUTTON_PADDING * 2.0f;
 		v2 p = guiContext->position;
-		p.y -= 4.0f;
+		//p.y -= 4.0f;
 		bool hot = isHot(id, p, v2(width, BUTTON_HEIGHT),width * 0.5f);
 		if (hot) {
 			guiContext->addBox(p, v2(width, BUTTON_HEIGHT), guiContext->colors[CLR_BUTTON_HOVER]);
@@ -980,6 +957,9 @@ namespace gui {
 		return isBoxSelected(id, p, v2(width, BUTTON_HEIGHT));
 	}
 
+	// -------------------------------------------------------
+	// Histogram
+	// -------------------------------------------------------	
 	void Histogram(int id, float* values, int num, float minValue, float maxValue, float step) {
 		v2 p = guiContext->position;
 		// FIXME: calculate width
@@ -1104,6 +1084,29 @@ namespace gui {
 		}
 	}
 
+
+	v2 getPanelDimension() {
+		v2 start = guiContext->startPosition;
+		v2 dim = v2(0, 2000);
+		GUIWindow& win = guiContext->window;
+		for (int i = 0; i < win.num; ++i) {
+			const DrawCall& call = win.calls[i];
+			float endX = call.position.x + call.size.x;
+			float endY = call.position.y - call.size.y;
+			if (endX > dim.x) {
+				dim.x = endX;
+			}
+			if (endY < dim.y) {
+				dim.y = endY;
+			}
+		}
+		dim.x = dim.x - start.x;
+		dim.y = start.y - dim.y - BOX_HEIGHT;
+		if (guiContext->editorMode) {
+			dim.x = 500.0f;
+		}
+		return dim;
+	}
 	// -------------------------------------------------------
 	// end panel
 	// -------------------------------------------------------	
@@ -1113,14 +1116,8 @@ namespace gui {
 		int current = ds::sprites::getCurrentTextureID();
 		ds::sprites::setTexture(guiContext->textureID);
 		// get dimension of entire panel
-		v2 dim = guiContext->dim;
-		if (dim.x == 0.0f) {
-			dim.x = 200.0f;
-		}
-		dim += v2(20, 20);
-		if (guiContext->editorMode) {
-			dim.x = 500.0f;
-		}
+		v2 dim = getPanelDimension();
+		GUIWindow& win = guiContext->window;
 		// draw header box
 		v2 p = guiContext->startPosition;
 		float sx = 1.0f;
@@ -1146,8 +1143,9 @@ namespace gui {
 		p.y -= 7.0f;
 		p.x = guiContext->startPosition.x + 20.0f;
 		ds::sprites::drawText(guiContext->font, p.x, p.y, guiContext->header, 2);
-
+		// draw panel background
 		if (guiContext->visible) {
+					
 			v2 p = guiContext->startPosition;
 			float sy = 1.0f;
 			if (dim.y > WHITE_BOX_SIZE) {
@@ -1161,24 +1159,24 @@ namespace gui {
 			}
 			center.y = guiContext->startPosition.y - dim.y / 2.0f * sy - 10.0f;
 			ds::sprites::draw(center, buildBoxTexture(dim.x, dim.y), 0.0f, sx, sy, guiContext->colors[CLR_PANEL_BACKGROUND]);
-		}
-		GUIWindow& win = guiContext->window;
-		if (win.num > 0) {				
-			for (int i = 0; i < win.num; ++i) {
-				const DrawCall& call = win.calls[i];
-				if (call.type == 1) {
-					ds::sprites::draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, 1.0f, 1.0f, call.color);
+
+
+			if (win.num > 0) {
+				for (int i = 0; i < win.num; ++i) {
+					const DrawCall& call = win.calls[i];
+					if (call.type == 1) {
+						ds::sprites::draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, 1.0f, 1.0f, call.color);
+					}
+					else if (call.type == 2) {
+						ds::sprites::drawText(guiContext->font, call.position.x, call.position.y, call.text, call.padding);
+					}
+					else if (call.type == 3) {
+						ds::sprites::draw(call.position, call.texture, 0.0f, 1.0f, 1.0f, call.color);
+					}
 				}
-				else if (call.type == 2) {
-					ds::sprites::drawText(guiContext->font, call.position.x, call.position.y, call.text, call.padding);
-				}
-				else if (call.type == 3) {
-					ds::sprites::draw(call.position, call.texture, 0.0f, 1.0f, 1.0f, call.color);
-				}
+
 			}
-				
-		}		
-		
+		}
 		ds::sprites::setTexture(current);
 		if (!guiContext->editorMode) {
 			guiContext->position.y -= 10.0f;
