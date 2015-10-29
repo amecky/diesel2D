@@ -92,6 +92,8 @@ namespace gui {
 
 	bool begin(const char* header, int* state);
 
+	void beginModal(const char* header);
+
 	void Label(int id,const char* text);
 
 	void beginGroup();
@@ -139,4 +141,20 @@ namespace gui {
 	void shutdown();
 
 	void endFrame();
+
+	//int InputDialog(const char* message, const char* label, char* text);
+
+	class InputDialog {
+
+	public:
+		InputDialog();
+		~InputDialog() {}
+		int show(const char* header,const char* label);
+		const char* getText() const;
+	private:
+		bool _active;
+		char _text[32];
+		int _button;
+	};
+
 }

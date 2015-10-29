@@ -163,7 +163,7 @@ public:
 	
 private:
 	void save();
-	void load();
+	void load();	
 	void addToModel(int id, GUIItemType type,const char* prefix);
 	void showAddDialog();
 	GUIItem* findByID(int id);
@@ -192,7 +192,7 @@ private:
 	int _offset;
 	v2 _position;
 	bool _showAdd;
-
+	
 	
 };
 

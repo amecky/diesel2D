@@ -11,7 +11,13 @@ namespace ds {
 
 class DialogManager : public Serializer {
 
-typedef std::vector<GUIDialog*> Dialogs;
+struct DialogDefinition {
+	char name[32];
+	IdString hash;
+	GUIDialog* dialog;
+};
+
+typedef std::vector<DialogDefinition> Dialogs;
 
 public:
 	DialogManager(void);
@@ -26,7 +32,11 @@ public:
 	void load(BinaryLoader* loader);
 	void tick(float dt);
 	void showDialog();
+	void load();
+	void save();
 private:	
+	bool remove(const char* name);
+	void clear();
 	void setActiveFlag(const char* name,bool active);	
 	void createDialog(const char* name,int id,GUIDialog* dialog);
 	BitmapFont* m_Font;
@@ -34,10 +44,12 @@ private:
 	Dialogs m_Dialogs;
 	uint32 m_Index;
 
-	gui::ComponentModel<GUIDialog*> _model;
+	gui::ComponentModel<DialogDefinition> _model;
 	v2 _dialogPos;
 	int _dialogState;
 	int _offset;
+	gui::InputDialog _dialog;
+	bool _showAdd;
 };
 
 }

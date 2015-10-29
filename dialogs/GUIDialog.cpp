@@ -502,7 +502,7 @@ namespace ds {
 				}
 				gui::endGroup();
 			}
-			gui::end();
+			gui::end();			
 		}
 	}
 
@@ -655,6 +655,7 @@ namespace ds {
 		BinaryLoader loader;
 		char buffer[64];
 		sprintf(buffer, "assets\\%u", m_HashName);
+		LOGC("GUIDialog") << "loading file: " << buffer;
 		int signature[] = { 0, 8, 15 };
 		loader.open(buffer, signature, 3);
 		while (loader.openChunk() == 0) {

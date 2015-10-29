@@ -94,6 +94,7 @@ void BaseApp::initializeHUD(int textureID, const char* fontName) {
 
 void BaseApp::initializeGUI() {
 	ds::assets::load("gui", &gui, CVT_GUI);
+	gui.load();
 }
 // -------------------------------------------------------
 // Creates the window

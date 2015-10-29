@@ -8,3 +8,4 @@ const int GUI_DIALOG_ID = 300;
 const int SPRITE_TEMPLATES_ID = 350;
 const int EDITOR_ID = 500;
 const int SPRITE_GROUP_CONTAINER_ID = 400;
+const int INPUT_DIALOG_ID = 500;

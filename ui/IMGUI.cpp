@@ -3,6 +3,7 @@
 #include "..\sprites\SpriteBatch.h"
 #include "..\utils\font.h"
 #include "..\utils\Profiler.h"
+#include "..\DialogResources.h"
 
 namespace gui {
 
@@ -147,12 +148,14 @@ namespace gui {
 		bool started;
 		char tempBuffer[64];
 		bool editorMode;
+		bool modal;
 
 		GUIContext() {
 			textureID = -1;
 			ready = false;
 			editorMode = false;
 			keyInput.num = 0;
+			modal = false;
 		}
 
 		void reset() {
@@ -162,6 +165,7 @@ namespace gui {
 			visible = false;
 			window.reset();
 			hot = -1;
+			modal = false;
 		}
 
 		void addBox(const v2& position, const v2& size, const ds::Color& color) {
@@ -411,6 +415,20 @@ namespace gui {
 		return *state == 1;
 	}
 
+	// -------------------------------------------------------
+	// begin modal panel
+	// -------------------------------------------------------
+	void beginModal(const char* header) {
+		guiContext->reset();
+		guiContext->header = header;
+		// FIXME: screen center
+		//guiContext->startPosition = v2(512,384);
+		//guiContext->position = v2(512, 384);
+		guiContext->visible = true;
+		//guiContext->nextPosition();
+		guiContext->modal = true;
+	}
+
 	v2 getTextSize(const char* text) {
 		return ds::font::calculateSize(*guiContext->font, text,CHAR_PADDING);
 	}
@@ -463,7 +481,7 @@ namespace gui {
 				}
 				else if (guiContext->keyInput.keys[i] == 134) {
 					if (len > 0) {
-						if (guiContext->caretPos < len) {
+						if (guiContext->caretPos < len) {							
 							memmove(guiContext->inputText + guiContext->caretPos, guiContext->inputText + guiContext->caretPos + 1, len - guiContext->caretPos);
 							--len;
 							guiContext->inputText[len] = '\0';
@@ -481,7 +499,7 @@ namespace gui {
 					}
 				}
 			}
-			++len;
+			//++len;
 			guiContext->inputText[len] = '\0';
 			guiContext->keyInput.num = 0;
 		}
@@ -499,9 +517,9 @@ namespace gui {
 		p.x += (width + 10.0f) * index;
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT),width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
-		if (selected) {
+		if (selected) {			
 			sprintf_s(guiContext->inputText, 32, "%d", *v);
-			guiContext->caretPos = strlen(guiContext->inputText);
+			guiContext->caretPos = strlen(guiContext->inputText);			
 			guiContext->active = new_id;
 		}
 		if (guiContext->active == new_id) {
@@ -573,7 +591,7 @@ namespace gui {
 		if (guiContext->active == new_id) {
 			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT_EDIT]);
 			handleTextInput();
-			*v = atoi(guiContext->inputText);
+			strncpy(v, guiContext->inputText, maxLength);
 			v2 cp = p;
 			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
 			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x;
@@ -1120,19 +1138,24 @@ namespace gui {
 		GUIWindow& win = guiContext->window;
 		// draw header box
 		v2 p = guiContext->startPosition;
+		v2 startPos = guiContext->startPosition;
+		//if (guiContext->modal) {
+			//p = v2(512, 384);
+			//startPos = p;
+		//}
 		float sx = 1.0f;
 		if (dim.x > WHITE_BOX_SIZE) {
 			sx = dim.x / WHITE_BOX_SIZE;
 			dim.x = WHITE_BOX_SIZE;
 		}		
-		p.x = guiContext->startPosition.x + dim.x / 2.0f * sx - 10.0f;
+		p.x = startPos.x + dim.x / 2.0f * sx - 10.0f;
 		if (guiContext->editorMode) {
 			p.x -= 15.0f;
 		}
 		p.y -= 2.0f;
 		ds::sprites::draw(p, buildBoxTexture(dim.x, BOX_HEIGHT), 0.0f, sx, 1.0f, guiContext->colors[CLR_PANEL_HEADER]);
 		// draw icon
-		p.x = guiContext->startPosition.x - BOX_HEIGHT;
+		p.x = startPos.x - BOX_HEIGHT;
 		if (guiContext->visible) {
 			ds::sprites::draw(p, guiContext->textures[ICN_ARROW_DOWN]);
 		}
@@ -1141,23 +1164,26 @@ namespace gui {
 		}
 		// draw text
 		p.y -= 7.0f;
-		p.x = guiContext->startPosition.x + 20.0f;
+		p.x = startPos.x + 20.0f;
 		ds::sprites::drawText(guiContext->font, p.x, p.y, guiContext->header, 2);
 		// draw panel background
 		if (guiContext->visible) {
 					
-			v2 p = guiContext->startPosition;
+			v2 p = startPos;
+			if (guiContext->modal) {
+				p = v2(512, 384);
+			}
 			float sy = 1.0f;
 			if (dim.y > WHITE_BOX_SIZE) {
 				sy = dim.y / WHITE_BOX_SIZE;
 				dim.y = WHITE_BOX_SIZE;
 			}
 			v2 center;
-			center.x = guiContext->startPosition.x + dim.x / 2.0f * sx - 10.0f;
+			center.x = startPos.x + dim.x / 2.0f * sx - 10.0f;
 			if (guiContext->editorMode) {
 				center.x -= 15.0f;
 			}
-			center.y = guiContext->startPosition.y - dim.y / 2.0f * sy - 10.0f;
+			center.y = startPos.y - dim.y / 2.0f * sy - 10.0f;
 			ds::sprites::draw(center, buildBoxTexture(dim.x, dim.y), 0.0f, sx, sy, guiContext->colors[CLR_PANEL_BACKGROUND]);
 
 
@@ -1182,6 +1208,43 @@ namespace gui {
 			guiContext->position.y -= 10.0f;
 		}
 		PR_END("IMGUI::end")
+	}
+
+	// -------------------------------------------
+	// pre defined dialogs
+	// -------------------------------------------
+	
+	InputDialog::InputDialog() : _active(false) {
+		_text[0] = '\0';
+	}
+
+	int InputDialog::show(const char* header, const char* label) {
+		if (!_active) {
+			_text[0] = '\0';
+			_active = true;
+			_button = 0;
+		}
+		else {
+			int state = 1;
+			gui::begin("Input",&state);
+			gui::Label(INPUT_DIALOG_ID + 1, header);
+			gui::Input(INPUT_DIALOG_ID + 2, label, _text, 32);
+			gui::beginGroup();
+			if (gui::Button(INPUT_DIALOG_ID + 3, "OK")) {
+				_button = 1;
+				_active = false;
+			}
+			if (gui::Button(INPUT_DIALOG_ID + 4, "Cancel")) {
+				_button = 2;
+				_active = false;
+			}
+			gui::endGroup();
+			gui::end();
+		}
+		return _button;
+	}
+	const char* InputDialog::getText() const {
+		return _text;
 	}
 
 }
