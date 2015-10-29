@@ -28,16 +28,19 @@ namespace ds {
 		sprintf_s(buffer, 128, "assets\\%u", _name);
 		LOG << "loading binary file: " << buffer;
 		FILE* f = fopen(buffer, "rb");
+		_currentSID = 0;
 		if (f) {
 			int nr = 0;
 			fread(&nr, sizeof(int), 1, f);
 			for (int i = 0; i < nr; ++i) {
 				Sprite sp;
 				fread(&sp, sizeof(Sprite), 1, f);
+				sp.id = _currentSID;
 				_sprites.push_back(sp);
 				char buffer[32];
 				sprintf_s(buffer, 32, "Sprite %d", sp.id);
 				_model.add(buffer, sp.id);
+				++_currentSID;
 			}
 			fclose(f);
 		}
