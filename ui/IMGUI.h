@@ -102,6 +102,8 @@ namespace gui {
 
 	bool Button(int id,const char* label);
 
+	void BoxTest();
+
 	void CheckBox(int id, const char* label,bool* selected);
 
 	void InputFloat(int id,const char* label, float* v);

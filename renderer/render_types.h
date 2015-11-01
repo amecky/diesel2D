@@ -143,8 +143,9 @@ namespace ds {
 		v2 dim;
 		int textureID;
 		Rect rect;
+		v2 textureSize;
 
-		Texture() : hashName(0) , uv(0, 0, 1, 1), dim(32, 32), textureID(0) , rect(0,0,32,32) {}
+		Texture() : hashName(0) , uv(0, 0, 1, 1), dim(32, 32), textureID(0) , rect(0,0,32,32) , textureSize(1024.0f,1024.0f) {}
 
 		const Vector2f getUV(int idx) const {
 			switch (idx) {

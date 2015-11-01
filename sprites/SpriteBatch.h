@@ -36,6 +36,10 @@ namespace sprites {
 
 	void draw(const Texture& texture,const ParticleArray& array);
 
+	void drawTiledX(const v2& position, float width, const Texture& texture, float cornersize, const Color& color = Color::WHITE);
+
+	void drawTiledXY(const v2& position, const v2& size, const Texture& texture, float cornersize, const Color& color = Color::WHITE);
+
 	void drawTemplate(const char* name);
 
 	void drawText(int x, int y, const char* text,float scaleX = 1.0f, float scaleY = 1.0f, const Color& color = Color::WHITE);

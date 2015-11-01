@@ -17,6 +17,13 @@ namespace gui {
 	const float BOX_HEIGHT = 16.0f;
 	const float WHITE_BOX_SIZE = 256.0f;
 	const float INPUT_BOX_WIDTH = 70.0f;
+
+	enum TilingDef {
+		TD_NONE,
+		TD_TILE_X,
+		TD_TILE_BOTH,
+		TD_TILE_Y
+	};
 	// -------------------------------------------------------
 	// DrawCall
 	// -------------------------------------------------------
@@ -29,6 +36,7 @@ namespace gui {
 		v2 position;
 		ds::Texture texture;
 		int padding;
+		TilingDef tilingDef;
 	};
 
 	const int MAX_DRAW_CALLS = 256;
@@ -52,18 +60,33 @@ namespace gui {
 				call.size = size;
 				call.position = position;
 				call.padding = 2;
+				call.tilingDef = TD_NONE;
 			}
 		}
 
-		void addImage(const v2& position, const ds::Texture& texture) {
+		void addTiledXImage(const v2& position, const ds::Texture& texture, const v2& size = v2(1, 1)) {
 			if (num < MAX_DRAW_CALLS) {
 				DrawCall& call = calls[num++];
 				call.type = 3;
 				call.color = ds::Color::WHITE;
-				call.size = v2(1, 1);
+				call.size = size;
 				call.position = position;
 				call.texture = texture;
 				call.padding = 1;
+				call.tilingDef = TD_TILE_X;
+			}
+		}
+
+		void addImage(const v2& position, const ds::Texture& texture,const v2& size = v2(1,1)) {
+			if (num < MAX_DRAW_CALLS) {
+				DrawCall& call = calls[num++];
+				call.type = 3;
+				call.color = ds::Color::WHITE;
+				call.size = size;
+				call.position = position;
+				call.texture = texture;
+				call.padding = 1;
+				call.tilingDef = TD_NONE;
 			}
 		}
 
@@ -77,6 +100,7 @@ namespace gui {
 				call.position = position;
 				call.position.y -= TEXT_OFFSET;
 				call.padding = CHAR_PADDING;
+				call.tilingDef = TD_NONE;
 			}
 		}
 
@@ -172,6 +196,71 @@ namespace gui {
 			v2 p = position;
 			p.x += size.x * 0.5f;
 			window.addBox(p, size, color);
+
+		}
+
+		void addTiledXBox(const v2& position, const v2& size,const ds::Texture& texture) {
+			v2 p = position;
+			p.x += size.x * 0.5f;
+			window.addTiledXImage(position, texture, size);
+
+		}
+
+		void addTexturedBox(const v2& position, const v2& size,const ds::Rect& rect,float cornersize, const ds::Color& color) {			
+			v2 center = position;
+			center.x += size.x * 0.5f;
+			center.y -= size.y * 0.5f;
+			float ch = size.y - 2.0f * cornersize;
+			float cw = size.x - 2.0f * cornersize;
+			float hcz = cornersize * 0.5f;
+			float sx = (size.x - 2.0f * cornersize) / (rect.width() - 2.0f * cornersize);
+			float sy = (size.y - 2.0f * cornersize) / (rect.height() - 2.0f * cornersize);
+			// left top corner 
+			v2 p = center;
+			ds::Texture tex = ds::math::buildTexture(rect.top, rect.left,cornersize,cornersize, 512.0f, 512.0f);
+			p.x = center.x - cw * 0.5f - hcz;
+			p.y = center.y + ch * 0.5f + hcz;
+			window.addImage(p, tex);
+			// right top corner
+			tex = ds::math::buildTexture(rect.top, rect.right - cornersize, cornersize, cornersize, 512.0f, 512.0f);
+			p.x = center.x + cw * 0.5f + hcz;
+			p.y = center.y + ch * 0.5f + hcz;
+			window.addImage(p, tex);
+			// left bottom corner
+			tex = ds::math::buildTexture(rect.bottom - cornersize, rect.left, cornersize, cornersize, 512.0f, 512.0f);
+			p.x = center.x - cw * 0.5f - hcz;
+			p.y = center.y - ch * 0.5f - hcz;
+			window.addImage(p, tex);
+			// right bottom corner
+			tex = ds::math::buildTexture(rect.bottom - cornersize, rect.right - cornersize, cornersize, cornersize, 512.0f, 512.0f);
+			p.x = center.x + cw * 0.5f + hcz;
+			p.y = center.y - ch * 0.5f - hcz;
+			window.addImage(p, tex);
+			// top
+			tex = ds::math::buildTexture(rect.top, rect.left + cornersize, rect.width() - 2.0f * cornersize, cornersize, 512.0f, 512.0f);
+			p.x = center.x;
+			p.y = center.y + ch * 0.5f + hcz;
+			window.addImage(p, tex,v2(sx,1.0f));
+			// bottom
+			tex = ds::math::buildTexture(rect.bottom - cornersize, rect.left + cornersize, rect.width() - 2.0f * cornersize, cornersize, 512.0f, 512.0f);
+			p.x = center.x;
+			p.y = center.y - ch * 0.5f - hcz;
+			window.addImage(p, tex, v2(sx, 1.0f));
+			// left
+			tex = ds::math::buildTexture(rect.top + cornersize, rect.left, cornersize, rect.height() - 2.0f *cornersize, 512.0f, 512.0f);
+			p.x = center.x - cw * 0.5f - hcz;
+			p.y = center.y;
+			window.addImage(p, tex, v2(1.0f, sy));
+			// right
+			tex = ds::math::buildTexture(rect.top + cornersize, rect.right - cornersize, cornersize, rect.height() - 2.0f *cornersize, 512.0f, 512.0f);
+			p.x = center.x + cw * 0.5f + hcz;
+			p.y = center.y;
+			window.addImage(p, tex, v2(1.0f, sy));
+			// center
+			tex = ds::math::buildTexture(rect.top + cornersize, rect.left + cornersize, rect.width() - 2.0f * cornersize, rect.height() - 2.0f * cornersize, 512.0f, 512.0f);
+			p.x = center.x;
+			p.y = center.y;
+			window.addImage(p, tex, v2(sx, sy));
 
 		}
 
@@ -523,7 +612,8 @@ namespace gui {
 			guiContext->active = new_id;
 		}
 		if (guiContext->active == new_id) {
-			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT_EDIT]);
+			//guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT_EDIT]);
+			guiContext->addTiledXBox(p, v2(width, BOX_HEIGHT), ds::math::buildTexture(160.0f, 160.0f, 150.0f, 16.0f, 512.0f, 512.0f));
 			handleTextInput();
 			*v = atoi(guiContext->inputText);
 			v2 cp = p;
@@ -534,7 +624,8 @@ namespace gui {
 		}
 		else {
 			sprintf_s(guiContext->tempBuffer, 64, "%d", *v);
-			guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
+			//guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
+			guiContext->addTiledXBox(p, v2(width, BOX_HEIGHT), ds::math::buildTexture(160.0f, 0.0f, 150.0f, 26.0f, 512.0f, 512.0f));
 			guiContext->addText(p, guiContext->tempBuffer);
 		}		
 		PR_END("IMGUI::InputScalar-I")
@@ -964,15 +1055,22 @@ namespace gui {
 		//p.y -= 4.0f;
 		bool hot = isHot(id, p, v2(width, BUTTON_HEIGHT),width * 0.5f);
 		if (hot) {
-			guiContext->addBox(p, v2(width, BUTTON_HEIGHT), guiContext->colors[CLR_BUTTON_HOVER]);
+			//guiContext->addBox(p, v2(width, BUTTON_HEIGHT), guiContext->colors[CLR_BUTTON_HOVER]);
 		}
 		else {
-			guiContext->addBox(p, v2(width, BUTTON_HEIGHT), guiContext->colors[CLR_BUTTON]);
+			//guiContext->addBox(p, v2(width, BUTTON_HEIGHT), guiContext->colors[CLR_BUTTON]);
 		}
+		guiContext->addTiledXBox(p, v2(width, BUTTON_HEIGHT), ds::math::buildTexture(105.0f, 0.0f, 150.0f, 24.0f, 512.0f, 512.0f));
 		p.x = guiContext->position.x + (width - textDim.x) / 2.0f;
 		guiContext->addText(p,label, textDim);
 		guiContext->nextPosition(LINE_HEIGHT + 4.0f);
 		return isBoxSelected(id, p, v2(width, BUTTON_HEIGHT));
+	}
+
+	void BoxTest() {
+		v2 p = guiContext->position;
+		guiContext->addTexturedBox(p, v2(180, 120), ds::Rect(34, 256, 100, 60), 10.0f,ds::Color::WHITE);
+		guiContext->nextPosition(160.0f);
 	}
 
 	// -------------------------------------------------------
@@ -1085,12 +1183,18 @@ namespace gui {
 		guiContext->ready = true;
 	}
 
+	// -------------------------------------------------------
+	// shutdown
+	// -------------------------------------------------------	
 	void shutdown() {
 		if (guiContext != 0)  {
 			delete guiContext;
 		}
 	}
 
+	// -------------------------------------------------------
+	// debug window
+	// -------------------------------------------------------	
 	void debugWindow() {
 		GUIWindow& win = guiContext->window;
 		if (win.num > 0) {
@@ -1102,7 +1206,9 @@ namespace gui {
 		}
 	}
 
-
+	// -------------------------------------------------------
+	// get panel dimension
+	// -------------------------------------------------------	
 	v2 getPanelDimension() {
 		v2 start = guiContext->startPosition;
 		v2 dim = v2(0, 2000);
@@ -1139,21 +1245,18 @@ namespace gui {
 		// draw header box
 		v2 p = guiContext->startPosition;
 		v2 startPos = guiContext->startPosition;
-		//if (guiContext->modal) {
-			//p = v2(512, 384);
-			//startPos = p;
-		//}
 		float sx = 1.0f;
 		if (dim.x > WHITE_BOX_SIZE) {
 			sx = dim.x / WHITE_BOX_SIZE;
-			dim.x = WHITE_BOX_SIZE;
+			//dim.x = WHITE_BOX_SIZE;
 		}		
-		p.x = startPos.x + dim.x / 2.0f * sx - 10.0f;
+		//p.x = startPos.x + dim.x / 2.0f * sx - 10.0f;
 		if (guiContext->editorMode) {
 			p.x -= 15.0f;
 		}
 		p.y -= 2.0f;
-		ds::sprites::draw(p, buildBoxTexture(dim.x, BOX_HEIGHT), 0.0f, sx, 1.0f, guiContext->colors[CLR_PANEL_HEADER]);
+		//ds::sprites::draw(p, buildBoxTexture(dim.x, BOX_HEIGHT), 0.0f, sx, 1.0f, guiContext->colors[CLR_PANEL_HEADER]);
+		ds::sprites::drawTiledX(p, dim.x, ds::math::buildTexture(140.0, 0.0f, 150.0f, 16.0f, 512.0f, 512.0f), 16.0f, guiContext->colors[CLR_PANEL_HEADER]);
 		// draw icon
 		p.x = startPos.x - BOX_HEIGHT;
 		if (guiContext->visible) {
@@ -1164,7 +1267,7 @@ namespace gui {
 		}
 		// draw text
 		p.y -= 7.0f;
-		p.x = startPos.x + 20.0f;
+		p.x = startPos.x + 10.0f;
 		ds::sprites::drawText(guiContext->font, p.x, p.y, guiContext->header, 2);
 		// draw panel background
 		if (guiContext->visible) {
@@ -1176,15 +1279,18 @@ namespace gui {
 			float sy = 1.0f;
 			if (dim.y > WHITE_BOX_SIZE) {
 				sy = dim.y / WHITE_BOX_SIZE;
-				dim.y = WHITE_BOX_SIZE;
+				//dim.y = WHITE_BOX_SIZE;
 			}
 			v2 center;
 			center.x = startPos.x + dim.x / 2.0f * sx - 10.0f;
-			if (guiContext->editorMode) {
-				center.x -= 15.0f;
-			}
+			//if (guiContext->editorMode) {
+				//center.x -= 15.0f;
+			//}
 			center.y = startPos.y - dim.y / 2.0f * sy - 10.0f;
-			ds::sprites::draw(center, buildBoxTexture(dim.x, dim.y), 0.0f, sx, sy, guiContext->colors[CLR_PANEL_BACKGROUND]);
+			//ds::sprites::draw(center, buildBoxTexture(dim.x, dim.y), 0.0f, sx, sy, guiContext->colors[CLR_PANEL_BACKGROUND]);
+			center.x = startPos.x - 24.0f;// -BOX_HEIGHT;
+			center.y = startPos.y - BOX_HEIGHT * 0.5f - 2.0f;
+			ds::sprites::drawTiledXY(center, dim, ds::math::buildTexture(30.0, 370.0f, 100.0f, 100.0f, 512.0f, 512.0f), 10.0f);
 
 
 			if (win.num > 0) {
@@ -1197,7 +1303,12 @@ namespace gui {
 						ds::sprites::drawText(guiContext->font, call.position.x, call.position.y, call.text, call.padding);
 					}
 					else if (call.type == 3) {
-						ds::sprites::draw(call.position, call.texture, 0.0f, 1.0f, 1.0f, call.color);
+						if (call.tilingDef == TD_NONE) {
+							ds::sprites::draw(call.position, call.texture, 0.0f, call.size.x, call.size.y, call.color);
+						}
+						else  if (call.tilingDef == TD_TILE_X) {
+							ds::sprites::drawTiledX(call.position, call.size.x,call.texture, call.texture.rect.height(), call.color);
+						}
 					}
 				}
 

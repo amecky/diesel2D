@@ -188,6 +188,8 @@ namespace ds {
 		ret.uv = getTextureCoordinates(r,textureWidth,textureHeight);
 		ret.textureID = 0;
 		ret.dim = Vector2f(width ,height);
+		ret.textureSize.x = textureWidth;
+		ret.textureSize.y = textureHeight;
 		return ret;
 	}
 
@@ -197,6 +199,8 @@ namespace ds {
 		ret.uv = getTextureCoordinates(r, textureWidth, textureHeight);
 		ret.textureID = 0;
 		ret.dim = Vector2f(r.width(), r.height());
+		ret.textureSize.x = textureWidth;
+		ret.textureSize.y = textureHeight;
 		return ret;
 	}
 
