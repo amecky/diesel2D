@@ -1,7 +1,6 @@
 # Editor
 
 - [ ] HUD / game states / GUI / sprite templates / Settings / particles / world
-- [ ] build a constant.h which contains IMGUI dialog IDs
 - [ ] GUI -> show all dialogs
 - [ ] GUI -> activate / deactivate dialog 
 - [ ] GUI -> only one should be active - keep activated dialog
@@ -11,3 +10,7 @@
 - [ ] HUD -> load binary file / check if file is there and then load it
 - [ ] HUD -> auto load of HUD in BaseApp - use fixed name
 - [ ] Asset Compiler - remove HUD
+
+## 30.10.2015
+
+- [x] build a constant.h which contains IMGUI dialog IDs
