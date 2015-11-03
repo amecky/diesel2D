@@ -13,11 +13,17 @@ JSONWriter::~JSONWriter() {
 	}
 }
 
+// ----------------------------------------------------------
+// open
+// ----------------------------------------------------------
 bool JSONWriter::open(const char* fileName) {
 	f = fopen(fileName,"w");
 	return true;
 }
 
+// ----------------------------------------------------------
+// start category
+// ----------------------------------------------------------
 void JSONWriter::startCategory(const char* name) {
 	writeIdent();
 	fprintf(f, "\"%s\" { ", name);
@@ -26,54 +32,42 @@ void JSONWriter::startCategory(const char* name) {
 	_ident += 4;
 }
 
+// ----------------------------------------------------------
+// write int
+// ----------------------------------------------------------
 void JSONWriter::write(const char* name, int value) {
 	
-	if (_items != 0) {
-		fprintf(f," , \n");
-	}
-	else {
-		fprintf(f, "\n");
-	}
-	writeIdent();
+	writeLineIdent();
 	fprintf_s(f, "\"%s\" : \"%d\"", name, value);
 	++_items;
 }
 
+// ----------------------------------------------------------
+// write float
+// ----------------------------------------------------------
 void JSONWriter::write(const char* name, float value) {
 	
-	if (_items != 0) {
-		fprintf(f, " , \n");
-	}
-	else {
-		fprintf(f, "\n");
-	}
-	writeIdent();
+	writeLineIdent();
 	fprintf(f, "\"%s\" : \"%.2f\"", name, value);
 	++_items;
 }
 
+// ----------------------------------------------------------
+// write string
+// ----------------------------------------------------------
 void JSONWriter::write(const char* name, const char* value) {
 
-	if (_items != 0) {
-		fprintf(f, " , \n");
-	}
-	else {
-		fprintf(f, "\n");
-	}
-	writeIdent();
+	writeLineIdent();
 	fprintf(f, "\"%s\" : \"%s\"", name, value);
 	++_items;
 }
 
+// ----------------------------------------------------------
+// write boolean
+// ----------------------------------------------------------
 void JSONWriter::write(const char* name, bool value) {
 
-	if (_items != 0) {
-		fprintf(f, " , \n");
-	}
-	else {
-		fprintf(f, "\n");
-	}
-	writeIdent();
+	writeLineIdent();
 	if (value) {
 		fprintf(f, "\"%s\" : \"true\"", name, value);
 	}
@@ -83,30 +77,25 @@ void JSONWriter::write(const char* name, bool value) {
 	++_items;
 }
 
+// ----------------------------------------------------------
+// write v2
+// ----------------------------------------------------------
 void JSONWriter::write(const char* name, const v2& value) {
 	
-	if (_items != 0) {
-		fprintf(f, " , \n");
-	}
-	else {
-		fprintf(f, "\n");
-	}
-	writeIdent();
+	writeLineIdent();
 	int x = value.x;
 	int y = value.y;
 	fprintf(f, "\"%s\" : \"%d,%d\"", name, x,y);
 	++_items;
 
 }
+
+// ----------------------------------------------------------
+// write color
+// ----------------------------------------------------------
 void JSONWriter::write(const char* name, const ds::Color& value) {
 	
-	if (_items != 0) {
-		fprintf(f, " , \n");
-	}
-	else {
-		fprintf(f, "\n");
-	}
-	writeIdent();
+	writeLineIdent();
 	int r = value.r * 255.0f;
 	int g = value.g * 255.0f;
 	int b = value.b * 255.0f;
@@ -114,19 +103,24 @@ void JSONWriter::write(const char* name, const ds::Color& value) {
 	fprintf(f, "\"%s\" : \"%d,%d,%d,%d\"", name, r, g, b, a);
 	++_items;
 }
+
+// ----------------------------------------------------------
+// write rect
+// ----------------------------------------------------------
 void JSONWriter::write(const char* name, const ds::Rect& value) {
 	
-	if (_items != 0) {
-		fprintf(f, " , \n");
-	}
-	else {
-		fprintf(f, "\n");
-	}
-	writeIdent();
-	fprintf(f, "\"%s\" : \"%d,%d,%d,%d\"", name, value.top,value.left,value.width(),value.height());
+	writeLineIdent();
+	int top = value.top;
+	int left = value.left;
+	int w = value.width();
+	int h = value.height();
+	fprintf(f, "\"%s\" : \"%d,%d,%d,%d\"", name, top, left, w, h);
 	++_items;
 }
 
+// ----------------------------------------------------------
+// end category
+// ----------------------------------------------------------
 void JSONWriter::endCategory() {
 	writeIdent();
 	fprintf_s(f, "\n}\n");
@@ -134,6 +128,24 @@ void JSONWriter::endCategory() {
 	_ident -= 4;
 }
 
+// ----------------------------------------------------------
+// write line ident
+// ----------------------------------------------------------
+void JSONWriter::writeLineIdent() {
+	if (_items != 0) {
+		fprintf(f, " , \n");
+	}
+	else {
+		fprintf(f, "\n");
+	}
+	for (int i = 0; i < _ident; ++i) {
+		fprintf(f, " ");
+	}
+}
+
+// ----------------------------------------------------------
+// write ident
+// ----------------------------------------------------------
 void JSONWriter::writeIdent() {
 	for (int i = 0; i < _ident; ++i) {
 		fprintf(f, " ");

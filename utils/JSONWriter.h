@@ -21,6 +21,7 @@ public:
 private:
 	FILE* f;
 	void writeIdent();
+	void writeLineIdent();
 	int _ident;
 	char _temp[128];
 	bool _open;

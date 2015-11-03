@@ -47,6 +47,7 @@ struct GUIButton {
 	char text[32];
 	v2 size;
 	Texture texture;
+	Rect boundingRect;
 };
 
 struct GUIImage {
@@ -61,7 +62,7 @@ struct GUIItem {
 	Color color;
 	float scale;
 	GUIItemType type;
-	Rect boundingRect;
+	
 	v2 size;
 
 	GUIItem() : id(-1) , pos(0,0) , centered(true) , color(Color::WHITE) , scale(1.0f) , size(0,0) {}
@@ -134,7 +135,7 @@ private:
 // -------------------------------------------------------
 // GUI Dialog
 // -------------------------------------------------------
-class GUIDialog : public Serializer {
+class GUIDialog {
 
 typedef std::vector<GUIItem> Items;
 typedef std::vector<GUIEffect*> Effects;
@@ -143,6 +144,7 @@ typedef std::vector<GUIText> Texts;
 typedef std::vector<GUIImage> Images;
 typedef std::vector<GUIButton> Buttons;
 typedef std::vector<GameTimer> Timers;
+
 public:
 	GUIDialog();
 	~GUIDialog(void);
@@ -184,7 +186,6 @@ public:
 		return m_ID;
 	}
 	void clear();
-	void load(BinaryLoader* loader);
 
 	void tick(float dt);
 

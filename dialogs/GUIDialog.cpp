@@ -165,9 +165,9 @@ namespace ds {
 		item.type = GIT_IMAGELINK;
 		item.pos = p;
 		item.id = id;
-		float w = textureRect.width();
-		float h = textureRect.height();
-		item.boundingRect = Rect(h * 0.5f, w * -0.5f, w, -h);
+		//float w = textureRect.width();
+		//float h = textureRect.height();
+		//item.boundingRect = Rect(h * 0.5f, w * -0.5f, w, -h);
 		m_Items.push_back(item);
 		return item.id;
 	}
@@ -254,16 +254,25 @@ namespace ds {
 		if ( !m_Active ) {
 			return -1;
 		}
-		for (size_t i = 0; i < m_Items.size(); ++i) {
-			if (m_Items[i].type == GIT_BUTTON || m_Items[i].type == GIT_IMAGELINK) {
-				Rect br = m_Items[i].boundingRect;
-				br.left += m_Items[i].pos.x;
-				br.right += m_Items[i].pos.x;
-				br.top += m_Items[i].pos.y;
-				br.bottom += m_Items[i].pos.y;
-				if ( x >= br.left && x <= br.right && y <= br.top && y >= br.bottom ) {
-					return m_Items[i].id;
-				}		
+		for (int i = 0; i < 32; ++i) {
+			const GUID& gid = _ids[i];
+			if ( gid.entryIndex != -1 ) {
+				const GUIItem& item = m_Items[gid.entryIndex];
+				if (item.type == GIT_BUTTON) {
+					const GUIButton& button = _buttons[gid.index];
+					Rect br = button.boundingRect;
+					v2 p = item.pos;
+					if (item.centered) {
+						p.x = renderer::getScreenWidth() * 0.5f;
+					}
+					br.left += p.x;
+					br.right += p.x;
+					br.top += p.y;
+					br.bottom += p.y;
+					if (x >= br.left && x <= br.right && y <= br.top && y >= br.bottom) {
+						return gid.id;
+					}
+				}
 			}
 		}	
 		return -1;
@@ -305,6 +314,9 @@ namespace ds {
 		GUIButton button;
 		strcpy(button.text, text);
 		button.texture = math::buildTexture(textureRect);
+		float w = textureRect.width();
+		float h = textureRect.height();
+		button.boundingRect = Rect(h * 0.5f, w * -0.5f, w, -h);
 		gid.index = _buttons.size();
 		_buttons.push_back(button);
 		return gid;
@@ -324,9 +336,7 @@ namespace ds {
 		item.textSize = strlen(text);
 		item.id = id;
 		item.color = Color::WHITE;
-		float w = textureRect.width();
-		float h = textureRect.height();
-		item.boundingRect = Rect(h * 0.5f, w * -0.5f, w, -h);
+		
 		m_Items.push_back(item);
 		*/
 	}
@@ -362,39 +372,6 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::render() {
 		if ( m_Active ) {
-			/*
-			for ( size_t i = 0; i < m_Items.size(); ++i ) {
-				GUIItem* gi = &m_Items[i];
-				if (gi->type == GIT_IMAGE) {
-					v2 p = gi->pos;
-					if (gi->centered) {
-						p.x = renderer::getScreenWidth() * 0.5f;
-					}
-					sprites::draw(p, gi->texture, 0.0f, gi->scale, gi->scale, gi->color);
-				}
-				else if (gi->type == GIT_BUTTON) {
-					v2 p = gi->pos;
-					if (gi->centered) {
-						p.x = renderer::getScreenWidth() * 0.5f;
-					}
-					sprites::draw(p, gi->texture, 0.0f, gi->scale, gi->scale, gi->color);					
-					v2 size = font::calculateSize(*m_BitmapFont, gi->label, gi->scale);
-					float ty = p.y - size.y * 0.5f;
-					p += v2(size.x * -0.5f, -size.y * 0.5f);
-					ds::sprites::drawText(m_BitmapFont, p.x, p.y, gi->label, 2.0f);
-				}
-				else if (gi->type == GIT_TEXT) {
-					v2 p = gi->pos;
-					if (gi->centered) {
-						p.x = renderer::getScreenWidth() * 0.5f;
-					}
-					v2 size = font::calculateSize(*m_BitmapFont, gi->label, 4, gi->scale, gi->scale);
-					float ty = p.y - size.y * 0.5f;
-					p += v2(size.x * -0.5f, -size.y * 0.5f);
-					ds::sprites::drawText(m_BitmapFont, p.x, p.y, gi->label, 4,gi->scale,gi->scale,gi->color);
-				}
-			}
-			*/
 			char buffer[32];
 			for (int i = 0; i < 32; ++i) {
 				const GUID& id = _ids[i];
@@ -551,88 +528,6 @@ namespace ds {
 			return true;
 		}
 		return false;
-	}
-
-	// -------------------------------------------------------
-	// old load method
-	// -------------------------------------------------------
-	void GUIDialog::load(BinaryLoader* loader) {
-		clear();
-		while ( loader->openChunk() == 0 ) {	
-			if ( loader->getChunkID() == CHNK_DLG_IMAGE ) {
-				int id = 0;
-				loader->read(&id);
-				Rect r;
-				loader->read(&r);
-				Vector2f p;
-				loader->read(&p);
-				int cnt = 0;
-				loader->read(&cnt);
-				bool centered = false;
-				if ( cnt == 1 ) {
-					centered = true;
-				}
-				addImage(id,p.x,p.y,r,centered);
-				addToModel(id, GIT_IMAGE, "Image");
-			}
-			if (loader->getChunkID() == CHNK_DLG_IMAGE_LINK) {
-				int id = 0;
-				loader->read(&id);
-				Rect r;
-				loader->read(&r);
-				Vector2f p;
-				loader->read(&p);
-				int cnt = 0;
-				loader->read(&cnt);
-				bool centered = false;
-				if (cnt == 1) {
-					centered = true;
-				}
-				addImageLink(id, p.x, p.y, r, centered);
-				addToModel(id, GIT_IMAGELINK, "Link");
-			}
-			else if ( loader->getChunkID() == CHNK_DLG_BUTTON ) {
-				int id = 0;
-				loader->read(&id);
-				Rect r;
-				loader->read(&r);
-				Vector2f p;
-				loader->read(&p);
-				std::string txt;
-				loader->read(txt);			
-				Color c;
-				loader->read(&c);
-				int cnt = 0;
-				loader->read(&cnt);
-				bool centered = false;
-				if (cnt == 1) {
-					centered = true;
-				}
-				addButton(id,p.x,p.y,txt.c_str(),r,c,1.0f,centered);
-				addToModel(id, GIT_BUTTON, "Button");
-			}
-			else if ( loader->getChunkID() == CHNK_DLG_TEXT ) {
-				int id = 0;
-				loader->read(&id);
-				Vector2f pos;
-				loader->read(&pos);
-				float scale = 1.0f;
-				loader->read(&scale);
-				std::string str;
-				loader->read(str);
-				Color clr = Color::WHITE;
-				loader->read(&clr);
-				int cnt = 0;
-				bool centered = false;
-				loader->read(&cnt);
-				if ( cnt == 1 ) {
-					centered = true;
-				}			
-				addText(id,pos.x,pos.y,str,clr,scale,centered);
-				addToModel(id, GIT_TEXT, "Text");
-			}		
-			loader->closeChunk();
-		}	
 	}
 
 	// -------------------------------------------------------
