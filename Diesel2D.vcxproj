@@ -234,7 +234,6 @@
     <ClCompile Include="compiler\DescriptorConverter.cpp" />
     <ClCompile Include="compiler\DialogConverter.cpp" />
     <ClCompile Include="compiler\GUIConverter.cpp" />
-    <ClCompile Include="compiler\HUDConverter.cpp" />
     <ClCompile Include="compiler\MeshConverter.cpp" />
     <ClCompile Include="compiler\NewParticleSystemConverter.cpp" />
     <ClCompile Include="compiler\ParticleManagerConverter.cpp" />
@@ -263,8 +262,6 @@
     <ClCompile Include="audio\AudioBuffer.cpp" />
     <ClCompile Include="audio\AudioManager.cpp" />
     <ClCompile Include="objects\BloomComponent.cpp" />
-    <ClCompile Include="objects\HUD.cpp" />
-    <ClCompile Include="objects\TextMessage.cpp" />
     <ClCompile Include="particles\ParticleEmitter.cpp" />
     <ClCompile Include="particles\ParticleManager.cpp" />
     <ClCompile Include="particles\ParticleSystem.cpp" />
@@ -283,6 +280,7 @@
     <ClCompile Include="sprites\modifiers.cpp" />
     <ClCompile Include="sprites\SpriteArray.cpp" />
     <ClCompile Include="sprites\SpriteBatch.cpp" />
+    <ClCompile Include="sprites\SpriteGroup.cpp" />
     <ClCompile Include="sprites\SpriteTemplates.cpp" />
     <ClCompile Include="tasks\TaskManager.cpp" />
     <ClCompile Include="ui\IMGUI.cpp" />
@@ -290,6 +288,7 @@
     <ClCompile Include="utils\FileUtils.cpp" />
     <ClCompile Include="base\Input.cpp" />
     <ClCompile Include="utils\font.cpp" />
+    <ClCompile Include="utils\JSONWriter.cpp" />
     <ClCompile Include="utils\Log.cpp" />
     <ClCompile Include="utils\mtrand.cpp" />
     <ClCompile Include="utils\ObjLoader.cpp" />
@@ -334,7 +333,6 @@
     <ClInclude Include="compiler\DescriptorConverter.h" />
     <ClInclude Include="compiler\DialogConverter.h" />
     <ClInclude Include="compiler\GUIConverter.h" />
-    <ClInclude Include="compiler\HUDConverter.h" />
     <ClInclude Include="compiler\MeshConverter.h" />
     <ClInclude Include="compiler\NewParticleSystemConverter.h" />
     <ClInclude Include="compiler\ParticleManagerConverter.h" />
@@ -387,8 +385,6 @@
     <ClInclude Include="audio\AudioManager.h" />
     <ClInclude Include="base\BaseApp.h" />
     <ClInclude Include="objects\BloomComponent.h" />
-    <ClInclude Include="objects\HUD.h" />
-    <ClInclude Include="objects\TextMessage.h" />
     <ClInclude Include="particles\DynamicSettings.h" />
     <ClInclude Include="particles\ParticleEmitter.h" />
     <ClInclude Include="particles\ParticleManager.h" />
@@ -414,6 +410,7 @@
     <ClInclude Include="sprites\SpriteArray.h" />
     <ClInclude Include="sprites\SpriteBatch.h" />
     <ClInclude Include="sprites\Sprite.h" />
+    <ClInclude Include="sprites\SpriteGroup.h" />
     <ClInclude Include="sprites\SpriteTemplates.h" />
     <ClInclude Include="tasks\TaskManager.h" />
     <ClInclude Include="ui\IMGUI.h" />
@@ -421,6 +418,7 @@
     <ClInclude Include="utils\FileUtils.h" />
     <ClInclude Include="utils\font.h" />
     <ClInclude Include="utils\GameTimer.h" />
+    <ClInclude Include="utils\JSONWriter.h" />
     <ClInclude Include="utils\Log.h" />
     <ClInclude Include="utils\mtrand.h" />
     <ClInclude Include="dxstdafx.h" />

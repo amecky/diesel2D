@@ -1,5 +1,4 @@
 #include "AssetCompiler.h"
-#include "HUDConverter.h"
 #include "..\io\FileWatcher.h"
 #include "..\utils\Log.h"
 #include "..\utils\FileUtils.h"
@@ -111,7 +110,6 @@ bool AssetDB::hasChanged(const char* fileName) {
 
 AssetCompiler::AssetCompiler() {
 	m_Database.readDB();
-	m_Mapping[CVT_HUD] = new HUDConverter;
 	m_Mapping[CVT_GUI] = new GUIConverter;
 	m_Mapping[CVT_DIALOG] = new DialogConverter;
 	m_Mapping[CVT_FONT] = new BitmapFontConverter;

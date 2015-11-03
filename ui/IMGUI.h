@@ -62,6 +62,7 @@ namespace gui {
 		}
 		void clear() {
 			_entries.clear();
+			_selected = -1;
 		}
 		void remove(int idx) {
 			_entries.erase(_entries.begin() + idx);

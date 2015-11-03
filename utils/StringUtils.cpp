@@ -66,6 +66,28 @@ void formatTime(int minutes,int seconds,std::string& str) {
 	str = minStr+":"+secStr;
 }
 
+void formatInt(int value, char* buffer, int maxBuffer, int length) {
+	int idx = 0;
+	if (value < 0) {
+		buffer[0] = '-';
+		++idx;
+		value = -value;
+	}
+	int tmp = value;
+	int div = 1;
+	for (int i = 0; i < length; ++i) {
+		if (i > 0) {
+			div *= 10;
+		}
+	}
+	for (int i = 0; i < length; ++i) {
+		int r = tmp / div;
+		buffer[idx++] = ('0' + r);
+		tmp = tmp - r * div;
+		div /= 10;
+	}
+	buffer[idx] = '\0';
+}
 // -------------------------------------------------------
 // Formats an int to a string using fixed length
 // -------------------------------------------------------

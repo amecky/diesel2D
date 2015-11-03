@@ -391,7 +391,7 @@ namespace gui {
 	// -------------------------------------------------------
 	void endGroup() {
 		guiContext->grouped = false;
-		guiContext->nextPosition();
+		guiContext->nextPosition(LINE_HEIGHT + 4.0f);
 	}
 
 	// -------------------------------------------------------

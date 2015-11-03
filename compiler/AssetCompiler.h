@@ -7,7 +7,6 @@
 
 namespace ds {
 
-const uint32 CVT_HUD                 = 0;
 const uint32 CVT_GUI                 = 1;
 const uint32 CVT_DIALOG              = 2;
 const uint32 CVT_FONT                = 3;

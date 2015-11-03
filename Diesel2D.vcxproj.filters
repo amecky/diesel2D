@@ -106,17 +106,8 @@
     <ClCompile Include="data\Gizmo.cpp">
       <Filter>data</Filter>
     </ClCompile>
-    <ClCompile Include="objects\HUD.cpp">
-      <Filter>objects</Filter>
-    </ClCompile>
-    <ClCompile Include="objects\TextMessage.cpp">
-      <Filter>objects</Filter>
-    </ClCompile>
     <ClCompile Include="particles\ParticleSystem.cpp">
       <Filter>particles</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler\HUDConverter.cpp">
-      <Filter>compiler</Filter>
     </ClCompile>
     <ClCompile Include="compiler\AssetCompiler.cpp">
       <Filter>compiler</Filter>
@@ -286,6 +277,9 @@
     <ClCompile Include="sprites\SpriteGroup.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
+    <ClCompile Include="utils\JSONWriter.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
@@ -446,17 +440,8 @@
     <ClInclude Include="base\ApplicationContext.h">
       <Filter>base</Filter>
     </ClInclude>
-    <ClInclude Include="objects\HUD.h">
-      <Filter>objects</Filter>
-    </ClInclude>
-    <ClInclude Include="objects\TextMessage.h">
-      <Filter>objects</Filter>
-    </ClInclude>
     <ClInclude Include="particles\ParticleSystem.h">
       <Filter>particles</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\HUDConverter.h">
-      <Filter>compiler</Filter>
     </ClInclude>
     <ClInclude Include="compiler\AssetCompiler.h">
       <Filter>compiler</Filter>
@@ -674,6 +659,9 @@
     <ClInclude Include="DialogResources.h" />
     <ClInclude Include="sprites\SpriteGroup.h">
       <Filter>sprites</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\JSONWriter.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

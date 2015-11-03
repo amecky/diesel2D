@@ -88,10 +88,6 @@ void BaseApp::prepare() {
 void BaseApp::loadSprites() {
 }
 
-void BaseApp::initializeHUD(int textureID, const char* fontName) {
-	hud.init(textureID, fontName);
-}
-
 void BaseApp::initializeGUI() {
 	ds::assets::load("gui", &gui, CVT_GUI);
 	gui.load();
@@ -339,9 +335,7 @@ void BaseApp::showEditor() {
 	gui::start(EDITOR_ID, &_editor.position);
 	if (gui::begin("Game", &_editor.state)) {
 		gui::beginGroup();
-		if (gui::Button(EDITOR_ID + 2, "HUD")) {
-			_editor.dialogIndex = 1;
-		}
+		
 		if (gui::Button(EDITOR_ID + 3, "GSM")) {
 			_editor.dialogIndex = 2;
 		}
@@ -358,9 +352,6 @@ void BaseApp::showEditor() {
 	}
 	gui::end();
 
-	if (_editor.dialogIndex == 1) {
-		hud.showDialog(&_editor.dialogPos);
-	}
 	if (_editor.dialogIndex == 2)  {
 		stateMachine->showDialog();
 	}

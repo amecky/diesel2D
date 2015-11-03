@@ -6,6 +6,9 @@
 #include "..\math\tweening.h"
 #include "..\renderer\BitmapFont.h"
 #include "..\ui\IMGUI.h"
+#include "..\utils\GameTimer.h"
+#include "..\utils\JSONWriter.h"
+#include "..\utils\PlainTextReader.h"
 
 namespace ds {
 
@@ -15,10 +18,43 @@ enum GUIItemType {
 	GIT_BUTTON,
 	GIT_TEXT,
 	GIT_IMAGE,
-	GIT_IMAGELINK
+	GIT_IMAGELINK,
+	GIT_TIMER,
+	GIT_NUMBERS,
+	GIT_UNUSED
+};
+
+struct GUID {
+	int id;
+	int index;
+	int entryIndex;
+
+	GUID() : id(-1), index(-1) , entryIndex(-1) {}
+	GUID(int _id, int _index, int _entryIndex) : id(_id), index(_index) , entryIndex(_entryIndex) {}
+};
+
+struct GUINumber {
+	int value;
+	int length;
+};
+
+struct GUIText {
+	char text[32];
+	v2 size;
+};
+
+struct GUIButton {
+	char text[32];
+	v2 size;
+	Texture texture;
+};
+
+struct GUIImage {
+	Texture texture;
 };
 
 struct GUIItem {
+	GUID gid;
 	uint32 id;
 	v2 pos;
 	bool centered;
@@ -26,10 +62,7 @@ struct GUIItem {
 	float scale;
 	GUIItemType type;
 	Rect boundingRect;
-	char label[32];
-	int textSize;
 	v2 size;
-	Texture texture;
 
 	GUIItem() : id(-1) , pos(0,0) , centered(true) , color(Color::WHITE) , scale(1.0f) , size(0,0) {}
 };
@@ -105,7 +138,11 @@ class GUIDialog : public Serializer {
 
 typedef std::vector<GUIItem> Items;
 typedef std::vector<GUIEffect*> Effects;
-
+typedef std::vector<GUINumber> Numbers;
+typedef std::vector<GUIText> Texts;
+typedef std::vector<GUIImage> Images;
+typedef std::vector<GUIButton> Buttons;
+typedef std::vector<GameTimer> Timers;
 public:
 	GUIDialog();
 	~GUIDialog(void);
@@ -114,21 +151,23 @@ public:
 	void setButtonHover(const Rect& regularItem,const Rect& highlightItem);
 	
 
-	uint32 addImage(int id,int x,int y,const Rect& textureRect,bool centered = true);	
+	GUID addImage(int id,int x,int y,const Rect& textureRect,bool centered = true);	
 	void updateImage(int id, int x, int y, const Rect& textureRect, bool centered = true);
 
 	uint32 addImageLink(int id,int x,int y,const Rect& textureRect,bool centered = true);
 
 	// FIXME: add button with x and y position
-	void addButton(int id,float x,float y,const char* text,const Rect& textureRect,const Color& textColor = Color(1.0f,1.0f,1.0f,1.0f),float textScale = 1.0f,bool centered = true);
+	GUID addButton(int id,float x,float y,const char* text,const Rect& textureRect,const Color& textColor = Color(1.0f,1.0f,1.0f,1.0f),float textScale = 1.0f,bool centered = true);
 	void setButtonTexture(int id,const Rect& textureRect);
 
-	void addText(int id,int x,int y,const std::string& text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f,bool centered = true);
+	GUID addText(int id,int x,int y,const std::string& text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f,bool centered = true);
 	void updateText(int id,int x,int y,const std::string& text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f,bool centered = true);
 	void updateText(int id,const std::string& text);
 	v2 getTextSize(int id);
 
 	uint32 addImageLink(int id,int x,int y,const char* taItem,bool centered = true);
+
+	GUID addTimer(int id,int x, int y, float scale = 1.0f, const Color& color = Color::WHITE, bool centered = true);
 	
 	virtual int onButton(int button,int x,int y,bool down);
 
@@ -144,9 +183,7 @@ public:
 	const DialogID& getDialogID() const {
 		return m_ID;
 	}
-	void clear() {
-		m_Items.clear();
-	}
+	void clear();
 	void load(BinaryLoader* loader);
 
 	void tick(float dt);
@@ -160,10 +197,19 @@ public:
 		}
 	}
 	void showDialog();
-	
+
+	GUID addNumber(int id,const v2& position,int value, int length,float scale = 1.0f,const Color& color = Color::WHITE);
+	void setNumber(int id, int value);
 private:
+	GUIDialog(const GUIDialog& other) {}
 	void save();
+	void saveItem(BinaryWriter& writer, int id, const GUIItem& item);
+	void saveItem(JSONWriter& writer, int id, const GUIItem& item);
 	void load();	
+	void export();
+	void import();
+	int loadItem(BinaryLoader& loader, GUIItem* item);
+	int loadItem(Category* category, GUIItem* item);
 	void addToModel(int id, GUIItemType type,const char* prefix);
 	void showAddDialog();
 	GUIItem* findByID(int id);
@@ -171,6 +217,8 @@ private:
 	bool containsItem(int id);
 	int getNextID();
 	bool swap(int currentIndex, int newIndex);
+	int createItem(const v2& position, GUIItemType type, float scale = 1.0f, bool centered = true, const Color& color = Color::WHITE);
+	
 
 	DialogID m_ID;
 	IdString m_HashName;
@@ -192,8 +240,15 @@ private:
 	int _offset;
 	v2 _position;
 	bool _showAdd;
+	char _name[32];
 	
-	
+	GUID _ids[32];
+	int _idIndex;
+	Numbers _numbers;
+	Texts _texts;
+	Images _images;
+	Buttons _buttons;
+	Timers _timers;
 };
 
 }
