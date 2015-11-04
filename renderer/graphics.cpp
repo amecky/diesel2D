@@ -1140,12 +1140,12 @@ namespace ds {
 				// make sure it is not used so far
 				assert(rt.flag == 0);
 				rt.clearColor = clearColor;
-				D3DXCreateRenderToSurface(renderContext->device,renderContext->screenWidth,renderContext->screenHeight,D3DFMT_A8R8G8B8,false,D3DFMT_UNKNOWN,&rt.rts);
-				renderContext->device->CreateTexture(renderContext->screenWidth,renderContext->screenHeight,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&rt.texture,NULL);
-				LOGC("renderer") << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << renderContext->screenWidth << " height: " << renderContext->screenHeight;
+				HR(D3DXCreateRenderToSurface(renderContext->device, renderContext->viewportWidth, renderContext->viewportHeight, D3DFMT_A8R8G8B8, false, D3DFMT_UNKNOWN, &rt.rts));
+				HR(renderContext->device->CreateTexture(renderContext->viewportWidth,renderContext->viewportHeight,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&rt.texture,NULL));
+				LOGC("renderer") << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << renderContext->viewportWidth << " height: " << renderContext->viewportHeight;
 				TextureAsset* t = &renderContext->textures[tid];
-				t->height = renderContext->screenHeight;
-				t->width = renderContext->screenWidth;
+				t->height = renderContext->viewportHeight;
+				t->width = renderContext->viewportWidth;
 				t->flags = 1;
 				t->texture = rt.texture;
 				rt.texture->GetSurfaceLevel(0, &rt.surface);
