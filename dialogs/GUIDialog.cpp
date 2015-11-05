@@ -119,24 +119,6 @@ namespace ds {
 		gid.index = _images.size();
 		_images.push_back(image);
 		return gid;
-		/*
-
-		assert(!containsItem(id));
-		Vector2f p = Vector2f(x,y);
-		if ( centered ) {
-			p.x = renderer::getScreenWidth() * 0.5f;
-		}
-		GUIItem item;
-		item.type = GIT_IMAGE;
-		item.pos = p;
-		item.id = id;
-		item.texture = 
-		item.centered = centered;
-		item.color = Color::WHITE;
-		item.scale = 1.0f;
-		m_Items.push_back(item);
-		return item.id;
-		*/
 	}
 
 	// -------------------------------------------------------
@@ -198,21 +180,6 @@ namespace ds {
 		gid.index = _texts.size();
 		_texts.push_back(guiText);
 		return gid;
-		/*
-		assert(!containsItem(id));
-		Vector2f p = Vector2f(x,y);
-		GUIItem item;
-		item.pos = p;
-		item.type = GIT_TEXT;
-		strcpy(item.label, text.c_str());
-		item.textSize = text.size();
-		item.id = id;
-		item.centered = centered;
-		item.color = color;
-		item.scale = scale;
-		//item.size = size;
-		m_Items.push_back(item);
-		*/
 	}
 
 	// -------------------------------------------------------
@@ -282,23 +249,7 @@ namespace ds {
 	// Set button texture
 	// -------------------------------------------------------
 	void GUIDialog::setButtonTexture(int id,const Rect& textureRect) {
-		/*
-		for ( size_t i = 0; i < m_Buttons.size(); ++i ) {
-			DialogButton* button = &m_Buttons[i];
-			if ( button->id == id ) {		
-				GUIItem* item = &m_Items[button->imageIndex];
-				for ( size_t j = 0; j < item->sprites.size(); ++j ) {
-					item->sprites[j].texture = math::buildTexture(textureRect);
-				}
-			}
-		}
-		*/
-		//for (size_t i = 0; i < m_Items.size(); ++i) {
-			//GUIItem& item = m_Items[i];
-			//if (item.type == GIT_BUTTON && item.id == id) {
-				//item.texture = math::buildTexture(textureRect);
-			//}
-		//}
+		
 	}
 
 	// -------------------------------------------------------
@@ -320,25 +271,7 @@ namespace ds {
 		gid.index = _buttons.size();
 		_buttons.push_back(button);
 		return gid;
-		/*
-		assert(!containsItem(id));
-		if (centered) {
-			x = renderer::getScreenWidth() * 0.5f;
-		}
-		Vector2f p = Vector2f(x, y);
-		GUIItem item;
-		item.pos = p;
-		item.type = GIT_BUTTON;
-		item.texture = math::buildTexture(textureRect);
-		item.scale = 1.0f;
-		item.centered = centered;
-		strcpy(item.label, text);
-		item.textSize = strlen(text);
-		item.id = id;
-		item.color = Color::WHITE;
 		
-		m_Items.push_back(item);
-		*/
 	}
 
 	// -------------------------------------------------------
@@ -346,15 +279,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::activate() {
 		m_Active = true;
-		/*
-		if ( m_SupportHover ) {
-			for ( size_t i = 0; i < m_Buttons.size(); ++i ) {
-				DialogButton* db = &m_Buttons[i];		
-				setButtonTexture(db->id,m_ButtonItem);
-			}
-			m_Selected = -1;
-		}
-		*/
+		
 		m_SelectedInput = -1;	
 		for (size_t i = 0; i < m_Effects.size(); ++i) {
 			m_Effects[i]->setActive(true);
