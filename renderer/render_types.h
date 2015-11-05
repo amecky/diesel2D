@@ -158,19 +158,28 @@ namespace ds {
 		}
 	};
 
+	struct RTID {
+		int textureID;
+		int rtID;
+
+		RTID() : textureID(-1), rtID(-1) {}
+
+		RTID(int tid, int rid) : textureID(tid), rtID(rid) {}
+	};
+
+	const RTID INVALID_RENDER_TARGET(-1, -1);
 	// -------------------------------------------------------
 	// Render target
 	// -------------------------------------------------------
 	struct RenderTarget {
 
-		int flag;
 		Color clearColor;
 		LPDIRECT3DTEXTURE9 texture;
 		LPDIRECT3DSURFACE9 surface;
 		LPD3DXRENDERTOSURFACE rts;
 		int textureID;
 
-		RenderTarget() : flag(0) , clearColor(Color(0,0,0,255)) ,texture(0) , surface(0) , rts(0) , textureID(-1) {}
+		RenderTarget() :  clearColor(Color(0,0,0,255)) ,texture(0) , surface(0) , rts(0) , textureID(-1) {}
 
 	};
 

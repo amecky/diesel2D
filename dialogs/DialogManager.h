@@ -42,7 +42,7 @@ private:
 	BitmapFont* m_Font;
 	bool m_Initialized;
 	Dialogs m_Dialogs;
-	uint32 m_Index;
+	uint32 _index;
 
 	gui::ComponentModel<DialogDefinition> _model;
 	v2 _dialogPos;
@@ -50,6 +50,7 @@ private:
 	int _offset;
 	gui::InputDialog _dialog;
 	bool _showAdd;
+
 };
 
 }

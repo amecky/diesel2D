@@ -77,7 +77,7 @@ namespace ds {
 		int currentDescriptor;
 		std::vector<BitmapFont*> bitmapFonts;
 		int currentTextures[5];
-		RenderTarget renderTargets[MAX_RT];
+		dVector<RenderTarget> renderTargets;
 		int usedRenderTargets;
 		int currentRenderTarget;
 		mat4 matWorldViewProj;
@@ -345,11 +345,9 @@ namespace ds {
 			for (int i = 0; i < renderContext->indexBuffers.size(); ++i) {
 				SAFE_RELEASE(renderContext->indexBuffers[i].buffer);
 			}
-			for (int i = 0; i < MAX_RT; ++i) {
-				if (renderContext->renderTargets[i].flag != 0) {
-					SAFE_RELEASE(renderContext->renderTargets[i].rts);
-					SAFE_RELEASE(renderContext->renderTargets[i].surface);
-				}
+			for (int i = 0; i < renderContext->renderTargets.size(); ++i) {
+				SAFE_RELEASE(renderContext->renderTargets[i].rts);
+				SAFE_RELEASE(renderContext->renderTargets[i].surface);
 			}
 			for (size_t i = 0; i < renderContext->bitmapFonts.size(); ++i) {
 				delete renderContext->bitmapFonts[i];
@@ -892,9 +890,9 @@ namespace ds {
 			shader->end();
 		}
 
-		void draw_render_target_common(int rtID, int shaderID,int blendState) {
+		void draw_render_target_common(RTID rtID, int shaderID, int blendState) {
 			PR_START("draw_render_target")
-				sprites::flush();
+			sprites::flush();
 			fillBuffer(renderContext->renderTargetQuad.vertexBufferID, renderContext->renderTargetQuad.vertices, 4);
 			const VertexBuffer& vb = renderContext->vertexBuffers[renderContext->renderTargetQuad.vertexBufferID];
 			VDStruct& vds = renderContext->vdStructs[vb.vertexDeclaration];
@@ -910,7 +908,7 @@ namespace ds {
 			int current = renderer::getCurrentBlendState();
 			renderer::setBlendState(blendState);
 
-			RenderTarget& rt = renderContext->renderTargets[rtID];
+			RenderTarget& rt = renderContext->renderTargets[rtID.rtID];
 
 			renderContext->drawCounter.numPrim += numPrimitives;
 			renderContext->drawCounter.indexCounter += numPrimitives * 3;
@@ -932,14 +930,14 @@ namespace ds {
 			PR_END("draw_render_target")
 		}
 
-		void draw_render_target(int rtID, int shaderID) {
+		void draw_render_target(RTID rtID, int shaderID) {
 			const char* name = "rt_blend";
 			IdString hash = string::murmur_hash(name);
 			int idx = renderer::getBlendStateID(hash);
 			draw_render_target_common(rtID, shaderID, idx);			
 		}
 
-		void draw_render_target_additive(int rtID, int shaderID) {
+		void draw_render_target_additive(RTID rtID, int shaderID) {
 			const char* name = "alpha_blend";
 			IdString hash = string::murmur_hash(name);
 			int idx = renderer::getBlendStateID(hash);
@@ -1133,16 +1131,14 @@ namespace ds {
 		// ---------------------------------------------------------
 		// Creates a render target and returns the attached texture
 		// ---------------------------------------------------------
-		int createRenderTarget(uint32 id, const Color& clearColor) {
+		RTID createRenderTarget(const Color& clearColor) {
 			int tid = findFreeTextureSlot();
 			if (tid != -1) {
-				RenderTarget& rt = renderContext->renderTargets[id];
+				RenderTarget rt;// = renderContext->renderTargets[id];				
 				// make sure it is not used so far
-				assert(rt.flag == 0);
 				rt.clearColor = clearColor;
 				HR(D3DXCreateRenderToSurface(renderContext->device, renderContext->viewportWidth, renderContext->viewportHeight, D3DFMT_A8R8G8B8, false, D3DFMT_UNKNOWN, &rt.rts));
-				HR(renderContext->device->CreateTexture(renderContext->viewportWidth,renderContext->viewportHeight,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&rt.texture,NULL));
-				LOGC("renderer") << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << renderContext->viewportWidth << " height: " << renderContext->viewportHeight;
+				HR(renderContext->device->CreateTexture(renderContext->viewportWidth,renderContext->viewportHeight,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&rt.texture,NULL));				
 				TextureAsset* t = &renderContext->textures[tid];
 				t->height = renderContext->viewportHeight;
 				t->width = renderContext->viewportWidth;
@@ -1150,46 +1146,47 @@ namespace ds {
 				t->texture = rt.texture;
 				rt.texture->GetSurfaceLevel(0, &rt.surface);
 				rt.textureID = tid;
-				rt.flag = 1;
-				return tid;
+				int id = renderContext->renderTargets.size();
+				renderContext->renderTargets.add(rt);
+				LOGC("renderer") << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << renderContext->viewportWidth << " height: " << renderContext->viewportHeight;
+				return RTID(tid,id);
 			}
 			else {
 				LOGEC("renderer") << "Cannot create rendertarget - No more texture slots available";
-				return -1;
+				return INVALID_RENDER_TARGET;
 			}
 		}
 
-		int createRenderTarget(uint32 id, float width, float height, const Color& clearColor) {			
+		RTID createRenderTarget(float width, float height, const Color& clearColor) {			
 			int tid = findFreeTextureSlot();
 			if ( tid != -1 ) {
-				RenderTarget* renderTarget = &renderContext->renderTargets[id];
-				assert(renderTarget->flag == 0);
-				renderTarget->clearColor = clearColor;
-				D3DXCreateRenderToSurface( renderContext->device,width,height,D3DFMT_A8R8G8B8,false,D3DFMT_UNKNOWN ,&renderTarget->rts);
-				renderContext->device->CreateTexture(width,height,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&renderTarget->texture,NULL);
-				LOGC("Renderer") << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << width << " height: " <<height;
+				RenderTarget renderTarget;
+				renderTarget.clearColor = clearColor;
+				D3DXCreateRenderToSurface( renderContext->device,width,height,D3DFMT_A8R8G8B8,false,D3DFMT_UNKNOWN ,&renderTarget.rts);
+				renderContext->device->CreateTexture(width,height,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&renderTarget.texture,NULL);				
 				TextureAsset* t = &renderContext->textures[tid];
 				t->height = height;
 				t->width = width;
 				t->flags = 1;
-				t->texture = renderTarget->texture;
-				renderTarget->texture->GetSurfaceLevel(0,&renderTarget->surface);
-				renderTarget->flag = 1;
-				return tid;
+				t->texture = renderTarget.texture;
+				renderTarget.texture->GetSurfaceLevel(0,&renderTarget.surface);
+				int id = renderContext->renderTargets.size();
+				renderContext->renderTargets.add(renderTarget);
+				LOGC("Renderer") << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << width << " height: " << height;
+				return RTID(tid, id);
 			}
 			else {
 				LOGEC("Renderer") << "Cannot create rendertarget - No more texture slots available";
-				return -1;
+				return INVALID_RENDER_TARGET;
 			}			
 		}
 
 		// -------------------------------------------------------
 		// Set render target
 		// -------------------------------------------------------
-		void setRenderTarget(uint32 id) {
-			RenderTarget* rt = &renderContext->renderTargets[id];
+		void setRenderTarget(RTID rtid) {
+			RenderTarget* rt = &renderContext->renderTargets[rtid.rtID];
 			// check that we have a valid RT
-			assert(rt->flag == 1);
 			sprites::flush();
 			if (renderContext->currentRenderTarget != -1) {
 				RenderTarget* activeRT = &renderContext->renderTargets[renderContext->currentRenderTarget];
@@ -1199,7 +1196,7 @@ namespace ds {
 				renderContext->device->EndScene();
 			}
 			rt->rts->BeginScene(rt->surface, NULL);
-			renderContext->currentRenderTarget = id;
+			renderContext->currentRenderTarget = rtid.rtID;
 			renderContext->device->SetRenderTarget(0, rt->surface);
 			HR(renderContext->device->Clear(0, NULL, D3DCLEAR_TARGET, rt->clearColor, 1.0f, 0));
 			renderContext->usedRenderTargets = 1;

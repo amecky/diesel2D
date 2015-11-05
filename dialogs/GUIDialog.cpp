@@ -82,13 +82,13 @@ namespace ds {
 		return m_Items.size() - 1;
 	}
 
-	GUID GUIDialog::addNumber(int id,const v2& position, int value, int length, float scale, const Color& color) {
+	GUID GUIDialog::addNumber(int id, const v2& position, int value, int length, float scale, const Color& color, bool centered) {
 		GUID& gid = _ids[id];
 		assert(gid.id == -1);
 		gid.id = id;
 		// add entry
 		Vector2f p = position;
-		gid.entryIndex = createItem(position, GIT_NUMBERS, scale, false, color);
+		gid.entryIndex = createItem(position, GIT_NUMBERS, scale, centered, color);
 		GUINumber number;
 		number.value = value;
 		number.length = length;
@@ -107,13 +107,13 @@ namespace ds {
 	// -------------------------------------------------------
 	// Add static image
 	// -------------------------------------------------------
-	GUID GUIDialog::addImage(int id, int x, int y, const Rect& textureRect, bool centered) {
+	GUID GUIDialog::addImage(int id, int x, int y, const Rect& textureRect,float scale, bool centered) {
 		GUID& gid = _ids[id];
 		assert(gid.id == -1);
 		gid.id = id;
 		// add entry
 		Vector2f p = v2(x,y);
-		gid.entryIndex = createItem(p, GIT_IMAGE, 1.0f, centered);
+		gid.entryIndex = createItem(p, GIT_IMAGE, scale, centered);
 		GUIImage image;
 		image.texture = math::buildTexture(textureRect);
 		gid.index = _images.size();
@@ -381,15 +381,21 @@ namespace ds {
 					if (item.type == GIT_NUMBERS) {
 						const GUINumber& number = _numbers[id.index];
 						string::formatInt(number.value, buffer, 32, number.length);
-						v2 size = font::calculateSize(*m_BitmapFont, buffer, item.scale);
+						v2 size = font::calculateSize(*m_BitmapFont, buffer, 2.0f, item.scale, item.scale);
 						float ty = p.y - size.y * 0.5f;
+						if (item.centered) {
+							p.x = renderer::getScreenWidth() * 0.5f;
+						}
 						p += v2(size.x * -0.5f, -size.y * 0.5f);
 						ds::sprites::drawText(m_BitmapFont, p.x, p.y, buffer, 2.0f, item.scale, item.scale, item.color);
 					}
 					else if (item.type == GIT_TEXT) {
 						const GUIText& text = _texts[id.index];
-						v2 size = font::calculateSize(*m_BitmapFont, text.text, item.scale);
+						v2 size = font::calculateSize(*m_BitmapFont, text.text, 2.0f, item.scale, item.scale);
 						float ty = p.y - size.y * 0.5f;
+						if (item.centered) {
+							p.x = renderer::getScreenWidth() * 0.5f;
+						}
 						p += v2(size.x * -0.5f, -size.y * 0.5f);
 						ds::sprites::drawText(m_BitmapFont, p.x, p.y, text.text, 2.0f, item.scale, item.scale, item.color);
 					}
@@ -520,11 +526,13 @@ namespace ds {
 	}
 
 	bool GUIDialog::swap(int currentIndex, int newIndex) {
-		if (currentIndex >= 0 && currentIndex < m_Items.size() && newIndex >= 0 && newIndex < m_Items.size()) {
-			GUIItem current = m_Items[currentIndex];
-			GUIItem next = m_Items[newIndex];
-			m_Items[newIndex] = current;
-			m_Items[currentIndex] = next;
+		if (currentIndex >= 0 && currentIndex < 32 && newIndex >= 0 && newIndex < 32) {
+			GUID current = _ids[currentIndex];
+			GUID next = _ids[newIndex];
+			_ids[newIndex].entryIndex = current.entryIndex;
+			_ids[newIndex].index = current.index;
+			_ids[currentIndex].entryIndex = next.entryIndex;
+			_ids[currentIndex].index = next.index;
 			return true;
 		}
 		return false;
@@ -815,7 +823,7 @@ namespace ds {
 					int id = loadItem(c, &item);
 					Rect r;
 					c->getRect("rect", &r);
-					GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.centered);
+					GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
 					addToModel(gid.id, GIT_IMAGE, "Image");
 				}
 				else if (c->getName() == "button") {
@@ -841,7 +849,7 @@ namespace ds {
 					c->getInt("value",&value);
 					int length = 0;
 					c->getInt("length",&length);
-					GUID gid = addNumber(id, item.pos, value, length, item.scale, item.color);
+					GUID gid = addNumber(id, item.pos, value, length, item.scale, item.color, item.centered);
 					addToModel(gid.id, GIT_NUMBERS, "Number");
 				}
 				else if (c->getName() == "timer") {
@@ -897,7 +905,7 @@ namespace ds {
 				int id = loadItem(loader,&item);
 				Rect r;
 				loader.read(&r);
-				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.centered);
+				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
 				addToModel(gid.id, GIT_IMAGE, "Image");
 			}
 			else if (loader.getChunkID() == CHNK_DLG_BUTTON) {
@@ -925,7 +933,7 @@ namespace ds {
 				loader.read(&value);
 				int length = 0;
 				loader.read(&length);
-				GUID gid = addNumber(id, item.pos, value, length, item.scale, item.color);
+				GUID gid = addNumber(id, item.pos, value, length, item.scale, item.color, item.centered);
 				addToModel(gid.id, GIT_NUMBERS, "Number");
 			}
 			else if (loader.getChunkID() == CHNK_DLG_TIMER) {

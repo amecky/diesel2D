@@ -62,9 +62,9 @@ public:
 	}
 private:
 	BloomSettings m_Settings;
-	int m_BloomTexture;
-	int m_BlurHTexture;
-	int m_BloomCombineTexture;
+	RTID m_BloomTexture;
+	RTID m_BlurHTexture;
+	RTID m_BloomCombineTexture;
 	Shader* m_BlurHShader;
 	Shader* m_BlurVShader;
 	Shader* m_BloomShader;

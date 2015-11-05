@@ -204,6 +204,7 @@ typedef std::vector<DataDefinition> Definitions;
 	// -------------------------------------------------------
 	// load file
 	// -------------------------------------------------------
+	/*
 	void load(const char* fileName,const char* categoryName) {
 		char buffer[256];
 		sprintf(buffer,"content\\resources\\%s.json",fileName);
@@ -239,9 +240,11 @@ typedef std::vector<DataDefinition> Definitions;
 			LOGEC("DataTranslator") << "Cannot parse " << fileName;
 		}
 	}
+	*/
 	// -------------------------------------------------------
 	// load file
 	// -------------------------------------------------------
+	/*
 	void read(Category* category) {		
 		for ( size_t i = 0; i < m_Definitions.size(); ++i ) {
 			DataDefinition& def = m_Definitions[i];
@@ -270,9 +273,11 @@ typedef std::vector<DataDefinition> Definitions;
 			}
 		}
 	}
+	*/
 	// -------------------------------------------------------
 	// save binary version
 	// -------------------------------------------------------
+	/*
 	void save(const char* fileName,uint32 chunkID) {
 		char out[256];
 		sprintf(out,"data\\%s.dsb",fileName);
@@ -282,9 +287,11 @@ typedef std::vector<DataDefinition> Definitions;
 		saveChunk(writer,chunkID);
 		writer.close();
 	}
+	*/
 	// -------------------------------------------------------
 	// save binary chunk
 	// -------------------------------------------------------
+	/*
 	void saveChunk(BinaryWriter& writer,uint32 chunkID,bool append = false) {
 		if ( !append ) {
 			writer.startChunk(chunkID,1);
@@ -362,7 +369,7 @@ typedef std::vector<DataDefinition> Definitions;
 				}
 				loader.closeChunk();
 			}		
-			loader.close();
+			//loader.close();
 		}
 	}
 	// -------------------------------------------------------
@@ -405,7 +412,7 @@ typedef std::vector<DataDefinition> Definitions;
 			}
 		}
 	}
-
+	*/
 	// -------------------------------------------------------
 	// internal find
 	// -------------------------------------------------------
@@ -419,6 +426,23 @@ typedef std::vector<DataDefinition> Definitions;
 			}
 		}
 		return 0;
+	}
+
+
+	void save() {
+
+	}
+
+	void load() {
+
+	}
+
+	void exportJSON() {
+
+	}
+
+	void importJSON() {
+
 	}
 	// -------------------------------------------------------
 	// internal add definition

@@ -43,18 +43,18 @@ int BloomComponent::init(int baseTarget,int texID) {
 	_baseRT = baseTarget;
 	int currentTarget = m_Settings.firstTarget;
 	// Bloom
-	m_BloomTexture = renderer::createRenderTarget(currentTarget, clr);
-	LOG << "Bloom texture: " << m_BloomTexture;
+	m_BloomTexture = renderer::createRenderTarget(clr);
+	LOG << "Bloom texture: " << m_BloomTexture.textureID;
 	m_BloomShaderID = shader::createBloomShader(1, m_Settings.threshold);
 	m_BloomShader = renderer::getShader(m_BloomShaderID);
-	m_BlurHShaderID = shader::createBlurShader(m_BloomTexture);
+	m_BlurHShaderID = shader::createBlurShader(m_BloomTexture.textureID);
 	m_BlurHShader = renderer::getShader(m_BlurHShaderID);
-	m_BlurHShader->setTexture("gTex", m_BloomTexture);
+	m_BlurHShader->setTexture("gTex", m_BloomTexture.textureID);
 	m_BlurHShader->setFloat("BlurDistance", 1.0f / 1024.0f);
-	m_BlurHTexture = renderer::createRenderTarget(currentTarget + 1, clr);
+	m_BlurHTexture = renderer::createRenderTarget(clr);
 	// Bloom combine	
-	m_BloomCombineTexture = renderer::createRenderTarget(currentTarget + 2, clr);
-	m_BloomCombineShaderID = shader::createBloomCombineShader(texID, m_BlurHTexture);
+	m_BloomCombineTexture = renderer::createRenderTarget(clr);
+	m_BloomCombineShaderID = shader::createBloomCombineShader(texID, m_BlurHTexture.textureID);
 	m_BloomCombineShader = renderer::getShader(m_BloomCombineShaderID);
 	LOG << "bloom render target: " << (currentTarget + 2);
 	return currentTarget + 2;
@@ -73,14 +73,14 @@ void BloomComponent::render() {
 		sprites::flush();
 		int currentShader = renderer::getCurrentShaderID();
 		// first step -> base RT using bloom shader
-		renderer::setRenderTarget(m_Settings.firstTarget);
-		renderer::draw_render_target(_baseRT, m_BloomShaderID);
+		//renderer::setRenderTarget(m_Settings.firstTarget);
+		//renderer::draw_render_target(_baseRT, m_BloomShaderID);
 		// second step -> blur 
-		renderer::setRenderTarget(m_Settings.firstTarget + 1);
-		renderer::draw_render_target(m_Settings.firstTarget, m_BlurHShaderID);
+		//renderer::setRenderTarget(m_Settings.firstTarget + 1);
+		//renderer::draw_render_target(m_Settings.firstTarget, m_BlurHShaderID);
 		// thord step -> combine original and this one
-		renderer::setRenderTarget(m_Settings.firstTarget + 2);
-		renderer::draw_render_target(m_Settings.firstTarget + 1, m_BloomCombineShaderID);
+		//renderer::setRenderTarget(m_Settings.firstTarget + 2);
+		//renderer::draw_render_target(m_Settings.firstTarget + 1, m_BloomCombineShaderID);
 		//renderer::restoreBackBuffer();
 		//renderer::setCurrentShader(currentShader);
 		//renderer::draw_render_target(m_Settings.firstTarget + 2);

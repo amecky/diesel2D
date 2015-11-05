@@ -10,6 +10,26 @@
 
 namespace ds {
 
+
+	class AbstractGameSettings {
+
+
+	public:
+		AbstractGameSettings() {}
+
+		virtual ~AbstractGameSettings() {}
+
+		virtual void save() = 0;
+
+		virtual void load() = 0;
+
+		virtual void exportJSON() = 0;
+		
+		virtual void importJSON() = 0;
+
+		virtual void showDialog() = 0;
+	};
+
 // -------------------------------------------------------
 // Data types
 // -------------------------------------------------------
@@ -19,16 +39,16 @@ enum DataType {DTR_INT,DTR_FLOAT,DTR_VEC2,DTR_RECT,DTR_COLOR,DTR_COLOR_PATH,DTR_
 // DataTranslator
 // -------------------------------------------------------
 template<class T>
-class DataTranslator {
+class DataTranslator : public AbstractGameSettings {
 
-struct DataDefinition {
+	struct DataDefinition {
 
-	unsigned index;
-	DataType type;
-	const char* name;
-};
+		unsigned index;
+		DataType type;
+		const char* name;
+	};
 
-typedef std::vector<DataDefinition> Definitions;
+	typedef std::vector<DataDefinition> Definitions;
 
 public:
 	typedef int T::*IntMember;
@@ -44,26 +64,26 @@ public:
 	// -------------------------------------------------------
 	// add int member
 	// -------------------------------------------------------
-	void add(const char* name,IntMember intMember) {
+	void add(const char* name, IntMember intMember) {
 		unsigned idx = m_Members.size();
 		m_Members.push_back(intMember);
-		addDefinition(name,idx,DTR_INT);
+		addDefinition(name, idx, DTR_INT);
 	}
 	// -------------------------------------------------------
 	// add float member
 	// -------------------------------------------------------
-	void add(const char* name,FloatMember floatMember) {
+	void add(const char* name, FloatMember floatMember) {
 		unsigned idx = m_FloatMembers.size();
 		m_FloatMembers.push_back(floatMember);
-		addDefinition(name,idx,DTR_FLOAT);
+		addDefinition(name, idx, DTR_FLOAT);
 	}
 	// -------------------------------------------------------
 	// add Vector2f member
 	// -------------------------------------------------------
-	void add(const char* name,Vec2Member vec2Member) {
+	void add(const char* name, Vec2Member vec2Member) {
 		unsigned idx = m_Vec2Members.size();
 		m_Vec2Members.push_back(vec2Member);
-		addDefinition(name,idx,DTR_VEC2);
+		addDefinition(name, idx, DTR_VEC2);
 	}
 	// -------------------------------------------------------
 	// add Vector3f member
@@ -76,31 +96,31 @@ public:
 	// -------------------------------------------------------
 	// add Rect member
 	// -------------------------------------------------------
-	void add(const char* name,RectMember rectMember) {
+	void add(const char* name, RectMember rectMember) {
 		unsigned idx = m_RectMembers.size();
 		m_RectMembers.push_back(rectMember);
-		addDefinition(name,idx,DTR_RECT);
+		addDefinition(name, idx, DTR_RECT);
 	}
 	// -------------------------------------------------------
 	// add Color member
 	// -------------------------------------------------------
-	void add(const char* name,ColorMember colorMember) {
+	void add(const char* name, ColorMember colorMember) {
 		unsigned idx = m_ColorMembers.size();
 		m_ColorMembers.push_back(colorMember);
-		addDefinition(name,idx,DTR_COLOR);
+		addDefinition(name, idx, DTR_COLOR);
 	}
 	// -------------------------------------------------------
 	// add Color path member
 	// -------------------------------------------------------
-	void add(const char* name,ColorPathMember colorPathMember) {
+	void add(const char* name, ColorPathMember colorPathMember) {
 		unsigned idx = m_ColorPathMembers.size();
 		m_ColorPathMembers.push_back(colorPathMember);
-		addDefinition(name,idx,DTR_COLOR_PATH);
+		addDefinition(name, idx, DTR_COLOR_PATH);
 	}
 	// -------------------------------------------------------
 	// add float path member
 	// -------------------------------------------------------
-	void add(const char* name,FloatPathMember floatPathMember) {
+	void add(const char* name, FloatPathMember floatPathMember) {
 		unsigned idx = m_FloatPathMembers.size();
 		m_FloatPathMembers.push_back(floatPathMember);
 		addDefinition(name, idx, DTR_FLOAT_PATH);
@@ -108,10 +128,10 @@ public:
 	// -------------------------------------------------------
 	// add vector2f path member
 	// -------------------------------------------------------
-	void add(const char* name,Vec2PathMember vec2PathMember) {
+	void add(const char* name, Vec2PathMember vec2PathMember) {
 		unsigned idx = m_Vec2PathMembers.size();
 		m_Vec2PathMembers.push_back(vec2PathMember);
-		addDefinition(name,idx,DTR_VEC2_PATH);
+		addDefinition(name, idx, DTR_VEC2_PATH);
 	}
 	// -------------------------------------------------------
 	// add bool member
@@ -124,18 +144,18 @@ public:
 	// -------------------------------------------------------
 	// set int value
 	// -------------------------------------------------------
-	void set(const char* name,int value,T* t) {
-		const DataDefinition* def = find(name,DTR_INT);
-		if ( def != 0 ) {
+	void set(const char* name, int value, T* t) {
+		const DataDefinition* def = find(name, DTR_INT);
+		if (def != 0) {
 			t->*m_Members[def->index] = value;
 		}
 	}
 	// -------------------------------------------------------
 	// get int value
 	// -------------------------------------------------------
-	int get(const char* name,T* t,int defaultValue) const {
-		const DataDefinition* def = find(name,DTR_INT);
-		if ( def != 0 ) {
+	int get(const char* name, T* t, int defaultValue) const {
+		const DataDefinition* def = find(name, DTR_INT);
+		if (def != 0) {
 			return t->*m_Members[def->index];
 		}
 		return defaultValue;
@@ -143,18 +163,18 @@ public:
 	// -------------------------------------------------------
 	// set float value
 	// -------------------------------------------------------
-	void set(const char* name,float value,T* t) {
-		const DataDefinition* def = find(name,DTR_FLOAT);
-		if ( def != 0 ) {
+	void set(const char* name, float value, T* t) {
+		const DataDefinition* def = find(name, DTR_FLOAT);
+		if (def != 0) {
 			t->*m_FloatMembers[def->index] = value;
 		}
 	}
 	// -------------------------------------------------------
 	// get float value
 	// -------------------------------------------------------
-	float get(const char* name,T* t,float defaultValue) const {
-		const DataDefinition* def = find(name,DTR_FLOAT);
-		if ( def != 0 ) {
+	float get(const char* name, T* t, float defaultValue) const {
+		const DataDefinition* def = find(name, DTR_FLOAT);
+		if (def != 0) {
 			return t->*m_FloatMembers[def->index];
 		}
 		return defaultValue;
@@ -162,18 +182,18 @@ public:
 	// -------------------------------------------------------
 	// set Vector2f value
 	// -------------------------------------------------------
-	void set(const char* name,const Vector2f& value,T* t) {
-		const DataDefinition* def = find(name,DTR_VEC2);
-		if ( def != 0 ) {
+	void set(const char* name, const Vector2f& value, T* t) {
+		const DataDefinition* def = find(name, DTR_VEC2);
+		if (def != 0) {
 			t->*m_Vec2Members[def->index] = value;
 		}
 	}
 	// -------------------------------------------------------
 	// get Vector2f value
 	// -------------------------------------------------------
-	const Vector2f& get(const char* name,T* t,const Vector2f& defaultValue) const {
-		const DataDefinition* def = find(name,DTR_VEC2);
-		if ( def != 0 ) {
+	const Vector2f& get(const char* name, T* t, const Vector2f& defaultValue) const {
+		const DataDefinition* def = find(name, DTR_VEC2);
+		if (def != 0) {
 			return t->*m_Vec2Members[def->index];
 		}
 		return defaultValue;
@@ -200,18 +220,18 @@ public:
 	// -------------------------------------------------------
 	// set Rect value
 	// -------------------------------------------------------
-	void set(const char* name,const Rect& value,T* t) {
-		const DataDefinition* def = find(name,DTR_RECT);
-		if ( def != 0 ) {
+	void set(const char* name, const Rect& value, T* t) {
+		const DataDefinition* def = find(name, DTR_RECT);
+		if (def != 0) {
 			t->*m_RectMembers[def->index] = value;
 		}
 	}
 	// -------------------------------------------------------
 	// get Rect value
 	// -------------------------------------------------------
-	const Rect& get(const char* name,T* t,const Rect& defaultValue) const {
-		const DataDefinition* def = find(name,DTR_RECT);
-		if ( def != 0 ) {
+	const Rect& get(const char* name, T* t, const Rect& defaultValue) const {
+		const DataDefinition* def = find(name, DTR_RECT);
+		if (def != 0) {
 			return t->*m_RectMembers[def->index];
 		}
 		return defaultValue;
@@ -219,18 +239,18 @@ public:
 	// -------------------------------------------------------
 	// set Color value
 	// -------------------------------------------------------
-	void set(const char* name,const Color& value,T* t) {
-		const DataDefinition* def = find(name,DTR_COLOR);
-		if ( def != 0 ) {
+	void set(const char* name, const Color& value, T* t) {
+		const DataDefinition* def = find(name, DTR_COLOR);
+		if (def != 0) {
 			t->*m_ColorMembers[def->index] = value;
 		}
 	}
 	// -------------------------------------------------------
 	// get Color value
 	// -------------------------------------------------------
-	const Color& get(const char* name,T* t,const Color& defaultValue) const {
-		const DataDefinition* def = find(name,DTR_COLOR);
-		if ( def != 0 ) {
+	const Color& get(const char* name, T* t, const Color& defaultValue) const {
+		const DataDefinition* def = find(name, DTR_COLOR);
+		if (def != 0) {
 			return t->*m_ColorMembers[def->index];
 		}
 		return defaultValue;
@@ -238,18 +258,18 @@ public:
 	// -------------------------------------------------------
 	// set color path value
 	// -------------------------------------------------------
-	void set(const char* name,const ColorPath& value,T* t) {
-		const DataDefinition* def = find(name,DTR_COLOR_PATH);
-		if ( def != 0 ) {
+	void set(const char* name, const ColorPath& value, T* t) {
+		const DataDefinition* def = find(name, DTR_COLOR_PATH);
+		if (def != 0) {
 			t->*m_ColorPathMembers[def->index] = value;
 		}
 	}
 	// -------------------------------------------------------
 	// get Rect value
 	// -------------------------------------------------------
-	const ColorPath& get(const char* name,T* t,const ColorPath& defaultValue) const {
-		const DataDefinition* def = find(name,DTR_COLOR_PATH);
-		if ( def != 0 ) {
+	const ColorPath& get(const char* name, T* t, const ColorPath& defaultValue) const {
+		const DataDefinition* def = find(name, DTR_COLOR_PATH);
+		if (def != 0) {
 			return t->*m_ColorPathMembers[def->index];
 		}
 		return defaultValue;
@@ -276,18 +296,18 @@ public:
 	// -------------------------------------------------------
 	// set vec2 path value
 	// -------------------------------------------------------
-	void set(const char* name,const Vector2fPath& value,T* t) {
-		const DataDefinition* def = find(name,DTR_VEC2_PATH);
-		if ( def != 0 ) {
+	void set(const char* name, const Vector2fPath& value, T* t) {
+		const DataDefinition* def = find(name, DTR_VEC2_PATH);
+		if (def != 0) {
 			t->*m_Vec2PathMembers[def->index] = value;
 		}
 	}
 	// -------------------------------------------------------
 	// get Rect value
 	// -------------------------------------------------------
-	const Vector2fPath& get(const char* name,T* t,const Vector2fPath& defaultValue) const {
-		const DataDefinition* def = find(name,DTR_VEC2_PATH);
-		if ( def != 0 ) {
+	const Vector2fPath& get(const char* name, T* t, const Vector2fPath& defaultValue) const {
+		const DataDefinition* def = find(name, DTR_VEC2_PATH);
+		if (def != 0) {
 			return t->*m_Vec2PathMembers[def->index];
 		}
 		return defaultValue;
@@ -295,7 +315,7 @@ public:
 	// -------------------------------------------------------
 	// set bool value
 	// -------------------------------------------------------
-	void set(const char* name,const bool b, T* t) {
+	void set(const char* name, const bool b, T* t) {
 		const DataDefinition* def = find(name, DTR_BOOL);
 		if (def != 0) {
 			t->*m_BoolMembers[def->index] = b;
@@ -304,7 +324,7 @@ public:
 	// -------------------------------------------------------
 	// get float path value
 	// -------------------------------------------------------
-	const bool get(const char* name, T* t,bool defaultValue) const {
+	const bool get(const char* name, T* t, bool defaultValue) const {
 		const DataDefinition* def = find(name, DTR_BOOL);
 		if (def != 0) {
 			return t->*m_BoolMembers[def->index];
@@ -315,9 +335,9 @@ public:
 	// contains
 	// -------------------------------------------------------
 	bool contains(const char* name) {
-		for ( size_t i = 0; i < m_Definitions.size(); ++i ) {
+		for (size_t i = 0; i < m_Definitions.size(); ++i) {
 			DataDefinition& in = m_Definitions[i];
-			if ( strcmp(name,in.name) == 0 ) {
+			if (strcmp(name, in.name) == 0) {
 				return true;
 			}
 		}
@@ -327,9 +347,9 @@ public:
 	// get data type
 	// -------------------------------------------------------
 	const DataType& getType(const char* name) const {
-		for ( size_t i = 0; i < m_Definitions.size(); ++i ) {
+		for (size_t i = 0; i < m_Definitions.size(); ++i) {
 			const DataDefinition& in = m_Definitions[i];
-			if ( strcmp(name,in.name) == 0 ) {
+			if (strcmp(name, in.name) == 0) {
 				return in.type;
 			}
 		}
@@ -347,6 +367,21 @@ public:
 	const char* getDefinitionName(uint32 index) const {
 		return m_Definitions[index].name;
 	}
+
+
+	void save() {}
+
+	void load(){}
+
+	void exportJSON() {}
+	
+	void importJSON() {}
+
+	void showDialog() {
+
+	}
+
+
 	// -------------------------------------------------------
 	// load file
 	// -------------------------------------------------------

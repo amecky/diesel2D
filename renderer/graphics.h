@@ -421,9 +421,9 @@ namespace ds {
 
 		void draw(int descriptorID, int vertexBufferID,int numVerticces,int indexBufferID);
 
-		void draw_render_target(int rtID, int shaderID = -1);
+		void draw_render_target(RTID rtID, int shaderID = -1);
 
-		void draw_render_target_additive(int rtID, int shaderID = -1);
+		void draw_render_target_additive(RTID rtID, int shaderID = -1);
 
 		BitmapFont* createBitmapFont(const char* name);
 
@@ -441,11 +441,11 @@ namespace ds {
 		
 		void setTexture(int shaderID, const char* handleName, int textureID);
 
-		int createRenderTarget(uint32 id, const Color& clearColor);
+		RTID createRenderTarget(const Color& clearColor);
 
-		int createRenderTarget(uint32 id, float width, float height, const Color& clearColor = Color::WHITE);
+		RTID createRenderTarget(float width, float height, const Color& clearColor = Color::WHITE);
 
-		void setRenderTarget(uint32 id);
+		void setRenderTarget(RTID rtid);
 
 		void restoreBackBuffer();
 

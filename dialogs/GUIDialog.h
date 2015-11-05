@@ -153,7 +153,7 @@ public:
 	void setButtonHover(const Rect& regularItem,const Rect& highlightItem);
 	
 
-	GUID addImage(int id,int x,int y,const Rect& textureRect,bool centered = true);	
+	GUID addImage(int id,int x,int y,const Rect& textureRect,float scale = 1.0f,bool centered = true);	
 	void updateImage(int id, int x, int y, const Rect& textureRect, bool centered = true);
 
 	uint32 addImageLink(int id,int x,int y,const Rect& textureRect,bool centered = true);
@@ -199,7 +199,7 @@ public:
 	}
 	void showDialog();
 
-	GUID addNumber(int id,const v2& position,int value, int length,float scale = 1.0f,const Color& color = Color::WHITE);
+	GUID addNumber(int id,const v2& position,int value, int length,float scale = 1.0f,const Color& color = Color::WHITE,bool centered = false);
 	void setNumber(int id, int value);
 private:
 	GUIDialog(const GUIDialog& other) {}

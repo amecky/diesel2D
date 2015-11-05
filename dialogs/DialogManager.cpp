@@ -13,7 +13,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// Constructor
 	// -------------------------------------------------------
-	DialogManager::DialogManager(void) : m_Index(0) , m_Initialized(false) {
+	DialogManager::DialogManager(void) : _index(1) , m_Initialized(false) {
 		_dialogPos = v2(1050, 690);
 		_dialogState = 1;
 		_offset = 0;
@@ -53,7 +53,7 @@ namespace ds {
 		def.hash = string::murmur_hash(name);
 		strncpy(def.name, name, 32);
 		dialog->init(name,id,m_Font);
-		++m_Index;
+		++_index;
 		m_Dialogs.push_back(def);
 	}
 
@@ -271,9 +271,10 @@ namespace ds {
 					GUIDialog* dialog = new GUIDialog();
 					LOGC("DialogManager") << "Creating new dialog: " << def.name;
 					def.dialog = dialog;
-					dialog->init(def.name, -1, m_Font);
+					dialog->init(def.name, _index, m_Font);
 					m_Dialogs.push_back(def);
 					_model.add(def.name, def);
+					++_index;
 				}
 				_showAdd = false;
 			}
@@ -313,6 +314,7 @@ namespace ds {
 	void DialogManager::load() {
 		_model.clear();
 		clear();
+		_index = 1;
 		BinaryLoader loader;
 		char buffer[64];
 		IdString hash = string::murmur_hash("gui_dialogs");
@@ -331,9 +333,10 @@ namespace ds {
 					GUIDialog* dialog = new GUIDialog();
 					LOGC("DialogManager") << "Creating new dialog: " << def.name;
 					def.dialog = dialog;
-					dialog->init(def.name, -1, m_Font);
+					dialog->init(def.name, _index, m_Font);
 					m_Dialogs.push_back(def);
 					_model.add(def.name, def);
+					++_index;
 				}
 			}
 			loader.closeChunk();
