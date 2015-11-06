@@ -10,7 +10,7 @@ DWORD SHADER_FLAGS = D3DXFX_NOT_CLONEABLE;
 
 namespace ds {
 
-	Shader::Shader(const char* name) : _hashName(0), _FX(0), _constants(0), _constantCount(0) {
+	Shader::Shader(int id,const char* name) : _id(id) , _hashName(0), _FX(0), _constants(0), _constantCount(0) {
 		_hashName = string::murmur_hash(name);
 	}
 
@@ -532,6 +532,54 @@ namespace ds {
 			sh->setTexture("ColorMap",  colorTextureID);
 			return ret;
 		}
+
+		Shader* createFadeToGrayShader(int textureID) {
+			const char* g_strBuffer =
+				"uniform extern float4x4 gWVP;\r\n"
+				"uniform extern texture gTex;\r\n"
+				"float timer = 1.0f; \r\n"
+				"float4 grayscale = float4(0.2125, 0.7154, 0.0721, 1.0); \r\n"
+				"sampler TexS = sampler_state {\r\n"
+				"	Texture = <gTex>;\r\n"
+				"	MinFilter = LINEAR;\r\n"
+				"	MagFilter = LINEAR;\r\n"
+				"	MipFilter = LINEAR;\r\n"
+				"	AddressU  = CLAMP;\r\n"
+				"	AddressV  = CLAMP;\r\n"
+				"};\r\n"
+				"struct OutputVS {\r\n"
+				"	float4 posH   : POSITION0;\r\n"
+				"	float2 tex0   : TEXCOORD0;\r\n"
+				"	float4 color0 : COLOR0;\r\n"
+				"};\r\n"
+				"OutputVS BasicVS(float3 posL : POSITION0,float2 tex0 : TEXCOORD0 , float4 color : COLOR0) {\r\n"
+				"	OutputVS outVS = (OutputVS)0;	\r\n"
+				"	outVS.posH = mul(float4(posL, 1.0f), gWVP);		\r\n"
+				"	outVS.tex0 = tex0;\r\n"
+				"	outVS.color0 = color;\r\n"
+				"	return outVS;\r\n"
+				"}\r\n"
+				"float4 BasicPS(OutputVS input) : COLOR {\r\n"
+				"	float4 clr = tex2D(TexS, input.tex0);\r\n"
+				"	float3 greyscale = dot(clr.rgb, float3(0.30, 0.59, 0.11)); \r\n"
+				"	float3 rgb = lerp(clr.rgb, greyscale, timer); \r\n"
+				"	return float4(rgb, clr.a);\r\n"
+				"}\r\n"
+				"technique FadeTech {\r\n"
+				"	pass P0 {\r\n"
+				"		vertexShader = compile vs_2_0 BasicVS();\r\n"
+				"		pixelShader  = compile ps_2_0 BasicPS();\r\n"
+				"	}\r\n"
+				"}\r\n";
+			int ret = ds::renderer::createShaderFromText(g_strBuffer, "FadeTech");
+			Shader* s = ds::renderer::getShader(ret);
+			if (textureID != -1) {
+				s->setTexture("gTex", textureID);
+			}
+			return s;
+		}
+
+
 	}
 
 	

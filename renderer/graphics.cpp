@@ -491,7 +491,7 @@ namespace ds {
 		// FIXME: add name as parameter
 		int createShaderFromText(const char* buffer, const char* techName) {
 			int id = renderContext->shaders.size();
-			Shader* shader = new Shader(techName);
+			Shader* shader = new Shader(id,techName);
 			renderContext->shaders.push_back(shader);
 			shader->createFromText(buffer, techName);
 			return id;
@@ -516,7 +516,7 @@ namespace ds {
 
 		int createEmptyShader(const char* name) {
 			int id = renderContext->shaders.size();
-			Shader* shader = new Shader(name);
+			Shader* shader = new Shader(id, name);
 			renderContext->shaders.push_back(shader);
 			return id;			
 		}

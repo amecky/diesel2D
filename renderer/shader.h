@@ -18,7 +18,7 @@ namespace ds {
 	class Shader : public Serializer {
 
 	public:		
-		Shader(const char* name);
+		Shader(int id,const char* name);
 		~Shader() {}
 		void initialize(const char* techName);
 		uint32 start();
@@ -41,8 +41,11 @@ namespace ds {
 			return _hashName;
 		}
 		void load(BinaryLoader* loader);
-
+		const int getID() const {
+			return _id;
+		}
 	private:
+		int _id;
 		D3DXHANDLE findHandle(const char* name);
 		ID3DXEffect* _FX;
 		D3DXHANDLE _hTech;
@@ -62,6 +65,8 @@ namespace ds {
 		int createBloomCombineShader(int colorTextureID,int bloomTextureID);
 
 		int createCombineLightShader(int lightTextureID, int colorTextureID);
+
+		Shader* createFadeToGrayShader(int textureID);
 
 		
 		
