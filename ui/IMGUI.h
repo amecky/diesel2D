@@ -66,6 +66,7 @@ namespace gui {
 		}
 		void remove(int idx) {
 			_entries.erase(_entries.begin() + idx);
+			_selected = -1;
 		}
 		void swap(int currentIndex, int newIndex) {
 			if (currentIndex >= 0 && currentIndex < size() && newIndex >= 0 && newIndex < size()) {

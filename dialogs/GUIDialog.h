@@ -13,7 +13,11 @@
 namespace ds {
 
 typedef uint32 DialogID;
+const int MAX_GUID = 64;
 
+// -------------------------------------------------------
+// GUI item types
+// -------------------------------------------------------
 enum GUIItemType {
 	GIT_BUTTON,
 	GIT_TEXT,
@@ -24,6 +28,9 @@ enum GUIItemType {
 	GIT_UNUSED
 };
 
+// -------------------------------------------------------
+// GUID
+// -------------------------------------------------------
 struct GUID {
 	int id;
 	int index;
@@ -54,6 +61,9 @@ struct GUIImage {
 	Texture texture;
 };
 
+// -------------------------------------------------------
+// GUIItem
+// -------------------------------------------------------
 struct GUIItem {
 	GUID gid;
 	uint32 id;
@@ -68,68 +78,22 @@ struct GUIItem {
 	GUIItem() : id(-1) , pos(0,0) , centered(true) , color(Color::WHITE) , scale(1.0f) , size(0,0) {}
 };
 
+// -------------------------------------------------------
+// GUI model item
+// -------------------------------------------------------
 struct GUIModelItem {
-	uint32 id;
+	int id;
 	GUIItemType type;
 };
 
 // -------------------------------------------------------
-// GUI base effect
+// GUI transitions
 // -------------------------------------------------------
-class GUIEffect {
-
-public:
-	GUIEffect() {}
-	virtual ~GUIEffect() {}
-	void init(GUIItem* guiItem) {
-		item = guiItem;
-	}
-	virtual bool tick(float dt) = 0;
-	const bool isActive() const {
-		return m_Active;
-	}
-	void setActive(bool act) {
-		if (act) {
-			m_Timer = 0.0f;
-		}
-		m_Active = act;
-	}
-protected:
-	bool m_Active;
-	float m_Timer;
-	float m_TTL;
-	GUIItem* item;
-};
-
-// -------------------------------------------------------
-// GUI transition effect
-// -------------------------------------------------------
-class TransitionEffect : public GUIEffect {
-
-public:
-	TransitionEffect(const Vector2f& start,const Vector2f& end,float ttl) : GUIEffect() {
-		m_TTL = ttl;
-		startPos = start;
-		endPos = end;
-	}
-	virtual ~TransitionEffect() {}
-	bool tick(float dt) {
-		if (isActive()) {
-			m_Timer += dt;
-			if (m_Timer >= m_TTL) {
-				item->pos = tweening::interpolate(tweening::easeOutQuad, startPos, endPos, 1.0f);
-				setActive(false);
-				return true;
-
-			}
-			float norm = m_Timer / m_TTL;
-			item->pos = tweening::interpolate(tweening::easeOutQuad,startPos, endPos, norm);
-		}
-		return false;
-	}
-private:
-	Vector2f startPos;
-	Vector2f endPos;
+struct GUITransition {
+	int id;
+	int typeBits;
+	float timer;
+	float ttl;
 };
 
 // -------------------------------------------------------
@@ -138,7 +102,6 @@ private:
 class GUIDialog {
 
 typedef std::vector<GUIItem> Items;
-typedef std::vector<GUIEffect*> Effects;
 typedef std::vector<GUINumber> Numbers;
 typedef std::vector<GUIText> Texts;
 typedef std::vector<GUIImage> Images;
@@ -188,19 +151,14 @@ public:
 	void clear();
 
 	void tick(float dt);
-
-	void addTransition(int id, Vector2f& start,float ttl) {
-		GUIItem* item = findByID(id);
-		if (item != 0) {
-			TransitionEffect* t = new TransitionEffect(start,item->pos,ttl);
-			t->init(item);
-			m_Effects.push_back(t);
-		}
-	}
+	
 	void showDialog();
 
 	GUID addNumber(int id,const v2& position,int value, int length,float scale = 1.0f,const Color& color = Color::WHITE,bool centered = false);
 	void setNumber(int id, int value);
+
+	void setTransition(int id, int type, float ttl);
+
 private:
 	GUIDialog(const GUIDialog& other) {}
 	void save();
@@ -219,13 +177,14 @@ private:
 	int getNextID();
 	bool swap(int currentIndex, int newIndex);
 	int createItem(const v2& position, GUIItemType type, float scale = 1.0f, bool centered = true, const Color& color = Color::WHITE);
-	
+	int getIndexByID(int id);
+	bool remove(int id);
+	v2 getPosition(int index);
 
 	DialogID m_ID;
 	IdString m_HashName;
 	BitmapFont* m_BitmapFont;
 	Items m_Items;
-	Effects m_Effects;
 	Rect m_ButtonItem;
 	Rect m_ButtonItemSelected;
 	bool m_Active;
@@ -243,8 +202,12 @@ private:
 	bool _showAdd;
 	char _name[32];
 	
-	GUID _ids[32];
+	GUID _ids[MAX_GUID];
 	int _idIndex;
+	GUITransition _transitions[MAX_GUID];	
+	int _transitionCounter;
+	bool _transitionMode;
+
 	Numbers _numbers;
 	Texts _texts;
 	Images _images;

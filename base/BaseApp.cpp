@@ -221,6 +221,7 @@ void BaseApp::buildFrame() {
 		_totalTime += m_GameTime.elapsed;
 		PR_START("UPDATE")
 		gui.updateMousePos(getMousePos());
+		gui.tick(m_GameTime.elapsed);
 		PR_END("GameObjects::update")
 		PR_START("Game::update")
 		update(m_GameTime.elapsed);

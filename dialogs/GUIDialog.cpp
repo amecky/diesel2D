@@ -25,13 +25,18 @@ namespace ds {
 		_selectedElement = 0;
 		_elementOffset = 0;
 		_idIndex = 0;
-		for (int i = 0; i < 32; ++i) {
+		for (int i = 0; i < MAX_GUID; ++i) {
 			_ids[i].id = -1;
 			_ids[i].index = -1;
 			_ids[i].entryIndex = -1;
+			_transitions[i].id = -1;
 		}
+		_transitionCounter = 0;
 	}
 
+	// -------------------------------------------------------
+	// clear
+	// -------------------------------------------------------
 	void GUIDialog::clear() {
 		m_Items.clear();
 		_buttons.clear();
@@ -39,12 +44,27 @@ namespace ds {
 		_images.clear();
 		_numbers.clear();
 		_timers.clear();
-		for (int i = 0; i < 32; ++i) {
+		_idIndex = 0;
+		for (int i = 0; i < MAX_GUID; ++i) {
 			_ids[i].id = -1;
 			_ids[i].index = -1;
 			_ids[i].entryIndex = -1;
+			_transitions[i].id = -1;
 		}
 	}
+
+	// -------------------------------------------------------
+	// get index by id
+	// -------------------------------------------------------
+	int GUIDialog::getIndexByID(int id) {
+		for (int i = 0; i < MAX_GUID; ++i) {
+			if (_ids[i].id == id) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	// -------------------------------------------------------
 	// Init
 	// -------------------------------------------------------
@@ -63,14 +83,12 @@ namespace ds {
 	// -------------------------------------------------------
 	// Destructor
 	// -------------------------------------------------------
-	GUIDialog::~GUIDialog(void) {
-		Effects::iterator it = m_Effects.begin();
-		while (it != m_Effects.end()) {
-			delete (*it);
-			it = m_Effects.erase(it);
-		}
+	GUIDialog::~GUIDialog(void) {		
 	}
 
+	// -------------------------------------------------------
+	// create item
+	// -------------------------------------------------------
 	int GUIDialog::createItem(const v2& position,GUIItemType type,float scale,bool centered,const Color& color) {
 		GUIItem item;
 		item.pos = position;
@@ -82,8 +100,11 @@ namespace ds {
 		return m_Items.size() - 1;
 	}
 
+	// -------------------------------------------------------
+	// add number
+	// -------------------------------------------------------
 	GUID GUIDialog::addNumber(int id, const v2& position, int value, int length, float scale, const Color& color, bool centered) {
-		GUID& gid = _ids[id];
+		GUID& gid = _ids[_idIndex++];
 		assert(gid.id == -1);
 		gid.id = id;
 		// add entry
@@ -98,7 +119,8 @@ namespace ds {
 	}
 
 	void GUIDialog::setNumber(int id, int value) {
-		const GUID& gid = _ids[id];
+		int idx = getIndexByID(id);
+		const GUID& gid = _ids[idx];
 		assert(gid.id != -1);
 		GUINumber& number = _numbers[gid.index];
 		number.value = value;
@@ -108,7 +130,7 @@ namespace ds {
 	// Add static image
 	// -------------------------------------------------------
 	GUID GUIDialog::addImage(int id, int x, int y, const Rect& textureRect,float scale, bool centered) {
-		GUID& gid = _ids[id];
+		GUID& gid = _ids[_idIndex++];
 		assert(gid.id == -1);
 		gid.id = id;
 		// add entry
@@ -125,7 +147,8 @@ namespace ds {
 	// update image
 	// -------------------------------------------------------
 	void GUIDialog::updateImage(int id, int x, int y, const Rect& textureRect, bool centered) {
-		const GUID& gid = _ids[id];
+		int idx = getIndexByID(id);
+		const GUID& gid = _ids[idx];
 		GUIItem& item = m_Items[gid.entryIndex];
 		assert(item.type == GIT_IMAGE);
 		GUIImage& image = _images[gid.index];
@@ -154,8 +177,11 @@ namespace ds {
 		return item.id;
 	}
 
+	// -------------------------------------------------------
+	// add timer
+	// -------------------------------------------------------
 	GUID GUIDialog::addTimer(int id,int x, int y, float scale, const Color& color, bool centered) {
-		GUID& gid = _ids[id];
+		GUID& gid = _ids[_idIndex++];
 		assert(gid.id == -1);
 		gid.id = id;
 		Vector2f p = v2(x, y);
@@ -170,7 +196,7 @@ namespace ds {
 	// Adds a text
 	// -------------------------------------------------------
 	GUID GUIDialog::addText(int id,int x,int y,const std::string& text,const Color& color,float scale,bool centered) {
-		GUID& gid = _ids[id];
+		GUID& gid = _ids[_idIndex++];
 		assert(gid.id == -1);
 		gid.id = id;
 		Vector2f p = v2(x,y);
@@ -186,7 +212,8 @@ namespace ds {
 	// Update text
 	// -------------------------------------------------------
 	void GUIDialog::updateText(int id,int x,int y,const std::string& text,const Color& color,float scale,bool centered) {
-		const GUID& gid = _ids[id];
+		int idx = getIndexByID(id);
+		const GUID& gid = _ids[idx];
 		GUIItem& item = m_Items[gid.entryIndex];
 		assert(item.type == GIT_TEXT);
 		GUIText& txt = _texts[gid.index];
@@ -201,13 +228,17 @@ namespace ds {
 	// Update text
 	// -------------------------------------------------------
 	void GUIDialog::updateText(int id,const std::string& text) {	
-		const GUID& gid = _ids[id];
+		int idx = getIndexByID(id);
+		const GUID& gid = _ids[idx];
 		GUIItem& item = m_Items[gid.entryIndex];
 		assert(item.type == GIT_TEXT);
 		GUIText& txt = _texts[gid.index];
 		strcpy(txt.text, text.c_str());
 	}
 
+	// -------------------------------------------------------
+	// get text size
+	// -------------------------------------------------------
 	v2 GUIDialog::getTextSize(int id) {
 		GUIItem* item = findByID(id);
 		assert(item != 0);
@@ -221,7 +252,7 @@ namespace ds {
 		if ( !m_Active ) {
 			return -1;
 		}
-		for (int i = 0; i < 32; ++i) {
+		for (int i = 0; i < MAX_GUID; ++i) {
 			const GUID& gid = _ids[i];
 			if ( gid.entryIndex != -1 ) {
 				const GUIItem& item = m_Items[gid.entryIndex];
@@ -256,7 +287,7 @@ namespace ds {
 	// add button 
 	// -------------------------------------------------------
 	GUID GUIDialog::addButton(int id,float x,float y, const char* text, const Rect& textureRect, const Color& textColor, float textScale, bool centered) {
-		GUID& gid = _ids[id];
+		GUID& gid = _ids[_idIndex++];
 		assert(gid.id == -1);
 		gid.id = id;
 		// add entry
@@ -278,11 +309,13 @@ namespace ds {
 	// Activate
 	// -------------------------------------------------------
 	void GUIDialog::activate() {
-		m_Active = true;
-		
-		m_SelectedInput = -1;	
-		for (size_t i = 0; i < m_Effects.size(); ++i) {
-			m_Effects[i]->setActive(true);
+		m_Active = true;		
+		m_SelectedInput = -1;			
+		if (_transitionCounter > 0) {
+			_transitionMode = true;
+			for (int i = 0; i < MAX_GUID; ++i) {
+				_transitions[i].timer = 0.0f;
+			}
 		}
 	}
 
@@ -292,13 +325,45 @@ namespace ds {
 	void GUIDialog::deactivate() {
 		m_Active = false;
 	}
+
+	// -------------------------------------------------------
+	// get position
+	// -------------------------------------------------------
+	v2 GUIDialog::getPosition(int index) {
+		const GUID& id = _ids[index];
+		const GUIItem& item = m_Items[id.entryIndex];
+		v2 p = item.pos;
+		if (item.centered) {
+			p.x = renderer::getScreenWidth() * 0.5f;
+		}
+		if (_transitionMode) {
+			if (_transitions[index].id != -1) {
+				float norm = _transitions[index].timer / _transitions[index].ttl;				
+				// float from left to position
+				if (_transitions[index].typeBits == 1) {
+					return lerp(v2(-200, item.pos.y), p, norm);
+				}	
+				// floar right to position
+				if (_transitions[index].typeBits == 2) {
+					return lerp(v2(1200, item.pos.y), p, norm);
+				}
+				if (_transitions[index].typeBits == 3) {
+					return lerp(v2(p.x, 900.0f), p, norm);
+				}
+				if (_transitions[index].typeBits == 4) {
+					return lerp(v2(p.x, -200.0f), p, norm);
+				}
+			}
+		}
+		return p;
+	}
 	// -------------------------------------------------------
 	// Render both nodes
 	// -------------------------------------------------------
 	void GUIDialog::render() {
 		if ( m_Active ) {
 			char buffer[32];
-			for (int i = 0; i < 32; ++i) {
+			for (int i = 0; i < MAX_GUID; ++i) {
 				const GUID& id = _ids[i];
 				if (id.entryIndex != -1) {
 					const GUIItem& item = m_Items[id.entryIndex];
@@ -342,10 +407,11 @@ namespace ds {
 					}
 					else if (item.type == GIT_BUTTON) {
 						const GUIButton& button = _buttons[id.index];
-						v2 p = item.pos;
-						if (item.centered) {
-							p.x = renderer::getScreenWidth() * 0.5f;
-						}
+						v2 p = getPosition(i);
+						//v2 p = item.pos;
+						//if (item.centered) {
+							//p.x = renderer::getScreenWidth() * 0.5f;
+						//}
 						sprites::draw(p, button.texture);
 						v2 size = font::calculateSize(*m_BitmapFont, button.text, item.scale);
 						float ty = p.y - size.y * 0.5f;
@@ -385,8 +451,32 @@ namespace ds {
 	// tick
 	// -------------------------------------------------------
 	void GUIDialog::tick(float dt) {
-		for (size_t i = 0; i < m_Effects.size(); ++i) {
-			m_Effects[i]->tick(dt);
+		if (_transitionMode) {
+			int cnt = 0;
+			for (int i = 0; i < MAX_GUID; ++i) {
+				if (_transitions[i].id != -1) {
+					if (_transitions[i].timer < _transitions[i].ttl) {
+						_transitions[i].timer += dt;
+					}
+					else {
+						++cnt;
+					}
+				}
+			}
+			if (cnt == _transitionCounter) {
+				_transitionMode = false;
+			}
+		}
+	}
+
+	void GUIDialog::setTransition(int id, int type, float ttl) {
+		int idx = getIndexByID(id);
+		if (idx != -1) {
+			_transitions[idx].id = id;
+			_transitions[idx].timer = 0.0f;
+			_transitions[idx].ttl = ttl;
+			_transitions[idx].typeBits = type;
+			++_transitionCounter;
 		}
 	}
 
@@ -417,13 +507,13 @@ namespace ds {
 	// -------------------------------------------------------
 	int GUIDialog::getNextID() {
 		int id = -1;
-		for (int i = 0; i < 32; ++i) {
+		for (int i = 0; i < MAX_GUID; ++i) {
 			const GUID& gid = _ids[i];
-			if (gid.id == -1 ) {
-				return i;
+			if (gid.id > id ) {
+				id = gid.id;
 			}
 		}
-		return -1;
+		return id + 1;
 	}
 
 	// -------------------------------------------------------
@@ -450,14 +540,29 @@ namespace ds {
 		return m_Items.size();
 	}
 
+	// -------------------------------------------------------
+	// swap
+	// -------------------------------------------------------
 	bool GUIDialog::swap(int currentIndex, int newIndex) {
 		if (currentIndex >= 0 && currentIndex < 32 && newIndex >= 0 && newIndex < 32) {
 			GUID current = _ids[currentIndex];
-			GUID next = _ids[newIndex];
-			_ids[newIndex].entryIndex = current.entryIndex;
-			_ids[newIndex].index = current.index;
-			_ids[currentIndex].entryIndex = next.entryIndex;
-			_ids[currentIndex].index = next.index;
+			_ids[currentIndex] = _ids[newIndex];
+			_ids[newIndex] = current;
+			return true;
+		}
+		return false;
+	}
+
+	// -------------------------------------------------------
+	// remove
+	// -------------------------------------------------------
+	bool GUIDialog::remove(int id) {
+		int idx = getIndexByID(id);
+		if (idx != -1) {
+			GUID& gid = _ids[idx];
+			gid.id = -1;
+			gid.entryIndex = -1;
+			gid.index = -1;
 			return true;
 		}
 		return false;
@@ -543,6 +648,14 @@ namespace ds {
 			if (gui::Button(GUI_DIALOG_ID + 10, "Add")) {
 				_showAdd = !_showAdd;
 			}
+			if (gui::Button(GUI_DIALOG_ID + 14, "Remove")) {
+				if (_model.hasSelection()) {
+					const GUIModelItem& item = _model.getSelectedValue();
+					if (remove(item.id)) {
+						_model.remove(_model.getSelection());
+					}
+				}
+			}
 			if (gui::Button(GUI_DIALOG_ID + 12, "Up")) {
 				if (_model.hasSelection()) {
 					int index = _model.getSelection();
@@ -570,8 +683,8 @@ namespace ds {
 		if (_model.hasSelection()) {
 			if (gui::begin("GUI Element", &_state)) {
 				GUIModelItem element = _model.getSelectedValue();
-
-				GUID gid = _ids[element.id];
+				int idx = getIndexByID(element.id);
+				const GUID& gid = _ids[idx];
 				if (gid.entryIndex != -1) {
 					GUIItem* item = &m_Items[gid.entryIndex];
 					char buffer[32];
@@ -637,7 +750,7 @@ namespace ds {
 		BinaryWriter writer;
 		int signature[] = { 0, 8, 15 };
 		writer.open(buffer, signature, 3);
-		for (int i = 0; i < 32; ++i ) {
+		for (int i = 0; i < MAX_GUID; ++i) {
 			const GUID& gid = _ids[i];
 			if (gid.entryIndex != -1) {
 				const GUIItem& gi = m_Items[gid.entryIndex];
@@ -689,7 +802,7 @@ namespace ds {
 		sprintf(buffer, "content\\dialogs\\%s.json", _name);
 		JSONWriter jw;
 		jw.open(buffer);
-		for (int i = 0; i < 32; ++i) {
+		for (int i = 0; i < MAX_GUID; ++i) {
 			const GUID& gid = _ids[i];
 			if (gid.entryIndex != -1) {
 				const GUIItem& gi = m_Items[gid.entryIndex];
