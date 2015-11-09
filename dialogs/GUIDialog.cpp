@@ -208,6 +208,21 @@ namespace ds {
 		return gid;
 	}
 
+	void GUIDialog::resetTimer(int id) {
+		int idx = getIndexByID(id);
+		const GUID& gid = _ids[idx];
+		GUIItem& item = m_Items[gid.entryIndex];
+		assert(item.type == GIT_TIMER);
+		_timers[gid.index].reset();
+	}
+
+	GameTimer* GUIDialog::getTimer(int id) {
+		int idx = getIndexByID(id);
+		const GUID& gid = _ids[idx];
+		GUIItem& item = m_Items[gid.entryIndex];
+		assert(item.type == GIT_TIMER);
+		return &_timers[gid.index];
+	}
 	// -------------------------------------------------------
 	// Update text
 	// -------------------------------------------------------

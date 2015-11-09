@@ -133,7 +133,9 @@ public:
 	uint32 addImageLink(int id,int x,int y,const char* taItem,bool centered = true);
 
 	GUID addTimer(int id,int x, int y, float scale = 1.0f, const Color& color = Color::WHITE, bool centered = true);
-	
+	void resetTimer(int id);
+	GameTimer* getTimer(int id);
+
 	virtual int onButton(int button,int x,int y,bool down);
 
 	virtual void activate();
