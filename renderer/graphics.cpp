@@ -1268,6 +1268,7 @@ namespace ds {
 			D3DXIMAGE_INFO imageInfo;
 			char fileName[256];
 			sprintf(fileName, "%s\\%s.png", dirName, name);
+			//sprintf(fileName, "%s\\%s.tga", dirName, name);
 			LOGC("Renderer") << "Trying to load texture " << fileName;
 			HR(D3DXCreateTextureFromFileEx(renderContext->device, fileName, 0, 0, 1, 0,
 				D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));

@@ -482,6 +482,9 @@ namespace ds {
 				_transitionMode = false;
 			}
 		}
+		for (size_t i = 0; i < _timers.size(); ++i) {
+			_timers[i].tick(dt);
+		}
 	}
 
 	void GUIDialog::setTransition(int id, int type, float ttl) {

@@ -7,6 +7,8 @@
 #include "..\utils\PlainTextReader.h"
 #include "..\io\BinaryWriter.h"
 #include "..\io\BinaryLoader.h"
+#include "..\ui\IMGUI.h"
+#include "..\DialogResources.h"
 
 namespace ds {
 
@@ -27,7 +29,7 @@ namespace ds {
 		
 		virtual void importJSON() = 0;
 
-		virtual void showDialog() = 0;
+		//virtual void showDialog() = 0;
 	};
 
 // -------------------------------------------------------
@@ -61,6 +63,8 @@ public:
 	typedef ColorPath T::*ColorPathMember;
 	typedef FloatArray T::*FloatPathMember;
 	typedef Vector2fPath T::*Vec2PathMember;
+
+	DataTranslator() : AbstractGameSettings(), _guiState(1), _modelOffset(0) {}
 	// -------------------------------------------------------
 	// add int member
 	// -------------------------------------------------------
@@ -377,8 +381,8 @@ public:
 	
 	void importJSON() {}
 
-	void showDialog() {
-
+	void showDialog(T* t) {
+		
 	}
 
 
@@ -817,6 +821,7 @@ private:
 		def.name = name;
 		def.type = type;
 		m_Definitions.push_back(def);
+		_model.add(name, def);
 	}
 
 	std::vector<IntMember> m_Members;
@@ -830,6 +835,9 @@ private:
 	std::vector<Vec2PathMember> m_Vec2PathMembers;
 	std::vector<BoolMember> m_BoolMembers;
 	Definitions m_Definitions;
+	gui::ComponentModel<DataDefinition> _model;
+	int _guiState;
+	int _modelOffset;
 	const static DataType unknownType = DTR_UNKNOWN;
 };
 
