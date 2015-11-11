@@ -7,10 +7,12 @@
 #include "..\compiler\AssetCompiler.h"
 #include "..\renderer\graphics.h"
 #include "Settings.h"
+#include "..\editor\BitmapFontsDialog.h"
 
 namespace ds {
 
 class GameStateMachine;
+struct BitmapFont;
 
 struct GameTime {
 	float elapsed;
@@ -99,7 +101,7 @@ public:
 	}
 protected:
 	void loadSprites();
-	void initializeGUI();
+	void initializeGUI(BitmapFont* font);
 	virtual const char* getTitle() = 0;
 	virtual void OnButtonDown(int button,int x,int y) {}
 	virtual void OnButtonUp(int button,int x,int y) {}
@@ -132,6 +134,7 @@ private:
 	bool m_Running;
 
 	GameEditor _editor;
+	BitmapFontsDialog _bmfDialog;
 	
 }; 
 

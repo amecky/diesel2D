@@ -39,7 +39,7 @@ BloomComponent::~BloomComponent(void) {
 
 int BloomComponent::init(int baseTarget,int texID) {
 	Color clr(0, 0, 0, 255);
-	assets::load("bloom",this,CVT_BLOOM_COMPONENT);
+	assets::load("bloom",this,1);
 	_baseRT = baseTarget;
 	int currentTarget = m_Settings.firstTarget;
 	// Bloom

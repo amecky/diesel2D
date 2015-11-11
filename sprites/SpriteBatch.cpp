@@ -62,8 +62,8 @@ namespace sprites {
 		spriteCtx->bufferIndex = renderer::createVertexBuffer(VD_PTC,MAX_SPRITES * 4);
 	}
 
-	void initializeTextSystem(int textureID, const char* fontName) {
-		spriteCtx->font = renderer::loadBitmapFont(fontName, textureID);		
+	void initializeTextSystem(BitmapFont * font) {
+		spriteCtx->font = font;		
 	}
 
 	int getDescriptorID() {
@@ -120,7 +120,7 @@ namespace sprites {
 				CharDef cd = spriteCtx->font->getCharDef(c);
 				padding = (cd.width + 2)  * scaleX;
 				float dimX = cd.width * scaleX;
-				float dimY = spriteCtx->font->getCharHeight() * scaleY;
+				float dimY = spriteCtx->font->charHeight * scaleY;
 				draw(Vector2f(x + dimX * 0.5f, y + dimY * 0.5f), math::buildTexture(cd.texureRect), 0.0f, scaleX, scaleY, color);
 				x += dimX + 4;
 			}
@@ -140,8 +140,8 @@ namespace sprites {
 				CharDef cd = font->getCharDef(c);
 				//padding = (cd.width + 2)  * scaleX;
 				float dimX = cd.width * scaleX;
-				float dimY = font->getCharHeight() * scaleY;
-				draw(v2(x + dimX * 0.5f, y + dimY * 0.5f), math::buildTexture(cd.texureRect,font->getTextureSize(),font->getTextureSize(),false), 0.0f, scaleX, scaleY, color);
+				float dimY = font->charHeight * scaleY;
+				draw(v2(x + dimX * 0.5f, y + dimY * 0.5f), math::buildTexture(cd.texureRect,font->textureSize,font->textureSize,false), 0.0f, scaleX, scaleY, color);
 				x += dimX + padding;
 			}
 		}

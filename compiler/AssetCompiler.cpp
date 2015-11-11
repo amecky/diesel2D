@@ -2,19 +2,10 @@
 #include "..\io\FileWatcher.h"
 #include "..\utils\Log.h"
 #include "..\utils\FileUtils.h"
-#include "GUIConverter.h"
-#include "DialogConverter.h"
-#include "BitmapFontConverter.h"
-#include "SpriteConverter.h"
 #include "ParticleManagerConverter.h"
 #include "..\objects\BloomComponent.h"
 #include "NewParticleSystemConverter.h"
 #include "..\renderer\TextureLoader.h"
-#include "PathConverter.h"
-#include "StraightPathConverter.h"
-#include "DescriptorConverter.h"
-#include "MeshConverter.h"
-#include "ShaderConverter.h"
 #include "..\particles\ParticleManager.h"
 
 //const unsigned int UINT32_MAX = 1024;
@@ -110,18 +101,8 @@ bool AssetDB::hasChanged(const char* fileName) {
 
 AssetCompiler::AssetCompiler() {
 	m_Database.readDB();
-	m_Mapping[CVT_GUI] = new GUIConverter;
-	m_Mapping[CVT_DIALOG] = new DialogConverter;
-	m_Mapping[CVT_FONT] = new BitmapFontConverter;
-	m_Mapping[CVT_SPRITE] = new SpriteConverter;
 	m_Mapping[CVT_PARTICLEMANAGER] = new ParticleManagerConverter;
-	m_Mapping[CVT_BLOOM_COMPONENT] = new BloomComponentConverter;
 	m_Mapping[CVT_NPS] = new NewParticleSystemConverter;
-	m_Mapping[CVT_PATH] = new PathConverter;
-	m_Mapping[CVT_STRAIGHT_PATH] = new StraightPathConverter;
-	m_Mapping[CVT_DESCRIPTOR] = new DescriptorConverter;
-	m_Mapping[CVT_MESH] = new MeshConverter;
-	m_Mapping[CVT_SHADER] = new ShaderConverter;
 	m_BinarySerializerMapping[BINL_TEXTURE] = new TextureLoader;
 	m_CustomIndex = 100;
 }
@@ -290,6 +271,16 @@ static AssetCompiler compiler;
 
 namespace assets {
 
+	BitmapFont* loadFont(const char* name,int textureID) {
+		BitmapFont* font = renderer::createBitmapFont(name,textureID);
+		if (!font->load()) {
+			font->importJSON();
+			font->save();
+		}
+		renderer::initializeBitmapFont(font, textureID);
+		return font;
+	}
+
 	void load(const char* fileName, Serializer* serializer, uint32 type) {
 		compiler.load(fileName, serializer, type);
 	}
@@ -304,18 +295,6 @@ namespace assets {
 
 	void loadParticleSystem(const char* fileName, ParticleManager* particleManager) {
 		compiler.load(fileName, particleManager, CVT_PARTICLEMANAGER);
-	}
-
-	void loadSpriteTemplates(const char* fileName) {
-		compiler.load(fileName, renderer::getSpriteTemplates(), CVT_SPRITE);
-	}
-	
-
-	int loadShader(const char* fileName) {
-		int id = renderer::createEmptyShader(fileName);
-		Shader* s = renderer::getShader(id);
-		compiler.load(fileName, s, CVT_SHADER);		
-		return id;
 	}
 	
 }

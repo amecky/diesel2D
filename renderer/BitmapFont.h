@@ -1,6 +1,7 @@
 #pragma once
-#include "..\io\Serializer.h"
+#include "..\utils\StringUtils.h"
 #include "..\lib\container\List.h"
+#include "render_types.h"
 
 namespace ds {
 
@@ -31,70 +32,9 @@ struct CharDef {
 	Rect texureRect;
 };
 
-class BitmapFont : public Serializer {
+struct BitmapFont {
 
-public:
-	BitmapFont() : hashName(0) {}
-	~BitmapFont() {}
-	void intialize(const FontDefinition& definition);
-	void addChar(uint32 ascii,int startX,int startY,int width) {
-		CharDef cd;
-		cd.ascii = ascii;
-		cd.startX = startX;
-		cd.startY = startY;
-		cd.width = width;
-		cd.u1 = (float)cd.startX/textureSize;
-		cd.v1 = (float)cd.startY/textureSize;
-		cd.u2 = cd.u1 + (float)cd.width/(textureSize);
-		cd.v2 = cd.v1 + ((float)charHeight)/(textureSize);
-		cd.texureRect = Rect(static_cast<float>(startY),static_cast<float>(startX),static_cast<float>(width),static_cast<float>(charHeight));
-		definitions.append(cd);
-	}
-	const bool contains(char c) const {
-		int idx = (int)c - startChar;
-		return idx >= 0 && idx < definitions.size();
-	}
-	const CharDef& getCharDef(char c) const {
-		return definitions[(int)c-startChar];
-	}
-	void load(BinaryLoader* loader);
-	const IdString getHashName() const {
-		return hashName;
-	}
-	const int getStartChar() const {
-		return startChar;
-	}
-	const int getEndChar() const {
-		return endChar;
-	}
-	const int getWidth() const {
-		return width;
-	}
-	const int getHeight() const {
-		return height;
-	}
-	const int getPadding() const {
-	return padding;
-	}
-	const int getTextureSize() const {
-	return textureSize;
-	}
-	const int getCharHeight() const {
-	return charHeight;
-	}
-	const int getStartX() const {
-	return startX;
-	}
-	const int getStartY() const {
-	return startY;
-	}
-	const int getGridHeight() const {
-		return gridHeight;		
-	}
-	void setHashName(IdString hash) {
-		hashName = hash;
-	}
-private:
+	char name[32];
 	IdString hashName;
 	int startChar;
 	int endChar;
@@ -105,8 +45,34 @@ private:
 	int charHeight;
 	int startX;
 	int startY;
-	int gridHeight;		
+	int gridHeight;
+	int textureID;
 	List<CharDef> definitions;
+
+	BitmapFont(const char* fontName,int texID) {
+		sprintf_s(name, 32, "%s", fontName);
+		hashName = string::murmur_hash(fontName);
+		textureID = texID;
+	}
+
+	~BitmapFont() {}
+
+	void intialize(const FontDefinition& definition);
+
+	void addChar(uint32 ascii, int startX, int startY, int width);
+
+	bool load();
+
+	void save();
+
+	void importJSON();
+
+	void exportJSON();
+
+	const bool contains(char c) const;
+
+	const CharDef& getCharDef(char c) const;
+	
 };
 
 }

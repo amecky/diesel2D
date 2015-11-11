@@ -425,7 +425,13 @@ namespace ds {
 
 		void draw_render_target_additive(RTID rtID, int shaderID = -1);
 
-		BitmapFont* createBitmapFont(const char* name);
+		// bitmap fonts
+
+		std::vector<BitmapFont*>& getBitmapFontList();
+
+		BitmapFont* getBitmapFont(const char* name);
+
+		BitmapFont* createBitmapFont(const char* name, int textureID);
 
 		BitmapFont* loadBitmapFont(const char* name, int textureId, const Color& fillColor = Color(1.0f, 0.0f, 1.0f, 1.0f));
 
@@ -434,6 +440,8 @@ namespace ds {
 		bool isFillColor(const Color& fillColor, const Color& currentColor);
 		
 		Color getColor(D3DLOCKED_RECT& lockedRect, int x, int y, int height);
+
+		// shader
 
 		void setShaderParameter(Shader* shader, int textureID);
 

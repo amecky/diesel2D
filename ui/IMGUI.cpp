@@ -372,11 +372,11 @@ namespace gui {
 	}
 
 	ds::Texture buildBoxTexture(const v2& size) {
-		return ds::math::buildTexture(200.0f, 0.0f, size.x, size.y, 512.0f, 512.0f);
+		return ds::math::buildTexture(200.0f, 0.0f, size.x, size.y);
 	}
 
 	ds::Texture buildBoxTexture(float dimX,float dimY) {
-		return ds::math::buildTexture(200.0f, 0.0f, dimX, dimY, 512.0f, 512.0f);
+		return ds::math::buildTexture(200.0f, 0.0f, dimX, dimY);
 	}
 
 	// -------------------------------------------------------
@@ -1153,7 +1153,7 @@ namespace gui {
 		guiContext = new GUIContext;
 		guiContext->textureID = ds::renderer::loadTexture("gui");
 		assert(guiContext->textureID != -1);
-		guiContext->font = ds::renderer::createBitmapFont("gui_font");		
+		guiContext->font = ds::renderer::createBitmapFont("gui_font", guiContext->textureID);
 		ds::FontDefinition fdf;
 		/*
 		fdf.startChar = 32;

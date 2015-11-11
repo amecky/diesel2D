@@ -38,8 +38,8 @@ namespace ds {
 	// -------------------------------------------------------
 	// Init
 	// -------------------------------------------------------
-	void DialogManager::init(const char* fontName,int textureID) {
-		m_Font = renderer::loadBitmapFont(fontName,textureID);	
+	void DialogManager::init(BitmapFont* font) {
+		m_Font = font;
 		m_Initialized = true;
 	}
 
@@ -178,6 +178,7 @@ namespace ds {
 	// old load
 	// -------------------------------------------------------
 	void DialogManager::load(BinaryLoader* loader) {
+		/*
 		while ( loader->openChunk() == 0 ) {		
 			if ( loader->getChunkID() == CHNK_GUI ) {	
 				int textureID = 0;
@@ -200,7 +201,8 @@ namespace ds {
 				LOGC("DialogManager") << "file hash: " << string::murmur_hash(file.c_str());
 			}	
 			loader->closeChunk();
-		}		
+		}
+		*/
 	}
 
 	// -------------------------------------------------------

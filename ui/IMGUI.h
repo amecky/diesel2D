@@ -2,6 +2,7 @@
 #include <Vector.h>
 #include <vector>
 #include "..\renderer\BitmapFont.h"
+#include "..\renderer\render_types.h"
 
 namespace gui {
 	

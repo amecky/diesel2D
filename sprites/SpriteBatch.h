@@ -7,14 +7,14 @@
 
 namespace ds {
 
-class BitmapFont;
+struct BitmapFont;
 class Renderer;
 
 namespace sprites {
 
 	void init();
 
-	void initializeTextSystem(int textureID, const char* fontName);
+	void initializeTextSystem(BitmapFont * font);
 
 	int getDescriptorID();
 

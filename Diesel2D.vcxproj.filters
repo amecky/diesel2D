@@ -112,20 +112,8 @@
     <ClCompile Include="compiler\AssetCompiler.cpp">
       <Filter>compiler</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\GUIConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler\DialogConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler\BitmapFontConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
     <ClCompile Include="renderer\BitmapFont.cpp">
       <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler\SpriteConverter.cpp">
-      <Filter>compiler</Filter>
     </ClCompile>
     <ClCompile Include="particles\ParticleManager.cpp">
       <Filter>particles</Filter>
@@ -152,9 +140,6 @@
       <Filter>collision</Filter>
     </ClCompile>
     <ClCompile Include="compiler\NewParticleSystemConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler\ShaderConverter.cpp">
       <Filter>compiler</Filter>
     </ClCompile>
     <ClCompile Include="math\tweening.cpp">
@@ -196,9 +181,6 @@
     <ClCompile Include="math\CubicBezierPath.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\PathConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
     <ClCompile Include="world\actions\FollowCurveAction.cpp">
       <Filter>world\actions</Filter>
     </ClCompile>
@@ -238,20 +220,11 @@
     <ClCompile Include="world\actions\FollowStraightPathAction.cpp">
       <Filter>world\actions</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\StraightPathConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
     <ClCompile Include="world\actions\ColorFadeToAction.cpp">
       <Filter>world\actions</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\DescriptorConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
     <ClCompile Include="utils\ObjLoader.cpp">
       <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler\MeshConverter.cpp">
-      <Filter>compiler</Filter>
     </ClCompile>
     <ClCompile Include="physics\PhysicalWorld.cpp">
       <Filter>physics</Filter>
@@ -279,6 +252,12 @@
     </ClCompile>
     <ClCompile Include="utils\JSONWriter.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="data\DynamicSettings.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\BitmapFontsDialog.cpp">
+      <Filter>editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -449,20 +428,8 @@
     <ClInclude Include="compiler\Converter.h">
       <Filter>compiler</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\GUIConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\DialogConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\BitmapFontConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
     <ClInclude Include="renderer\BitmapFont.h">
       <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\SpriteConverter.h">
-      <Filter>compiler</Filter>
     </ClInclude>
     <ClInclude Include="particles\DynamicSettings.h">
       <Filter>particles</Filter>
@@ -521,9 +488,6 @@
     <ClInclude Include="particles\ParticleEmitter.h">
       <Filter>particles</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\ShaderConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
     <ClInclude Include="math\tweening.h">
       <Filter>math</Filter>
     </ClInclude>
@@ -568,9 +532,6 @@
     </ClInclude>
     <ClInclude Include="math\CubicBezierPath.h">
       <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\PathConverter.h">
-      <Filter>compiler</Filter>
     </ClInclude>
     <ClInclude Include="math\BezierCurve.h">
       <Filter>math</Filter>
@@ -617,20 +578,11 @@
     <ClInclude Include="world\actions\FollowStraightPathAction.h">
       <Filter>world\actions</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\StraightPathConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
     <ClInclude Include="world\actions\ColorFadeToAction.h">
       <Filter>world\actions</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\DescriptorConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
     <ClInclude Include="utils\ObjLoader.h">
       <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\MeshConverter.h">
-      <Filter>compiler</Filter>
     </ClInclude>
     <ClInclude Include="physics\PhysicalWorld.h">
       <Filter>physics</Filter>
@@ -662,6 +614,9 @@
     </ClInclude>
     <ClInclude Include="utils\JSONWriter.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\BitmapFontsDialog.h">
+      <Filter>editor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -737,6 +692,9 @@
     </Filter>
     <Filter Include="ui">
       <UniqueIdentifier>{b51108ab-afc9-4563-8fef-82e56fd08bec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="editor">
+      <UniqueIdentifier>{6dc399db-de5a-407c-b7a2-d9de1e03b21b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

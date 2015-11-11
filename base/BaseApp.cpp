@@ -79,6 +79,9 @@ void BaseApp::prepare() {
 	stateMachine->initializeStates();
 	m_Loading = false;	
 	init();
+	if (_settings.showEditor) {
+		_bmfDialog.init();
+	}
 	m_Running = true;
 }
 
@@ -88,8 +91,9 @@ void BaseApp::prepare() {
 void BaseApp::loadSprites() {
 }
 
-void BaseApp::initializeGUI() {
-	ds::assets::load("gui", &gui, CVT_GUI);
+void BaseApp::initializeGUI(BitmapFont* font) {
+	//ds::assets::load("gui", &gui, CVT_GUI);
+	gui.init(font);
 	gui.load();
 }
 // -------------------------------------------------------
@@ -349,6 +353,9 @@ void BaseApp::showEditor() {
 		if (gui::Button(EDITOR_ID + 6, "SCG")) {
 			_editor.dialogIndex = 5;
 		}
+		if (gui::Button(EDITOR_ID + 7, "BMF")) {
+			_editor.dialogIndex = 6;
+		}
 		gui::endGroup();
 	}
 	gui::end();
@@ -364,6 +371,9 @@ void BaseApp::showEditor() {
 	}
 	if (_editor.dialogIndex == 5) {
 		renderer::getSpriteGroupContainer()->showDialog();
+	}
+	if (_editor.dialogIndex == 6) {
+		_bmfDialog.show();
 	}
 }
 

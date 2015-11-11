@@ -4,25 +4,13 @@
 #include "..\io\Serializer.h"
 #include <vector>
 #include "..\renderer\shader.h"
+#include "..\renderer\BitmapFont.h"
 
 namespace ds {
 
-const uint32 CVT_GUI                 = 1;
-const uint32 CVT_DIALOG              = 2;
-const uint32 CVT_FONT                = 3;
 const uint32 CVT_PARTICLESYSTEM      = 4;
-const uint32 CVT_SPRITE              = 5;
 const uint32 CVT_PARTICLEMANAGER     = 6;
-const uint32 CVT_BLOOM_COMPONENT     = 7;
-const uint32 CVT_SPRITES_DESCRIPTION = 8;
-const uint32 CVT_SCRIPT              = 9;
-const uint32 CVT_BLUEPRINT           = 10;
 const uint32 CVT_NPS                 = 11;
-const uint32 CVT_PATH                = 14;
-const uint32 CVT_STRAIGHT_PATH       = 15;
-const uint32 CVT_DESCRIPTOR          = 18;
-const uint32 CVT_MESH                = 19;
-const uint32 CVT_SHADER              = 20;
 const uint32 BINL_TEXTURE            = 0;
 
 // -------------------------------------------------------
@@ -92,6 +80,8 @@ private:
 class ParticleManager;
 
 namespace assets {
+
+	BitmapFont* loadFont(const char* name,int textureID);
 
 	void load(const char* fileName, Serializer* serializer, uint32 type);
 

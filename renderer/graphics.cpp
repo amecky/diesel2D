@@ -1018,21 +1018,38 @@ namespace ds {
 			pBits[p + 3] = a; // alpha
 		}
 
+		// -------------------------------------------------------
+		// get bitmap font list
+		// -------------------------------------------------------
+		std::vector<BitmapFont*>& getBitmapFontList() {
+			return renderContext->bitmapFonts;
+		}
 
+		// -------------------------------------------------------
+		// get bitmap font by name
+		// -------------------------------------------------------
+		BitmapFont* getBitmapFont(const char* name) {
+			IdString hash = string::murmur_hash(name);
+			for (int i = 0; i < renderContext->bitmapFonts.size(); ++i) {
+				if (renderContext->bitmapFonts[i]->hashName == hash) {
+					return renderContext->bitmapFonts[i];
+				}
+			}
+			return 0;
+		}
 		// -------------------------------------------------------
 		// create bitmap font
 		// -------------------------------------------------------
-		BitmapFont* createBitmapFont(const char* name) {
+		BitmapFont* createBitmapFont(const char* name, int textureID) {
 			IdString hash = string::murmur_hash(name);
 			for (int i = 0; i < renderContext->bitmapFonts.size(); ++i) {
-				if (renderContext->bitmapFonts[i]->getHashName() == hash) {
+				if (renderContext->bitmapFonts[i]->hashName == hash) {
 					LOG << "Found already loaded font " << name;
 					return renderContext->bitmapFonts[i];
 				}
 			}
 			LOG << "Created bitmap font " << name;
-			BitmapFont* font = new BitmapFont;
-			font->setHashName(hash);
+			BitmapFont* font = new BitmapFont(name,textureID);
 			renderContext->bitmapFonts.push_back(font);
 			return font;
 		}
@@ -1045,10 +1062,10 @@ namespace ds {
 			assert(textureID < MAX_TEXTURES);
 			TextureAsset* texture = &renderContext->textures[textureID];
 			HR(texture->texture->LockRect(0, &lockedRect, NULL, 0));
-			uint32 x = bitmapFont->getStartX() + bitmapFont->getPadding() - 1;
-			uint32 y = bitmapFont->getStartY() + bitmapFont->getPadding();
-			uint32 ascii = bitmapFont->getStartChar();
-			Color c = getColor(lockedRect, x, y, bitmapFont->getTextureSize());
+			uint32 x = bitmapFont->startX + bitmapFont->padding - 1;
+			uint32 y = bitmapFont->startY + bitmapFont->padding;
+			uint32 ascii = bitmapFont->startChar;
+			Color c = getColor(lockedRect, x, y, bitmapFont->textureSize);
 			bool running = true;
 			bool isChar = false;
 			int charStartedX = 0;
@@ -1056,20 +1073,20 @@ namespace ds {
 			int charCount = 0;
 			while (running) {
 				++x;
-				if (x > (bitmapFont->getStartX() + bitmapFont->getWidth())) {
-					x = bitmapFont->getStartX() + bitmapFont->getPadding() - 1;
-					y += bitmapFont->getPadding() + bitmapFont->getGridHeight();// - 1;
+				if (x > (bitmapFont->startX + bitmapFont->width)) {
+					x = bitmapFont->startX + bitmapFont->padding - 1;
+					y += bitmapFont->padding + bitmapFont->gridHeight;// - 1;
 					isChar = false;
 					charCount = 0;
 				}
-				if (y >= (bitmapFont->getStartY() + bitmapFont->getHeight())) {
+				if (y >= (bitmapFont->startY + bitmapFont->height)) {
 					running = false;
 				}
 				if (y >= texture->height) {
 					running = false;
 				}
 				if (running) {
-					c = getColor(lockedRect, x, y, bitmapFont->getTextureSize());
+					c = getColor(lockedRect, x, y, bitmapFont->textureSize);
 					if (!isFillColor(fillColor, c) && !isChar) {
 						isChar = true;
 						charStartedX = x;
@@ -1086,7 +1103,8 @@ namespace ds {
 				}
 			}
 			HR(texture->texture->UnlockRect(0));
-			LOG << "found characters: " << (ascii - bitmapFont->getStartChar());
+			//LOGC("Renderer") << "found characters: " << (ascii - bitmapFont->startChar);
+			LOGC("Renderer") << "found characters: " << bitmapFont->definitions.size();
 		}
 
 		// -------------------------------------------------------
@@ -1095,15 +1113,15 @@ namespace ds {
 		BitmapFont* loadBitmapFont(const char* name, int textureId, const Color& fillColor) {
 			IdString hash = string::murmur_hash(name);
 			for (int i = 0; i < renderContext->bitmapFonts.size(); ++i) {
-				if (renderContext->bitmapFonts[i]->getHashName() == hash) {
+				if (renderContext->bitmapFonts[i]->hashName == hash) {
 					LOG << "Found already loaded font " << name;
 					return renderContext->bitmapFonts[i];
 				}
 			}
 			LOG << "Loading bitmap font " << name;
-			BitmapFont* font = new BitmapFont;
-			font->setHashName(hash);
-			assets::load("xscale", font, ds::CVT_FONT);
+			BitmapFont* font = new BitmapFont(name,textureId);
+			font->load();
+			//assets::load("xscale", font, ds::CVT_FONT);
 			renderContext->bitmapFonts.push_back(font);
 			initializeBitmapFont(font, textureId, fillColor);
 			return font;

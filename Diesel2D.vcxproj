@@ -88,9 +88,9 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</EmbedManifest>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\math;C:\devtools\DirectX\Include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX\Lib\x86;$(LibraryPath)</LibraryPath>
-    <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX\Lib\x86;$(ReferencePath)</ReferencePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\math;C:\devtools\DirectX_SDK\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(LibraryPath)</LibraryPath>
+    <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(ReferencePath)</ReferencePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\math;C:\devtools\DirectX_SDK\Include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(LibraryPath)</LibraryPath>
     <ReferencePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\devtools\DirectX_SDK\Lib\x86;$(ReferencePath)</ReferencePath>
@@ -230,20 +230,13 @@
     <ClCompile Include="collision\NarrowPhaseDetector.cpp" />
     <ClCompile Include="collision\SpatialHashingBroadPhaseDetector.cpp" />
     <ClCompile Include="compiler\AssetCompiler.cpp" />
-    <ClCompile Include="compiler\BitmapFontConverter.cpp" />
-    <ClCompile Include="compiler\DescriptorConverter.cpp" />
-    <ClCompile Include="compiler\DialogConverter.cpp" />
-    <ClCompile Include="compiler\GUIConverter.cpp" />
-    <ClCompile Include="compiler\MeshConverter.cpp" />
     <ClCompile Include="compiler\NewParticleSystemConverter.cpp" />
     <ClCompile Include="compiler\ParticleManagerConverter.cpp" />
-    <ClCompile Include="compiler\PathConverter.cpp" />
-    <ClCompile Include="compiler\ShaderConverter.cpp" />
-    <ClCompile Include="compiler\SpriteConverter.cpp" />
-    <ClCompile Include="compiler\StraightPathConverter.cpp" />
+    <ClCompile Include="data\DynamicSettings.cpp" />
     <ClCompile Include="data\Gizmo.cpp" />
     <ClCompile Include="dialogs\DialogManager.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
+    <ClCompile Include="editor\BitmapFontsDialog.cpp" />
     <ClCompile Include="io\BinaryLoader.cpp" />
     <ClCompile Include="io\BinaryWriter.cpp" />
     <ClCompile Include="io\FileWatcher.cpp" />
@@ -328,18 +321,9 @@
     <ClInclude Include="collision\NarrowPhaseDetector.h" />
     <ClInclude Include="collision\SpatialHashingBroadPhaseDetector.h" />
     <ClInclude Include="compiler\AssetCompiler.h" />
-    <ClInclude Include="compiler\BitmapFontConverter.h" />
     <ClInclude Include="compiler\Converter.h" />
-    <ClInclude Include="compiler\DescriptorConverter.h" />
-    <ClInclude Include="compiler\DialogConverter.h" />
-    <ClInclude Include="compiler\GUIConverter.h" />
-    <ClInclude Include="compiler\MeshConverter.h" />
     <ClInclude Include="compiler\NewParticleSystemConverter.h" />
     <ClInclude Include="compiler\ParticleManagerConverter.h" />
-    <ClInclude Include="compiler\PathConverter.h" />
-    <ClInclude Include="compiler\ShaderConverter.h" />
-    <ClInclude Include="compiler\SpriteConverter.h" />
-    <ClInclude Include="compiler\StraightPathConverter.h" />
     <ClInclude Include="data\DataTranslator.h" />
     <ClInclude Include="data\DynamicSettings.h" />
     <ClInclude Include="data\Gizmo.h" />
@@ -347,6 +331,7 @@
     <ClInclude Include="DialogResources.h" />
     <ClInclude Include="dialogs\DialogManager.h" />
     <ClInclude Include="dialogs\GUIDialog.h" />
+    <ClInclude Include="editor\BitmapFontsDialog.h" />
     <ClInclude Include="io\BinaryLoader.h" />
     <ClInclude Include="io\BinaryWriter.h" />
     <ClInclude Include="io\FileWatcher.h" />

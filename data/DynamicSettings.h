@@ -25,6 +25,7 @@ namespace ds {
 		~DynamicGameSettings();
 
 		void addFloat(const char* name, float* value, float defaultValue);
+		bool setFloat(const char* name, float value);
 
 		void exportJSON();
 

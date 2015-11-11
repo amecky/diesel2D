@@ -13,7 +13,7 @@ namespace ds {
 			float cPadding = 0.0f;
 			v2 ret(0.0f, 0.0f);
 			int len = strlen(text);
-			ret.y = bitmapFont.getCharHeight() * scaleY;
+			ret.y = bitmapFont.charHeight * scaleY;
 			for (size_t cnt = 0; cnt < len; ++cnt) {
 				char c = text[cnt];
 				if (bitmapFont.contains(c)) {
@@ -32,7 +32,7 @@ namespace ds {
 		v2 calculateLimitedSize(const BitmapFont& bitmapFont, const char* text, int chars, int padding, float scaleX, float scaleY) {
 			float cPadding = 0.0f;
 			v2 ret(0.0f, 0.0f);
-			ret.y = bitmapFont.getCharHeight() * scaleY;
+			ret.y = bitmapFont.charHeight * scaleY;
 			int total = chars;
 			int len = strlen(text);
 			if (total >= len) {
@@ -65,7 +65,7 @@ namespace ds {
 					CharDef cd = bitmapFont.getCharDef(c);
 					padding = (cd.width + 2)  * scaleX;
 					float dimX = cd.width * scaleX;
-					float dimY = bitmapFont.getCharHeight() * scaleY;
+					float dimY = bitmapFont.charHeight * scaleY;
 					// quad buffer is centered by default so adjust position!
 					Sprite sp;
 					sp.position = (Vector2f(x + dimX * 0.5f, y + dimY * 0.5f));
@@ -86,7 +86,7 @@ namespace ds {
 			CharDef cd = bitmapFont.getCharDef(c);
 			padding = (cd.width + 2)  * scaleX;
 			float dimX = cd.width * scaleX;
-			float dimY = bitmapFont.getCharHeight() * scaleY;
+			float dimY = bitmapFont.charHeight * scaleY;
 			// quad buffer is centered by default so adjust position!
 			Sprite sp;
 			sp.position = (Vector2f(x + dimX * 0.5f, y + dimY * 0.5f));

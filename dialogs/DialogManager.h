@@ -22,7 +22,7 @@ typedef std::vector<DialogDefinition> Dialogs;
 public:
 	DialogManager(void);
 	~DialogManager(void);	
-	void init(const char* fontName,int textureID);
+	void init(BitmapFont* font);
 	void render();
 	void activate(const char* dialogName);
 	void deactivate(const char* dialogName);

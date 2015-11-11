@@ -3,12 +3,43 @@
 #include "..\utils\JSONWriter.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\DialogResources.h"
+#include "..\io\BinaryLoader.h"
+#include "..\io\BinaryWriter.h"
 
 namespace ds {
 
 	DynamicGameSettings::DynamicGameSettings() : _state(1), _offset(0) {}
 
 	DynamicGameSettings::~DynamicGameSettings() {}
+
+	// -------------------------------------------------------
+	// add float
+	// -------------------------------------------------------
+	void DynamicGameSettings::addFloat(const char* name, float* value, float defaultValue) {
+		*value = defaultValue;
+		SettingsItem item;
+		item.name = name;
+		item.type = 1;
+		item.index = _floats.size();
+		_floats.push_back(value);
+		_items.push_back(item);
+		_model.add(name, item);
+	}
+
+	// -------------------------------------------------------
+	// set float
+	// -------------------------------------------------------
+	bool DynamicGameSettings::setFloat(const char* name, float value) {
+		for (int i = 0; i < _items.size(); ++i) {
+			const SettingsItem& item = _items[i];
+			if (strcmp(item.name, name) == 0) {
+				*_floats[item.index] = value;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// -------------------------------------------------------
 	// export json
 	// -------------------------------------------------------
@@ -67,12 +98,7 @@ namespace ds {
 					if (type == 1) {
 						float v = 0.0f;
 						loader.read(&v);
-						for (int i = 0; i < _items.size(); ++i) {
-							const SettingsItem& item = _items[i];
-							if (item.name == buffer) {
-								*_floats[item.index] = v;
-							}
-						}
+						setFloat(buffer, v);
 					}
 				}
 				loader.closeChunk();
@@ -136,20 +162,6 @@ namespace ds {
 			}
 			gui::end();
 		}
-	}
-
-	// -------------------------------------------------------
-	// add float
-	// -------------------------------------------------------
-	void DynamicGameSettings::addFloat(const char* name, float* value, float defaultValue) {
-		*value = defaultValue;
-		SettingsItem item;
-		item.name = name;
-		item.type = 1;
-		item.index = _floats.size();
-		_floats.push_back(value);
-		_items.push_back(item);
-		_model.add(name, item);
 	}
 
 }
