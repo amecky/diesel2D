@@ -32,7 +32,7 @@ public:
 		return 0;
 	}
 	virtual int onGUIButton(ds::DialogID dlgID, int button) {
-		return 0;
+		return button;
 	}
 	virtual int onKeyDown(WPARAM virtualKey) {
 		return 0;

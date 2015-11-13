@@ -22,7 +22,7 @@ enum GUIItemType {
 	GIT_BUTTON,
 	GIT_TEXT,
 	GIT_IMAGE,
-	GIT_IMAGELINK,
+	GIT_IMAGE_BUTTON,
 	GIT_TIMER,
 	GIT_NUMBERS,
 	GIT_UNUSED
@@ -52,6 +52,12 @@ struct GUIText {
 
 struct GUIButton {
 	char text[32];
+	v2 size;
+	Texture texture;
+	Rect boundingRect;
+};
+
+struct GUIImageButton {
 	v2 size;
 	Texture texture;
 	Rect boundingRect;
@@ -106,6 +112,7 @@ typedef std::vector<GUINumber> Numbers;
 typedef std::vector<GUIText> Texts;
 typedef std::vector<GUIImage> Images;
 typedef std::vector<GUIButton> Buttons;
+typedef std::vector<GUIImageButton> ImageButtons;
 typedef std::vector<GameTimer> Timers;
 
 public:
@@ -119,7 +126,7 @@ public:
 	GUID addImage(int id,int x,int y,const Rect& textureRect,float scale = 1.0f,bool centered = true);	
 	void updateImage(int id, int x, int y, const Rect& textureRect, bool centered = true);
 
-	uint32 addImageLink(int id,int x,int y,const Rect& textureRect,bool centered = true);
+	GUID addImageButton(int id,int x,int y,const Rect& textureRect,bool centered = true);
 
 	// FIXME: add button with x and y position
 	GUID addButton(int id,float x,float y,const char* text,const Rect& textureRect,const Color& textColor = Color(1.0f,1.0f,1.0f,1.0f),float textScale = 1.0f,bool centered = true);
@@ -129,8 +136,6 @@ public:
 	void updateText(int id,int x,int y,const std::string& text,const Color& color = Color(1.0f,1.0f,1.0f,1.0f),float scale = 1.0f,bool centered = true);
 	void updateText(int id,const std::string& text);
 	v2 getTextSize(int id);
-
-	uint32 addImageLink(int id,int x,int y,const char* taItem,bool centered = true);
 
 	GUID addTimer(int id,int x, int y, float scale = 1.0f, const Color& color = Color::WHITE, bool centered = true);
 	void resetTimer(int id);
@@ -214,6 +219,7 @@ private:
 	Texts _texts;
 	Images _images;
 	Buttons _buttons;
+	ImageButtons _imageButtons;
 	Timers _timers;
 };
 

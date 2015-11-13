@@ -18,7 +18,7 @@ namespace ds {
 		_availableElements.push_back("Image");
 		_availableElements.push_back("Text");
 		_availableElements.push_back("Button");
-		_availableElements.push_back("ImageLink");
+		_availableElements.push_back("ImageButton");
 		_availableElements.push_back("Number");
 		_availableElements.push_back("Timer");
 		_showAdd = false;
@@ -160,21 +160,21 @@ namespace ds {
 	// -------------------------------------------------------
 	// Add image link
 	// -------------------------------------------------------
-	uint32 GUIDialog::addImageLink(int id,int x,int y,const Rect& textureRect,bool centered) {
-		assert(!containsItem(id));
-		Vector2f p = Vector2f(x, y);
-		if (centered) {
-			p.x = renderer::getScreenWidth() * 0.5f;
-		}
-		GUIItem item;
-		item.type = GIT_IMAGELINK;
-		item.pos = p;
-		item.id = id;
-		//float w = textureRect.width();
-		//float h = textureRect.height();
-		//item.boundingRect = Rect(h * 0.5f, w * -0.5f, w, -h);
-		m_Items.push_back(item);
-		return item.id;
+	GUID GUIDialog::addImageButton(int id,int x,int y,const Rect& textureRect,bool centered) {
+		GUID& gid = _ids[_idIndex++];
+		assert(gid.id == -1);
+		gid.id = id;
+		// add entry
+		Vector2f p = v2(x, y);
+		gid.entryIndex = createItem(p, GIT_IMAGE_BUTTON, 1.0f, centered);
+		GUIImageButton image;
+		image.texture = math::buildTexture(textureRect);
+		float w = textureRect.width();
+		float h = textureRect.height();
+		image.boundingRect = Rect(h * 0.5f, w * -0.5f, w, -h);
+		gid.index = _imageButtons.size();
+		_imageButtons.push_back(image);
+		return gid;
 	}
 
 	// -------------------------------------------------------
@@ -271,9 +271,16 @@ namespace ds {
 			const GUID& gid = _ids[i];
 			if ( gid.entryIndex != -1 ) {
 				const GUIItem& item = m_Items[gid.entryIndex];
-				if (item.type == GIT_BUTTON) {
-					const GUIButton& button = _buttons[gid.index];
-					Rect br = button.boundingRect;
+				if (item.type == GIT_BUTTON || item.type == GIT_IMAGE_BUTTON) {
+					Rect br;
+					if (item.type == GIT_BUTTON) {
+						const GUIButton& button = _buttons[gid.index];
+						br = button.boundingRect;
+					}
+					else  {
+						const GUIImageButton& button = _imageButtons[gid.index];
+						br = button.boundingRect;
+					}
 					v2 p = item.pos;
 					if (item.centered) {
 						p.x = renderer::getScreenWidth() * 0.5f;
@@ -414,6 +421,14 @@ namespace ds {
 					}
 					else if (item.type == GIT_IMAGE) {
 						const GUIImage& image = _images[id.index];
+						v2 p = item.pos;
+						if (item.centered) {
+							p.x = renderer::getScreenWidth() * 0.5f;
+						}
+						sprites::draw(p, image.texture, 0.0f, item.scale, item.scale, item.color);
+					}
+					else if (item.type == GIT_IMAGE_BUTTON) {
+						const GUIImageButton& image = _imageButtons[id.index];
 						v2 p = item.pos;
 						if (item.centered) {
 							p.x = renderer::getScreenWidth() * 0.5f;
@@ -610,6 +625,10 @@ namespace ds {
 							GUID gid = addButton(id, 512, 384, "Text", Rect(0,0,50,50), Color::WHITE, 1.0f, true);
 							addToModel(gid.id, GIT_BUTTON, "Button");
 						}
+						else if (_selectedElement == 3) {
+							GUID gid = addImageButton(id, 512, 384, Rect(0,0,50,50),true);
+							addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
+						}
 						else if (_selectedElement == 4) {
 							GUID gid = addNumber(id,v2(512, 384), 0, 3);
 							addToModel(gid.id, GIT_NUMBERS, "Numbers");
@@ -730,6 +749,12 @@ namespace ds {
 						button->texture = math::buildTexture(r);
 						gui::Input(GUI_DIALOG_ID + 8, "Text", button->text, 32);
 					}
+					else if (element.type == GIT_IMAGE_BUTTON) {
+						GUIImageButton* button = &_imageButtons[gid.index];
+						Rect r = button->texture.rect;
+						gui::InputRect(GUI_DIALOG_ID + 7, "Texture", &r);
+						button->texture = math::buildTexture(r);
+					}
 					else if (element.type == GIT_TEXT) {
 						GUIText* text = &_texts[gid.index];
 						gui::Input(GUI_DIALOG_ID + 7, "Text", text->text, 32);
@@ -787,6 +812,13 @@ namespace ds {
 					writer.write(button.text);
 					writer.closeChunk();
 				}
+				else if (gi.type == GIT_IMAGE_BUTTON) {
+					writer.startChunk(CHNK_DLG_IMAGE_LINK, 1);
+					saveItem(writer, gid.id, gi);
+					const GUIImageButton& button = _imageButtons[gid.index];
+					writer.write(button.texture.rect);
+					writer.closeChunk();
+				}
 				else if (gi.type == GIT_TEXT) {
 					writer.startChunk(CHNK_DLG_TEXT, 1);
 					saveItem(writer, gid.id, gi);
@@ -837,6 +869,13 @@ namespace ds {
 					const GUIButton& button = _buttons[gid.index];
 					jw.write("rect", button.texture.rect);
 					jw.write("text", button.text);
+					jw.endCategory();
+				}
+				else if (gi.type == GIT_IMAGE_BUTTON) {
+					jw.startCategory("image_button");
+					saveItem(jw, gid.id, gi);
+					const GUIImageButton& button = _imageButtons[gid.index];
+					jw.write("rect", button.texture.rect);
 					jw.endCategory();
 				}
 				else if (gi.type == GIT_TEXT) {
@@ -890,6 +929,15 @@ namespace ds {
 					std::string label = c->getProperty("text");
 					GUID gid = addButton(id, item.pos.x, item.pos.y, label.c_str(), r, item.color, item.scale, item.centered);
 					addToModel(gid.id, GIT_BUTTON, "Button");
+				}
+				else if (c->getName() == "image_button") {
+					GUIItem item;
+					int id = loadItem(c, &item);
+					Rect r;
+					c->getRect("rect", &r);
+					std::string label = c->getProperty("text");
+					GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
+					addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
 				}
 				else if (c->getName() == "text") {
 					GUIItem item;
@@ -963,6 +1011,14 @@ namespace ds {
 				loader.read(&r);
 				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
 				addToModel(gid.id, GIT_IMAGE, "Image");
+			}
+			else if (loader.getChunkID() == CHNK_DLG_IMAGE_LINK) {
+				GUIItem item;
+				int id = loadItem(loader, &item);
+				Rect r;
+				loader.read(&r);
+				GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
+				addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
 			}
 			else if (loader.getChunkID() == CHNK_DLG_BUTTON) {
 				GUIItem item;

@@ -19,7 +19,7 @@ namespace ds {
 		*value = defaultValue;
 		SettingsItem item;
 		item.name = name;
-		item.type = 1;
+		item.type = ST_FLOAT;
 		item.index = _floats.size();
 		_floats.push_back(value);
 		_items.push_back(item);
@@ -40,6 +40,28 @@ namespace ds {
 		return false;
 	}
 
+	void DynamicGameSettings::addRect(const char* name, Rect* value, const Rect& defaultValue) {
+		*value = defaultValue;
+		SettingsItem item;
+		item.name = name;
+		item.type = ST_RECT;
+		item.index = _rects.size();
+		_rects.push_back(value);
+		_items.push_back(item);
+		_model.add(name, item);
+	}
+
+	bool DynamicGameSettings::setRect(const char* name, const Rect& value) {
+		for (int i = 0; i < _items.size(); ++i) {
+			const SettingsItem& item = _items[i];
+			if (strcmp(item.name, name) == 0) {
+				*_rects[item.index] = value;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// -------------------------------------------------------
 	// export json
 	// -------------------------------------------------------
@@ -51,8 +73,11 @@ namespace ds {
 		jw.startCategory("settings");
 		for (int i = 0; i < _items.size(); ++i) {
 			const SettingsItem& item = _items[i];
-			if (item.type == 1) {
+			if (item.type == ST_FLOAT) {
 				jw.write(item.name, *_floats[item.index]);
+			}
+			else if (item.type == ST_RECT) {
+				jw.write(item.name, *_rects[item.index]);
 			}
 		}
 		jw.endCategory();
@@ -71,8 +96,13 @@ namespace ds {
 				for (int i = 0; i < _items.size(); ++i) {
 					const SettingsItem& item = _items[i];
 					if (c->hasProperty(item.name)) {
-						if (item.type == 1) {
+						if (item.type == ST_FLOAT) {
 							c->getFloat(item.name, _floats[item.index]);
+						}
+						else {
+							if (item.type == ST_RECT) {
+								c->getRect(item.name, _rects[item.index]);
+							}
 						}
 					}
 				}
@@ -95,10 +125,15 @@ namespace ds {
 					loader.read(buffer);
 					int type = -1;
 					loader.read(&type);
-					if (type == 1) {
+					if (type == ST_FLOAT) {
 						float v = 0.0f;
 						loader.read(&v);
 						setFloat(buffer, v);
+					}
+					else if (type == ST_RECT) {
+						Rect r;
+						loader.read(&r);
+						setRect(buffer, r);
 					}
 				}
 				loader.closeChunk();
@@ -124,7 +159,8 @@ namespace ds {
 			writer.write(item.name);
 			writer.write(item.type);
 			switch (item.type) {
-				case 1: writer.write(*_floats[item.index]); break;
+				case ST_FLOAT: writer.write(*_floats[item.index]); break;
+				case ST_RECT: writer.write(*_rects[item.index]); break;
 			}
 			writer.closeChunk();
 		}
@@ -156,8 +192,11 @@ namespace ds {
 		if (_model.hasSelection()) {
 			if (gui::begin("Setting", &_state)) {
 				SettingsItem element = _model.getSelectedValue();
-				if (element.type == 1) {
+				if (element.type == ST_FLOAT) {
 					gui::InputFloat(DGS_DIALOG_ID + 4, element.name, _floats[element.index]);
+				}
+				else if (element.type == ST_RECT) {
+					gui::InputRect(DGS_DIALOG_ID + 4, element.name, _rects[element.index]);
 				}
 			}
 			gui::end();
