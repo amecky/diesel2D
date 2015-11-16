@@ -12,6 +12,7 @@
 #include "GameStateMachine.h"
 #include "..\ui\IMGUI.h"
 #include "..\DialogResources.h"
+#include "..\particles\ParticleManager.h"
 
 namespace ds {
 
@@ -43,6 +44,7 @@ BaseApp::BaseApp() {
 	_editor.position = v2(1050, 750);
 	_editor.dialogIndex = -1;
 	_editor.state = 1;
+	particles = new ParticleManager;
 }
 
 // -------------------------------------------------------
@@ -51,6 +53,7 @@ BaseApp::BaseApp() {
 BaseApp::~BaseApp() {
 	LOGC("BaseApp") << "Destructing all elements";
 	sprites::shutdown();
+	delete particles;
 	delete stateMachine;
 	//delete gProfiler;
 	delete audio;
@@ -356,6 +359,9 @@ void BaseApp::showEditor() {
 		if (gui::Button(EDITOR_ID + 7, "BMF")) {
 			_editor.dialogIndex = 6;
 		}
+		if (gui::Button(EDITOR_ID + 8, "PS")) {
+			_editor.dialogIndex = 7;
+		}
 		gui::endGroup();
 	}
 	gui::end();
@@ -374,6 +380,9 @@ void BaseApp::showEditor() {
 	}
 	if (_editor.dialogIndex == 6) {
 		_bmfDialog.show();
+	}
+	if (_editor.dialogIndex == 7) {
+		particles->showDialog();
 	}
 }
 

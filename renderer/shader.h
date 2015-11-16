@@ -68,7 +68,7 @@ namespace ds {
 
 		Shader* createFadeToGrayShader(int textureID);
 
-		
+		int createParticleShader();
 		
 		//bool setFloat(Shader& shader,const char* name,float value);
 		//D3DXHANDLE findHandle(const Shader& shader,const char* name);

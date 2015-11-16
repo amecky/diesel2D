@@ -6,23 +6,36 @@
 
 namespace ds {
 
-class SpriteTemplates : public Serializer {
+class SpriteTemplates {
 
-typedef std::map<IdString, Sprite> TemplateMap;
+struct MappingEntry {
+	IdString hash;
+	Sprite sprite;
+	char name[32];
+};
+
+typedef std::vector<MappingEntry> TemplateMap;
 
 public:
 	SpriteTemplates();
 	~SpriteTemplates();
-	void load(BinaryLoader* loader);
+	void load();
+	void save();
+	void exportJSON();
+	void importJSON();
 	const bool contains(int id) const;
 	bool get(const char* name,Sprite* sprite);
 	void showDialog();
 private:
+	const int getIndex(int id) const;
+	const int getIndex(IdString hash) const;
 	TemplateMap _map;
-	int _IDs[256];
 	int _state;
-	gui::ComponentModel<IdString> _model;
+	int _currentID;
+	gui::ComponentModel<MappingEntry> _model;
 	int _offset;
+	bool _showAdd;
+	gui::InputDialog _dialog;
 };
 
 }

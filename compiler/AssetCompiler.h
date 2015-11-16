@@ -87,7 +87,7 @@ namespace assets {
 
 	void loadParticleSystem(const char* fileName, ParticleManager* particleManager);
 
-	void loadSpriteTemplates(const char* fileName);
+	void loadSpriteTemplates();
 
 	int loadShader(const char* fileName);
 

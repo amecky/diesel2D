@@ -296,6 +296,10 @@ namespace assets {
 	void loadParticleSystem(const char* fileName, ParticleManager* particleManager) {
 		compiler.load(fileName, particleManager, CVT_PARTICLEMANAGER);
 	}
+
+	void loadSpriteTemplates() {
+		renderer::loadSpriteTemplates();
+	}
 	
 }
 

@@ -13,6 +13,7 @@ namespace ds {
 
 class GameStateMachine;
 struct BitmapFont;
+class ParticleManager;
 
 struct GameTime {
 	float elapsed;
@@ -112,6 +113,7 @@ protected:
 	DialogManager gui;
 	AudioManager* audio;
 	GameStateMachine* stateMachine;
+	ParticleManager* particles;
 	HINSTANCE hInstance;
 	HWND m_hWnd;
 	bool m_Active;

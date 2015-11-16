@@ -47,6 +47,7 @@ public:
 		return _name;
 	}
 private:
+	GameState(const GameState& other) {}
 	const char* _name;
 	IdString _hash;
 };

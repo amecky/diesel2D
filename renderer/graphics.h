@@ -362,7 +362,7 @@ namespace ds {
 
 		Shader* getShader(int id);
 
-		//int loadShader(const char* fxName, const char* techName);
+		int loadShader(const char* fxName, const char* techName);
 
 		int createEmptyShader(const char* name);
 
@@ -483,7 +483,7 @@ namespace ds {
 
 		int findFreeTextureSlot();
 
-		//void loadSpriteTemplates(const char* name);
+		void loadSpriteTemplates();
 
 		bool getSpriteTemplate(const char* name, Sprite* sprite);
 		

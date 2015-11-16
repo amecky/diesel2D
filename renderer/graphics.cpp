@@ -520,18 +520,17 @@ namespace ds {
 			renderContext->shaders.push_back(shader);
 			return id;			
 		}
-		/*
-		int loadShader(const char* fxName, const char* techName) {
-			
+		
+		int loadShader(const char* fxName, const char* techName) {			
 			int id = renderContext->shaders.size();
-			Shader* shader = new Shader(fxName);
+			Shader* shader = new Shader(id,fxName);
 			renderContext->shaders.push_back(shader);
 			if (shader->loadShader(fxName, techName)) {
 				return id;
 			}
 			return -1;			
 		}
-		*/
+		
 		int createViewport(int width, int height) {
 			int idx = renderContext->viewPorts.size();
 			Viewport v;
@@ -1573,6 +1572,10 @@ namespace ds {
 			if (rasterizerState->scissor != renderContext->rsState.scissor) {
 				dev->SetRenderState(D3DRS_SCISSORTESTENABLE, renderContext->rsState.scissor = rasterizerState->scissor);
 			}
+		}
+
+		void loadSpriteTemplates() {
+			renderContext->spriteTemplates.load();
 		}
 
 		bool getSpriteTemplate(const char* name,Sprite* sprite) {

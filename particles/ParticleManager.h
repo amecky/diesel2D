@@ -3,10 +3,12 @@
 #include "..\compiler\AssetCompiler.h"
 #include "..\io\Serializer.h"
 #include "..\renderer\graphics.h"
+#include "..\ui\IMGUI.h"
 
 namespace ds {
 	
 class ParticleManager : public Serializer {
+
 
 typedef std::vector<NewParticleSystem*> ParticleSystems;
 
@@ -27,6 +29,7 @@ public:
 	void update(float elapsed);
 	void render();
 	void debug();
+	void showDialog();
 private:
 	void end();
 	void flush();
@@ -42,6 +45,11 @@ private:
 	int m_ParticleIndex;
 	//int m_TextureID;
 	//int m_ShaderID;
+
+	gui::ComponentModel<int> _model;
+	v2 _dialogPos;
+	int _dialogState;
+	int _offset;
 };
 
 }

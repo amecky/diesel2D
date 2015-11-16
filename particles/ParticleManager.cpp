@@ -14,6 +14,9 @@ namespace ds {
 		for ( int i = 0; i < 512; ++i ) {
 			m_Index[i] = -1;
 		}
+		_dialogState = 1;
+		_offset = 0;
+		_dialogPos = v2(512, 384);
 	}
 
 	// --------------------------------------------------------------------------
@@ -56,6 +59,7 @@ namespace ds {
 	// load binary file
 	// --------------------------------------------------------------------------
 	void ParticleManager::load(BinaryLoader* loader) {
+		char buffer[32];
 		while ( loader->openChunk() == 0 ) {		
 			if ( loader->getChunkID() == CHNK_PARTICLESYSTEM ) {
 				int id = 0;
@@ -71,6 +75,9 @@ namespace ds {
 				ds::assets::load(file.c_str(),system,CVT_NPS);
 				m_Index[id] = m_Systems.size();
 				m_Systems.push_back(system);
+				sprintf_s(buffer, 32, "%s (%d)", file.c_str(), id);
+				LOG << "----> '" << buffer << "'";
+				_model.add(buffer, id);
 			}
 			loader->closeChunk();
 		}		
@@ -176,5 +183,33 @@ namespace ds {
 		bufferIndex = renderer::createVertexBuffer(VD_PARTICLE, 4096 * 4, true);
 		indexBufferIndex = renderer::getQuadIndexBufferIndex();
 		descriptorIndex = renderer::addDescriptor(desc);
+	}
+
+	void ParticleManager::showDialog() {
+		gui::start(DIALOG_MANAGER_ID, &_dialogPos);
+		if (gui::begin("Particlesystem", &_dialogState)) {
+			gui::ComboBox(DIALOG_MANAGER_ID + 1, &_model, &_offset);
+			gui::beginGroup();
+			if (gui::Button(DIALOG_MANAGER_ID + 4, "Load")) {
+			}
+			else if (gui::Button(DIALOG_MANAGER_ID + 5, "Save")) {
+			}
+			else if (gui::Button(DIALOG_MANAGER_ID + 6, "Add")) {
+			}
+			else if (gui::Button(DIALOG_MANAGER_ID + 7, "Start")) {
+				if (_model.hasSelection()) {
+					int id = _model.getSelectedValue();
+					start(id, v2(512, 384));
+				}
+			}
+			gui::endGroup();
+		}
+		gui::end();
+		/*
+		if (_model.hasSelection()) {
+		GUIDialog* dlg = _model.getSelectedValue().dialog;
+		dlg->showDialog();
+		}
+		*/
 	}
 }
