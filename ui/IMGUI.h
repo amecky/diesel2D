@@ -34,7 +34,7 @@ namespace gui {
 	class ComponentModel : public AbstractComponentModel {
 
 		struct ModelEntry {
-			char name[20];
+			char name[32];
 			T value;
 		};
 
@@ -44,7 +44,7 @@ namespace gui {
 		ComponentModel() : AbstractComponentModel() {}
 		void add(const char* label, const T& t) {
 			ModelEntry entry;
-			strcpy(entry.name, label);
+			strcpy_s(entry.name, 32, label);
 			entry.value = t;
 			_entries.push_back(entry);
 		}

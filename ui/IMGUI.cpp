@@ -327,7 +327,7 @@ namespace gui {
 	// send key
 	// -------------------------------------------------------
 	void sendKey(unsigned char c) {
-		if (guiContext->ready) {
+		if (guiContext->ready && guiContext->active != -1) {
 			if (guiContext->keyInput.num < 256) {
 				guiContext->keyInput.keys[guiContext->keyInput.num++] = c;
 			}
