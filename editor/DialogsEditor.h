@@ -21,7 +21,6 @@ namespace ds {
 		int _dialogState;
 		int _offset;
 		gui::InputDialog _dialog;
-		bool _showAdd;
 	};
 
 }

@@ -25,7 +25,7 @@ namespace ds {
 		bool load() {
 			BinaryLoader loader;
 			char buffer[64];
-			sprintf(buffer, "assets\\%u", string::murmur_hash(getFileName()));
+			sprintf_s(buffer, 64, "assets\\%u", string::murmur_hash(getFileName()));
 			LOGC("DataFile") << "loading file: " << buffer;
 			int signature[] = { 0, 8, 15 };
 			if (loader.open(buffer, signature, 3) == IO_OK) {
@@ -42,7 +42,7 @@ namespace ds {
 		// -----------------------------------------------
 		bool save() {
 			char buffer[64];
-			sprintf(buffer, "assets\\%u", string::murmur_hash(getFileName()));
+			sprintf_s(buffer, 64, "assets\\%u", string::murmur_hash(getFileName()));
 			LOGC("DataFile") << "saving file: " << buffer;
 			BinaryWriter writer;
 			int signature[] = { 0, 8, 15 };
@@ -62,7 +62,7 @@ namespace ds {
 		// -----------------------------------------------
 		bool exportJSON() {
 			char buffer[64];
-			sprintf(buffer, "content\\%s", getJSONFileName());
+			sprintf_s(buffer, 64,"content\\%s", getJSONFileName());
 			LOGC("DataFile") << "exporting json file: " << buffer;
 			// FIXME: check if directory exists
 			JSONWriter jw;
