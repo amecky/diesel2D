@@ -13,6 +13,8 @@
 #include "..\ui\IMGUI.h"
 #include "..\DialogResources.h"
 #include "..\particles\ParticleManager.h"
+#include "..\editor\DialogsEditor.h"
+#include "..\editor\SpriteTemplatesEditor.h"
 
 namespace ds {
 
@@ -45,6 +47,10 @@ BaseApp::BaseApp() {
 	_editor.dialogIndex = -1;
 	_editor.state = 1;
 	particles = new ParticleManager;
+
+	_dialogsEditor = 0;
+	_templatesEditor = 0;
+	
 }
 
 // -------------------------------------------------------
@@ -53,6 +59,7 @@ BaseApp::BaseApp() {
 BaseApp::~BaseApp() {
 	LOGC("BaseApp") << "Destructing all elements";
 	sprites::shutdown();
+	delete _dialogsEditor;
 	delete particles;
 	delete stateMachine;
 	//delete gProfiler;
@@ -71,7 +78,7 @@ BaseApp::~BaseApp() {
 void BaseApp::prepare() {
 	LOGC("BaseApp") << "---> Init <---";
 	//settings.mode = 1;		
-	renderer::initialize(m_hWnd,_settings);   
+	renderer::initialize(m_hWnd,_settings);   	
 	audio->initialize(m_hWnd);
 
 	profiler::init();
@@ -84,6 +91,9 @@ void BaseApp::prepare() {
 	init();
 	if (_settings.showEditor) {
 		_bmfDialog.init();
+		_dialogsEditor = new DialogsEditor(&gui);
+		_templatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
+		_templatesEditor->init();
 	}
 	m_Running = true;
 }
@@ -340,49 +350,55 @@ void BaseApp::sendKeyUp(WPARAM virtualKey) {
 }
 
 void BaseApp::showEditor() {
-	gui::start(EDITOR_ID, &_editor.position);
-	if (gui::begin("Game", &_editor.state)) {
-		gui::beginGroup();
-		
-		if (gui::Button(EDITOR_ID + 3, "GSM")) {
-			_editor.dialogIndex = 2;
-		}
-		if (gui::Button(EDITOR_ID + 4, "DLG")) {
-			_editor.dialogIndex = 3;
-		}
-		if (gui::Button(EDITOR_ID + 5, "SPT")) {
-			_editor.dialogIndex = 4;
-		}
-		if (gui::Button(EDITOR_ID + 6, "SCG")) {
-			_editor.dialogIndex = 5;
-		}
-		if (gui::Button(EDITOR_ID + 7, "BMF")) {
-			_editor.dialogIndex = 6;
-		}
-		if (gui::Button(EDITOR_ID + 8, "PS")) {
-			_editor.dialogIndex = 7;
-		}
-		gui::endGroup();
-	}
-	gui::end();
+	if (_settings.showEditor) {
+		gui::start(EDITOR_ID, &_editor.position);
+		if (gui::begin("Game", &_editor.state)) {
+			gui::beginGroup();
 
-	if (_editor.dialogIndex == 2)  {
-		stateMachine->showDialog();
-	}
-	if (_editor.dialogIndex == 3)  {
-		gui.showDialog();
-	}
-	if (_editor.dialogIndex == 4) {
-		renderer::getSpriteTemplates()->showDialog();
-	}
-	if (_editor.dialogIndex == 5) {
-		renderer::getSpriteGroupContainer()->showDialog();
-	}
-	if (_editor.dialogIndex == 6) {
-		_bmfDialog.show();
-	}
-	if (_editor.dialogIndex == 7) {
-		particles->showDialog();
+			if (gui::Button(EDITOR_ID + 3, "GSM")) {
+				_editor.dialogIndex = 2;
+			}
+			if (_dialogsEditor != 0 && gui::Button(EDITOR_ID + 4, "DLG")) {
+				_dialogsEditor->init();
+				_editor.dialogIndex = 3;
+			}
+			if (_templatesEditor != 0 && gui::Button(EDITOR_ID + 5, "SPT")) {
+				_templatesEditor->init();
+				_editor.dialogIndex = 4;
+			}
+			if (gui::Button(EDITOR_ID + 6, "SCG")) {
+				_editor.dialogIndex = 5;
+			}
+			if (gui::Button(EDITOR_ID + 7, "BMF")) {
+				_editor.dialogIndex = 6;
+			}
+			if (gui::Button(EDITOR_ID + 8, "PS")) {
+				_editor.dialogIndex = 7;
+			}
+			gui::endGroup();
+		}
+		gui::end();
+
+		if (_editor.dialogIndex == 2)  {
+			stateMachine->showDialog();
+		}
+		if (_editor.dialogIndex == 3)  {
+			//gui.showDialog();
+			_dialogsEditor->showDialog();
+		}
+		if (_editor.dialogIndex == 4) {
+			//renderer::getSpriteTemplates()->showDialog();
+			_templatesEditor->showDialog();
+		}
+		if (_editor.dialogIndex == 5) {
+			renderer::getSpriteGroupContainer()->showDialog();
+		}
+		if (_editor.dialogIndex == 6) {
+			_bmfDialog.show();
+		}
+		if (_editor.dialogIndex == 7) {
+			particles->showDialog();
+		}
 	}
 }
 

@@ -6,6 +6,9 @@
 
 namespace ds {
 
+enum ParticleModifierType {
+	PMT_POSITION
+};
 // -------------------------------------------------------
 // Particle modifier
 // -------------------------------------------------------
@@ -17,6 +20,8 @@ public:
 	virtual void update(ParticleArray* array,float dt) = 0;
 	virtual void convert(Category* category,BinaryWriter& writer) {} 
 	virtual void load(BinaryLoader* loader) {}
+	virtual const ParticleModifierType getType() const = 0;
+	virtual const char* getName() const = 0;
 };
 
 // -------------------------------------------------------
@@ -44,7 +49,9 @@ public:
 		DataTranslator<DATA>& translator = getTranslator();
 		translator.readChunk(*loader,&m_Data);
 	}
-
+	DATA& getData() const {
+		return m_Data;
+	}
 protected:
 	DataTranslator<DATA> m_Translator;
 	DATA m_Data;
@@ -65,7 +72,12 @@ public:
 			array->position[i] += array->velocity[i] * dt;
 		}
 	}
-
+	const ParticleModifierType getType() const {
+		return PMT_POSITION;
+	}
+	const char* getName() const {
+		return "PositionModifier";
+	}
 };
 
 // -------------------------------------------------------
@@ -89,6 +101,12 @@ public:
 			}
 			++cnt;
 		}
+	}
+	const ParticleModifierType getType() const {
+		return PMT_POSITION;
+	}
+	const char* getName() const {
+		return "TimeModifier";
 	}
 };
 
@@ -120,6 +138,12 @@ public:
 			array->color[i] = color::lerp(m_Data.startColor,m_Data.endColor,array->timer[i].y);			
 		}
 	}
+	const ParticleModifierType getType() const {
+		return PMT_POSITION;
+	}
+	const char* getName() const {
+		return "LinearColorModifier";
+	}
 };
 
 // -------------------------------------------------------
@@ -149,6 +173,12 @@ public:
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {			
 			array->scale[i] = lerp(m_Data.minScale,m_Data.maxScale,array->timer[i].y);
 		}
+	}
+	const ParticleModifierType getType() const {
+		return PMT_POSITION;
+	}
+	const char* getName() const {
+		return "LinearSizeModifier";
 	}
 };
 
@@ -184,6 +214,12 @@ public:
 			//array->position[i] += perp * dt;
 		}
 	}
+	const ParticleModifierType getType() const {
+		return PMT_POSITION;
+	}
+	const char* getName() const {
+		return "PerpendicularMoveModifier";
+	}
 };
 
 // -------------------------------------------------------
@@ -210,6 +246,12 @@ public:
 			m_Data.path.update(array->timer[i].y,&array->color[i]);			
 		}
 	}
+	const ParticleModifierType getType() const {
+		return PMT_POSITION;
+	}
+	const char* getName() const {
+		return "ColorPathModifier";
+	}
 };
 
 // -------------------------------------------------------
@@ -235,6 +277,12 @@ public:
 		for (uint32 i = 0; i < array->countAlive; ++i) {
 			array->color[i].a = m_Data.path.get(array->timer[i].y) / 255.0f;
 		}
+	}
+	const ParticleModifierType getType() const {
+		return PMT_POSITION;
+	}
+	const char* getName() const {
+		return "AlphaPathModifier";
 	}
 };
 
@@ -264,6 +312,12 @@ public:
 			array->velocity[i] -= v * dt;
 		}
 	}
+	const ParticleModifierType getType() const {
+		return PMT_POSITION;
+	}
+	const char* getName() const {
+		return "DampingVelocityModifier";
+	}
 };
 
 // -------------------------------------------------------
@@ -290,6 +344,12 @@ public:
 			m_Data.path.update(array->timer[i].y,&array->scale[i]);			
 		}
 	}
+	const ParticleModifierType getType() const {
+		return PMT_POSITION;
+	}
+	const char* getName() const {
+		return "SizePathModifier";
+	}
 };
 
 // -------------------------------------------------------
@@ -305,6 +365,12 @@ public:
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
 			//array->rotation[i] = math::getTargetAngle(V2_RIGHT,array->velocity[i]);			
 		}
+	}
+	const ParticleModifierType getType() const {
+		return PMT_POSITION;
+	}
+	const char* getName() const {
+		return "VelocityRotationModifier";
 	}
 };
 

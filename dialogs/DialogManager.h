@@ -2,14 +2,10 @@
 #include "..\dxstdafx.h"
 #include "GUIDialog.h"
 #include <vector>
-#include "..\utils\PlainTextReader.h"
-#include "..\io\Serializer.h"
-#include "..\compiler\AssetCompiler.h"
+#include "..\compiler\DataFile.h"
 #include "..\ui\IMGUI.h"
 
 namespace ds {
-
-class DialogManager : public Serializer {
 
 struct DialogDefinition {
 	char name[32];
@@ -18,6 +14,8 @@ struct DialogDefinition {
 };
 
 typedef std::vector<DialogDefinition> Dialogs;
+
+class DialogManager : public DataFile {
 
 public:
 	DialogManager(void);
@@ -29,13 +27,24 @@ public:
 	bool onButtonUp(int button,int x,int y,DialogID* dlgId,int* selected);
 	void updateMousePos(const Vector2f& mousePos);
 	GUIDialog* get(const char* dialogName);
-	void load(BinaryLoader* loader);
+	GUIDialog* create(const char* dialogName);
 	void tick(float dt);
-	void showDialog();
-	void load();
-	void save();
-private:	
+	bool exportData(JSONWriter& writer);
+	bool importData(JSONReader& reader);
+	bool saveData(BinaryWriter& writer);
+	bool loadData(BinaryLoader& loader);
+	const char* getJSONFileName() const {
+		return "resources\\gui.json";
+	}
+	const char* getFileName() const {
+		return "gui_dialogs";
+	}
+	const Dialogs& getDialogs() const {
+		return m_Dialogs;
+	}
 	bool remove(const char* name);
+	bool contains(const char* name) const;
+private:		
 	void clear();
 	void setActiveFlag(const char* name,bool active);	
 	void createDialog(const char* name,int id,GUIDialog* dialog);
@@ -43,14 +52,6 @@ private:
 	bool m_Initialized;
 	Dialogs m_Dialogs;
 	uint32 _index;
-
-	gui::ComponentModel<DialogDefinition> _model;
-	v2 _dialogPos;
-	int _dialogState;
-	int _offset;
-	gui::InputDialog _dialog;
-	bool _showAdd;
-
 };
 
 }

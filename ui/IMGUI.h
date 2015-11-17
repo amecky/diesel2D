@@ -117,6 +117,8 @@ namespace gui {
 
 	void InputInt(int id, const char* label, int* v);
 
+	void InputInt(int id, const char* label, uint32* v);
+
 	void InputInt(int id, const char* label, int* v,int minValue, int maxValue, int step);
 
 	void InputVec2(int id, const char* label, v2* v);

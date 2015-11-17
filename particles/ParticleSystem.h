@@ -79,9 +79,11 @@ struct NewParticleSystemData {
 	Texture texture;
 };
 
+typedef std::vector<ParticleModifier*> Modifiers;
+
 class NewParticleSystem : public Serializer {
 
-typedef std::vector<ParticleModifier*> Modifiers;
+
 //typedef std::vector<ParticleEmitterInstance> EmitterInstances;
 
 public:
@@ -157,6 +159,9 @@ public:
 	}
 	const Texture& getTexture() const {
 		return m_Data.texture;
+	}
+	const Modifiers& getModifiers() const {
+		return m_Modifiers;
 	}
 private:
 	ParticleGenerator* createGenerator(int id);

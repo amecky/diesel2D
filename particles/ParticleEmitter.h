@@ -37,6 +37,7 @@ public:
 	virtual void convert(Category* category,BinaryWriter& writer) {} 
 	virtual void load(BinaryLoader* loader) {}
 	virtual const ParticleGeneratorType getType() const = 0;
+	virtual const char* getName() const = 0;
 	//virtual const int getChunkID() const = 0;
 };
 
@@ -91,6 +92,9 @@ public:
 			array->position[i] = Vector3f(0, 0, 0);
 			array->type[i] = 1;
 		}
+	}
+	const char* getName() const {
+		return "DefaultParticleGenerator";
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_DEFAULT;
@@ -147,6 +151,9 @@ public:
 			m_Angle += step;
 		}
 	}
+	const char* getName() const {
+		return "RingGenerator";
+	}
 	const ParticleGeneratorType getType() const {
 		return PGT_RING;
 	}
@@ -187,6 +194,9 @@ public:
 			array->type[start + i] = 1;
 		}
 	}
+	const char* getName() const {
+		return "CircleGenerator";
+	}
 	const ParticleGeneratorType getType() const {
 		return PGT_CIRCLE;
 	}
@@ -225,6 +235,9 @@ public:
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_POINT;
+	}
+	const char* getName() const {
+		return "LineGeneratorData";
 	}
 };
 // -------------------------------------------------------
@@ -267,6 +280,9 @@ public:
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_POINT;
+	}
+	const char* getName() const {
+		return "PointGenerator";
 	}
 };
 
@@ -314,6 +330,9 @@ public:
 			beta += deltaBeta;
 		}
 	}
+	const char* getName() const {
+		return "SphereGenerator";
+	}
 	const ParticleGeneratorType getType() const {
 		return PGT_POINT;
 	}
@@ -356,6 +375,9 @@ public:
 		}
 		
 	}
+	const char* getName() const {
+		return "RandomSphereGenerator";
+	}
 	const ParticleGeneratorType getType() const {
 		return PGT_POINT;
 	}
@@ -391,6 +413,9 @@ public:
 			array->velocity[start + i] = dn * v;
 			//array->velocity[start+i] = vector::getRadialVelocity(array->rotation[start+i],v);
 		}
+	}
+	const char* getName() const {
+		return "RadialVelocityGenerator";
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_DEFAULT;
@@ -429,6 +454,9 @@ public:
 	const ParticleGeneratorType getType() const {
 		return PGT_DEFAULT;
 	}
+	const char* getName() const {
+		return "VelocityGenerator";
+	}
 };
 
 // -------------------------------------------------------
@@ -462,6 +490,9 @@ public:
 	const ParticleGeneratorType getType() const {
 		return PGT_DEFAULT;
 	}
+	const char* getName() const {
+		return "LifetimeGenerator";
+	}
 };
 
 // -------------------------------------------------------
@@ -491,6 +522,9 @@ public:
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_DEFAULT;
+	}
+	const char* getName() const {
+		return "ColorGenerator";
 	}
 };
 
@@ -540,6 +574,9 @@ public:
 	const ParticleGeneratorType getType() const {
 		return PGT_DEFAULT;
 	}
+	const char* getName() const {
+		return "HSVColorGenerator";
+	}
 };
 
 // -------------------------------------------------------
@@ -572,6 +609,9 @@ public:
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_SIZE;
+	}
+	const char* getName() const {
+		return "SizeGenerator";
 	}
 };
 
@@ -606,6 +646,9 @@ public:
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_DEFAULT;
+	}
+	const char* getName() const {
+		return "ParticleRandomGenerator";
 	}
 };
 
@@ -674,9 +717,9 @@ struct ParticleEmitterData {
 
 class ParticleEmitterInstance;
 
-class ParticleEmitter {
-
 typedef std::vector<ParticleGenerator*> Generators;
+
+class ParticleEmitter {
 
 public:
 	ParticleEmitter();
@@ -692,6 +735,9 @@ public:
 	void init();
 	void stop();
 	void createInstance(ParticleEmitterInstance* instance);
+	const Generators& getGenerators() const {
+		return m_Generators;
+	}
 private:
 	void generate(ParticleArray* array, const ParticleGeneratorData& data, int count, float dt);
 	Generators m_Generators;
@@ -708,8 +754,6 @@ private:
 
 class ParticleEmitterInstance {
 
-typedef std::vector<ParticleGenerator*> Generators;
-
 public:
 	ParticleEmitterInstance() {}
 	~ParticleEmitterInstance() {}
@@ -725,6 +769,7 @@ public:
 	void tick(float dt);
 	void init();
 	void stop();
+	
 private:
 	void generate(ParticleArray* array, const Vector2f& pos, int count, float dt);
 	Generators m_Generators;

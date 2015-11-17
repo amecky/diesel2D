@@ -765,6 +765,19 @@ namespace gui {
 	}
 
 	// -------------------------------------------------------
+	// input int
+	// -------------------------------------------------------
+	void InputInt(int id, const char* label, uint32* v) {
+		int tmp = *v;
+		InputScalar(id, 0, &tmp);
+		v2 p = guiContext->position;
+		p.x += INPUT_BOX_WIDTH + 10.0f;
+		guiContext->addText(p, label);
+		guiContext->nextPosition();
+		*v = tmp;
+	}
+
+	// -------------------------------------------------------
 	// input int using steps
 	// -------------------------------------------------------
 	void InputFloat(int id, const char* label, float* v, float minValue, float maxValue, float step) {

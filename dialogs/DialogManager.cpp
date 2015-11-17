@@ -14,10 +14,6 @@ namespace ds {
 	// Constructor
 	// -------------------------------------------------------
 	DialogManager::DialogManager(void) : _index(1) , m_Initialized(false) {
-		_dialogPos = v2(1050, 690);
-		_dialogState = 1;
-		_offset = 0;
-		_showAdd = false;
 	}
 
 	// -------------------------------------------------------
@@ -141,16 +137,38 @@ namespace ds {
 		}
 	}
 
+	bool DialogManager::contains(const char* name) const {
+		IdString hashName = string::murmur_hash(name);
+		for (size_t i = 0; i < m_Dialogs.size(); ++i) {
+			const DialogDefinition& def = m_Dialogs[i];
+			if (def.hash == hashName){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	GUIDialog* DialogManager::create(const char* dialogName) {
+		DialogDefinition def;
+		strcpy(def.name, dialogName);
+		def.hash = string::murmur_hash(dialogName);
+		GUIDialog* dialog = new GUIDialog();
+		LOGC("DialogManager") << "Creating new dialog: " << dialogName;
+		def.dialog = dialog;
+		dialog->init(def.name, _index, m_Font);
+		m_Dialogs.push_back(def);
+		++_index;
+		return dialog;
+	}
 	// -------------------------------------------------------
 	// Find dialog by name
 	// -------------------------------------------------------
 	GUIDialog* DialogManager::get(const char* name) {
 		IdString hashName = string::murmur_hash(name);
 		for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
-			const DialogDefinition& def = m_Dialogs[i];
-			GUIDialog* dlg = def.dialog;
-			if ( dlg->getHashName() == hashName ) {
-				return dlg;				
+			const DialogDefinition& def = m_Dialogs[i];	
+			if (def.hash == hashName){
+				return def.dialog;
 			}
 		}
 		return 0;
@@ -174,37 +192,7 @@ namespace ds {
 		}
 		return false;
 	}
-	// -------------------------------------------------------
-	// old load
-	// -------------------------------------------------------
-	void DialogManager::load(BinaryLoader* loader) {
-		/*
-		while ( loader->openChunk() == 0 ) {		
-			if ( loader->getChunkID() == CHNK_GUI ) {	
-				int textureID = 0;
-				loader->read(&textureID);
-				std::string str;
-				loader->read(str);
-				int max = 1024;
-				loader->read(&max);
-				init(str.c_str(),textureID);
-			}	
-			else if ( loader->getChunkID() == CHNK_DLG_DEF ) {	
-				std::string dialogName;
-				loader->read(dialogName);
-				int id = 0;
-				loader->read(&id);
-				std::string file;
-				loader->read(file);
-				LOGC("DialogManager") << "=> Dialog: " << dialogName;
-				LOGC("DialogManager") << "name hash: " << string::murmur_hash(dialogName.c_str());
-				LOGC("DialogManager") << "file hash: " << string::murmur_hash(file.c_str());
-			}	
-			loader->closeChunk();
-		}
-		*/
-	}
-
+	
 	// -------------------------------------------------------
 	// tick
 	// -------------------------------------------------------
@@ -217,89 +205,11 @@ namespace ds {
 			}
 		}
 	}
-
-	// -------------------------------------------------------
-	// show dialog
-	// -------------------------------------------------------
-	void DialogManager::showDialog() {
-		gui::start(DIALOG_MANAGER_ID, &_dialogPos);
-		if (gui::begin("Dialogs", &_dialogState)) {
-			gui::ComboBox(DIALOG_MANAGER_ID + 1, &_model, &_offset);
-			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 2, "Activate")) {
-				if (_model.hasSelection()) {
-					GUIDialog* dlg = _model.getSelectedValue().dialog;
-					dlg->activate();					
-				}
-			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 3, "Deactivate")) {
-				if (_model.hasSelection()) {
-					GUIDialog* dlg = _model.getSelectedValue().dialog;
-					dlg->deactivate();
-				}
-			}
-			gui::endGroup();
-			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 4, "Load")) {
-				load();
-			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 5, "Save")) {
-				save();
-			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 6, "Add")) {
-				_showAdd = true;
-			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 7, "Remove")) {
-				if (_model.hasSelection()) {
-					const DialogDefinition& def = _model.getSelectedValue();
-					if (remove(def.name)) {
-						_model.remove(_model.getSelection());
-						_model.select(-1);
-					}
-				}
-			}
-			gui::endGroup();
-		}
-		gui::end();
-		if (_showAdd) {
-			int ret = _dialog.show("Please provide a name", "Name");
-			if (ret == 1) {
-				DialogDefinition def;
-				strcpy(def.name,_dialog.getText());
-				LOGC("DialogManager") << "dialog definition: " << def.name;
-				//assert(get(def.name) == 0);
-				if (get(def.name) == 0) {
-					def.hash = string::murmur_hash(def.name);
-					GUIDialog* dialog = new GUIDialog();
-					LOGC("DialogManager") << "Creating new dialog: " << def.name;
-					def.dialog = dialog;
-					dialog->init(def.name, _index, m_Font);
-					m_Dialogs.push_back(def);
-					_model.add(def.name, def);
-					++_index;
-				}
-				_showAdd = false;
-			}
-			if (ret == 2) {
-				_showAdd = false;
-			}
-		}
-		if (_model.hasSelection()) {
-			GUIDialog* dlg = _model.getSelectedValue().dialog;
-			dlg->showDialog();
-		}
-	}
-
+	
 	// -------------------------------------------------------
 	// save
 	// -------------------------------------------------------
-	void DialogManager::save() {
-		IdString hash = string::murmur_hash("gui_dialogs");
-		char buffer[64];
-		sprintf(buffer, "assets\\%u", hash);
-		BinaryWriter writer;
-		int signature[] = { 0, 8, 15 };
-		writer.open(buffer, signature, 3);
+	bool DialogManager::saveData(BinaryWriter& writer) {
 		for (size_t i = 0; i < m_Dialogs.size(); ++i) {
 			const DialogDefinition& def = m_Dialogs[i];
 			writer.startChunk(CHNK_DLG_DEF, 1);
@@ -307,23 +217,30 @@ namespace ds {
 			writer.write(def.hash);
 			writer.closeChunk();			
 		}
-		writer.close();
+		return true;
 	}
 
 	// -------------------------------------------------------
+	// export json
+	// -------------------------------------------------------
+	bool DialogManager::exportData(JSONWriter& writer) {
+		return true;
+	}
+
+	// -------------------------------------------------------
+	// import json
+	// -------------------------------------------------------
+	bool DialogManager::importData(JSONReader& reader) {
+		return true;
+	}
+	
+	// -------------------------------------------------------
 	// load
 	// -------------------------------------------------------
-	void DialogManager::load() {
-		_model.clear();
+	bool DialogManager::loadData(BinaryLoader& loader) {
+		//_model.clear();
 		clear();
-		_index = 1;
-		BinaryLoader loader;
-		char buffer[64];
-		IdString hash = string::murmur_hash("gui_dialogs");
-		sprintf(buffer, "assets\\%u", hash);
-		LOGC("DialogManager") << "reading file: " << buffer;
-		int signature[] = { 0, 8, 15 };
-		loader.open(buffer, signature, 3);
+		_index = 1;		
 		while (loader.openChunk() == 0) {
 			if (loader.getChunkID() == CHNK_DLG_DEF) {
 				DialogDefinition def;
@@ -337,11 +254,12 @@ namespace ds {
 					def.dialog = dialog;
 					dialog->init(def.name, _index, m_Font);
 					m_Dialogs.push_back(def);
-					_model.add(def.name, def);
+					//_model.add(def.name, def);
 					++_index;
 				}
 			}
 			loader.closeChunk();
 		}
+		return true;
 	}
 }

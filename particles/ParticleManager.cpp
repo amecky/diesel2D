@@ -205,11 +205,40 @@ namespace ds {
 			gui::endGroup();
 		}
 		gui::end();
-		/*
 		if (_model.hasSelection()) {
-		GUIDialog* dlg = _model.getSelectedValue().dialog;
-		dlg->showDialog();
+			int id = _model.getSelectedValue();
+			NewParticleSystem* system = m_Systems[id];
+			if (gui::begin("System", &_dialogState)) {
+				ParticleEmitter& emitter = system->getEmitter();
+				ParticleEmitterData& data = emitter.getEmitterData();
+				/*
+				uint32 ejectionPeriod;
+				uint32 ejectionVariance;
+				uint32 ejectionCounter;
+				uint32 count;
+				float duration; // seconds
+				int loops; // how many ticks to run
+				*/
+				gui::InputInt(SPRITE_TEMPLATES_ID + 2, "count", &data.count);
+				gui::InputInt(SPRITE_TEMPLATES_ID + 3, "ejectionPeriod", &data.ejectionPeriod);
+				gui::InputInt(SPRITE_TEMPLATES_ID + 4, "ejectionVariance", &data.ejectionVariance);
+				gui::InputInt(SPRITE_TEMPLATES_ID + 5, "ejectionCounter", &data.ejectionCounter);
+				const Generators& generators = emitter.getGenerators();
+				std::vector<std::string> names;
+				for (size_t i = 0; i < generators.size(); ++i) {
+					names.push_back(generators[i]->getName());
+				}
+				int s = 0;
+				int o = 0;
+				gui::ComboBox(SPRITE_TEMPLATES_ID + 6, names, &s, &o);
+				const Modifiers& modifiers = system->getModifiers();
+				std::vector<std::string> mnames;
+				for (size_t i = 0; i < modifiers.size(); ++i) {
+					mnames.push_back(modifiers[i]->getName());
+				}
+				gui::ComboBox(SPRITE_TEMPLATES_ID + 7, mnames, &s, &o);
+			}
+			gui::end();
 		}
-		*/
 	}
 }

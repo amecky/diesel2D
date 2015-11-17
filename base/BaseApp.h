@@ -14,6 +14,8 @@ namespace ds {
 class GameStateMachine;
 struct BitmapFont;
 class ParticleManager;
+class DialogsEditor;
+class SpriteTemplatesEditor;
 
 struct GameTime {
 	float elapsed;
@@ -137,7 +139,10 @@ private:
 
 	GameEditor _editor;
 	BitmapFontsDialog _bmfDialog;
+
+	DialogsEditor* _dialogsEditor;
+	SpriteTemplatesEditor* _templatesEditor;
 	
 }; 
 
-};
+}

@@ -3,10 +3,9 @@
 #include "..\io\Serializer.h"
 #include <map>
 #include "..\ui\IMGUI.h"
+#include "..\compiler\DataFile.h"
 
 namespace ds {
-
-class SpriteTemplates {
 
 struct MappingEntry {
 	IdString hash;
@@ -16,26 +15,33 @@ struct MappingEntry {
 
 typedef std::vector<MappingEntry> TemplateMap;
 
+class SpriteTemplates : public DataFile {
+
 public:
 	SpriteTemplates();
 	~SpriteTemplates();
-	void load();
-	void save();
-	void exportJSON();
-	void importJSON();
 	const bool contains(int id) const;
 	bool get(const char* name,Sprite* sprite);
-	void showDialog();
+	Sprite& get(int index);
+	bool exportData(JSONWriter& writer);
+	bool importData(JSONReader& reader);
+	bool saveData(BinaryWriter& writer);
+	bool loadData(BinaryLoader& loader);
+	const char* getJSONFileName() const {
+		return "resources\\sprite_templates.json";
+	}
+	const char* getFileName() const {
+		return "sprite_templates";
+	}
+	int createEmptyTemplate(const char* name);
+	const TemplateMap& getTemplates() const {
+		return _map;
+	}
 private:
 	const int getIndex(int id) const;
 	const int getIndex(IdString hash) const;
 	TemplateMap _map;
-	int _state;
 	int _currentID;
-	gui::ComponentModel<MappingEntry> _model;
-	int _offset;
-	bool _showAdd;
-	gui::InputDialog _dialog;
 };
 
 }

@@ -675,10 +675,10 @@ namespace ds {
 				load();
 			}
 			if (gui::Button(GUI_DIALOG_ID + 14, "Export")) {
-				export();
+				exportJSON();
 			}
 			if (gui::Button(GUI_DIALOG_ID + 15, "Import")) {
-				import();
+				importJSON();
 			}
 			gui::endGroup();
 			gui::beginGroup();
@@ -784,15 +784,12 @@ namespace ds {
 		writer.write("centered", item.centered);
 		writer.write("scale", item.scale);
 	}
+
+	
 	// -------------------------------------------------------
 	// save
 	// -------------------------------------------------------
-	void GUIDialog::save() {
-		char buffer[64];
-		sprintf(buffer, "assets\\%u", m_HashName);
-		BinaryWriter writer;
-		int signature[] = { 0, 8, 15 };
-		writer.open(buffer, signature, 3);
+	bool GUIDialog::saveData(BinaryWriter& writer) {		
 		for (int i = 0; i < MAX_GUID; ++i) {
 			const GUID& gid = _ids[i];
 			if (gid.entryIndex != -1) {
@@ -841,17 +838,13 @@ namespace ds {
 				}
 			}
 		}
-		writer.close();
+		return true;
 	}
 
 	// -------------------------------------------------------
 	// save
 	// -------------------------------------------------------
-	void GUIDialog::export() {
-		char buffer[64];
-		sprintf(buffer, "content\\dialogs\\%s.json", _name);
-		JSONWriter jw;
-		jw.open(buffer);
+	bool GUIDialog::exportData(JSONWriter& jw) {		
 		for (int i = 0; i < MAX_GUID; ++i) {
 			const GUID& gid = _ids[i];
 			if (gid.entryIndex != -1) {
@@ -900,70 +893,68 @@ namespace ds {
 				}
 			}
 		}
+		return true;
 	}
 
-	void GUIDialog::import() {
+	
+	bool GUIDialog::importData(JSONReader& reader) {
 		clear();
-		_model.clear();
-		char buffer[64];
-		sprintf(buffer, "content\\dialogs\\%s.json", _name);
-		JSONReader reader;
-		if (reader.parse(buffer)) {
-			std::vector<Category*> categories = reader.getCategories();
-			for (size_t i = 0; i < categories.size(); ++i) {
-				Category* c = categories[i];
-				LOG << "name: " << c->getName();
-				if (c->getName() == "image" ) {
-					GUIItem item;
-					int id = loadItem(c, &item);
-					Rect r;
-					c->getRect("rect", &r);
-					GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
-					addToModel(gid.id, GIT_IMAGE, "Image");
-				}
-				else if (c->getName() == "button") {
-					GUIItem item;
-					int id = loadItem(c, &item);
-					Rect r;
-					c->getRect("rect", &r);
-					std::string label = c->getProperty("text");
-					GUID gid = addButton(id, item.pos.x, item.pos.y, label.c_str(), r, item.color, item.scale, item.centered);
-					addToModel(gid.id, GIT_BUTTON, "Button");
-				}
-				else if (c->getName() == "image_button") {
-					GUIItem item;
-					int id = loadItem(c, &item);
-					Rect r;
-					c->getRect("rect", &r);
-					std::string label = c->getProperty("text");
-					GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
-					addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
-				}
-				else if (c->getName() == "text") {
-					GUIItem item;
-					int id = loadItem(c, &item);
-					std::string label = c->getProperty("text");
-					GUID gid = addText(id, item.pos.x, item.pos.y, label.c_str(), item.color, item.scale, item.centered);
-					addToModel(gid.id, GIT_TEXT, "Text");
-				}
-				else if (c->getName() == "numbers") {
-					GUIItem item;
-					int id = loadItem(c, &item);
-					int value = 0;
-					c->getInt("value",&value);
-					int length = 0;
-					c->getInt("length",&length);
-					GUID gid = addNumber(id, item.pos, value, length, item.scale, item.color, item.centered);
-					addToModel(gid.id, GIT_NUMBERS, "Number");
-				}
-				else if (c->getName() == "timer") {
-					GUIItem item;
-					int id = loadItem(c, &item);
-					GUID gid = addTimer(id, item.pos.x, item.pos.y, item.scale, item.color, item.centered);
-					addToModel(gid.id, GIT_TIMER, "Timer");
-				}
+		_model.clear();		
+		std::vector<Category*> categories = reader.getCategories();
+		for (size_t i = 0; i < categories.size(); ++i) {
+			Category* c = categories[i];
+			LOG << "name: " << c->getName();
+			if (c->getName() == "image" ) {
+				GUIItem item;
+				int id = loadItem(c, &item);
+				Rect r;
+				c->getRect("rect", &r);
+				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
+				addToModel(gid.id, GIT_IMAGE, "Image");
+			}
+			else if (c->getName() == "button") {
+				GUIItem item;
+				int id = loadItem(c, &item);
+				Rect r;
+				c->getRect("rect", &r);
+				std::string label = c->getProperty("text");
+				GUID gid = addButton(id, item.pos.x, item.pos.y, label.c_str(), r, item.color, item.scale, item.centered);
+				addToModel(gid.id, GIT_BUTTON, "Button");
+			}
+			else if (c->getName() == "image_button") {
+				GUIItem item;
+				int id = loadItem(c, &item);
+				Rect r;
+				c->getRect("rect", &r);
+				std::string label = c->getProperty("text");
+				GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
+				addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
+			}
+			else if (c->getName() == "text") {
+				GUIItem item;
+				int id = loadItem(c, &item);
+				std::string label = c->getProperty("text");
+				GUID gid = addText(id, item.pos.x, item.pos.y, label.c_str(), item.color, item.scale, item.centered);
+				addToModel(gid.id, GIT_TEXT, "Text");
+			}
+			else if (c->getName() == "numbers") {
+				GUIItem item;
+				int id = loadItem(c, &item);
+				int value = 0;
+				c->getInt("value",&value);
+				int length = 0;
+				c->getInt("length",&length);
+				GUID gid = addNumber(id, item.pos, value, length, item.scale, item.color, item.centered);
+				addToModel(gid.id, GIT_NUMBERS, "Number");
+			}
+			else if (c->getName() == "timer") {
+				GUIItem item;
+				int id = loadItem(c, &item);
+				GUID gid = addTimer(id, item.pos.x, item.pos.y, item.scale, item.color, item.centered);
+				addToModel(gid.id, GIT_TIMER, "Timer");
 			}
 		}
+		return true;
 	}
 
 	int GUIDialog::loadItem(Category* category, GUIItem* item) {
@@ -994,15 +985,9 @@ namespace ds {
 	// -------------------------------------------------------
 	// load
 	// -------------------------------------------------------
-	void GUIDialog::load() {
+	bool GUIDialog::loadData(BinaryLoader& loader) {
 		clear();
 		_model.clear();
-		BinaryLoader loader;
-		char buffer[64];
-		sprintf(buffer, "assets\\%u", m_HashName);
-		LOGC("GUIDialog") << "loading file: " << buffer;
-		int signature[] = { 0, 8, 15 };
-		loader.open(buffer, signature, 3);
 		while (loader.openChunk() == 0) {
 			if (loader.getChunkID() == CHNK_DLG_IMAGE) {
 				GUIItem item;
@@ -1056,5 +1041,6 @@ namespace ds {
 			}
 			loader.closeChunk();
 		}		
+		return true;
 	}
 }

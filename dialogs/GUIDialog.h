@@ -7,8 +7,7 @@
 #include "..\renderer\BitmapFont.h"
 #include "..\ui\IMGUI.h"
 #include "..\utils\GameTimer.h"
-#include "..\utils\JSONWriter.h"
-#include "..\utils\PlainTextReader.h"
+#include "..\compiler\DataFile.h"
 
 namespace ds {
 
@@ -105,7 +104,7 @@ struct GUITransition {
 // -------------------------------------------------------
 // GUI Dialog
 // -------------------------------------------------------
-class GUIDialog {
+class GUIDialog : public DataFile {
 
 typedef std::vector<GUIItem> Items;
 typedef std::vector<GUINumber> Numbers;
@@ -166,14 +165,25 @@ public:
 
 	void setTransition(int id, int type, float ttl);
 
+	bool exportData(JSONWriter& writer);
+	bool importData(JSONReader& reader);
+	bool saveData(BinaryWriter& writer);
+	bool loadData(BinaryLoader& loader);
+	const char* getJSONFileName() const {
+		char buffer[64];
+		sprintf_s(buffer, 64, "dialogs\\%s.json", _name);
+		return buffer;
+	}
+	const char* getFileName() const {
+		return _name;
+	}
+	const char* getName() const {
+		return _name;
+	}
 private:
 	GUIDialog(const GUIDialog& other) {}
-	void save();
 	void saveItem(BinaryWriter& writer, int id, const GUIItem& item);
 	void saveItem(JSONWriter& writer, int id, const GUIItem& item);
-	void load();	
-	void export();
-	void import();
 	int loadItem(BinaryLoader& loader, GUIItem* item);
 	int loadItem(Category* category, GUIItem* item);
 	void addToModel(int id, GUIItemType type,const char* prefix);
