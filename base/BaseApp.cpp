@@ -354,7 +354,6 @@ void BaseApp::showEditor() {
 		gui::start(EDITOR_ID, &_editor.position);
 		if (gui::begin("Game", &_editor.state)) {
 			gui::beginGroup();
-
 			if (gui::Button(EDITOR_ID + 3, "GSM")) {
 				_editor.dialogIndex = 2;
 			}
@@ -372,8 +371,13 @@ void BaseApp::showEditor() {
 			if (gui::Button(EDITOR_ID + 7, "BMF")) {
 				_editor.dialogIndex = 6;
 			}
+			gui::endGroup();
+			gui::beginGroup();
 			if (gui::Button(EDITOR_ID + 8, "PS")) {
 				_editor.dialogIndex = 7;
+			}
+			if (gui::Button(EDITOR_ID + 9, "PF")) {
+				_editor.dialogIndex = 8;
 			}
 			gui::endGroup();
 		}
@@ -398,6 +402,15 @@ void BaseApp::showEditor() {
 		}
 		if (_editor.dialogIndex == 7) {
 			particles->showDialog();
+		}
+		if (_editor.dialogIndex == 8) {
+			int state = 1;
+			if (gui::begin("Performance", &state)) {
+				float val[16];// = { 0.2f, 0.4f, 0.3f, 0.1f, 0.15f, 0.6f, 1.0f, 0.1f, 0.9f, 0.75f };
+				int count = profiler::get_total_times(val, 16);
+				gui::Histogram(17, val, count, 0.0f, 16.0f, 1.0f);
+			}
+			gui::end();
 		}
 	}
 }

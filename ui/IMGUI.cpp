@@ -1155,8 +1155,8 @@ namespace gui {
 			p.y -= yp;
 			guiContext->addBox(p, v2(width + barWidth, 1.0f), guiContext->colors[CLR_INPUT_EDIT]);
 		}
-		guiContext->position.y -= height;
-		guiContext->nextPosition();
+		//guiContext->position.y -= height;
+		guiContext->nextPosition(height);
 	}
 
 	// -------------------------------------------------------
