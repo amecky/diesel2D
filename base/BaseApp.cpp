@@ -36,20 +36,24 @@ BaseApp::BaseApp() {
 	m_DebugInfo.printProfiler = false;
 	m_DebugInfo.showDrawCounter = false;
 	m_DebugInfo.debugRenderer = false;
+	m_DebugInfo.performanceOverlay = false;
+	m_DebugInfo.showEditor = false;
+	m_DebugInfo.profilerTicks = 0;
 	m_ButtonState.processed = true;
 	m_MousePos = Vector2f(0,0);
 	rand.seed(GetTickCount());
 	audio = new AudioManager;
 	_totalTime = 0.0f;
 	stateMachine = new GameStateMachine;
-	_editor.dialogPos = v2(1050, 690);
-	_editor.position = v2(1050, 750);
+	_editor.dialogPos = v2(750, 750);
+	_editor.position = v2(750, 750);
 	_editor.dialogIndex = -1;
 	_editor.state = 1;
 	particles = new ParticleManager;
 
 	_dialogsEditor = 0;
 	_templatesEditor = 0;
+	_perfHUDPos = v2(750, 750);
 	
 }
 
@@ -89,13 +93,25 @@ void BaseApp::prepare() {
 	stateMachine->initializeStates();
 	m_Loading = false;	
 	init();
-	if (_settings.showEditor) {
+	if (_settings.initializeEditor) {
 		_bmfDialog.init();
 		_dialogsEditor = new DialogsEditor(&gui);
 		_templatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
 		_templatesEditor->init();
 	}
+	logKeyBindings();
 	m_Running = true;
+}
+
+void BaseApp::logKeyBindings() {
+	LOGC("BaseApp") << "-----------> Key Bindings   <-----------";
+	LOGC("BaseApp") << "F1 -> print profiler";
+	LOGC("BaseApp") << "F2 -> show draw counter";
+	LOGC("BaseApp") << "F3 -> show profiler";
+	LOGC("BaseApp") << "F4 -> toggle update flag";
+	LOGC("BaseApp") << "F5 -> toggle performance overlay";
+	LOGC("BaseApp") << "F6 -> toggle editor";
+	LOGC("BaseApp") << "F7 -> debug renderer";
 }
 
 // -------------------------------------------------------
@@ -113,9 +129,6 @@ void BaseApp::initializeGUI(BitmapFont* font) {
 // Creates the window
 // -------------------------------------------------------
 void BaseApp::createWindow() {
-	if (_settings.showEditor) {
-		_settings.screenWidth += 500;
-	}
 	RECT DesktopSize;
 	GetClientRect(GetDesktopWindow(),&DesktopSize);
 	// Create the application's window
@@ -260,11 +273,14 @@ void BaseApp::buildFrame() {
 	gui.render();
 	PRE("RENDER_GUI")
 	PRS("RENDER_EDITOR")
-	if (_settings.showEditor) {
+	if (m_DebugInfo.showEditor) {
 		showEditor();
 	}
 	PRE("RENDER_EDITOR")
 	debug::drawDebugMessages();
+	if (m_DebugInfo.performanceOverlay) {
+		showPerformceOverlay(&_perfHUDPos);
+	}
 	PRS("RENDER_FLUSH")
 	renderer::flush();
 	PRE("RENDER_FLUSH")
@@ -272,10 +288,15 @@ void BaseApp::buildFrame() {
 #ifdef DEBUG		
 	if ( m_DebugInfo.showDrawCounter ) {
 		int y = ds::renderer::getSelectedViewport().getHeight() - 80;
-		debug::showDrawCounter(10,y);
+		debug::showDrawCounter(&_perfHUDPos);
 	}
 	if ( m_DebugInfo.showProfiler ) {
-		debug::showProfiler(10, 10);
+		++m_DebugInfo.profilerTicks;
+		if (m_DebugInfo.profilerTicks > 10) {
+			m_DebugInfo.profilerTicks = 0;
+			m_DebugInfo.snapshotCount = profiler::get_snapshot(_snapshots, 64);
+		}
+		showProfilerSnapshot(&_perfHUDPos);
 	}		
 #endif
 	
@@ -319,25 +340,27 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 	m_KeyStates.keyPressed = virtualKey;
 #ifdef DEBUG
 	
-	if ( virtualKey == VK_F1 && !m_DebugInfo.printProfiler) {
-		m_DebugInfo.printProfiler = true;
+	if ( virtualKey == VK_F1) {
+		m_DebugInfo.printProfiler = !m_DebugInfo.printProfiler;
 	}
-	if ( virtualKey == VK_F2 && !m_DebugInfo.showDrawCounter) {
-		m_DebugInfo.showDrawCounter = true;
+	else if (virtualKey == VK_F2) {
+		m_DebugInfo.showDrawCounter = !m_DebugInfo.showDrawCounter;
 	}
-	else if ( virtualKey == VK_F2 && m_DebugInfo.showDrawCounter) {
-		m_DebugInfo.showDrawCounter = false;
+	else if (virtualKey == VK_F3) {
+		m_DebugInfo.showProfiler = !m_DebugInfo.showProfiler;
+		m_DebugInfo.profilerTicks = 0;
+		m_DebugInfo.snapshotCount = profiler::get_snapshot(_snapshots, 64);
 	}
-	if ( virtualKey == VK_F3 && !m_DebugInfo.showProfiler) {
-		m_DebugInfo.showProfiler = true;
-	}
-	else if ( virtualKey == VK_F3 && m_DebugInfo.showProfiler) {
-		m_DebugInfo.showProfiler = false;
-	}	
 	else if ( virtualKey == VK_F4 ) {
 		m_Running = !m_Running;
 	}	
-	if ( virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
+	else if (virtualKey == VK_F5) {
+		m_DebugInfo.performanceOverlay = !m_DebugInfo.performanceOverlay;
+	}
+	else if (virtualKey == VK_F6) {
+		m_DebugInfo.showEditor = !m_DebugInfo.showEditor;
+	}
+	else if (virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
 		m_DebugInfo.debugRenderer = true;
 	}
 #endif
@@ -349,70 +372,94 @@ void BaseApp::sendKeyUp(WPARAM virtualKey) {
 	gui::sendSpecialKey(virtualKey);
 }
 
+void BaseApp::showPerformceOverlay(v2* position) {
+	gui::start(EDITOR_ID, position);
+	int state = 1;
+	if (gui::begin("Performance", &state)) {
+		float val[16];// = { 0.2f, 0.4f, 0.3f, 0.1f, 0.15f, 0.6f, 1.0f, 0.1f, 0.9f, 0.75f };
+		int count = profiler::get_total_times(val, 16);
+		gui::Histogram(17, val, count, 0.0f, 16.0f, 1.0f);
+	}
+	gui::end();
+}
+
 void BaseApp::showEditor() {
-	if (_settings.showEditor) {
-		gui::start(EDITOR_ID, &_editor.position);
-		if (gui::begin("Game", &_editor.state)) {
-			gui::beginGroup();
-			if (gui::Button(EDITOR_ID + 3, "GSM")) {
-				_editor.dialogIndex = 2;
-			}
-			if (_dialogsEditor != 0 && gui::Button(EDITOR_ID + 4, "DLG")) {
-				_dialogsEditor->init();
-				_editor.dialogIndex = 3;
-			}
-			if (_templatesEditor != 0 && gui::Button(EDITOR_ID + 5, "SPT")) {
-				_templatesEditor->init();
-				_editor.dialogIndex = 4;
-			}
-			if (gui::Button(EDITOR_ID + 6, "SCG")) {
-				_editor.dialogIndex = 5;
-			}
-			if (gui::Button(EDITOR_ID + 7, "BMF")) {
-				_editor.dialogIndex = 6;
-			}
-			gui::endGroup();
-			gui::beginGroup();
-			if (gui::Button(EDITOR_ID + 8, "PS")) {
-				_editor.dialogIndex = 7;
-			}
-			if (gui::Button(EDITOR_ID + 9, "PF")) {
-				_editor.dialogIndex = 8;
-			}
-			gui::endGroup();
+	gui::start(EDITOR_ID, &_editor.position);
+	if (gui::begin("Game", &_editor.state)) {
+		gui::beginGroup();
+		if (gui::Button(EDITOR_ID + 3, "GSM")) {
+			_editor.dialogIndex = 2;
+		}
+		if (_dialogsEditor != 0 && gui::Button(EDITOR_ID + 4, "DLG")) {
+			_dialogsEditor->init();
+			_editor.dialogIndex = 3;
+		}
+		if (_templatesEditor != 0 && gui::Button(EDITOR_ID + 5, "SPT")) {
+			_templatesEditor->init();
+			_editor.dialogIndex = 4;
+		}
+		if (gui::Button(EDITOR_ID + 6, "SCG")) {
+			_editor.dialogIndex = 5;
+		}
+		if (gui::Button(EDITOR_ID + 7, "BMF")) {
+			_editor.dialogIndex = 6;
+		}
+		gui::endGroup();
+		gui::beginGroup();
+		if (gui::Button(EDITOR_ID + 8, "PS")) {
+			_editor.dialogIndex = 7;
+		}
+		if (gui::Button(EDITOR_ID + 9, "PF")) {
+			_editor.dialogIndex = 8;
+		}
+		gui::endGroup();
+	}
+	gui::end();
+
+	if (_editor.dialogIndex == 2)  {
+		stateMachine->showDialog();
+	}
+	if (_editor.dialogIndex == 3)  {
+		//gui.showDialog();
+		_dialogsEditor->showDialog();
+	}
+	if (_editor.dialogIndex == 4) {
+		//renderer::getSpriteTemplates()->showDialog();
+		_templatesEditor->showDialog();
+	}
+	if (_editor.dialogIndex == 5) {
+		renderer::getSpriteGroupContainer()->showDialog();
+	}
+	if (_editor.dialogIndex == 6) {
+		_bmfDialog.show();
+	}
+	if (_editor.dialogIndex == 7) {
+		particles->showDialog();
+	}
+	if (_editor.dialogIndex == 8) {
+		int state = 1;
+		if (gui::begin("Performance", &state)) {
+			float val[16];// = { 0.2f, 0.4f, 0.3f, 0.1f, 0.15f, 0.6f, 1.0f, 0.1f, 0.9f, 0.75f };
+			int count = profiler::get_total_times(val, 16);
+			gui::Histogram(17, val, count, 0.0f, 16.0f, 1.0f);
 		}
 		gui::end();
+	}
+}
 
-		if (_editor.dialogIndex == 2)  {
-			stateMachine->showDialog();
-		}
-		if (_editor.dialogIndex == 3)  {
-			//gui.showDialog();
-			_dialogsEditor->showDialog();
-		}
-		if (_editor.dialogIndex == 4) {
-			//renderer::getSpriteTemplates()->showDialog();
-			_templatesEditor->showDialog();
-		}
-		if (_editor.dialogIndex == 5) {
-			renderer::getSpriteGroupContainer()->showDialog();
-		}
-		if (_editor.dialogIndex == 6) {
-			_bmfDialog.show();
-		}
-		if (_editor.dialogIndex == 7) {
-			particles->showDialog();
-		}
-		if (_editor.dialogIndex == 8) {
-			int state = 1;
-			if (gui::begin("Performance", &state)) {
-				float val[16];// = { 0.2f, 0.4f, 0.3f, 0.1f, 0.15f, 0.6f, 1.0f, 0.1f, 0.9f, 0.75f };
-				int count = profiler::get_total_times(val, 16);
-				gui::Histogram(17, val, count, 0.0f, 16.0f, 1.0f);
-			}
-			gui::end();
+void BaseApp::showProfilerSnapshot(v2* position) {
+	gui::start(EDITOR_ID, position);
+	int state = 1;
+	if (gui::begin("Profiler", &state)) {
+		char buffer[256];
+		for (int i = 0; i < m_DebugInfo.snapshotCount; ++i) {
+			ProfileSnapshot& pd = _snapshots[i];
+			int ident = pd.level * 2;
+			sprintf(buffer, "%3d - %3.8f - %.11s", pd.invokeCounter, pd.totalTime, pd.name);
+			gui::Label(EDITOR_ID + 1 + i, buffer);
 		}
 	}
+	gui::end();
 }
 
 }

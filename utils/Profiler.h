@@ -1,8 +1,21 @@
 #pragma once
 #define PROFILING TRUE
-//#include <windows.h>
-//#include "..\dxstdafx.h"
+#include <Vector.h>
 
+// -------------------------------------------------------
+// Profile data
+// -------------------------------------------------------
+struct ProfileSnapshot {
+
+	char name[32];
+	int level;
+	int invokeCounter;
+	float totalTime;
+
+};
+// -------------------------------------------------------
+// profiler
+// -------------------------------------------------------
 namespace profiler {
 
 	void init();
@@ -18,6 +31,10 @@ namespace profiler {
 	void print();
 
 	int get_total_times(float* values, int max);
+
+	void showDialog(v2* position);
+
+	int get_snapshot(ProfileSnapshot* items, int max);
 }
 
 #define PRS(name) profiler::start(name);

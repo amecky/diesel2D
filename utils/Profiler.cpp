@@ -2,10 +2,13 @@
 #include <windows.h>
 #include "Log.h"
 #include "StringUtils.h"
+#include "..\ui\IMGUI.h"
+#include "..\DialogResources.h"
 
 namespace profiler {
 
 	const int MAX_PROFLING_ENTRIES = 256;
+	
 	// -------------------------------------------------------
 	// Profile data
 	// -------------------------------------------------------
@@ -219,5 +222,41 @@ namespace profiler {
 			LOG << line << " " << pd.name;
 		}
 		LOG << "------------------------------------------------------------";
+	}
+
+	void showDialog(v2* position) {
+		gui::start(EDITOR_ID, position);
+		int state = 1;
+		if (gui::begin("Profiler", &state)) {
+			float norm = ctx.data[0].totalTime;
+			char buffer[256];
+			for (int i = 0; i < ctx.index; ++i) {
+				ProfileData& pd = ctx.data[i];
+				int ident = pd.level * 2;
+				//float per = pd.totalTime / norm * 100.0f;
+				sprintf(buffer, "%3d - %3.8f - %.11s", pd.invokeCounter, pd.totalTime,pd.name);
+				gui::Label(EDITOR_ID + 1 + i, buffer);
+			}
+		}
+		gui::end();
+	}
+
+	int get_snapshot(ProfileSnapshot* items, int max) {
+		int realMax = ctx.index;
+		if (realMax > max) {
+			realMax = max;
+		}
+		float total = 0.0f;
+		for (int i = 0; i < realMax; ++i) {
+			ProfileData& pd = ctx.data[i];
+			ProfileSnapshot& snap = items[i];
+			strcpy(snap.name, pd.name);
+			snap.level = pd.level;
+			snap.invokeCounter = pd.invokeCounter;
+			snap.totalTime = pd.totalTime;
+			total += pd.totalTime;
+		}
+		items[0].totalTime = total;
+		return realMax;
 	}
 }

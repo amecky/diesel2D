@@ -1156,7 +1156,8 @@ namespace gui {
 			guiContext->addBox(p, v2(width + barWidth, 1.0f), guiContext->colors[CLR_INPUT_EDIT]);
 		}
 		//guiContext->position.y -= height;
-		guiContext->nextPosition(height);
+		//guiContext->nextPosition(height);
+		guiContext->nextPosition();
 	}
 
 	// -------------------------------------------------------
@@ -1257,7 +1258,7 @@ namespace gui {
 		for (int i = 0; i < win.num; ++i) {
 			const DrawCall& call = win.calls[i];
 			float endX = call.position.x + call.size.x;
-			float endY = call.position.y - call.size.y;
+			float endY = call.position.y - call.size.y * 0.5f;
 			if (endX > dim.x) {
 				dim.x = endX;
 			}

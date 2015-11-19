@@ -8,7 +8,7 @@
 #include "..\utils\FileUtils.h"
 #include "..\compiler\AssetCompiler.h"
 #include "..\sprites\SpriteBatch.h"
-
+#include "..\DialogResources.h"
 
 namespace ds {
 
@@ -254,9 +254,6 @@ namespace ds {
 			renderer::initializeDevice(settings);
 			int vp = renderer::createViewport(settings.screenWidth, settings.screenHeight, settings.screenWidth, settings.screenHeight);
 			renderContext->viewportWidth = settings.screenWidth;
-			if (settings.showEditor) {
-				renderContext->viewportWidth -= 500;
-			}
 			renderContext->viewportHeight = settings.screenHeight;
 			//int centerX = settings.width / 2;
 			//int centerY = settings.height / 2;
@@ -1847,11 +1844,27 @@ namespace ds {
 			//gProfiler->show(x,y,this);
 		}
 
-		void showDrawCounter(int x, int y) {
-			int ty = y;
-			debug(x, ty, ds::Color(1.0f, 1.0f, 1.0f, 1.0f), "DrawCounter IDX: %d Vertices: %d Sprites: %d Flushes: %d", renderContext->drawCounter.indexCounter, renderContext->drawCounter.numPrim, renderContext->drawCounter.sprites, renderContext->drawCounter.flushes);
-			ty += 20;
-			debug(x, ty, ds::Color(1.0f, 1.0f, 1.0f, 1.0f), "DrawCalls: %d Textures: %d Shaders: %d", renderContext->drawCounter.drawCalls, renderContext->drawCounter.textures, renderContext->drawCounter.shaders);
+		void showDrawCounter(v2* position) {
+			gui::start(EDITOR_ID, position);
+			int state = 1;
+			if (gui::begin("Draw Calls", &state)) {
+				char buffer[256];
+				sprintf(buffer, "DrawCounter IDX: %d", renderContext->drawCounter.indexCounter);
+				gui::Label(EDITOR_ID + 1, buffer);
+				sprintf(buffer, "Vertices: %d", renderContext->drawCounter.numPrim);
+				gui::Label(EDITOR_ID + 2, buffer);
+				sprintf(buffer, "Sprites: %d", renderContext->drawCounter.sprites);
+				gui::Label(EDITOR_ID + 3, buffer);
+				sprintf(buffer, "Flushes: %d", renderContext->drawCounter.flushes);
+				gui::Label(EDITOR_ID + 4, buffer);
+				sprintf(buffer, "DrawCalls: %d", renderContext->drawCounter.drawCalls);
+				gui::Label(EDITOR_ID + 5, buffer);
+				sprintf(buffer, "Textures: %d", renderContext->drawCounter.textures);
+				gui::Label(EDITOR_ID + 6, buffer);
+				sprintf(buffer, "Shaders: %d", renderContext->drawCounter.shaders);
+				gui::Label(EDITOR_ID + 7, buffer);
+			}
+			gui::end();
 		}
 
 		void printDrawCounter() {

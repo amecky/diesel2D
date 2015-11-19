@@ -535,7 +535,7 @@ namespace ds {
 		void debug(int x, int y, const Color& color, char* format, ...);
 		void debug(int x, int y, const Color& color, char* format, va_list args);
 		void showProfiler(int x, int y);
-		void showDrawCounter(int x, int y);
+		void showDrawCounter(v2* position);
 		void printDrawCounter();
 
 	}

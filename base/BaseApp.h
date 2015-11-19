@@ -8,6 +8,7 @@
 #include "..\renderer\graphics.h"
 #include "Settings.h"
 #include "..\editor\BitmapFontsDialog.h"
+#include "..\utils\Profiler.h"
 
 namespace ds {
 
@@ -16,6 +17,7 @@ struct BitmapFont;
 class ParticleManager;
 class DialogsEditor;
 class SpriteTemplatesEditor;
+
 
 struct GameTime {
 	float elapsed;
@@ -37,6 +39,10 @@ struct DebugInfo {
 	bool showDrawCounter;
 	bool printProfiler;
 	bool debugRenderer;
+	bool performanceOverlay;
+	bool showEditor;
+	int profilerTicks;
+	int snapshotCount;
 };
 	
 struct KeyStates {
@@ -112,6 +118,10 @@ protected:
 	virtual void OnKeyUp( WPARAM wParam ) {}
 	virtual void onGUIButton(DialogID dlgID,int button) {}
 	virtual void OnChar(char ascii,unsigned int keyState) {}
+	void logKeyBindings();
+	void showPerformceOverlay(v2* position);
+
+
 	DialogManager gui;
 	AudioManager* audio;
 	GameStateMachine* stateMachine;
@@ -124,6 +134,7 @@ protected:
 	float _totalTime;
 	Settings _settings;
 private:
+	void showProfilerSnapshot(v2* position);
 	void showEditor();
 	Vector2f m_MousePos;
 	Vector2f m_TwistedMousePos;
@@ -142,7 +153,8 @@ private:
 
 	DialogsEditor* _dialogsEditor;
 	SpriteTemplatesEditor* _templatesEditor;
-	
+	v2 _perfHUDPos;
+	ProfileSnapshot _snapshots[64];
 }; 
 
 }
