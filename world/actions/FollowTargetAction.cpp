@@ -14,12 +14,15 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	FollowTargetAction::~FollowTargetAction() {
+		if (m_Data.buffer != 0) {
+			delete[] m_Data.buffer;
+		}
 	}
 
 	void FollowTargetAction::allocate(int sz) {
 		int size = sz * (sizeof(SID) + sizeof(float));
-		m_Buffer = new char[size];
-		m_Data.ids = (SID*)(m_Buffer);
+		m_Data.buffer = new char[size];
+		m_Data.ids = (SID*)(m_Data.buffer);
 		m_Data.velocities = (float*)(m_Data.ids + sz);
 		m_Data.total = sz;
 	}
@@ -27,20 +30,9 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void FollowTargetAction::attach(SID id,float velocity) {
-		if ( m_Data.total == 0 ) {
-			allocate(256);
-			m_Data.num = 0;
-		}
-		int idx = m_Data.num;
-		if ( m_Mapping.find(id) != m_Mapping.end()) {
-			idx = m_Mapping[id];			
-		}
-		else {
-			++m_Data.num;
-		}
+		int idx = next(id, m_Data);
 		m_Data.ids[idx] = id;
 		m_Data.velocities[idx] = velocity;
-		m_Mapping[id] = idx;
 	}
 
 	// -------------------------------------------------------
@@ -149,7 +141,6 @@ namespace ds {
 		SID current = m_Data.ids[i];
 		m_Data.ids[i] = m_Data.ids[last];
 		m_Data.velocities[i] = m_Data.velocities[last];
-		m_Mapping[last_id] =  i;
 		--m_Data.num;
 		return current;
 	}
@@ -158,7 +149,6 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void FollowTargetAction::clear() {
-		m_Mapping.clear();
 		m_Data.num = 0;
 	}
 
@@ -169,11 +159,13 @@ namespace ds {
 		for ( int i = 0; i < m_Data.num; ++i ) {
 			LOG << i << " : id: " << m_Data.ids[i] << " velocity: " << m_Data.velocities[i];
 		}
+		/*
 		std::map<SID,int>::iterator it = m_Mapping.begin();
 		while ( it != m_Mapping.end()) {
 			LOG << it->first << " = " << it->second;
 			++it;
 		}
+		*/
 	}
 
 }

@@ -139,7 +139,7 @@ namespace ds {
 	void World::remove(SID id) {
 		m_Physics.remove(id);		
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
-			m_Actions[i]->remove(id);
+			m_Actions[i]->removeByID(id);
 		}		
 		sar::remove(m_Data,id);
 	}
@@ -316,11 +316,13 @@ namespace ds {
 
 	void World::debug(SID sid) {
 		sar::debug(m_Data, sid);
+		/*
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			if ( m_Actions[i]->contains(sid)) {
 				m_Actions[i]->debug(sid);
 			}
 		}
+		*/
 	}
 
 	SID World::pick(const Vector2f& pos) {

@@ -12,8 +12,8 @@ namespace ds {
 
 	void MoveByAction::allocate(int sz) {
 		int size = sz * (sizeof(SID) + sizeof(Vector2f) + sizeof(float) + sizeof(bool));
-		m_Buffer = new char[size];
-		m_Data.ids = (SID*)(m_Buffer);
+		m_Data.buffer = new char[size];
+		m_Data.ids = (SID*)(m_Data.buffer);
 		m_Data.velocities = (Vector2f*)(m_Data.ids + sz);
 		m_Data.timers = (float*)(m_Data.velocities + sz);
 		m_Data.bounce = (bool*)(m_Data.timers + sz);
@@ -22,24 +22,12 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void MoveByAction::attach(SID id,const Vector2f& velocity,bool bounce) {
-		if ( m_Data.total == 0 ) {
-			int size = 256;
-			allocate(size);
-			m_Data.num = 0;
-		}
-		int idx = m_Data.num;
-		if ( m_Mapping.find(id) != m_Mapping.end()) {
-			idx = m_Mapping[id];			
-		}
-		else {
-			++m_Data.num;
-		}
+	void MoveByAction::attach(SID id,const Vector2f& velocity,bool bounce) {		
+		int idx = next(id, m_Data);
 		m_Data.ids[idx] = id;
 		m_Data.velocities[idx] = velocity;		
 		m_Data.timers[idx] = 0.0f;
 		m_Data.bounce[idx] = bounce;
-		m_Mapping[id] = idx;
 	}
 
 	void MoveByAction::rotateTo(SpriteArray& array, int index) {
@@ -110,7 +98,7 @@ namespace ds {
 		m_Data.velocities[i] = m_Data.velocities[last];
 		m_Data.timers[i] = m_Data.timers[last];
 		m_Data.bounce[i] = m_Data.bounce[last];
-		m_Mapping[last_id] =  i;		
+		//m_Mapping[last_id] =  i;		
 		--m_Data.num;
 		return current;
 	}
@@ -119,7 +107,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void MoveByAction::clear() {
-		m_Mapping.clear();
+		//m_Mapping.clear();
 		m_Data.num = 0;
 	}
 

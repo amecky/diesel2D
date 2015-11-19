@@ -11,24 +11,30 @@ namespace ds {
 
 	class MoveByAction : public AbstractAction {
 
-		struct MoveByActionData {
-			int num;
-			int total;
-			SID* ids;
+		struct MoveByActionData : public BasicData {
+
 			Vector2f* velocities;
 			float* timers;
 			bool* bounce;
-			MoveByActionData() : num(0) , total(0) {}
+
+			MoveByActionData() : BasicData() {}
 		};
 
 	public:
 		MoveByAction();
-		virtual ~MoveByAction() {}
+		virtual ~MoveByAction() {
+			if (m_Data.buffer != 0) {
+				delete[] m_Data.buffer;
+			}
+		}
 		void attach(SID id,const Vector2f& velocity,bool bounce = false);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
 		void clear();
 		void debug();
 		void debug(SID sid) {}
+		void removeByID(SID id) {
+			remove(id, m_Data);
+		}
 	protected:
 		SID swap(int index);
 	private:

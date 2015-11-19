@@ -11,11 +11,8 @@ namespace ds {
 
 	class ColorFadeToAction : public AbstractAction {
 
-		struct ColorFadeToActionData {
+		struct ColorFadeToActionData : public BasicData {
 
-			int num;
-			int total;
-			SID* ids;
 			Color* startColors;
 			Color* endColors;
 			float* timers;
@@ -23,7 +20,7 @@ namespace ds {
 			tweening::TweeningType* tweeningTypes;
 			int* modes;
 
-			ColorFadeToActionData() : num(0), total(0) {}
+			ColorFadeToActionData() : BasicData() {}
 		};
 
 	public:
@@ -34,6 +31,9 @@ namespace ds {
 		void clear();
 		void debug();
 		void debug(SID sid) {}
+		void removeByID(SID id) {
+			remove(id, m_Data);
+		}
 	protected:
 		SID swap(int index);
 	private:

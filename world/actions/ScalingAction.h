@@ -11,10 +11,8 @@ namespace ds {
 
 	class ScalingAction : public AbstractAction {
 
-		struct ScalingActionData {
-			int num;
-			int total;
-			SID* ids;
+		struct ScalingActionData : public BasicData {
+
 			Vector2f* startScale;
 			Vector2f* endScale;
 			float* timers;
@@ -22,7 +20,7 @@ namespace ds {
 			tweening::TweeningType* tweeningTypes;
 			int* modes;
 
-			ScalingActionData() : num(0) , total(0) {}
+			ScalingActionData() : BasicData() {}
 		};
 
 	public:
@@ -33,6 +31,9 @@ namespace ds {
 		void clear();
 		void debug();
 		void debug(SID sid) {}
+		void removeByID(SID id) {
+			remove(id, m_Data);
+		}
 	protected:
 		SID swap(int i);
 	private:

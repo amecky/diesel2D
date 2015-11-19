@@ -11,14 +11,12 @@ namespace ds {
 
 	class WaitAction : public AbstractAction {
 
-		struct WaitActionData {
-			int num;
-			int total;
-			SID* ids;
+		struct WaitActionData : public BasicData {
+
 			float* timers;
 			float* ttl;
 
-			WaitActionData() : num(0) , total(0) {}
+			WaitActionData() : BasicData() {}
 		};
 
 	public:
@@ -29,6 +27,9 @@ namespace ds {
 		void clear();
 		void debug();
 		void debug(SID sid);
+		void removeByID(SID id) {
+			remove(id, m_Data);
+		}
 	protected:
 		SID swap(int i);
 	private:

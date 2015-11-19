@@ -12,8 +12,8 @@ namespace ds {
 
 	void MoveToAction::allocate(int sz) {
 		int size = sz * (sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(float) + sizeof(float) + sizeof(tweening::TweeningType)+sizeof(int));
-		m_Buffer = new char[size];
-		m_Data.ids = (SID*)(m_Buffer);
+		m_Data.buffer = new char[size];
+		m_Data.ids = (SID*)(m_Data.buffer);
 		m_Data.startPositions = (Vector2f*)(m_Data.ids + sz);
 		m_Data.endPositions = (Vector2f*)(m_Data.startPositions + sz);
 		m_Data.timers = (float*)(m_Data.endPositions + sz);
@@ -26,18 +26,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void MoveToAction::attach(SID id, SpriteArray& array,const Vector2f& startPos, const Vector2f& endPos, float ttl, int mode, const tweening::TweeningType& tweeningType) {
-		if ( m_Data.total == 0 ) {
-			int size = 256;
-			allocate(size);
-			m_Data.num = 0;
-		}
-		int idx = m_Data.num;
-		if ( m_Mapping.find(id) != m_Mapping.end()) {
-			idx = m_Mapping[id];			
-		}
-		else {
-			++m_Data.num;
-		}
+		int idx = next(id, m_Data);
 		m_Data.ids[idx] = id;
 		m_Data.startPositions[idx] = startPos;
 		m_Data.endPositions[idx] = endPos;
@@ -49,7 +38,6 @@ namespace ds {
 			--m_Data.modes[idx];
 		}
 		sar::setPosition(array, id, startPos);
-		m_Mapping[id] = idx;
 	}
 
 	// -------------------------------------------------------
@@ -95,7 +83,6 @@ namespace ds {
 		m_Data.ttl[i] = m_Data.ttl[last];
 		m_Data.tweeningTypes[i] = m_Data.tweeningTypes[last];
 		m_Data.modes[i] = m_Data.modes[last];
-		m_Mapping[last_id] =  i;		
 		--m_Data.num;
 		return current;
 	}
@@ -104,7 +91,6 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void MoveToAction::clear() {
-		m_Mapping.clear();
 		m_Data.num = 0;
 	}
 
@@ -119,7 +105,7 @@ namespace ds {
 	}
 
 	void MoveToAction::debug(SID sid) {
-		int i = m_Mapping[sid];
+		int i = m_Data.findIndex(sid);
 		LOG << "> move_to : id: " << m_Data.ids[i] << " start: " << DBG_V2(m_Data.startPositions[i]) << " end: " << DBG_V2(m_Data.endPositions[i]) << " ttl: " << m_Data.ttl[i] << " timer: " << m_Data.timers[i];
 	}
 

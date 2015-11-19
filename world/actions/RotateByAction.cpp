@@ -12,8 +12,8 @@ namespace ds {
 
 	void RotateByAction::allocate(int sz) {
 		int size = sz * (sizeof(SID) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(tweening::TweeningType)+sizeof(int));
-		m_Buffer = new char[size];
-		m_Data.ids = (SID*)(m_Buffer);
+		m_Data.buffer = new char[size];
+		m_Data.ids = (SID*)(m_Data.buffer);
 		m_Data.startAngles = (float*)(m_Data.ids + sz);
 		m_Data.endAngles = (float*)(m_Data.startAngles + sz);
 		m_Data.steps = (float*)(m_Data.endAngles + sz);
@@ -27,18 +27,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void RotateByAction::attach(SID id,float startAngle,float endAngle,float ttl,int mode,const tweening::TweeningType& tweeningType) {
-		if ( m_Data.total == 0 ) {
-			int size = 256;
-			allocate(size);
-			m_Data.num = 0;
-		}
-		int idx = m_Data.num;
-		if ( m_Mapping.find(id) != m_Mapping.end()) {
-			idx = m_Mapping[id];			
-		}
-		else {
-			++m_Data.num;
-		}
+		int idx = next(id, m_Data);
 		m_Data.ids[idx] = id;
 		m_Data.startAngles[idx] = startAngle;
 		m_Data.endAngles[idx] = endAngle;
@@ -50,7 +39,6 @@ namespace ds {
 		if ( mode > 0 ) {
 			--m_Data.modes[idx];
 		}
-		m_Mapping[id] = idx;
 	}
 
 	// -------------------------------------------------------
@@ -99,7 +87,6 @@ namespace ds {
 		m_Data.ttl[i] = m_Data.ttl[last];
 		m_Data.modes[i] = m_Data.modes[last];
 		m_Data.tweeningTypes[i] = m_Data.tweeningTypes[last];
-		m_Mapping[last_id] =  i;		
 		--m_Data.num;
 		return current;
 	}
@@ -108,7 +95,6 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void RotateByAction::clear() {
-		m_Mapping.clear();
 		m_Data.num = 0;
 	}
 
@@ -122,7 +108,7 @@ namespace ds {
 	}
 
 	void RotateByAction::debug(SID sid) {
-		int i = m_Mapping[sid];
+		int i = m_Data.findIndex(sid);
 		LOG << "> rotate by : id: " << m_Data.ids[i] << " start: " << m_Data.startAngles[i] << " end: " << m_Data.endAngles[i] << " ttl: " << m_Data.ttl[i] << " timer: " << m_Data.timers[i];
 	}
 

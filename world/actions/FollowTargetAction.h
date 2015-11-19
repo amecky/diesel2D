@@ -12,13 +12,11 @@ namespace ds {
 
 	class FollowTargetAction : public AbstractAction {
 
-		struct FollowTargetActionData {
-			int num;
-			int total;
-			SID* ids;
+		struct FollowTargetActionData : public BasicData {
+
 			float* velocities;
 
-			FollowTargetActionData() : num(0), total(0) {}
+			FollowTargetActionData() : BasicData() {}
 		};
 
 	public:
@@ -31,6 +29,9 @@ namespace ds {
 		void debug(SID sid) {}
 		void setTarget(Vector2f* target) {
 			m_Target = target;
+		}
+		void removeByID(SID id) {
+			remove(id, m_Data);
 		}
 	protected:
 		SID swap(int i);

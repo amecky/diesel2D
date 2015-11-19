@@ -39,6 +39,7 @@ BaseApp::BaseApp() {
 	m_DebugInfo.performanceOverlay = false;
 	m_DebugInfo.showEditor = false;
 	m_DebugInfo.profilerTicks = 0;
+	m_DebugInfo.monitoring = false;
 	m_ButtonState.processed = true;
 	m_MousePos = Vector2f(0,0);
 	rand.seed(GetTickCount());
@@ -114,6 +115,10 @@ void BaseApp::logKeyBindings() {
 	LOGC("BaseApp") << "F7 -> debug renderer";
 }
 
+void BaseApp::activateMonitoring(float threshold) {
+	m_DebugInfo.monitoring = true;
+	m_DebugInfo.treshold = threshold;
+}
 // -------------------------------------------------------
 // Load sprites
 // -------------------------------------------------------
@@ -304,6 +309,13 @@ void BaseApp::buildFrame() {
 	PR_END("RENDER")
 	gui::endFrame();
 	profiler::finalize();
+	if (m_DebugInfo.monitoring) {
+		if (profiler::get_current_total_time() > m_DebugInfo.treshold) {
+			debug::printDrawCounter();
+			LOG << "--------------------------------";
+			profiler::print();
+		}
+	}
 	renderer::endRendering();
 	//profiler::finalize();
 	//PR_END("MAIN")

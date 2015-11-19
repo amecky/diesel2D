@@ -169,6 +169,9 @@ namespace profiler {
 		}
 	}
 
+	float get_current_total_time() {
+		return ctx.data[0].totalTime;
+	}
 	// -------------------------------------------------------
 	// get total times array
 	// -------------------------------------------------------

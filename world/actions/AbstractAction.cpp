@@ -1,6 +1,6 @@
 #include "AbstractAction.h"
 #include "..\..\utils\Log.h"
-
+/*
 namespace ds {
 
 	AbstractAction::AbstractAction(void) : m_Buffer(0) {		
@@ -24,6 +24,20 @@ namespace ds {
 		m_BoundingRect = r;
 	}
 
+	int AbstractAction::next() {
+		if (m_Data.total == 0) {
+			int size = 256;
+			allocate(size);
+			m_Data.num = 0;
+		}
+		int idx = m_Data.num;
+		if (m_Mapping.find(id) != m_Mapping.end()) {
+			idx = m_Mapping[id];
+		}
+		else {
+			++m_Data.num;
+		}
+	}
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
@@ -64,3 +78,4 @@ namespace ds {
 	}
 
 }
+*/

@@ -43,6 +43,8 @@ struct DebugInfo {
 	bool showEditor;
 	int profilerTicks;
 	int snapshotCount;
+	bool monitoring;
+	float treshold;
 };
 	
 struct KeyStates {
@@ -109,6 +111,7 @@ public:
 		renderer::setMousePosition(m_TwistedMousePos.x, m_TwistedMousePos.y);
 	}
 protected:
+	void activateMonitoring(float threshold);
 	void loadSprites();
 	void initializeGUI(BitmapFont* font);
 	virtual const char* getTitle() = 0;

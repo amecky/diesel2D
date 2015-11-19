@@ -12,8 +12,8 @@ namespace ds {
 
 	void RemoveAfterAction::allocate(int sz) {
 		int size = sz * (sizeof(SID) + sizeof(float) + sizeof(float));
-		m_Buffer = new char[size];
-		m_Data.ids = (SID*)(m_Buffer);
+		m_Data.buffer = new char[size];
+		m_Data.ids = (SID*)(m_Data.buffer);
 		m_Data.timers = (float*)(m_Data.ids + sz);
 		m_Data.ttl = (float*)(m_Data.timers + sz);
 		m_Data.total = sz;
@@ -22,22 +22,10 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void RemoveAfterAction::attach(SID id, float ttl) {
-		if ( m_Data.total == 0 ) {
-			int size = 256;
-			allocate(size);
-			m_Data.num = 0;
-		}
-		int idx = m_Data.num;
-		if ( m_Mapping.find(id) != m_Mapping.end()) {
-			idx = m_Mapping[id];			
-		}
-		else {
-			++m_Data.num;
-		}
+		int idx = next(id, m_Data);
 		m_Data.ids[idx] = id;
 		m_Data.timers[idx] = 0.0f;
 		m_Data.ttl[idx] = ttl;
-		m_Mapping[id] = idx;
 	}
 
 	// -------------------------------------------------------
@@ -66,7 +54,6 @@ namespace ds {
 		m_Data.ids[i] = m_Data.ids[last];
 		m_Data.timers[i] = m_Data.timers[last];
 		m_Data.ttl[i] = m_Data.ttl[last];
-		m_Mapping[last_id] =  i;		
 		--m_Data.num;
 		return current;
 	}
@@ -75,7 +62,6 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void RemoveAfterAction::clear() {
-		m_Mapping.clear();
 		m_Data.num = 0;
 	}
 
@@ -90,7 +76,7 @@ namespace ds {
 	}
 
 	void RemoveAfterAction::debug(SID sid) {
-		int i = m_Mapping[sid];
+		int i = m_Data.findIndex(sid);
 		LOG << "> move_to : id: " << m_Data.ids[i] << " ttl: " << m_Data.ttl[i] << " timer: " << m_Data.timers[i];
 	}
 

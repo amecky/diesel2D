@@ -12,16 +12,14 @@ namespace ds {
 
 	class FollowStraightPathAction : public AbstractAction {
 
-		struct FollowStraightPathActionData {
-			int num;
-			int total;
-			SID* ids;
+		struct FollowStraightPathActionData : public BasicData {
+
 			StraightPath** path;
 			float* timers;
 			float* ttl;
 			int* modes;
 
-			FollowStraightPathActionData() : num(0), total(0) {}
+			FollowStraightPathActionData() : BasicData() {}
 		};
 
 	public:
@@ -32,6 +30,9 @@ namespace ds {
 		void clear();
 		void debug();
 		void debug(SID sid) {}
+		void removeByID(SID id) {
+			remove(id, m_Data);
+		}
 	protected:
 		SID swap(int i);
 	private:

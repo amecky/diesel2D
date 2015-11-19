@@ -13,12 +13,15 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	AlphaFadeToAction::~AlphaFadeToAction() {
+		if (m_Data.buffer != 0) {
+			delete[] m_Data.buffer;
+		}
 	}
 
 	void AlphaFadeToAction::allocate(int sz) {
 		int size = sz * (sizeof(SID) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(tweening::TweeningType)+sizeof(int));
-		m_Buffer = new char[size];
-		m_Data.ids = (SID*)(m_Buffer);
+		m_Data.buffer = new char[size];
+		m_Data.ids = (SID*)(m_Data.buffer);
 		m_Data.startAlphas = (float*)(m_Data.ids + sz);
 		m_Data.endAlphas = (float*)(m_Data.startAlphas + sz);
 		m_Data.timers = (float*)(m_Data.endAlphas + sz);
@@ -31,17 +34,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void AlphaFadeToAction::attach(SID id,float startAlpha,float endAlpha,float ttl,int mode,const tweening::TweeningType& tweeningType) {
-		if ( m_Data.total == 0 ) {
-			allocate(256);
-			m_Data.num = 0;
-		}
-		int idx = m_Data.num;
-		if ( m_Mapping.find(id) != m_Mapping.end()) {
-			idx = m_Mapping[id];			
-		}
-		else {
-			++m_Data.num;
-		}
+		int idx = next(id, m_Data);
 		m_Data.ids[idx] = id;
 		m_Data.startAlphas[idx] = startAlpha;
 		m_Data.endAlphas[idx] = endAlpha;
@@ -52,7 +45,6 @@ namespace ds {
 		if ( mode > 0 ) {
 			--m_Data.modes[idx];
 		}
-		m_Mapping[id] = idx;
 	}
 
 	// -------------------------------------------------------
@@ -98,7 +90,6 @@ namespace ds {
 		m_Data.ttl[i] = m_Data.ttl[last];
 		m_Data.tweeningTypes[i] = m_Data.tweeningTypes[last];
 		m_Data.modes[i] = m_Data.modes[last];
-		m_Mapping[last_id] =  i;		
 		--m_Data.num;
 		return current;
 	}
@@ -107,7 +98,6 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void AlphaFadeToAction::clear() {
-		m_Mapping.clear();
 		m_Data.num = 0;
 	}
 
@@ -118,11 +108,13 @@ namespace ds {
 		for ( int i = 0; i < m_Data.num; ++i ) {
 			LOG << i << " : id: " << m_Data.ids[i] << " timer: " << m_Data.timers[i];
 		}
+		/*
 		std::map<SID,int>::iterator it = m_Mapping.begin();
 		while ( it != m_Mapping.end()) {
 			LOG << it->first << " = " << it->second;
 			++it;
 		}
+		*/
 	}
 
 }

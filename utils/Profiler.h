@@ -35,6 +35,8 @@ namespace profiler {
 	void showDialog(v2* position);
 
 	int get_snapshot(ProfileSnapshot* items, int max);
+
+	float get_current_total_time();
 }
 
 #define PRS(name) profiler::start(name);

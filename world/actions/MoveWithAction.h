@@ -9,26 +9,33 @@
 
 namespace ds {
 
+	
 	class MoveWithAction : public AbstractAction {
 
-		struct MoveWithActionData {
-			int num;
-			int total;
-			SID* ids;
+		struct MoveWithActionData : public BasicData {
+
 			MoveFunc* functions;
 			float* timers;
 			float* ttl;
-			MoveWithActionData() : num(0) , total(0) {}
+			MoveWithActionData() : BasicData() {}
 		};
+
 
 	public:
 		MoveWithAction();
-		virtual ~MoveWithAction() {}
+		virtual ~MoveWithAction() {
+			if (m_Data.buffer != 0) {
+				delete[] m_Data.buffer;
+			}
+		}
 		void attach(SID id,const MoveFunc& function,float ttl);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
 		void clear();
 		void debug();
 		void debug(SID sid) {}
+		void removeByID(SID id) {
+			remove(id, m_Data);
+		}
 	protected:
 		SID swap(int index);
 	private:

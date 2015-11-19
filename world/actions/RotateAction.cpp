@@ -12,8 +12,8 @@ namespace ds {
 
 	void RotateAction::allocate(int sz) {
 		int size = sz * (sizeof(SID) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(int));
-		m_Buffer = new char[size];
-		m_Data.ids = (SID*)(m_Buffer);
+		m_Data.buffer = new char[size];
+		m_Data.ids = (SID*)(m_Data.buffer);
 		m_Data.angleVelocities = (float*)(m_Data.ids + sz);
 		m_Data.timers = (float*)(m_Data.angleVelocities + sz);
 		m_Data.ttl = (float*)(m_Data.timers + sz);
@@ -24,18 +24,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void RotateAction::attach(SID id,float angleVelocity,float ttl,int mode) {
-		if ( m_Data.total == 0 ) {
-			int size = 256;
-			allocate(size);
-			m_Data.num = 0;
-		}
-		int idx = m_Data.num;
-		if ( m_Mapping.find(id) != m_Mapping.end()) {
-			idx = m_Mapping[id];			
-		}
-		else {
-			++m_Data.num;
-		}
+		int idx = next(id, m_Data);
 		m_Data.ids[idx] = id;
 		m_Data.angleVelocities[idx] = DEGTORAD(angleVelocity);
 		m_Data.timers[idx] = 0.0f;
@@ -44,7 +33,6 @@ namespace ds {
 		if ( mode > 0 ) {
 			--m_Data.modes[idx];
 		}
-		m_Mapping[id] = idx;
 	}
 
 	// -------------------------------------------------------
@@ -88,7 +76,6 @@ namespace ds {
 		m_Data.timers[i] = m_Data.timers[last];
 		m_Data.ttl[i] = m_Data.ttl[last];
 		m_Data.modes[i] = m_Data.modes[last];
-		m_Mapping[last_id] =  i;		
 		--m_Data.num;
 		return current;
 	}
@@ -97,7 +84,6 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void RotateAction::clear() {
-		m_Mapping.clear();
 		m_Data.num = 0;
 	}
 
@@ -111,7 +97,7 @@ namespace ds {
 	}
 
 	void RotateAction::debug(SID sid) {
-		int i = m_Mapping[sid];
+		int i = m_Data.findIndex(sid);
 		LOG << i << " : id: " << m_Data.ids[i] << " angle velocity: " << m_Data.angleVelocities[i] << " ttl: " << m_Data.ttl[i] << " timer: " << m_Data.timers[i];
 	}
 

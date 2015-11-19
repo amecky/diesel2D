@@ -11,10 +11,8 @@ namespace ds {
 
 	class RotateByAction : public AbstractAction {
 
-		struct RotateByActionData {
-			int num;
-			int total;
-			SID* ids;
+		struct RotateByActionData : public BasicData {
+
 			float* startAngles;
 			float* endAngles;
 			float* steps;
@@ -23,17 +21,24 @@ namespace ds {
 			tweening::TweeningType* tweeningTypes;
 			int* modes;
 
-			RotateByActionData() : num(0) , total(0) {}
+			RotateByActionData() : BasicData() {}
 		};
 
 	public:
 		RotateByAction();
-		virtual ~RotateByAction() {}
+		virtual ~RotateByAction() {
+			if (m_Data.buffer != 0) {
+				delete[] m_Data.buffer;
+			}
+		}
 		void attach(SID id,float startAngle,float endAngle,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
 		void clear();
 		void debug();
 		void debug(SID sid);
+		void removeByID(SID id) {
+			remove(id, m_Data);
+		}
 	protected:
 		SID swap(int index);
 	private:
