@@ -25,8 +25,8 @@ struct FloatPath {
 		return array.size();
 	}
 	
-	void setInterpolationMode(const PathInterpolation& interpolation) {
-		array.setInterpolationMode(interpolation);
+	void setInterpolationMode(const tweening::TweeningType& tweening) {
+		array.setInterpolationMode(tweening);
 	}
 	void setLoopMode(const PathLoopMode& loopMode) {
 		array.setLoopMode(loopMode);

@@ -1,81 +1,37 @@
 #include "AbstractAction.h"
 #include "..\..\utils\Log.h"
-/*
+
 namespace ds {
 
-	AbstractAction::AbstractAction(void) : m_Buffer(0) {		
-		//m_BoundingRect.left = 0.0f;
-		//m_BoundingRect.bottom = 0.0f;
-		//m_BoundingRect.right = renderer::getScreenWidth();
-		//m_BoundingRect.top = renderer::getScreenHeight();
-	}
-
-
-	AbstractAction::~AbstractAction(void) {
-		if ( m_Buffer != 0 ) {
-			delete[] m_Buffer;
+	void AbstractAction::remove(SID id, const BasicData& data) {
+		int idx = data.findIndex(id);
+		if (idx != -1) {
+			swap(idx);
 		}
 	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
+	void AbstractAction::removeByIndex(int i) {
+		swap(i);
+	}
 	void AbstractAction::setBoundingRect(const Rect& r) {
 		m_BoundingRect = r;
 	}
-
-	int AbstractAction::next() {
-		if (m_Data.total == 0) {
+	int AbstractAction::next(SID sid, BasicData& data) {
+		if (data.total == 0) {
 			int size = 256;
 			allocate(size);
-			m_Data.num = 0;
+			data.num = 0;
 		}
-		int idx = m_Data.num;
-		if (m_Mapping.find(id) != m_Mapping.end()) {
-			idx = m_Mapping[id];
+		if (data.num + 1 >= data.total) {
+			// FIXME: resize
+		}
+		int idx = data.num;
+		int tmp = data.findIndex(sid);
+		if (tmp != -1) {
+			idx = tmp;
 		}
 		else {
-			++m_Data.num;
+			++data.num;
 		}
+		return idx;
 	}
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	const int AbstractAction::size() const {
-		return m_Mapping.size();
-	}
-
-	// -------------------------------------------------------
-	// Check if Mapping contains SID
-	// -------------------------------------------------------
-	const bool AbstractAction::contains(SID sid) const {
-		 return m_Mapping.find(sid) != m_Mapping.end();
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	void AbstractAction::remove(SID id) {
-		//LOG << "removing id: " << id;
-		if ( m_Mapping.find(id) != m_Mapping.end()) {
-			int i = m_Mapping[id];
-			SID sid = swap(i);
-			//LOG << "removed: " << sid;
-			m_Mapping.erase(id);
-		}
-		//else {
-			//LOG << "not found";
-		//}
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	void AbstractAction::removeByIndex(int i) {		
-		SID current = swap(i);
-		//LOG << "remove index: " << i << " current: " << current;
-		m_Mapping.erase(m_Mapping.find(current));
-	}
-
 }
-*/

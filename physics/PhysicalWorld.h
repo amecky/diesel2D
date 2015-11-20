@@ -25,7 +25,6 @@ namespace ds {
 		}
 	};
 
-	typedef std::map<SID, CID> ColliderMap;
 	typedef std::vector<IgnoredCollision> IgnoredCollisions;
 	
 	public:
@@ -57,7 +56,6 @@ namespace ds {
 		void checkCollisions(int currentIndex, const Vector2f& pos, const Vector2f& extent);
 		bool containsCollision(CID firstID, CID secondID);
 		SpriteArray* m_Sprites;
-		ColliderMap m_ColliderMap;
 		ColliderArray<Vector2f> m_ColliderData;
 		Collision m_Collisions[256];
 		IgnoredCollisions m_Ignored;

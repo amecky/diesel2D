@@ -1,6 +1,7 @@
 #pragma once
 #include "math_types.h"
 #include "..\utils\Color.h"
+#include "tweening.h"
 /*!
  * \class FloatArray
  * 
@@ -10,12 +11,6 @@
  * \date 14.01.2014
  */
 namespace ds {
-
-enum PathInterpolation {
-	PI_LINEAR,
-	PI_STEP,
-	PI_CUBIC
-};
 
 enum PathLoopMode {
 	PLM_ZERO,
@@ -76,8 +71,8 @@ public:
 		return m_Array[index].value;
 	}
 	//! Sets interpolation mode
-	void setInterpolationMode(const PathInterpolation& interpolation) {
-		m_Interpolation = interpolation;
+	void setInterpolationMode(const tweening::TweeningType& tweening) {
+		_tweening = tweening;
 	}
 	//! Sets the loop mode
 	/*!
@@ -96,8 +91,10 @@ private:
 	float catmullRom(float t, float v0, float v1, float v2, float v3);
 	PathItem m_Array[MAX_FLOAT_ARRAY_ITEMS];
 	PathLoopMode m_LoopMode;
-	PathInterpolation m_Interpolation;
 	int m_Count;
+	int _lastIndex;
+	float _lastTime;
+	tweening::TweeningType _tweening;
 };
 
 // -------------------------------------------------------
@@ -139,11 +136,11 @@ struct ColorPath {
 		alpha.reset();
 	}
 
-	void setInterpolationMode(const PathInterpolation& interpolation) {
-		red.setInterpolationMode(interpolation);
-		green.setInterpolationMode(interpolation);
-		blue.setInterpolationMode(interpolation);
-		alpha.setInterpolationMode(interpolation);
+	void setInterpolationMode(const tweening::TweeningType& tweening) {
+		red.setInterpolationMode(tweening);
+		green.setInterpolationMode(tweening);
+		blue.setInterpolationMode(tweening);
+		alpha.setInterpolationMode(tweening);
 	}
 	void setLoopMode(const PathLoopMode& loopMode) {
 		red.setLoopMode(loopMode);
@@ -187,9 +184,9 @@ struct Vector2fPath {
 		return Vector2f(x.value(idx),y.value(idx));
 	}
 	
-	void setInterpolationMode(const PathInterpolation& interpolation) {
-		x.setInterpolationMode(interpolation);
-		y.setInterpolationMode(interpolation);
+	void setInterpolationMode(const tweening::TweeningType& tweening) {
+		x.setInterpolationMode(tweening);
+		y.setInterpolationMode(tweening);
 	}
 	void setLoopMode(const PathLoopMode& loopMode) {
 		x.setLoopMode(loopMode);

@@ -14,11 +14,23 @@ namespace ds {
 		}
 	}
 
+	// --------------------------------------------------------------------------
+	// set sprite array pointer
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::setDataPtr(SpriteArray* sprites) {
 		m_Sprites = sprites;
 	}
 
+	// --------------------------------------------------------------------------
+	// remove by SID
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::remove(SID id) {
+		for (int i = 0; i < m_ColliderData.num; ++i) {
+			if (m_ColliderData.sids[i] == id) {
+				m_ColliderData.remove(m_ColliderData.ids[i]);
+			}
+		}
+		/*
 		if (m_ColliderMap.find(id) != m_ColliderMap.end()) {
 			CID cid = m_ColliderMap[id];
 			//LOG << "removing: " << id << " CID:" << cid;
@@ -26,9 +38,17 @@ namespace ds {
 			m_ColliderData.remove(cid);
 			m_ColliderMap.erase(id);
 		}
+		*/
 	}
 
+	// --------------------------------------------------------------------------
+	// tick
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::tick(float dt) {
+		for (int i = 0; i < m_ColliderData.num; ++i) {
+			m_ColliderData.moveTo(m_ColliderData.ids[i], m_Sprites->getPosition(m_ColliderData.sids[i]));
+		}
+		/*
 		ColliderMap::iterator it = m_ColliderMap.begin();
 		while (it != m_ColliderMap.end()) {
 			SID sid = it->first;
@@ -36,10 +56,14 @@ namespace ds {
 			m_ColliderData.moveTo(cid, m_Sprites->getPosition(sid));
 			++it;
 		}
+		*/
 		m_NumCollisions = 0;
 		checkCollisions();
 	}
 
+	// --------------------------------------------------------------------------
+	// allocate collider data
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::allocateCollider(int size) {
 		if (size > m_ColliderData.total) {
 			ColliderArray<Vector2f> ca;
@@ -77,12 +101,18 @@ namespace ds {
 		}
 	}
 
+	// --------------------------------------------------------------------------
+	// ignore layer
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::ignoreLayer(int layer) {
 		assert(layer >= 0 && layer < 32);
 		LOG << "ignoring layer: " << layer;
 		_ignoredLayers.set(layer);
 	}
 
+	// --------------------------------------------------------------------------
+	// attach collider
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::attachCollider(SID sid, const Vector2f& extent, int type,int layer) {
 		if (m_ColliderData.total == 0) {
 			allocateCollider(256);
@@ -92,9 +122,12 @@ namespace ds {
 		}
 		const Vector2f& p = m_Sprites->getPosition(sid);
 		CID cid = m_ColliderData.create(sid, p, extent, type,layer);
-		m_ColliderMap[sid] = cid;
+		//m_ColliderMap[sid] = cid;
 	}
 
+	// --------------------------------------------------------------------------
+	// attach collider
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::attachCollider(SID sid, int type,int layer) {
 		if (m_ColliderData.total == 0) {
 			allocateCollider(256);
@@ -105,9 +138,12 @@ namespace ds {
 		const Vector2f& p = m_Sprites->getPosition(sid);
 		const ds::Texture& t = m_Sprites->getTexture(sid);
 		CID cid = m_ColliderData.create(sid, p, t.dim, type,layer);
-		m_ColliderMap[sid] = cid;
+		//m_ColliderMap[sid] = cid;
 	}
 
+	// --------------------------------------------------------------------------
+	// check collisions
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::checkCollisions() {
 		for (int i = 0; i < m_ColliderData.num; ++i) {
 			if (!_ignoredLayers.isSet(m_ColliderData.layers[i])) {
@@ -116,6 +152,9 @@ namespace ds {
 		}
 	}
 
+	// --------------------------------------------------------------------------
+	// intersects
+	// --------------------------------------------------------------------------
 	bool PhysicalWorld::intersects(int firstIndex, int secondIndex) {
 		ColliderShape firstShape = m_ColliderData.shapeTypes[firstIndex];
 		ColliderShape secondShape = m_ColliderData.shapeTypes[secondIndex];
@@ -138,6 +177,9 @@ namespace ds {
 		return false;
 	}
 
+	// --------------------------------------------------------------------------
+	// check collision
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::checkCollisions(int currentIndex, const Vector2f& pos, const Vector2f& extent) {
 		
 		for (int i = 0; i < m_ColliderData.num; ++i) {
@@ -169,6 +211,9 @@ namespace ds {
 		}
 	}
 
+	// --------------------------------------------------------------------------
+	// contains collision
+	// --------------------------------------------------------------------------
 	bool PhysicalWorld::containsCollision(CID firstID, CID secondID) {
 		for (int i = 0; i < m_NumCollisions; ++i) {
 			Collision& other = m_Collisions[i];
@@ -182,6 +227,9 @@ namespace ds {
 		return false;
 	}
 
+	// --------------------------------------------------------------------------
+	// debug
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::debug() {
 		LOG << "------- Colliders --------";
 		for (int i = 0; i < m_ColliderData.num; ++i) {
@@ -189,6 +237,9 @@ namespace ds {
 		}
 	}
 
+	// --------------------------------------------------------------------------
+	// should be ignored
+	// --------------------------------------------------------------------------
 	bool PhysicalWorld::shouldBeIgnored(int firstType, int secondType) {
 		for (size_t i = 0; i < m_Ignored.size(); ++i) {
 			IgnoredCollision& ic = m_Ignored[i];
@@ -199,6 +250,9 @@ namespace ds {
 		return false;
 	}
 
+	// --------------------------------------------------------------------------
+	// ignore
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::ignore(int firstType, int secondType) {
 		if (!shouldBeIgnored(firstType, secondType)) {
 			IgnoredCollision c;
@@ -208,6 +262,9 @@ namespace ds {
 		}
 	}
 
+	// --------------------------------------------------------------------------
+	// draw colliders
+	// --------------------------------------------------------------------------
 	void PhysicalWorld::drawColliders(const Texture& texture) {
 		for (int i = 0; i < m_ColliderData.num; ++i) {
 			Vector2f& e = m_ColliderData.extents[i];

@@ -713,6 +713,7 @@ private:
 				path.setLoopMode(PLM_LOOP);
 			}
 			else if ( propertyNames[i] == "interpolation" ) {
+				/*
 				// PI_LINEAR,PI_STEP,PI_CUBIC
 				std::string inMode = category->getProperty("interpolation");
 				if ( inMode == "PI_STEP") {
@@ -721,6 +722,7 @@ private:
 				else if ( inMode == "PI_CUBIC") {
 					path.setInterpolationMode(PI_CUBIC);
 				}
+				*/
 			}
 			else {
 				float timeStep = 0.0f;
@@ -744,6 +746,7 @@ private:
 				path.setLoopMode(PLM_LOOP);
 			}
 			else if ( propertyNames[i] == "interpolation" ) {
+				/*
 				// PI_LINEAR,PI_STEP,PI_CUBIC
 				std::string inMode = category->getProperty("interpolation");
 				if ( inMode == "PI_STEP") {
@@ -752,6 +755,7 @@ private:
 				else if ( inMode == "PI_CUBIC") {
 					path.setInterpolationMode(PI_CUBIC);
 				}
+				*/
 			}
 			else {
 				float timeStep = 0.0f;
@@ -775,6 +779,7 @@ private:
 				path.setLoopMode(PLM_LOOP);
 			}
 			else if (propertyNames[i] == "interpolation") {
+				/*
 				// PI_LINEAR,PI_STEP,PI_CUBIC
 				std::string inMode = category->getProperty("interpolation");
 				if (inMode == "PI_STEP") {
@@ -783,6 +788,7 @@ private:
 				else if (inMode == "PI_CUBIC") {
 					path.setInterpolationMode(PI_CUBIC);
 				}
+				*/
 			}
 			else {
 				float value = 0.0f;

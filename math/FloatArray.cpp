@@ -4,7 +4,7 @@
 
 namespace ds {
 
-FloatArray::FloatArray() : m_Count(0) , m_LoopMode(PLM_LAST) , m_Interpolation(PI_LINEAR) {
+FloatArray::FloatArray() : m_Count(0) , m_LoopMode(PLM_LAST) , _lastIndex(-1) , _lastTime(0.0f) , _tweening(tweening::linear) {
 }
 
 FloatArray::~FloatArray() {
@@ -12,10 +12,9 @@ FloatArray::~FloatArray() {
 
 void FloatArray::add(float timeStep,float value) {
 	if ( m_Count < 20 ) {
-		PathItem* item = &m_Array[m_Count];
+		PathItem* item = &m_Array[m_Count++];
 		item->time = timeStep;
 		item->value = value;
-		++m_Count;
 	}
 }
 
@@ -44,11 +43,24 @@ float FloatArray::get(float time) {
 		float maxTime = m_Array[m_Count-1].time;       
 		normTime = fmod(time,(maxTime-minTime));
 	}
-	for ( int i = 0; i < m_Count - 1 ; ++i ) {
+	// we assume that we are moving forward in time
+	int start = 0;
+	if (_lastIndex != -1 && _lastTime < time) {
+		start = _lastIndex;
+	}
+	else {
+		_lastIndex = -1;
+		_lastTime = 0.0f;
+	}
+	for ( int i = start; i < m_Count - 1 ; ++i ) {
 		PathItem* current = &m_Array[i];
 		PathItem* next = &m_Array[i+1];
 		if ( normTime >= current->time && normTime <= next->time ) {
+			_lastIndex = i;
+			_lastTime = time;
 			float t = ( normTime - current->time ) / ( next->time - current->time);
+			return tweening::interpolate(_tweening, current->value, next->value, t);
+			/*
 			if ( m_Interpolation == PI_LINEAR) {
 				return current->value + ( next->value - current->value) * t;
 			}
@@ -66,6 +78,7 @@ float FloatArray::get(float time) {
 				}
 				return catmullRom(normTime,prev,current->value,next->value,nextNext);
 			}
+			*/
 		}
 	}
 	return 0.0f;
