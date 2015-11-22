@@ -636,7 +636,6 @@ namespace gui {
 			guiContext->active = new_id;
 		}
 		if (guiContext->active == new_id) {
-			//guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT_EDIT]);
 			guiContext->addTiledXBox(p, width, ds::math::buildTexture(160.0f, 160.0f, 150.0f, BOX_HEIGHT), BOX_HEIGHT);
 			handleTextInput();
 			*v = atoi(guiContext->inputText);
@@ -649,7 +648,6 @@ namespace gui {
 		}
 		else {
 			sprintf_s(guiContext->tempBuffer, 64, "%d", *v);
-			//guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
 			guiContext->addTiledXBox(p, width, ds::math::buildTexture(160.0f, 0.0f, 150.0f, BOX_HEIGHT), BOX_HEIGHT);
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->tempBuffer);
