@@ -101,6 +101,15 @@ void BaseApp::prepare() {
 		_templatesEditor->init();
 	}
 	logKeyBindings();
+
+
+	v2 dp;
+	dp.x = _settings.screenWidth - 500.0f;
+	dp.y = _settings.screenHeight - 10.0f;
+	_editor.dialogPos = dp;
+	_editor.position = dp;
+	_perfHUDPos = dp;
+
 	m_Running = true;
 }
 
