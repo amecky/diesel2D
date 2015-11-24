@@ -33,4 +33,26 @@ private:
 	unsigned int m_Bits;
 };
 
+namespace bit {
+	
+	inline void set(int* v, int index) {
+		*v |= 1 << index;
+		
+	}
+
+	inline void clear(int *v, int index) {
+		*v &= ~(1 << index);
+	}
+
+	inline bool isSet(int v, int index) {
+		int tmp = 1 << index;
+		return (v & tmp) == tmp;
+	}
+
+	inline void toggle(int* v, int index) {
+		*v ^= 1 << index;
+	}
+		
+}
+
 }
