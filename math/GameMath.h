@@ -58,6 +58,8 @@ namespace ds {
 		bool isInside(Vector2f& pos, const Rect& rect);
 
 		float reflect(float angle);
+
+		v2 reflect(const v2& v, const v2& n);
 		//void interpolateColor(const Color& firstCol,const Color& secondColor,float t,Color* outColor);
 		bool outside(float value,float min,float max);
 

@@ -475,6 +475,13 @@ namespace ds {
 		return newAngle;
 	}
 
+	v2 reflect(const v2& v, const v2& n) {
+		//Vect2 = Vect1 - 2 * WallN * (WallN DOT Vect1)
+		v2 nn = normalize(n);
+		v2 ret = v - 2.0f * nn * dot(nn, v);
+		return ret;
+	}
+
 	float norm(float t,float max) {
 		float r = t/max;
 		if ( r > 1.0f ) {

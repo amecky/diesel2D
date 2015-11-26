@@ -64,18 +64,18 @@ namespace ds {
 	// -------------------------------------------------------
 	// generate
 	// -------------------------------------------------------
-	void ParticleEmitter::generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, bool started) {
+	void ParticleEmitter::generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32* start, uint32* end, bool started) {
 		if (m_Active) {
 			if (m_Burst) {
-				generate(array, data, m_EmitterData.count, dt);
+				generate(array, data, m_EmitterData.count, start, end, dt);
 				m_Active = false;
 			}
 			else {
 				m_Accu += m_Frequency;
 				if (m_Accu >= m_Frequency) {
-					int start = (int)m_Accu;
-					m_Accu -= start;
-					generate(array, data, start, dt);
+					int count = (int)m_Accu;
+					m_Accu -= count;
+					generate(array, data, count, start, end, dt);
 				}
 				if (!m_Endless) {
 					if (m_Timer >= m_EmitterData.duration) {
@@ -90,18 +90,17 @@ namespace ds {
 	// -------------------------------------------------------
 	// generate
 	// -------------------------------------------------------
-	void ParticleEmitter::generate(ParticleArray* array, const ParticleGeneratorData& data, int count, float dt) {
-		uint32 start = array->countAlive;
-		uint32 end = start + count;
+	void ParticleEmitter::generate(ParticleArray* array, const ParticleGeneratorData& data, int count, uint32* start, uint32* end, float dt) {
+		*start = array->countAlive;
+		*end = *start + count;
 		//uint32 end = start + started;
-		if (end > array->count) {
-			end = array->count;
-		}
-
+		if (*end > array->count) {
+			*end = array->count;
+		}		
 		for (size_t i = 0; i < m_Generators.size(); ++i) {
-			m_Generators[i]->generate(array, data, dt, start, end);
+			m_Generators[i]->generate(array, data, dt, *start, *end);
 		}
-		for (uint32 i = start; i < end; ++i) {
+		for (uint32 i = *start; i < *end; ++i) {
 			array->wake(i);
 		}		
 	}

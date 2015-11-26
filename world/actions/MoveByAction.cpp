@@ -67,7 +67,7 @@ namespace ds {
 				//if (p.x < m_BoundingRect.left || p.x > m_BoundingRect.right || p.y < m_BoundingRect.top || p.y > m_BoundingRect.bottom) {
 				if (isOutOfBounds(p, m_Data.velocities[i])) { 
 					if (m_Data.bounce[i]) {
-						if (p.y < 0.0f || p.y > m_BoundingRect.bottom) {
+						if (p.y < m_BoundingRect.bottom || p.y > m_BoundingRect.top) {
 							m_Data.velocities[i].y *= -1.0f;
 						}
 						if (p.x < 0.0f || p.x > m_BoundingRect.right ) {

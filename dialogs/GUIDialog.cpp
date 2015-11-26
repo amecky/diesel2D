@@ -76,6 +76,7 @@ namespace ds {
 		m_SupportHover = false;
 		m_SelectedInput = -1;
 		strcpy(_name,name);
+		sprintf_s(_jsonName, 128, "dialogs\\%s.json", _name);
 		load();
 	}
 

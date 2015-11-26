@@ -726,7 +726,7 @@ public:
 	~ParticleEmitter();
 	void clear(bool addDefault = true);
 	void start();
-	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, bool started = true);
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32* start, uint32* end, bool started = true);
 	ParticleGenerator* getGenerator(ParticleGeneratorType type);
 	void add(ParticleGenerator* generator);
 	ParticleEmitterData& getEmitterData();
@@ -739,7 +739,7 @@ public:
 		return m_Generators;
 	}
 private:
-	void generate(ParticleArray* array, const ParticleGeneratorData& data, int count, float dt);
+	void generate(ParticleArray* array, const ParticleGeneratorData& data, int count, uint32* start, uint32* end, float dt);
 	Generators m_Generators;
 	ParticleEmitterData m_EmitterData;
 	ParticleSpawner m_Spawner;

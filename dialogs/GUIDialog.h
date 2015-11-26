@@ -170,9 +170,7 @@ public:
 	bool saveData(BinaryWriter& writer);
 	bool loadData(BinaryLoader& loader);
 	const char* getJSONFileName() const {
-		char buffer[64];
-		sprintf_s(buffer, 64, "dialogs\\%s.json", _name);
-		return buffer;
+		return _jsonName;
 	}
 	const char* getFileName() const {
 		return _name;
@@ -218,7 +216,8 @@ private:
 	v2 _position;
 	bool _showAdd;
 	char _name[32];
-	
+	char _jsonName[128];
+
 	GUID _ids[MAX_GUID];
 	int _idIndex;
 	GUITransition _transitions[MAX_GUID];	
