@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	FollowTargetAction::FollowTargetAction() : AbstractAction() , m_Target(0) {
+	FollowTargetAction::FollowTargetAction() : AbstractAction() {
 
 	}
 
@@ -20,49 +20,58 @@ namespace ds {
 	}
 
 	void FollowTargetAction::allocate(int sz) {
-		int size = sz * (sizeof(SID) + sizeof(float));
+		int size = sz * (sizeof(SID) * 2 + sizeof(float));
 		m_Data.buffer = new char[size];
 		m_Data.ids = (SID*)(m_Data.buffer);
-		m_Data.velocities = (float*)(m_Data.ids + sz);
+		m_Data.targets = (SID*)(m_Data.ids + sz);
+		m_Data.velocities = (float*)(m_Data.targets + sz);
 		m_Data.total = sz;
 	}
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void FollowTargetAction::attach(SID id,float velocity) {
+	void FollowTargetAction::attach(SID id,SID target,float velocity) {
 		int idx = next(id, m_Data);
 		m_Data.ids[idx] = id;
 		m_Data.velocities[idx] = velocity;
+		m_Data.targets[idx] = target;
 	}
 
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
 	void FollowTargetAction::update(SpriteArray& array, float dt, ActionEventBuffer& buffer) {
-		if ( m_Target !=0 && m_Data.num > 0 ) {				
-			Vector2f p;
-			Vector2f t;
+		if ( m_Data.num > 0 ) {				
 			for ( int i = 0; i < m_Data.num; ++i ) {
-				Vector2f p = sar::getPosition(array,m_Data.ids[i]);
-				Vector2f diff = *m_Target - p;
-				if (sqr_length(diff) > 100.0f) {
-					Vector2f n = normalize(diff);
-					n *= m_Data.velocities[i] * dt;
-					p += n;
-					sar::setPosition(array, m_Data.ids[i], p);
-					float angle = vector::calculateRotation(n);
-					sar::rotate(array, m_Data.ids[i], angle);
+				SID targetID = m_Data.targets[i];
+				if (array.contains(targetID)) {
+					v2 p = sar::getPosition(array, m_Data.ids[i]);
+					v2 targetPos = sar::getPosition(array, targetID);
+					v2 diff = targetPos - p;
+					if (sqr_length(diff) > 100.0f) {
+						v2 n = normalize(diff);
+						n *= m_Data.velocities[i] * dt;
+						p += n;
+						sar::setPosition(array, m_Data.ids[i], p);
+						float angle = vector::calculateRotation(n);
+						sar::rotate(array, m_Data.ids[i], angle);
+					}
+				}
+				else {
+					removeByIndex(i);
 				}
 			}
 
-			Vector2f v;
-			for (int i = 0; i < m_Data.num; ++i) {
+			//Vector2f v;
+			//for (int i = 0; i < m_Data.num; ++i) {
+				/*
 				int in = array.getIndex(m_Data.ids[i]);
 				int cnt = computeSeparation(array, i, 20.0f, &v);
 				if (cnt > 0) {
 					Vector2f n = normalize(v);
 					array.positions[in] += n * m_Data.velocities[in] * dt * 0.75f;
 				}
+				*/
 				/*
 				int idx = findNearest(array,array.positions[in], 20.0f, in,array.types[in]);
 				if (idx != -1) {					
@@ -79,7 +88,7 @@ namespace ds {
 					}
 				}
 				*/
-			}
+			//}
 			
 		}
 	}
