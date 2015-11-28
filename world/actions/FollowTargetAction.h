@@ -15,6 +15,7 @@ namespace ds {
 		struct FollowTargetActionData : public BasicData {
 
 			float* velocities;
+			SID* targets;
 
 			FollowTargetActionData() : BasicData() {}
 		};
@@ -22,14 +23,11 @@ namespace ds {
 	public:
 		FollowTargetAction();
 		virtual ~FollowTargetAction();
-		void attach(SID id,float velocity);
+		void attach(SID id,SID target,float velocity);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
 		void clear();
 		void debug();
 		void debug(SID sid) {}
-		void setTarget(Vector2f* target) {
-			m_Target = target;
-		}
 		void removeByID(SID id) {
 			remove(id, m_Data);
 		}
@@ -38,7 +36,6 @@ namespace ds {
 	private:
 		int computeSeparation(SpriteArray& array, int self, float radius, Vector2f* v);
 		int findNearest(SpriteArray& array, const Vector2f& pos, float radius, int self, int type);
-		Vector2f* m_Target;
 		void allocate(int sz);
 		FollowTargetActionData m_Data;
 	};

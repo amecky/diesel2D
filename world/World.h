@@ -155,7 +155,7 @@ namespace ds {
 
 		void followCurve(SID sid,BezierCurve* path,float ttl,int mode = 0);
 
-		void followTarget(SID sid,float velocity, Vector2f* pos);
+		void followTarget(SID sid,SID target, float velocity);
 
 		void fadeAlphaTo(SID sid,float startAlpha,float endAlpha,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
 

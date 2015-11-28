@@ -274,9 +274,8 @@ namespace ds {
 		m_FollowCurveAction->attach(sid,path,ttl,mode);
 	}
 
-	void World::followTarget(SID sid,float velocity, Vector2f* pos) {
-		m_FollowTargetAction->attach(sid, velocity);
-		m_FollowTargetAction->setTarget(pos);
+	void World::followTarget(SID sid,SID target,float velocity) {
+		m_FollowTargetAction->attach(sid, target, velocity);
 	}
 
 	void World::wait(SID sid,float ttl) {
