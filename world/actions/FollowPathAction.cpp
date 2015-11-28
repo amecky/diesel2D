@@ -49,8 +49,8 @@ namespace ds {
 	void FollowPathAction::update(SpriteArray& array,float dt,ActionEventBuffer& buffer) {
 		if ( m_Data.num > 0 ) {				
 			// move
-			Vector2f p;
-			Vector2f t;
+			v2 p;
+			v2 t;
 			for ( int i = 0; i < m_Data.num; ++i ) {
 				float norm = math::norm(m_Data.timers[i] , m_Data.ttl[i]);
 				m_Data.path[i]->approx(norm,&p);

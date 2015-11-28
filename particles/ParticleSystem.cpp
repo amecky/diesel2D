@@ -39,11 +39,20 @@ namespace ds {
 
 	void NewParticleSystem::start(const ParticleGeneratorData& data) {
 		_generatorData = data;
+		PR_START("NPS:emitterStart")
 		m_Emitter.start();
-		m_Emitter.generate(&m_Array, data, 0.0f);
+		PR_END("NPS:emitterStart")
+		PR_START("NPS:emitterGenerate")
+		uint32 start = 0;
+		uint32 end = 0;
+		m_Emitter.generate(&m_Array, data, 0.0f,&start, &end);
+		//LOG << "---- start: " << start << " end: " << end;
+		PR_END("NPS:emitterGenerate")
+		PR_START("NPS:emitterModifiers")
 		for (size_t i = 0; i < m_Modifiers.size(); ++i) {
-			m_Modifiers[i]->update(&m_Array, 0.0f);
+			m_Modifiers[i]->init(&m_Array, start, end);
 		}
+		PR_END("NPS:emitterModifiers")
 	}
 
 	void NewParticleSystem::start(const Vector3f& startPosition) {
@@ -57,7 +66,9 @@ namespace ds {
 
 	void NewParticleSystem::update(float elapsed) {
 		PR_START("NPS:update")
-		m_Emitter.generate(&m_Array, _generatorData, elapsed);
+		uint32 start = 0;
+		uint32 end = 0;
+		m_Emitter.generate(&m_Array, _generatorData, elapsed, &start, &end);
 		for (size_t i = 0; i < m_Modifiers.size(); ++i) {
 			m_Modifiers[i]->update(&m_Array, elapsed);
 		}
@@ -137,7 +148,7 @@ namespace ds {
 		PR_START("NPS:buildVertices")
 		Vector3f p(0, 0 , 0);
 		Vector3f dp(0, 0, 0);
-		for (int i = 0; i < m_Array.countAlive; ++i) {
+		for (uint32 i = 0; i < m_Array.countAlive; ++i) {
 			Vector3f cor = m_Array.position[i];
 			//cor = cor - ds::renderer::getSelectedViewport().getPosition();
 		

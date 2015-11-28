@@ -34,25 +34,22 @@ private:
 };
 
 namespace bit {
-	
-	inline void set(int* v, int index) {
+
+	inline void set(int* v,int index) {
 		*v |= 1 << index;
-		
 	}
 
-	inline void clear(int *v, int index) {
+	inline void clear(int* v, int index) {
 		*v &= ~(1 << index);
 	}
-
-	inline bool isSet(int v, int index) {
-		int tmp = 1 << index;
-		return (v & tmp) == tmp;
+	inline bool is_set(int u,int index) {
+		int v = 1 << index;
+		return (u & v) == v;
 	}
 
 	inline void toggle(int* v, int index) {
 		*v ^= 1 << index;
 	}
-		
 }
 
 }

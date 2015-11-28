@@ -83,9 +83,6 @@ typedef std::vector<ParticleModifier*> Modifiers;
 
 class NewParticleSystem : public Serializer {
 
-
-//typedef std::vector<ParticleEmitterInstance> EmitterInstances;
-
 public:
 	NewParticleSystem() {
 		m_Array.initialize(MAX_PARTICLES);

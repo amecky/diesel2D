@@ -3,6 +3,7 @@
 #include "..\utils\PlainTextReader.h"
 #include "..\io\BinaryWriter.h"
 #include "..\data\DataTranslator.h"
+#include "..\utils\Profiler.h"
 
 namespace ds {
 
@@ -18,6 +19,7 @@ public:
 	ParticleModifier() {}
 	virtual ~ParticleModifier() {}
 	virtual void update(ParticleArray* array,float dt) = 0;
+	virtual void init(ParticleArray* array, uint32 start, uint32 end) = 0;
 	virtual void convert(Category* category,BinaryWriter& writer) {} 
 	virtual void load(BinaryLoader* loader) {}
 	virtual const ParticleModifierType getType() const = 0;
@@ -72,6 +74,7 @@ public:
 			array->position[i] += array->velocity[i] * dt;
 		}
 	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
 		return PMT_POSITION;
 	}
@@ -102,6 +105,7 @@ public:
 			++cnt;
 		}
 	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
 		return PMT_POSITION;
 	}
@@ -138,6 +142,11 @@ public:
 			array->color[i] = color::lerp(m_Data.startColor,m_Data.endColor,array->timer[i].y);			
 		}
 	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {
+		for (uint32 i = start; i < end; ++i) {
+			array->color[i] = m_Data.startColor;
+		}
+	}
 	const ParticleModifierType getType() const {
 		return PMT_POSITION;
 	}
@@ -172,6 +181,11 @@ public:
 	void update(ParticleArray* array,float dt) {
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {			
 			array->scale[i] = lerp(m_Data.minScale,m_Data.maxScale,array->timer[i].y);
+		}
+	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {
+		for (uint32 i = start; i < end; ++i) {
+			array->scale[i] = m_Data.minScale;
 		}
 	}
 	const ParticleModifierType getType() const {
@@ -214,6 +228,7 @@ public:
 			//array->position[i] += perp * dt;
 		}
 	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
 		return PMT_POSITION;
 	}
@@ -246,6 +261,11 @@ public:
 			m_Data.path.update(array->timer[i].y,&array->color[i]);			
 		}
 	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {
+		for (uint32 i = start; i < end; ++i) {
+			array->color[i] = m_Data.path.getColor(0);
+		}
+	}
 	const ParticleModifierType getType() const {
 		return PMT_POSITION;
 	}
@@ -276,6 +296,11 @@ public:
 	void update(ParticleArray* array, float dt) {
 		for (uint32 i = 0; i < array->countAlive; ++i) {
 			array->color[i].a = m_Data.path.get(array->timer[i].y) / 255.0f;
+		}
+	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {
+		for (uint32 i = start; i < end; ++i) {
+			array->color[i].a = m_Data.path.get(0.0f);
 		}
 	}
 	const ParticleModifierType getType() const {
@@ -312,6 +337,7 @@ public:
 			array->velocity[i] -= v * dt;
 		}
 	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
 		return PMT_POSITION;
 	}
@@ -344,6 +370,11 @@ public:
 			m_Data.path.update(array->timer[i].y,&array->scale[i]);			
 		}
 	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {
+		for (uint32 i = start; i < end; ++i) {
+			array->scale[i] = m_Data.path.getVec2(0);
+		}
+	}
 	const ParticleModifierType getType() const {
 		return PMT_POSITION;
 	}
@@ -366,6 +397,7 @@ public:
 			//array->rotation[i] = math::getTargetAngle(V2_RIGHT,array->velocity[i]);			
 		}
 	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
 		return PMT_POSITION;
 	}
