@@ -35,19 +35,19 @@ namespace ds {
 	// start specific particlesystem
 	// --------------------------------------------------------------------------
 	void ParticleManager::start(uint32 id,const Vector3f& pos) {	
-		PR_START("ParticleManager::start")
+		PR_START("ParticleManager::start");
 		assert(m_Index[id] != -1);
 		NewParticleSystem* system = m_Systems[m_Index[id]];
 		system->start(pos);
-		PR_END("ParticleManager::start")
+		PR_END("ParticleManager::start");
 	}
 
 	void ParticleManager::start(uint32 id, const ParticleGeneratorData& data) {
-		PR_START("ParticleManager::start")
+		PR_START("ParticleManager::start");
 		assert(m_Index[id] != -1);
 		NewParticleSystem* system = m_Systems[m_Index[id]];
 		system->start(data);
-		PR_END("ParticleManager::start")
+		PR_END("ParticleManager::start");
 	}
 
 	// --------------------------------------------------------------------------
@@ -92,11 +92,11 @@ namespace ds {
 	// update
 	// --------------------------------------------------------------------------
 	void ParticleManager::update(float elapsed) {
-		PR_START("ParticleManager::update")
+		PR_START("ParticleManager::update");
 		for ( size_t i = 0; i < m_Systems.size(); ++i ) {
 			m_Systems[i]->update(elapsed);
 		}
-		PR_END("ParticleManager::update")
+		PR_END("ParticleManager::update");
 	}
 
 	// --------------------------------------------------------------------------
@@ -106,7 +106,7 @@ namespace ds {
 		sprites::flush();
 		int batchSize = 0;
 		begin();
-		PR_START("ParticleManager::render")
+		PR_START("ParticleManager::render");
 		for (size_t i = 0; i < m_Systems.size(); ++i) {
 			const ParticleArray& array = m_Systems[i]->getArray();
 			const Texture& t = m_Systems[i]->getTexture();
@@ -134,7 +134,7 @@ namespace ds {
 			flush();
 		}
 		renderer::setCurrentShader(renderer::getDefaultShaderID());
-		PR_END("ParticleManager::render")
+		PR_END("ParticleManager::render");
 	}
 
 	// --------------------------------------------------------------------------
@@ -166,12 +166,12 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	void ParticleManager::end() {
 		if (m_ParticleIndex > 0) {
-			PR_START("ParticleManager")
+			PR_START("ParticleManager");
 			renderer::setWorldMatrix(matrix::m4identity());
 			renderer::fillBuffer(bufferIndex, particles, m_ParticleIndex);
 			renderer::draw(descriptorIndex, bufferIndex,m_ParticleIndex, indexBufferIndex);
 			renderer::drawCounter().particles += m_ParticleIndex;
-			PR_END("ParticleManager")
+			PR_END("ParticleManager");
 		}
 	}
 

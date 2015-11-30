@@ -65,6 +65,7 @@ BaseApp::~BaseApp() {
 	LOGC("BaseApp") << "Destructing all elements";
 	sprites::shutdown();
 	delete _dialogsEditor;
+	delete _templatesEditor;
 	delete particles;
 	delete stateMachine;
 	//delete gProfiler;
@@ -214,15 +215,15 @@ void BaseApp::buildFrame() {
 	//gProfiler->reset();	
 	profiler::reset();
 	//PR_START("MAIN")
-	PR_START("FILEWATCHER")
+	PR_START("FILEWATCHER");
 #ifdef DEBUG
 	assets::update();
 #endif
-	PR_END("FILEWATCHER")
+	PR_END("FILEWATCHER");
 	renderer::drawCounter().reset();
 	debug::reset();
 	// handle key states
-	PR_START("INPUT")
+	PR_START("INPUT");
 	if ( m_KeyStates.keyDown ) {
 		m_KeyStates.keyDown = false;
 		stateMachine->onKeyDown(m_KeyStates.keyPressed);
@@ -240,7 +241,7 @@ void BaseApp::buildFrame() {
 			OnChar(m_KeyStates.ascii, 0);
 		}
 	}
-	PR_END("INPUT")
+	PR_END("INPUT");
 	if ( !m_ButtonState.processed ) {
 		m_ButtonState.processed = true;
 		if ( m_ButtonState.down ) {
@@ -263,42 +264,42 @@ void BaseApp::buildFrame() {
 	sprites::begin();
 	if ( m_Running ) {
 		_totalTime += m_GameTime.elapsed;
-		PR_START("UPDATE")
+		PR_START("UPDATE");
 		gui.updateMousePos(getMousePos());
 		gui.tick(m_GameTime.elapsed);
-		PR_END("GameObjects::update")
-		PR_START("Game::update")
+		PR_END("GameObjects::update");
+		PR_START("Game::update");
 		update(m_GameTime.elapsed);
 		stateMachine->update(m_GameTime.elapsed);
-		PR_END("Game::update")
-		PR_END("UPDATE")
+		PR_END("Game::update");
+		PR_END("UPDATE");
 	}
-	PR_START("RENDER")
+	PR_START("RENDER");
 	renderer::beginRendering(_settings.clearColor);	
 	renderer::setupMatrices();
-	PR_START("RENDER_GAME")
+	PR_START("RENDER_GAME");
 	ds::sprites::begin();		
 	stateMachine->render();
 	draw();
 	ds::sprites::flush();
-	PR_END("RENDER_GAME")
+	PR_END("RENDER_GAME");
 	//m_World.draw();
-	PRS("RENDER_GUI")
+	PRS("RENDER_GUI");
 	gui.render();
-	PRE("RENDER_GUI")
-	PRS("RENDER_EDITOR")
+	PRE("RENDER_GUI");
+	PRS("RENDER_EDITOR");
 	if (m_DebugInfo.showEditor) {
 		showEditor();
 	}
-	PRE("RENDER_EDITOR")
+	PRE("RENDER_EDITOR");
 	debug::drawDebugMessages();
 	if (m_DebugInfo.performanceOverlay) {
 		showPerformceOverlay(&_perfHUDPos);
 	}
-	PRS("RENDER_FLUSH")
+	PRS("RENDER_FLUSH");
 	renderer::flush();
-	PRE("RENDER_FLUSH")
-	PR_START("DEBUG_RENDER")
+	PRE("RENDER_FLUSH");
+	PR_START("DEBUG_RENDER");
 #ifdef DEBUG		
 	if ( m_DebugInfo.showDrawCounter ) {
 		int y = ds::renderer::getSelectedViewport().getHeight() - 80;
@@ -314,8 +315,8 @@ void BaseApp::buildFrame() {
 	}		
 #endif
 	
-	PR_END("DEBUG_RENDER")
-	PR_END("RENDER")
+	PR_END("DEBUG_RENDER");
+	PR_END("RENDER");
 	gui::endFrame();
 	profiler::finalize();
 	if (m_DebugInfo.monitoring) {

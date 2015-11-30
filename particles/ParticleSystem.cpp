@@ -39,20 +39,20 @@ namespace ds {
 
 	void NewParticleSystem::start(const ParticleGeneratorData& data) {
 		_generatorData = data;
-		PR_START("NPS:emitterStart")
+		PR_START("NPS:emitterStart");
 		m_Emitter.start();
-		PR_END("NPS:emitterStart")
-		PR_START("NPS:emitterGenerate")
+		PR_END("NPS:emitterStart");
+		PR_START("NPS:emitterGenerate");
 		uint32 start = 0;
 		uint32 end = 0;
 		m_Emitter.generate(&m_Array, data, 0.0f,&start, &end);
 		//LOG << "---- start: " << start << " end: " << end;
-		PR_END("NPS:emitterGenerate")
-		PR_START("NPS:emitterModifiers")
+		PR_END("NPS:emitterGenerate");
+		PR_START("NPS:emitterModifiers");
 		for (size_t i = 0; i < m_Modifiers.size(); ++i) {
 			m_Modifiers[i]->init(&m_Array, start, end);
 		}
-		PR_END("NPS:emitterModifiers")
+		PR_END("NPS:emitterModifiers");
 	}
 
 	void NewParticleSystem::start(const Vector3f& startPosition) {
@@ -65,7 +65,7 @@ namespace ds {
 	}
 
 	void NewParticleSystem::update(float elapsed) {
-		PR_START("NPS:update")
+		PR_START("NPS:update");
 		uint32 start = 0;
 		uint32 end = 0;
 		m_Emitter.generate(&m_Array, _generatorData, elapsed, &start, &end);
@@ -73,16 +73,16 @@ namespace ds {
 			m_Modifiers[i]->update(&m_Array, elapsed);
 		}
 		//buildVertices();
-		PR_END("NPS:update")
+		PR_END("NPS:update");
 	}
 
 	void NewParticleSystem::render() {
-		PR_START("NPS:render")
+		PR_START("NPS:render");
 		if (m_Array.countAlive > 0) {
 			ds::sprites::draw(m_Data.texture, m_Array);
 			renderer::drawCounter().particles += m_Array.countAlive;
 		}
-		PR_END("NPS:render")
+		PR_END("NPS:render");
 	}
 
 	void NewParticleSystem::clear() {
@@ -145,7 +145,7 @@ namespace ds {
 	}
 
 	void NewParticleSystem::buildVertices() {
-		PR_START("NPS:buildVertices")
+		PR_START("NPS:buildVertices");
 		Vector3f p(0, 0 , 0);
 		Vector3f dp(0, 0, 0);
 		for (uint32 i = 0; i < m_Array.countAlive; ++i) {
@@ -163,7 +163,7 @@ namespace ds {
 				m_Array.vertices[i * 4 + j].color = m_Array.color[i];
 			}
 		}
-		PR_END("NPS:buildVertices")
+		PR_END("NPS:buildVertices");
 	}
 
 	ParticleGenerator* NewParticleSystem::createGenerator(int id) {

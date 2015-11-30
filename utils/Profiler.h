@@ -39,12 +39,12 @@ namespace profiler {
 	float get_current_total_time();
 }
 
-#define PRS(name) profiler::start(name);
-#define PRE(name) profiler::end(name);
+#define PRS(name) do { profiler::start(name); } while(0)
+#define PRE(name) do { profiler::end(name); } while(0)
 
 #ifdef PROFILING
-#define PR_START(a) profiler::start(a);
-#define PR_END(a) profiler::end(a);
+#define PR_START(a) do { profiler::start(a); } while(0)
+#define PR_END(a) do { profiler::end(a); } while(0)
 #else
 #define PR_START(a) 
 #define PR_END(a) 

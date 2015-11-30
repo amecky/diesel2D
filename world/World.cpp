@@ -145,17 +145,17 @@ namespace ds {
 	}
 
 	void World::renderSingleLayer(int layer) {
-		PR_START("World:render")
+		PR_START("World:render");
 		for (int i = 0; i < m_Data.num; ++i) {
 			if (m_Data.layers[i] == layer) {
 				sprites::draw(m_Data.positions[i], m_Data.textures[i], m_Data.rotations[i], m_Data.scales[i].x, m_Data.scales[i].y, m_Data.colors[i]);
 			}
 		}
-		PR_END("World:render")
+		PR_END("World:render");
 	}
 
 	void World::renderLayers(int* layers, int num_layers) {
-		PR_START("World:render")
+		PR_START("World:render");
 		for (int j = 0; j < num_layers; ++j) {
 			for (int i = 0; i < m_Data.num; ++i) {
 				if (m_Data.layers[i] == layers[j]) {					
@@ -163,19 +163,19 @@ namespace ds {
 				}
 			}
 		}
-		PR_END("World:render")
+		PR_END("World:render");
 	}
 
 	void World::render() {
-		PR_START("World:render")
+		PR_START("World:render");
 		for ( int i = 0; i < m_Data.num; ++i ) {
 			sprites::draw(m_Data.positions[i],m_Data.textures[i],m_Data.rotations[i],m_Data.scales[i].x,m_Data.scales[i].y,m_Data.colors[i]);
 		}
-		PR_END("World:render")
+		PR_END("World:render");
 	}
 
 	void World::tick(float dt) {
-		PR_START("World:tick")
+		PR_START("World:tick");
 		m_Buffer.reset();
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->update(m_Data, dt, m_Buffer);
@@ -188,7 +188,7 @@ namespace ds {
 			}
 		}
 		m_Physics.tick(dt);
-		PR_END("World:tick")
+		PR_END("World:tick");
 	}
 
 	void World::moveTo(SID sid,const Vector2f& startPos,const Vector2f& endPos,float ttl,int mode,const tweening::TweeningType& tweeningType) {

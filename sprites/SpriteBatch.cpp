@@ -97,11 +97,11 @@ namespace sprites {
 
 	void end() {
 		if (spriteCtx->size > 0) {
-			PR_START("sprites")
+			PR_START("sprites");
 			renderer::fillBuffer(spriteCtx->bufferIndex, spriteCtx->sprites, spriteCtx->index);
 			renderer::draw(spriteCtx->descriptorID, spriteCtx->bufferIndex, spriteCtx->index, renderer::getQuadIndexBufferIndex());
 			renderer::drawCounter().sprites += spriteCtx->index;
-			PR_END("sprites")
+			PR_END("sprites");
 		}
 	}
 
