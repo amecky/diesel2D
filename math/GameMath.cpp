@@ -519,6 +519,14 @@ namespace ds {
 		}
 
 		// -------------------------------------------------------
+		// random v2
+		// -------------------------------------------------------
+		v2 random(const v2& min, const v2& max) {
+			float x = random(min.x, max.x);
+			float y = random(min.y, max.y);
+			return v2(x, y);
+		}
+		// -------------------------------------------------------
 		// 
 		// -------------------------------------------------------
 		bool checkLineCircle(const Vector2f& center, float radius,const Vector2f& lineFrom,const Vector2f& lineTo) {
