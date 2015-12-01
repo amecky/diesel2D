@@ -607,6 +607,8 @@ namespace ds {
 			return false;
 		}
 
+		
+
 		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const v2& pos, const v2& dim) {
 			float rx = pos.x;
 			float ry = pos.y;
@@ -631,6 +633,10 @@ namespace ds {
 				(cdy - dim.y / 2.0f) * (cdy - dim.y / 2.0f);
 
 			return (cornerDistance_sq <= (radius * radius));
+		}
+
+		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const AABBox& aabBox) {
+			return checkCircleBoxIntersection(circlePos, radius, aabBox.position, aabBox.extent);
 		}
 
 		bool checkCircleBoxIntersection(const v2& circlePos, float radius, const Rect& rectangle) {

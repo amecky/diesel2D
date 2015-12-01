@@ -196,41 +196,41 @@ namespace ds {
 
 	struct AABBox {
 
-		Vector2f position;
-		Vector2f extent;
-		Vector2f min;
-		Vector2f max;
+		v2 position;
+		v2 extent;
+		v2 min;
+		v2 max;
 
 		AABBox() {}
 
-		AABBox(const Vector2f& pos, const Vector2f& ext) {
+		AABBox(const v2& pos, const v2& ext) {
 			position = pos;
 			extent = ext * 0.5f;
 			min = vec_min(position - extent, position + extent);
 			max = vec_max(position - extent, position + extent);
 		}
 
-		void scale(const Vector2f& s) {
+		void scale(const v2& s) {
 			extent.x *= s.x;
 			extent.y *= s.y;
 			min = vec_min(position - extent, position + extent);
 			max = vec_max(position - extent, position + extent);
 		}
 
-		void transpose(const Vector2f& pos) {
+		void transpose(const v2& pos) {
 			position = pos;
 			min = vec_min(position - extent, position + extent);
 			max = vec_max(position - extent, position + extent);
 		}
 
-		Vector2f findClosestPoint(const Vector2f& p) const {
-			Vector2f ret(0, 0);
+		v2 findClosestPoint(const v2& p) const {
+			v2 ret(0, 0);
 			ret.x = (p.x < min.x) ? min.x : (p.x > max.x) ? max.x : p.x;
 			ret.y = (p.y < min.y) ? min.y : (p.y > max.y) ? max.y : p.y;
 			return ret;
 		}
 
-		bool contains(const Vector2f& point) const {
+		bool contains(const v2& point) const {
 			if (point.x < min.x || max.x < point.x) {
 				return false;
 			}
@@ -241,7 +241,7 @@ namespace ds {
 		}
 
 		const bool overlaps(const AABBox& b) const {
-			const Vector2f T = b.position - position;
+			const v2 T = b.position - position;
 			return fabs(T.x) <= (extent.x + b.extent.x) && fabs(T.y) <= (extent.y + b.extent.y);
 		}
 

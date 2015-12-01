@@ -51,6 +51,13 @@ struct DataArray {
 		return objects[index];
 	}
 
+	const U& get(ID id) const {
+		assert(id != UINT_MAX);
+		unsigned short index = indices[id & INDEX_MASK].index;
+		assert(index != USHRT_MAX);
+		return objects[index];
+	}
+
 	ID add() {
 		assert(numObjects != MAX_FLOW_OBJECTS);
 		Index &in = indices[free_dequeue];
