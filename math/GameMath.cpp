@@ -399,7 +399,7 @@ namespace ds {
 	void followRelative(const Vector2f& targetPos,Vector2f& newPos,float* angle,float dst,float percentage) {
 		Vector2f p = newPos;
 		Vector2f diff = targetPos - p;
-		*angle = getAngle(diff,V2_RIGHT);
+		*angle = getAngle(V2_RIGHT,diff);
 		if ( *angle < 0.0f ) {
 			*angle += 2.0f * D3DX_PI;
 		}

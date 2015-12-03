@@ -45,7 +45,7 @@ namespace ds {
 
 		void save();
 
-		void showDialog();
+		void showDialog(v2* pos);
 
 		int _state;
 		int _offset;

@@ -64,7 +64,9 @@ BaseApp::BaseApp() {
 BaseApp::~BaseApp() {
 	LOGC("BaseApp") << "Destructing all elements";
 	sprites::shutdown();
-	delete _dialogsEditor;
+	if (_dialogsEditor != 0) {
+		delete _dialogsEditor;
+	}
 	delete _templatesEditor;
 	delete particles;
 	delete stateMachine;

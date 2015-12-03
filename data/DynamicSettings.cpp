@@ -170,7 +170,8 @@ namespace ds {
 	// -------------------------------------------------------
 	// show dialog
 	// -------------------------------------------------------
-	void DynamicGameSettings::showDialog() {
+	void DynamicGameSettings::showDialog(v2* pos) {
+		gui::start(20, pos);
 		if (gui::begin("Settings Dialog", &_state)) {
 			gui::ComboBox(DGS_DIALOG_ID + 1, &_model, &_offset, 10);
 			gui::beginGroup();
