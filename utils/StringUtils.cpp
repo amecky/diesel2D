@@ -233,7 +233,7 @@ bool isCharacter(const char p) {
 	else if (p >= 'A' && p <= 'Z') {
 		return true;
 	}
-	else if ( p == '_' || isDigit(p) ) {
+	else if ( p == '_' || isDigit(p) || p == '.' || p == ',') {
 		return true;
 	}
 	return false;

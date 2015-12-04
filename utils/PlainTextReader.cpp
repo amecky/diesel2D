@@ -136,3 +136,232 @@ bool JSONReader::parse(const char* fileName) {
 }
 
 
+
+namespace json {
+
+	Category* read_simplified_json(const char* file_name) {
+		FILE *fp = fopen(file_name, "rb");
+		char* text;
+		if (fp) {
+			Category* root = new Category("root");
+			LOG << "read_simplified_json - parsing " << file_name;
+			fseek(fp, 0, SEEK_END);
+			int size = ftell(fp);
+			fseek(fp, 0, SEEK_SET);
+			text = (char*)malloc(sizeof(char) * (size + 1));
+			fread(text, 1, size, fp);
+			fclose(fp);
+			char* ptr = text;
+			char* name = 0;
+			char* value = 0;
+			bool naming = true;
+			int bracketCounter = 0;
+			// validate file
+			while (*ptr) {
+				if (*ptr == '{') {
+					++bracketCounter;
+				}
+				if (*ptr == '}') {
+					--bracketCounter;
+				}
+				++ptr;
+			}
+			if (bracketCounter != 0) {
+				LOGE << "Number of opening and closing brackets do not match - count: " << bracketCounter;
+				return 0;
+			}
+			LOG << "Valid JSON";
+			std::stack<Category*> stack;
+			stack.push(root);
+			ptr = text;
+			while (*ptr) {
+				if (*ptr == '\t') {
+					++ptr;
+				}
+				else if (*ptr == '/') {
+					++ptr;
+					if (*ptr == '*') {
+						while (*ptr != '/') {
+							++ptr;
+						}
+					}
+					if (*ptr == '/') {
+						while (*ptr != '\n') {
+							++ptr;
+						}
+					}
+				}
+				else if (*ptr == '{' && name != 0) {
+					Category* c = new Category(name);
+					if (!stack.empty()) {
+						Category* parent = stack.top();
+						parent->addCategory(c);
+					}
+					stack.push(c);
+					++ptr;
+					naming = true;
+				}
+				else if (*ptr == '}') {
+					--bracketCounter;
+					++ptr;
+					if (!stack.empty()) {
+						stack.pop();
+					}
+					naming = true;
+				}
+				else if (ds::string::isCharacter(*ptr)) {
+					char* first = ptr;
+					char* last = ptr;
+					while (*ptr) {
+						if (!ds::string::isCharacter(*ptr)) {
+							*last = 0;
+							++ptr;
+							break;
+						}
+						else {
+							*last++ = *ptr++;
+						}
+					}
+					if (naming) {
+						name = first;
+						naming = false;
+					}
+					else {
+						value = first;
+						naming = true;
+					}
+					if (name != 0 && value != 0) {
+						Category* c = stack.top();
+						c->addProperty(name, value);
+						stack.top() = c;
+						name = 0;
+						value = 0;
+					}
+				}
+				else {
+					++ptr;
+				}
+			}
+			free(text);
+			return root;
+		}
+		else {
+			LOGE << "File not found";
+		}
+		return 0;
+	}
+
+	bool read_simplified_json(const char* file_name,Category* root) {
+		FILE *fp = fopen(file_name, "rb");
+		char* text;
+		if (fp) {
+			LOG << "read_simplified_json - parsing " << file_name;
+			fseek(fp, 0, SEEK_END);
+			int size = ftell(fp);
+			fseek(fp, 0, SEEK_SET);
+			text = (char*)malloc(sizeof(char) * (size + 1));
+			fread(text, 1, size, fp);
+			fclose(fp);
+			char* ptr = text;
+			char* name = 0;
+			char* value = 0;
+			bool naming = true;
+			int bracketCounter = 0;
+			// validate file
+			while (*ptr) {
+				if (*ptr == '{') {
+					++bracketCounter;
+				}
+				if (*ptr == '}') {
+					--bracketCounter;
+				}
+				++ptr;
+			}
+			if (bracketCounter != 0) {
+				LOGE << "Number of opening and closing brackets do not match - count: " << bracketCounter;
+				return false;
+			}
+			LOG << "Valid JSON";
+			std::stack<Category*> stack;
+			stack.push(root);
+			ptr = text;
+			while (*ptr) {
+				if (*ptr == '\t') {
+					++ptr;
+				}
+				else if (*ptr == '/') {
+					++ptr;
+					if (*ptr == '*') {
+						while (*ptr != '/') {
+							++ptr;
+						}
+					}
+					if (*ptr == '/') {
+						while (*ptr != '\n') {
+							++ptr;
+						}
+					}
+				}
+				else if (*ptr == '{' && name != 0) {
+					Category* c = new Category(name);
+					if (!stack.empty()) {
+						Category* parent = stack.top();
+						parent->addCategory(c);
+					}
+					stack.push(c);
+					++ptr;
+					naming = true;
+				}
+				else if (*ptr == '}') {
+					--bracketCounter;
+					++ptr;
+					if (!stack.empty()) {
+						stack.pop();
+					}
+					naming = true;
+				}
+				else if (ds::string::isCharacter(*ptr)) {
+					char* first = ptr;
+					char* last = ptr;
+					while (*ptr) {
+						if (!ds::string::isCharacter(*ptr)) {
+							*last = 0;
+							++ptr;
+							break;
+						}
+						else {
+							*last++ = *ptr++;
+						}
+					}
+					if (naming) {
+						name = first;
+						naming = false;
+					}
+					else {
+						value = first;
+						naming = true;
+					}
+					if (name != 0 && value != 0) {
+						Category* c = stack.top();
+						c->addProperty(name, value);
+						stack.top() = c;
+						name = 0;
+						value = 0;
+					}
+				}
+				else {
+					++ptr;
+				}
+			}
+			free(text);
+			return true;
+		}
+		else {
+			LOGE << "File not found";
+		}
+		return false;
+	}
+
+
+
+}

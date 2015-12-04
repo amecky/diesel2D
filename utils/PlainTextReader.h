@@ -499,3 +499,13 @@ private:
 	std::vector<Category*> m_Categories;
 };
 
+// -------------------------------------------------------
+// JSON Reader
+// -------------------------------------------------------
+namespace json {
+
+	Category* read_simplified_json(const char* file_name);
+
+	bool read_simplified_json(const char* file_name,Category* root);
+
+}
