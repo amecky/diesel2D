@@ -26,13 +26,13 @@ namespace ds {
 			BinaryLoader loader;
 			char buffer[64];
 			sprintf_s(buffer, 64, "assets\\%u", string::murmur_hash(getFileName()));
-			LOGC("DataFile") << "loading file: " << buffer;
+			LOG << "loading file: " << buffer;
 			int signature[] = { 0, 8, 15 };
 			if (loader.open(buffer, signature, 3) == IO_OK) {
 				return loadData(loader);
 			}
 			else {
-				LOGC("DataFile") << "Cannot find file";
+				LOG << "Cannot find file";
 				return false;
 			}
 		}
@@ -43,7 +43,7 @@ namespace ds {
 		bool save() {
 			char buffer[64];
 			sprintf_s(buffer, 64, "assets\\%u", string::murmur_hash(getFileName()));
-			LOGC("DataFile") << "saving file: " << buffer;
+			LOG << "saving file: " << buffer;
 			BinaryWriter writer;
 			int signature[] = { 0, 8, 15 };
 			if (writer.open(buffer, signature, 3) == IO_OK) {
@@ -52,7 +52,7 @@ namespace ds {
 				return ret;
 			}
 			else {
-				LOGC("DataFile") << "Cannot open file";
+				LOG << "Cannot open file";
 				return false;
 			}
 		}
@@ -63,14 +63,14 @@ namespace ds {
 		bool exportJSON() {
 			char buffer[64];
 			sprintf_s(buffer, 64,"content\\%s", getJSONFileName());
-			LOGC("DataFile") << "exporting json file: " << buffer;
+			LOG << "exporting json file: " << buffer;
 			// FIXME: check if directory exists
 			JSONWriter jw;
 			if (jw.open(buffer)) {
 				return exportData(jw);
 			}
 			else {
-				LOGC("DataFile") << "Cannot open file";
+				LOG << "Cannot open file";
 				return false;
 			}
 		}
@@ -82,13 +82,13 @@ namespace ds {
 			char buffer[64];
 			// check length
 			sprintf_s(buffer, 64, "content\\%s", getJSONFileName());
-			LOGC("DataFile") << "Reading json file: " << buffer;
+			LOG << "Reading json file: " << buffer;
 			JSONReader reader;
 			if (reader.parse(buffer)) {
 				return importData(reader);
 			}
 			else {
-				LOGC("DataFile") << "Error: Cannot parse file: " << buffer;
+				LOG << "Error: Cannot parse file: " << buffer;
 				return false;
 			}
 		}

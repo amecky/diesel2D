@@ -14,7 +14,7 @@ namespace ds {
 			buffer.vertexDeclaration = vertexType;
 			D3DPOOL pool = D3DPOOL_DEFAULT;
 			DWORD usage = D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC;
-			LOGC("buffer") << "creating new vertex buffer - size: " << size << " vd size: " << buffer.vertexSize;
+			LOG << "creating new vertex buffer - size: " << size << " vd size: " << buffer.vertexSize;
 			HR(renderer::getDevice()->CreateVertexBuffer(size * buffer.vertexSize, usage, 0, pool, &buffer.buffer, NULL));
 		}
 
@@ -22,7 +22,7 @@ namespace ds {
 			D3DPOOL pool = D3DPOOL_MANAGED;
 			DWORD usage = D3DUSAGE_WRITEONLY;
 			HR(renderer::getDevice()->CreateIndexBuffer(size * sizeof(WORD), usage, D3DFMT_INDEX16, pool, &buffer.buffer, NULL));
-			LOGC("buffer") << "new IndexBuffer created size: " << size;
+			LOG << "new IndexBuffer created size: " << size;
 		}
 
 		void buildQuadIndices(IndexBuffer& buffer, int size) {

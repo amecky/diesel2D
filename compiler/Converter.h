@@ -57,7 +57,7 @@ public:
 			writer.close();
 		}
 		else {
-			LOGEC("Converter") << "Cannot parse " << fileName;
+			LOGE << "Cannot parse " << fileName;
 		}
 	}
 

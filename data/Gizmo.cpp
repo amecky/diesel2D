@@ -12,7 +12,7 @@ Gizmo::~Gizmo(void) {
 }
 
 void Gizmo::load(Category* category) {
-	LOGC("Gizmo") << "loading data from " << category->getName();
+	LOG << "loading data from " << category->getName();
 	for ( size_t i = 0; i < m_Params.size(); ++i ) {
 		Param* p = m_Params[i];
 		if ( p->getType() == PT_INT ) {

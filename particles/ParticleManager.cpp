@@ -72,7 +72,7 @@ namespace ds {
 				loader->read(file);
 				int max = 512;
 				loader->read(&max);
-				LOGC("ParticleManager") << "loading particle system: " << id << " file: " << file;
+				LOG << "loading particle system: " << id << " file: " << file;
 				// FIXME: check if we already have one with this id
 				NewParticleSystem* system = new NewParticleSystem;
 				system->setDebugName(file.c_str());
@@ -85,7 +85,7 @@ namespace ds {
 			}
 			loader->closeChunk();
 		}		
-		LOGC("ParticleManager") << "Number of particle systems: " << m_Systems.size();
+		LOG << "Number of particle systems: " << m_Systems.size();
 	}
 
 	// --------------------------------------------------------------------------

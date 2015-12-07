@@ -39,7 +39,7 @@ namespace ds {
 	void BitmapFont::exportJSON() {
 		char buffer[64];
 		sprintf(buffer, "content\\resources\\%s.json",name);
-		LOGC("BitmapFont") << "exporting to: << " << buffer;
+		LOG << "exporting to: << " << buffer;
 		JSONWriter jw;
 		jw.open(buffer);
 		jw.startCategory("font");
@@ -62,7 +62,7 @@ namespace ds {
 	void BitmapFont::importJSON() {
 		char buffer[64];
 		sprintf(buffer, "content\\resources\\%s.json", name);
-		LOGC("BitmapFont") << "importing file: " << buffer;
+		LOG << "importing file: " << buffer;
 		JSONReader reader;
 		if (reader.parse(buffer)) {
 			Category* c = reader.getCategory("font");
@@ -80,7 +80,7 @@ namespace ds {
 			}
 		}
 		else {
-			LOGC("BitmapFont") << "Cannot parse json file";
+			LOG << "Cannot parse json file";
 		}
 	}
 
@@ -91,7 +91,7 @@ namespace ds {
 		BinaryLoader loader;
 		char buffer[64];
 		sprintf(buffer, "assets\\%u", hashName);
-		LOGC("BitmapFont") << "loading file: " << buffer;
+		LOG << "loading file: " << buffer;
 		int signature[] = { 0, 8, 15 };
 		if (loader.open(buffer, signature, 3) == IO_OK) {
 			while (loader.openChunk() == 0) {
@@ -112,7 +112,7 @@ namespace ds {
 			}
 		}
 		else {
-			LOGC("BitmapFont") << "Error loading file";
+			LOG << "Error loading file";
 		}
 		return false;
 	}
@@ -123,7 +123,7 @@ namespace ds {
 	void BitmapFont::save() {
 		char buffer[64];
 		sprintf(buffer, "assets\\%u", hashName);
-		LOGC("BitmapFont") << "saving file: " << buffer;
+		LOG << "saving file: " << buffer;
 		BinaryWriter writer;
 		int signature[] = { 0, 8, 15 };
 		writer.open(buffer, signature, 3);

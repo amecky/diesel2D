@@ -9,26 +9,25 @@
 #define	LOG_H
 
 #include <sstream>
-#include <string>
 #include <stdio.h>
 
 class LogOutputHandler {
 
 public:
-	virtual void write(const std::string& message) = 0;
+	virtual void write(const char* message) = 0;
 };
 
 class ConsoleOutputHandler : public LogOutputHandler {
 
 public:
-	void write(const std::string& message);
+	void write(const char* message);
 };
 
 class FileOutputHandler : public LogOutputHandler {
 
 public:
    static FILE*& Stream();
-   void write(const std::string& msg);
+   void write(const char* msg);
 
 };
 
@@ -39,18 +38,18 @@ public:
     virtual ~Log();
     std::ostringstream& get();
 	std::ostringstream& error();
-	std::ostringstream& get(const std::string& category);    
 	std::ostringstream& get(const char *file, const unsigned long line);    
 	std::ostringstream& error(const char *file, const unsigned long line);
 	std::ostringstream& error(const char *file, const unsigned long line,const char* message);
 	std::ostringstream& error(const char *file, const unsigned long line, char* format, va_list args);
 	std::ostringstream& error(const char *file, const unsigned long line, char* format, ...);
-	std::ostringstream& error(const std::string& category);   
 	static LogOutputHandler& handler();        
 protected:
     std::ostringstream os;		
 private:
+	void log_file_line(const char *file, const unsigned long line, bool isError);
     std::string NowTime();
+	void NowTime(char* ret, int max);
     Log(const Log&);
     Log& operator =(const Log&);	
 };
@@ -62,18 +61,13 @@ private:
 #define LG \
 	Log().get()
 
-#define LOG Log().get()
-#define LOGE Log().error()
-
-#define LOGC(category) Log().get(category)
-#define LOGEC(category) Log().error(category)
+#define LOG Log().get(__FILE__,__LINE__)
+#define LOGE Log().error(__FILE__,__LINE__)
 
 #define ELOG(M) \
 	do {\
 		Log().error(__FILE__,__LINE__,M); \
 	} while (0)
-
-//#define ELOG(M,...) Log().error(__FILE__,__LINE__,M,...)
 
 #endif	/* LOG_H */
 

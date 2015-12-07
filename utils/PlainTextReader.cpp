@@ -48,7 +48,7 @@ bool JSONReader::parse(const char* fileName) {
 	FILE *fp = fopen(fileName, "rb");
 	char* text;
 	if (fp) {
-		LOGC("JSONReader") << "Parsing " << fileName;
+		LOG << "Parsing " << fileName;
 		fseek(fp, 0, SEEK_END);
 		int size = ftell(fp);
 		fseek(fp, 0, SEEK_SET);

@@ -86,7 +86,7 @@ namespace ds {
 			}
 		}
 		if ( !found ) {
-			LOGEC("DialogManager") << "Cannot activate/deactivate '" << name << "'";
+			LOGE << "Cannot activate/deactivate '" << name << "'";
 		}
 	}
 
@@ -153,7 +153,7 @@ namespace ds {
 		strcpy(def.name, dialogName);
 		def.hash = string::murmur_hash(dialogName);
 		GUIDialog* dialog = new GUIDialog();
-		LOGC("DialogManager") << "Creating new dialog: " << dialogName;
+		LOG << "Creating new dialog: " << dialogName;
 		def.dialog = dialog;
 		dialog->init(def.name, _index, m_Font);
 		m_Dialogs.push_back(def);
@@ -245,12 +245,12 @@ namespace ds {
 			if (loader.getChunkID() == CHNK_DLG_DEF) {
 				DialogDefinition def;
 				loader.read(def.name);
-				LOGC("DialogManager") << "dialog definition: " << def.name;
+				LOG << "dialog definition: " << def.name;
 				//assert(get(def.name) == 0);
 				if (get(def.name) == 0) {
 					loader.read(&def.hash);
 					GUIDialog* dialog = new GUIDialog();
-					LOGC("DialogManager") << "Creating new dialog: " << def.name;
+					LOG << "Creating new dialog: " << def.name;
 					def.dialog = dialog;
 					dialog->init(def.name, _index, m_Font);
 					m_Dialogs.push_back(def);

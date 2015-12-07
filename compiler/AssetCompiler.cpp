@@ -81,7 +81,7 @@ void AssetDB::update(const char* name,FILETIME fileTime) {
 
 bool AssetDB::hasChanged(const char* fileName) {
 	if ( !contains(fileName)) {
-		LOGC("AssetDB") << "file " << fileName << " is not yet in the database - loading";
+		LOG << "file " << fileName << " is not yet in the database - loading";
 		return true;
 	}
 	for ( size_t i = 0; i < m_Entries.size(); ++i ) {
@@ -89,13 +89,13 @@ bool AssetDB::hasChanged(const char* fileName) {
 		if ( strcmp(entry.fileName,fileName) == 0 ) {
 			
 			if ( file::compareFileTime(entry.fileName,entry.fileTime)) {
-				LOGC("AssetDB") << "file " << entry.fileName << " has changed";
+				LOG << "file " << entry.fileName << " has changed";
 				file::getFileTime(entry.fileName,entry.fileTime);
 				return true;
 			}
 		}
 	}
-	LOGC("AssetDB") << "file " << fileName << " has not changed";
+	LOG << "file " << fileName << " has not changed";
 	return false;
 }
 
@@ -161,10 +161,10 @@ void AssetCompiler::load(const char* fileName,Serializer* serializer,uint32 type
 		IdString hash = string::murmur_hash(buffer);
 #ifdef DEBUG
 		if ( m_Database.hasChanged(buffer) ) {
-			LOGC("AssetCompiler") << "converting file " << buffer;		
+			LOG << "converting file " << buffer;		
 			// convert json to binary file
 			converter->convert(fileName);	
-			LOGC("AssetCompiler") << "file converted";
+			LOG << "file converted";
 		}	
 		FileWatch watch;
 		watch.hash = hash;
@@ -175,21 +175,21 @@ void AssetCompiler::load(const char* fileName,Serializer* serializer,uint32 type
 		watch.binary = false;
 		file::getFileTime(buffer,watch.fileTime);
 		m_WatchList.push_back(watch);
-		LOGC("AssetCompiler") << "file watch created";
+		LOG << "file watch created";
 		m_Database.add(buffer,watch.fileTime);
 #endif
 		// load file
-		LOGC("AssetCompiler") << "loading binary file  - original name: " << buffer;
+		LOG << "loading binary file  - original name: " << buffer;
 		BinaryLoader loader;
 		sprintf(buffer,"data\\%u",hash);
 		int signature[] = {0,8,15};
-		LOGC("AssetCompiler") << "loading binary file: " << buffer;
+		LOG << "loading binary file: " << buffer;
 		if ( loader.open(buffer,signature,3) == 0 ) {
 			serializer->load(&loader);
 		}
 	}
 	else {
-		LOGEC("AssetCompiler") << "Cannot find file: " << buffer;
+		LOGE << "Cannot find file: " << buffer;
 	}
 }
 
@@ -198,7 +198,7 @@ void AssetCompiler::update() {
 		FileWatch* watch = &m_WatchList[i];
 		if ( file::compareFileTime(watch->jsonName,watch->fileTime)) {
 			m_Database.update(watch->jsonName,watch->fileTime);
-			LOGC("AssetCompiler") << "Reloading file: " << watch->jsonName;	
+			LOG << "Reloading file: " << watch->jsonName;	
 			if ( watch->binary ) {
 				// do something here
 				file::copyFile(watch->jsonName,watch->binaryName);
@@ -217,7 +217,7 @@ void AssetCompiler::update() {
 					watch->serializer->load(&loader);
 				}
 				else {
-					LOGEC("AssetCompiler") << "Cannot reload binary file " << buffer;
+					LOGE << "Cannot reload binary file " << buffer;
 				}
 			}			
 			file::getFileTime(watch->jsonName,watch->fileTime);
@@ -238,9 +238,9 @@ int AssetCompiler::loadBinary(const char* fileName,uint32 type) {
 		sprintf(bb,"data\\%u",hash);
 #ifdef DEBUG
 		if ( m_Database.hasChanged(buffer) ) {
-			LOGC("AssetCompiler") << "copying file " << buffer;		
+			LOG << "copying file " << buffer;		
 			file::copyFile(buffer,bb);
-			LOGC("AssetCompiler") << "file copied to " << bb;
+			LOG << "file copied to " << bb;
 		}	
 		FileWatch watch;
 		watch.hash = hash;
@@ -250,18 +250,18 @@ int AssetCompiler::loadBinary(const char* fileName,uint32 type) {
 		watch.type = type;
 		file::getFileTime(buffer,watch.fileTime);
 		m_WatchList.push_back(watch);
-		LOGC("AssetCompiler") << "file watch created";
+		LOG << "file watch created";
 		m_Database.add(buffer,watch.fileTime);
 #endif
 		// load file
-		LOGC("AssetCompiler") << "loading binary file: " << bb;
+		LOG << "loading binary file: " << bb;
 
 		
 		return serializer->load(bb);
 
 	}
 	else {
-		LOGEC("AssetCompiler") << "Cannot find file: " << buffer;
+		LOGE << "Cannot find file: " << buffer;
 		return -1;
 	}
 	

@@ -9,8 +9,15 @@
 #include <windows.h>
 #include <stdio.h>
 
-void ConsoleOutputHandler::write(const std::string& message) {
-	OutputDebugStringA(message.c_str());
+void file_name(const char* file, char* name) {
+	char n[256];
+	char e[4];
+	_splitpath(file,0,0,name,e);
+	//sprintf_s(name, 64, "%s%s",n,e);
+}
+
+void ConsoleOutputHandler::write(const char* message) {
+	OutputDebugStringA(message);
 }
 
 FILE*& FileOutputHandler::Stream() {
@@ -18,11 +25,11 @@ FILE*& FileOutputHandler::Stream() {
     return pStream;
 }
 
-void FileOutputHandler::write(const std::string& message) {
-	OutputDebugStringA(message.c_str());
+void FileOutputHandler::write(const char* message) {
+	OutputDebugStringA(message);
 	FILE* pStream = Stream();
 	if ( pStream ) {
-		fprintf(pStream, "%s", message.c_str());
+		fprintf(pStream, "%s", message);
 		fflush(pStream);
 	}
 }
@@ -37,47 +44,40 @@ std::ostringstream& Log::get() {
     return os;
 }
 
-std::ostringstream& Log::get(const char *file, const unsigned long line) {
-	os << NowTime();
-	os << " : [";
-	os << file;
-	os << " : ";
+void Log::log_file_line(const char *file, const unsigned long line, bool isError) {
+	char buffer[128];
+	NowTime(buffer, 128);
+	os << buffer;
+	os << " ";
+	if (isError) {
+		os << " -- ERROR -- ";
+	}
+	file_name(file, buffer);
+	os << " [";
+	os << buffer;
+	os << ":";
 	os << line;
-	os << "] ";
+	os << "] : ";
+}
+
+std::ostringstream& Log::get(const char *file, const unsigned long line) {
+	log_file_line(file, line, false);
 	return os;
 }
 
 std::ostringstream& Log::error(const char *file, const unsigned long line) {
-	os << NowTime();
-	os << " [ERROR] : ";
-	os << " : [";
-	os << file;
-	os << " : ";
-	os << line;
-	os << "] ";	
+	log_file_line(file, line, true);
 	return os;
 }
 
 std::ostringstream& Log::error(const char *file, const unsigned long line,const char* message) {
-	os << NowTime();
-	os << " [ERROR] : ";
-	os << " : [";
-	os << file;
-	os << " : ";
-	os << line;
-	os << "] ";
+	log_file_line(file, line,true);
 	os << message;
 	return os;
 }
 
 std::ostringstream& Log::error(const char *file, const unsigned long line, char* format, va_list args) {
-	os << NowTime();
-	os << " [ERROR] : ";
-	os << " : [";
-	os << file;
-	os << " : ";
-	os << line;
-	os << "] ";
+	log_file_line(file, line, true);
 	char buffer[1024];
 	memset(buffer, 0, sizeof(buffer));
 	int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);
@@ -99,19 +99,6 @@ std::ostringstream& Log::error() {
 	return os;
 }
 
-std::ostringstream& Log::error(const std::string& category) {
-	os << NowTime();
-	os << " [ERROR] : ";
-	os << " [" << category << "] : ";
-	return os;
-}
-
-std::ostringstream& Log::get(const std::string& category) {
-	os << NowTime();
-	os << " [" << category << "] : ";
-	return os;
-}
-
 Log::~Log() {
     os << std::endl;
 	OutputDebugStringA(os.str().c_str());
@@ -121,6 +108,16 @@ Log::~Log() {
 LogOutputHandler& Log::handler() {
 	static ConsoleOutputHandler coh;
 	return coh;	
+}
+
+void Log::NowTime(char* ret, int max) {
+	char buffer[200];
+	if (GetTimeFormatA(LOCALE_USER_DEFAULT, 0, 0, "HH':'mm':'ss", buffer, 200) == 0) {
+		//return "Error in NowTime()";
+	}
+
+	static DWORD first = GetTickCount();
+	sprintf_s(ret, max, "%s.%03ld", buffer, (long)(GetTickCount() - first) % 1000);
 }
 
 std::string Log::NowTime() {

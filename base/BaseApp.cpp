@@ -62,7 +62,7 @@ BaseApp::BaseApp() {
 // Destructor
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
-	LOGC("BaseApp") << "Destructing all elements";
+	LOG << "Destructing all elements";
 	sprites::shutdown();
 	if (_dialogsEditor != 0) {
 		delete _dialogsEditor;
@@ -84,16 +84,16 @@ BaseApp::~BaseApp() {
 // Init
 // -------------------------------------------------------
 void BaseApp::prepare() {
-	LOGC("BaseApp") << "---> Init <---";
+	LOG << "---> Init <---";
 	//settings.mode = 1;		
 	renderer::initialize(m_hWnd,_settings);   	
 	audio->initialize(m_hWnd);
 
 	profiler::init();
 	sprites::init();
-	LOGC("BaseApp") << "---> Start loading content <---";
+	LOG << "---> Start loading content <---";
 	loadContent();	
-	LOGC("BaseApp") << "---> End loading content   <---";
+	LOG << "---> End loading content   <---";
 	stateMachine->initializeStates();
 	m_Loading = false;	
 	init();
@@ -117,14 +117,14 @@ void BaseApp::prepare() {
 }
 
 void BaseApp::logKeyBindings() {
-	LOGC("BaseApp") << "-----------> Key Bindings   <-----------";
-	LOGC("BaseApp") << "F1 -> print profiler";
-	LOGC("BaseApp") << "F2 -> show draw counter";
-	LOGC("BaseApp") << "F3 -> show profiler";
-	LOGC("BaseApp") << "F4 -> toggle update flag";
-	LOGC("BaseApp") << "F5 -> toggle performance overlay";
-	LOGC("BaseApp") << "F6 -> toggle editor";
-	LOGC("BaseApp") << "F7 -> debug renderer";
+	LOG << "-----------> Key Bindings   <-----------";
+	LOG << "F1 -> print profiler";
+	LOG << "F2 -> show draw counter";
+	LOG << "F3 -> show profiler";
+	LOG << "F4 -> toggle update flag";
+	LOG << "F5 -> toggle performance overlay";
+	LOG << "F6 -> toggle editor";
+	LOG << "F7 -> debug renderer";
 }
 
 void BaseApp::activateMonitoring(float threshold) {
@@ -157,7 +157,7 @@ void BaseApp::createWindow() {
 
 	if (!m_hWnd) 	{
 		DWORD dw = GetLastError(); 
-		LOGC("BaseApp") << "Failed to created window";
+		LOG << "Failed to created window";
 		//ErrorExit(TEXT("CreateWindow"));
 		ExitProcess(dw); 
 	}
@@ -179,7 +179,7 @@ void BaseApp::createWindow() {
 	m_wp.length = sizeof( WINDOWPLACEMENT );
 	GetWindowPlacement( m_hWnd, &m_wp );	
 
-	LOGC("Framework") << "window created";
+	LOG << "window created";
 }
 
 // -------------------------------------------------------

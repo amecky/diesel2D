@@ -19,7 +19,7 @@ void FileWatcher::update() {
 
 void FileWatcher::registerFile(const char* fileName,Serializer* serializer) {
 #ifdef DEBUG
-	LOGC("FileWatcher") << "Registering file " << fileName << " to be monitored";	
+	LOG << "Registering file " << fileName << " to be monitored";	
 	if ( !contains(fileName)) {
 		FileWatch watch;
 		IdString hash = string::murmur_hash(fileName);
@@ -35,7 +35,7 @@ void FileWatcher::registerFile(const char* fileName,Serializer* serializer) {
 
 void FileWatcher::registerFile(const char* fileName,const char* otherName,Serializer* serializer) {
 #ifdef DEBUG
-	LOGC("FileWatcher") << "Registering file " << fileName << " to be monitored";	
+	LOG << "Registering file " << fileName << " to be monitored";	
 	if ( !contains(fileName)) {
 		FileWatch watch;
 		IdString hash = string::murmur_hash(fileName);

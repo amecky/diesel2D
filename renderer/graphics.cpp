@@ -280,9 +280,9 @@ namespace ds {
 			renderContext->defaultBlendState = renderer::createBlendState("default",BL_SRC_ALPHA, BL_ONE_MINUS_SRC_ALPHA, true);
 			//renderContext->defaultBlendState = renderer::createBlendState("rt_blend", BL_SRC_ALPHA, BL_ZERO, BL_ONE_MINUS_SRC_ALPHA, BL_ONE_MINUS_SRC_ALPHA, true);
 			renderContext->defaultBlendState = renderer::createBlendState("rt_blend", BL_SRC_ALPHA, BL_ONE_MINUS_SRC_ALPHA, true);
-			LOGC("Renderer") << "'default' blendstate " << renderContext->defaultBlendState;
+			LOG << "'default' blendstate " << renderContext->defaultBlendState;
 			int addBS = renderer::createBlendState("alpha_blend", ds::BL_ONE, ds::BL_ONE, true);
-			LOGC("Renderer") << "'alpha_blend' blendstate " << addBS;
+			LOG << "'alpha_blend' blendstate " << addBS;
 
 			Descriptor desc;
 			desc.hash = string::murmur_hash("default_descriptor");
@@ -316,18 +316,18 @@ namespace ds {
 				}
 			}
 			renderContext->rasterizerStates.deleteContents();
-			LOGC("Renderer") << "Releasing textures";
+			LOG << "Releasing textures";
 			for (int i = 0; i < MAX_TEXTURES; ++i) {
 				if (renderContext->textures[i].flags != 0) {
 					SAFE_RELEASE(renderContext->textures[i].texture);
 				}
 			}
-			LOGC("Renderer") << "Releasing shaders";
+			LOG << "Releasing shaders";
 			for (int i = 0; i < renderContext->shaders.size(); ++i) {				
 				renderContext->shaders[i]->release();
 				delete renderContext->shaders[i];
 			}
-			LOGC("Renderer") << "Releasing vertex declarations";
+			LOG << "Releasing vertex declarations";
 			for (int i = 0; i < MAX_VERDECLS; ++i) {
 				if (renderContext->vdStructs[i].vertexSize != 0) {
 					delete renderContext->vdStructs[i].declaration;
@@ -349,7 +349,7 @@ namespace ds {
 			for (size_t i = 0; i < renderContext->bitmapFonts.size(); ++i) {
 				delete renderContext->bitmapFonts[i];
 			}
-			LOGC("Renderer") << "Releasing system font";
+			LOG << "Releasing system font";
 			SAFE_RELEASE(renderContext->debugContext.font);
 			delete renderContext->camera;
 			if (renderContext->device != NULL) {
@@ -578,11 +578,11 @@ namespace ds {
 				bs.separateAlpha = separateAlpha;
 				bs.mask = 0x0f;
 				bs.flag = 1;
-				LOGC("Renderer") << "created new blendstate '" << name << "' - id: " << renderContext->numBlendStates - 1;
+				LOG << "created new blendstate '" << name << "' - id: " << renderContext->numBlendStates - 1;
 				return renderContext->numBlendStates - 1;
 			}
 			else {
-				LOGEC("Renderer") << "No more free slots for BlendStates available";
+				LOGE << "No more free slots for BlendStates available";
 				return -1;
 			}
 		}
@@ -699,7 +699,7 @@ namespace ds {
 			int id = createIndexBuffer(size);
 			IndexBuffer& buffer = getIndexBuffer(id);
 			HR(renderContext->device->CreateIndexBuffer(size * sizeof(WORD), usage, D3DFMT_INDEX16, pool, &buffer.buffer, NULL));
-			LOGC("sprites") << "new IndexBuffer created size: " << size;
+			LOG << "new IndexBuffer created size: " << size;
 			WORD* indexBuffer;
 			HR(buffer.buffer->Lock(0, size * sizeof(WORD), (void**)&indexBuffer, 0));
 
@@ -1100,7 +1100,7 @@ namespace ds {
 			}
 			HR(texture->texture->UnlockRect(0));
 			//LOGC("Renderer") << "found characters: " << (ascii - bitmapFont->startChar);
-			LOGC("Renderer") << "found characters: " << bitmapFont->definitions.size();
+			LOG << "found characters: " << bitmapFont->definitions.size();
 		}
 
 		// -------------------------------------------------------
@@ -1162,11 +1162,11 @@ namespace ds {
 				rt.textureID = tid;
 				int id = renderContext->renderTargets.size();
 				renderContext->renderTargets.add(rt);
-				LOGC("renderer") << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << renderContext->viewportWidth << " height: " << renderContext->viewportHeight;
+				LOG << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << renderContext->viewportWidth << " height: " << renderContext->viewportHeight;
 				return RTID(tid,id);
 			}
 			else {
-				LOGEC("renderer") << "Cannot create rendertarget - No more texture slots available";
+				LOGE << "Cannot create rendertarget - No more texture slots available";
 				return INVALID_RENDER_TARGET;
 			}
 		}
@@ -1186,11 +1186,11 @@ namespace ds {
 				renderTarget.texture->GetSurfaceLevel(0,&renderTarget.surface);
 				int id = renderContext->renderTargets.size();
 				renderContext->renderTargets.add(renderTarget);
-				LOGC("Renderer") << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << width << " height: " << height;
+				LOG << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << width << " height: " << height;
 				return RTID(tid, id);
 			}
 			else {
-				LOGEC("Renderer") << "Cannot create rendertarget - No more texture slots available";
+				LOGE << "Cannot create rendertarget - No more texture slots available";
 				return INVALID_RENDER_TARGET;
 			}			
 		}
@@ -1283,12 +1283,12 @@ namespace ds {
 			char fileName[256];
 			sprintf(fileName, "%s\\%s.png", dirName, name);
 			//sprintf(fileName, "%s\\%s.tga", dirName, name);
-			LOGC("Renderer") << "Trying to load texture " << fileName;
+			LOG << "Trying to load texture " << fileName;
 			HR(D3DXCreateTextureFromFileEx(renderContext->device, fileName, 0, 0, 1, 0,
 				D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
 			tr->width = imageInfo.Width;
 			tr->height = imageInfo.Height;
-			LOGC("Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
+			LOG << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
 			return id;			
 		}
 
@@ -1304,16 +1304,16 @@ namespace ds {
 				int lw = D3DX_DEFAULT;
 				int lh = D3DX_DEFAULT;
 				D3DXIMAGE_INFO imageInfo;
-				LOGC("Renderer") << "Trying to load texture " << fileName;
+				LOG << "Trying to load texture " << fileName;
 				HR(D3DXCreateTextureFromFileEx(renderContext->device, fileName, 0, 0, 1, 0,
 					D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
 				tr->width = imageInfo.Width;
 				tr->height = imageInfo.Height;
-				LOGC("Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
+				LOG << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
 				return id;
 			}
 			else {
-				LOGEC("Renderer") << "No more texture slots available";
+				LOGE << "No more texture slots available";
 				return -1;
 			}
 		}
@@ -1334,12 +1334,12 @@ namespace ds {
 			int lw = D3DX_DEFAULT;
 			int lh = D3DX_DEFAULT;
 			D3DXIMAGE_INFO imageInfo;
-			LOGC("Renderer") << "Trying to load texture " << fileName;
+			LOG << "Trying to load texture " << fileName;
 			HR(D3DXCreateTextureFromFileEx(renderContext->device, fileName, 0, 0, 1, 0,
 				D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
 			tr->width = imageInfo.Width;
 			tr->height = imageInfo.Height;
-			LOGC("Renderer") << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
+			LOG << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
 
 		}
 
@@ -1454,7 +1454,7 @@ namespace ds {
 				return true;
 			}
 			else {
-				LOGEC("Renderer") << "cannot begin scene";
+				LOGE << "cannot begin scene";
 			}
 			return false;
 		}
@@ -1607,7 +1607,7 @@ namespace ds {
 			sprintf(srcFileName, "content\\data\\%s.obj", file);
 			ObjLoader ml;
 			if (!file::fileExists(fileName) || file::isOlder(fileName, srcFileName)) {
-				LOGC("mesh") << "obj fileName: " << srcFileName;
+				LOG << "obj fileName: " << srcFileName;
 				ml.parse(srcFileName, md);
 				ml.save(fileName, md);
 			}
@@ -1738,7 +1738,7 @@ namespace ds {
 		// Loads system font
 		// -------------------------------------------------------
 		void loadSystemFont(const char* name, const char* fontName, int size, bool bold) {
-			LOGC("Renderer") << "Loading font " << fontName << " size " << size;
+			LOG << "Loading font " << fontName << " size " << size;
 			UINT type = FW_NORMAL;
 			if (bold) {
 				type = FW_BOLD;

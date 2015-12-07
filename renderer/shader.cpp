@@ -94,24 +94,24 @@ namespace ds {
 	}
 
 	void Shader::initialize(const char* techName) {
-		LOGC("renderer") << "initializing shader using tech: " << techName;
+		LOG << "initializing shader using tech: " << techName;
 		_hTech = _FX->GetTechniqueByName(techName);
 		D3DXEFFECT_DESC effectDesc;
 		_FX->GetDesc(&effectDesc);
 		UINT nc = effectDesc.Parameters;
 		_constants = new ShaderConstant[nc];
 		_constantCount = nc;
-		LOGC("renderer") << "Got Description - number of parameters: " << nc;
+		LOG << "Got Description - number of parameters: " << nc;
 		for (UINT i = 0; i < effectDesc.Parameters; ++i) {
 			D3DXHANDLE hParam = _FX->GetParameter(NULL, i);
 			D3DXPARAMETER_DESC pDesc;
 			// get parameter description
 			_FX->GetParameterDesc(hParam, &pDesc);
-			LOGC("renderer") << "Parameter : " << pDesc.Name << " Type: " << pDesc.Type;
+			LOG << "Parameter : " << pDesc.Name << " Type: " << pDesc.Type;
 			_constants[i].handle = hParam;
 			_constants[i].name = string::murmur_hash(pDesc.Name);
 		}
-		LOGC("renderer") << "Shader finally loaded";
+		LOG << "Shader finally loaded";
 
 	}
 
@@ -138,10 +138,10 @@ namespace ds {
 		ID3DXBuffer* errors = 0;
 		D3DXCreateEffect(renderer::getDevice(), buffer, dwBufferSize, 0, 0, SHADER_FLAGS, 0, &_FX, &errors);
 		if (errors != 0) {
-			LOGEC("Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
+			LOGE << "Error while loading shader: " << (char*)errors->GetBufferPointer();
 		}
 		else {
-			LOGC("Renderer") << "Shader created";
+			LOG << "Shader created";
 			initialize(techName);
 		}
 	}
@@ -152,11 +152,11 @@ namespace ds {
 		ID3DXBuffer* errors = 0;
 		HRESULT hr = D3DXCreateEffectFromFileA(renderer::getDevice(), fileName, 0, 0, SHADER_FLAGS, 0, &_FX, &errors);
 		if (errors != 0) {
-			LOGEC("Renderer") << "Error while loading shader: " << (char*)errors->GetBufferPointer();
+			LOGE << "Error while loading shader: " << (char*)errors->GetBufferPointer();
 			return false;
 		}
 
-		LOGC("Renderer") << "Shader created";
+		LOG << "Shader created";
 		initialize(techName);
 		return true;
 	}

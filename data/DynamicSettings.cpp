@@ -117,7 +117,7 @@ namespace ds {
 		BinaryLoader loader;
 		char buffer[64];
 		sprintf(buffer, "assets\\%u", string::murmur_hash("settings"));
-		LOGC("DynamicGameSettings") << "loading file: " << buffer;
+		LOG << "loading file: " << buffer;
 		int signature[] = { 0, 8, 15 };
 		if (loader.open(buffer, signature, 3) == IO_OK) {
 			while (loader.openChunk() == 0) {
@@ -140,7 +140,7 @@ namespace ds {
 			}
 		}
 		else {
-			LOGC("DynamicGameSettings") << "Error loading file";
+			LOG << "Error loading file";
 		}
 	}
 
