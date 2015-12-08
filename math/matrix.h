@@ -16,6 +16,8 @@ Vector3f operator * (const ds::mat4& m,const Vector3f& v);
 
 Vector3f operator * (const Vector3f& v,const ds::mat4& m);
 
+v2 operator * (const v2& v, const ds::mat4& m);
+
 ds::mat4 operator * (const ds::mat4& m1,const ds::mat4& m2);
 
 ds::mat4 operator * (const ds::mat4& m,float v);
@@ -53,6 +55,8 @@ namespace ds {
 		mat4 mat4Scale(const Vector3f& scale);
 
 		mat4 mat4Transform(const Vector3f& pos);
+
+		mat4 mat4Transform(const v2& pos);
 
 		mat4 mat4Rotation(const Vector3f& v,float angle);
 

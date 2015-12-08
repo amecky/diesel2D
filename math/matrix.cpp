@@ -62,6 +62,13 @@ Vector3f operator * (const Vector3f& v,const ds::mat4& m) {
 	return Vector3f(tmp.x,tmp.y,tmp.z);
 }
 
+v2 operator * (const v2& v, const ds::mat4& m) {
+	Vector4f nv(v.x, v.y, 1.0f, 1.0f);
+	Vector4f tmp = nv * m;
+	return v2(tmp.x, tmp.y);
+}
+
+
 ds::mat4 operator * (const ds::mat4& m1,const ds::mat4& m2) {
 	ds::mat4 tmp;
 	tmp._11 = m1._11 * m2._11 + m1._12 * m2._21 + m1._13 * m2._31 + m1._14 * m2._41;
@@ -320,6 +327,20 @@ namespace matrix {
 			 0.0f,  0.0f,  1.0f, 0.0f,
 			pos.x, pos.y, pos.z, 1.0f
 		);
+		return tm;
+	}
+
+	// -------------------------------------------------------
+	// Translation matrix
+	// -------------------------------------------------------
+
+	mat4 mat4Transform(const v2& pos) {
+		mat4 tm(
+			1.0f, 0.0f, pos.x, 0.0f,
+			0.0f, 1.0f, pos.y, 0.0f,
+			0.0f, 0.0f,  1.0f, 0.0f,
+			0.0f, 0.0f,  0.0f, 1.0f
+			);
 		return tm;
 	}
 	// -------------------------------------------------------
