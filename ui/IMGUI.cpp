@@ -120,6 +120,20 @@ namespace gui {
 			}
 		}
 
+		void addHeader(const v2& position, const char* text, const v2& size) {
+			if (num < MAX_DRAW_CALLS) {
+				DrawCall& call = calls[num++];
+				call.type = 4;
+				call.color = ds::Color::WHITE;
+				call.size = size;
+				sprintf_s(call.text, 32, text);
+				call.position = position;
+				call.position.y -= TEXT_OFFSET;
+				call.padding = CHAR_PADDING;
+				call.tilingDef = TD_NONE;
+			}
+		}
+
 		
 	};
 
@@ -299,6 +313,13 @@ namespace gui {
 			v2 p = position;
 			p.x += TEXT_PADDING;
 			addText(p, text, size);
+		}
+
+		void addHeader(const v2& position, const char* text) {
+			v2 size = ds::font::calculateSize(*font, text, CHAR_PADDING);
+			v2 p = position;
+			p.x += TEXT_PADDING;
+			window.addHeader(position, text, size);
 		}
 
 		void addText(const v2& position, const char* text, const v2& size) {
@@ -553,6 +574,13 @@ namespace gui {
 		bool hot = isHot(id,p, getTextSize(text));
 		guiContext->addText(p, text);
 		guiContext->nextPosition();
+	}
+
+	void Header(int id, const char* text) {
+		v2 p = guiContext->position;
+		bool hot = isHot(id, p, getTextSize(text));
+		guiContext->addHeader(p, text);
+		guiContext->nextPosition(36.0f);
 	}
 
 	// -------------------------------------------------------
@@ -1335,6 +1363,15 @@ namespace gui {
 							ds::sprites::drawTiledXY(call.position, call.size, call.texture, call.additional, call.color);
 						}
 					}
+					else if (call.type == 4) {
+						v2 p = call.position;
+						p.x -= 10.0f;
+						ds::sprites::drawTiledX(p, dim.x, ds::math::buildTexture(140.0, 0.0f, 150.0f, 16.0f), 16.0f);
+						// draw text
+						p.y -= 7.0f;
+						p.x += 20.0f;
+						ds::sprites::drawText(guiContext->font, p.x, p.y, call.text, 2);
+					}
 				}
 
 			}
@@ -1353,6 +1390,31 @@ namespace gui {
 	
 	InputDialog::InputDialog() : _active(false) {
 		_text[0] = '\0';
+	}
+
+	int InputDialog::showEmbedded(const char* header, const char* label) {
+		if (!_active) {
+			_text[0] = '\0';
+			_active = true;
+			_button = 0;
+		}
+		else {
+			int state = 1;
+			gui::Header(INPUT_DIALOG_ID + 6, "Input");
+			gui::Label(INPUT_DIALOG_ID + 1, header);
+			gui::Input(INPUT_DIALOG_ID + 2, label, _text, 32);
+			gui::beginGroup();
+			if (gui::Button(INPUT_DIALOG_ID + 3, "OK")) {
+				_button = 1;
+				_active = false;
+			}
+			if (gui::Button(INPUT_DIALOG_ID + 4, "Cancel")) {
+				_button = 2;
+				_active = false;
+			}
+			gui::endGroup();
+		}
+		return _button;
 	}
 
 	int InputDialog::show(const char* header, const char* label) {

@@ -26,6 +26,7 @@ enum ParticleGeneratorType {
 	PGT_LIFETIME,
 	PGT_RADIAL_VELOCITY,
 	PGT_RANDOM,
+	PGT_COLOR,
 	PGT_UNKNOWN
 };
 // -------------------------------------------------------
@@ -526,7 +527,7 @@ public:
 		}
 	}
 	const ParticleGeneratorType getType() const {
-		return PGT_DEFAULT;
+		return PGT_COLOR;
 	}
 	const char* getName() const {
 		return "Color";
@@ -788,6 +789,13 @@ private:
 	float m_Accu;
 	float m_Frequency;
 };
+
+namespace generator {
+
+	ParticleGenerator* create_by_name(const char* name);
+
+}
+
 }
 
 

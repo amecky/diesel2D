@@ -9,7 +9,8 @@ namespace ds {
 
 enum ParticleModifierType {
 	PMT_POSITION,
-	PMT_LINEAR_SIZE
+	PMT_LINEAR_SIZE,
+	PMT_LINEAR_ALPHA
 };
 // -------------------------------------------------------
 // Particle modifier
@@ -156,6 +157,47 @@ public:
 	}
 	const char* getName() const {
 		return "LinearColor";
+	}
+};
+
+// -------------------------------------------------------
+// Linear color modifier
+// -------------------------------------------------------
+struct LinearAlphaModifierData {
+
+	float startAlpha;
+	float endAlpha;
+
+	LinearAlphaModifierData() : startAlpha(1.0f), endAlpha(0.0f) {}
+};
+
+class LinearAlphaModifier : public AbstractParticleModifier<LinearAlphaModifierData> {
+
+public:
+	LinearAlphaModifier() : AbstractParticleModifier<LinearAlphaModifierData>() {
+		m_Translator.add("start", &LinearAlphaModifierData::startAlpha);
+		m_Translator.add("end", &LinearAlphaModifierData::endAlpha);
+	}
+	virtual ~LinearAlphaModifier() {}
+	void init(float start, float end) {
+		m_Data.startAlpha = start;
+		m_Data.endAlpha = end;
+	}
+	void update(ParticleArray* array, float dt) {
+		for (uint32 i = 0; i < array->countAlive; ++i) {
+			array->color[i].a = tweening::interpolate(tweening::easeInOutQuad,m_Data.startAlpha, m_Data.endAlpha, array->timer[i].y);
+		}
+	}
+	void init(ParticleArray* array, uint32 start, uint32 end) {
+		for (uint32 i = start; i < end; ++i) {
+			array->color[i].a = m_Data.startAlpha;
+		}
+	}
+	const ParticleModifierType getType() const {
+		return PMT_LINEAR_ALPHA;
+	}
+	const char* getName() const {
+		return "LinearAlpha";
 	}
 };
 
@@ -409,5 +451,10 @@ public:
 		return "VelocityRotation";
 	}
 };
+
+namespace modifier {
+
+	ParticleModifier* create_by_name(const char* name);
+}
 
 }

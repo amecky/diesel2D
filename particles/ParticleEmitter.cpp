@@ -174,6 +174,32 @@ namespace ds {
 		LOG << "--> endless: " << m_Endless;
 		LOG << "--> frequency: " << m_Frequency;
 	}
+
+
+	namespace generator {
+
+		ParticleGenerator* create_by_name(const char* name) {
+			if (strcmp(name, "Ring") == 0) {
+				RingGenerator* generator = new RingGenerator();
+				generator->init(10.0f, 2.0f);
+				return generator;
+			}
+				//Circle
+				//Line
+				//Point
+				//Sphere
+				//RandomSphere
+				//RadialVelocity
+				//Velocity
+				//Lifetime
+				//Color
+				//HSVColor
+				//Size
+				//Random
+			return 0;
+		}
+
+	}
 }
 
 

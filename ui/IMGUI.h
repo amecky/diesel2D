@@ -99,6 +99,8 @@ namespace gui {
 
 	void Label(int id,const char* text);
 
+	void Header(int id,const char* text);
+
 	void beginGroup();
 
 	void endGroup();
@@ -157,6 +159,7 @@ namespace gui {
 		InputDialog();
 		~InputDialog() {}
 		int show(const char* header,const char* label);
+		int showEmbedded(const char* header, const char* label);
 		const char* getText() const;
 	private:
 		bool _active;
