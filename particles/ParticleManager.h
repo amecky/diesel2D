@@ -29,7 +29,8 @@ public:
 	void update(float elapsed);
 	void render();
 	void debug();
-	void showDialog();
+	void fillModel(gui::ComponentModel<int>* model);
+
 private:
 	void end();
 	void flush();
@@ -46,10 +47,7 @@ private:
 	//int m_TextureID;
 	//int m_ShaderID;
 
-	gui::ComponentModel<int> _model;
-	v2 _dialogPos;
-	int _dialogState;
-	int _offset;
+	
 };
 
 }

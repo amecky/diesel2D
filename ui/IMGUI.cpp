@@ -1117,14 +1117,15 @@ namespace gui {
 	// -------------------------------------------------------	
 	void Histogram(int id, float* values, int num, float minValue, float maxValue, float step) {
 		v2 p = guiContext->position;
-		// FIXME: calculate width
 		float width = 200.0f;
 		float height = 100.0f;
-		float barWidth = 6.0f;
+		float barWidth = 10.0f;
 		p.y -= height / 2.0f;
-		// FIXME: calculate width of individual box
+		float delta = maxValue - minValue;
+		if (delta == 0.0f) {
+			delta = 1.0f;
+		}
 		float st = width / static_cast<float>(num - 1);
-		int d = (maxValue - minValue) / step + 1;
 		guiContext->addBox(p, v2(width + barWidth, height), guiContext->colors[CLR_INPUT]);
 		p.x += width + BOX_HEIGHT;
 		p.y += height / 2.0f;
@@ -1139,22 +1140,22 @@ namespace gui {
 			if (v > maxValue) {
 				v = maxValue;
 			}
-			float current = v / (maxValue - minValue);
+			float current = v / delta;
 			float yp = current * height;
 			p = guiContext->position;
 			p.y -= ( height - yp * 0.5f);
-			p.x += static_cast<float>(i) * st;// (st - barWidth * 0.5f);
+			p.x += static_cast<float>(i) * st;
 			guiContext->addBox(p, v2(barWidth, yp), guiContext->colors[CLR_SELECTED_LINE]);
 		}
+		step = delta / 10.0f;
+		int d = delta / step + 1;
 		for (int i = 0; i < d; ++i) {
 			p = guiContext->position;
-			float current = 1.0f - (step*i) / (maxValue - minValue);
+			float current = 1.0f - (step*i) / delta;
 			float yp = current * height;
 			p.y -= yp;
 			guiContext->addBox(p, v2(width + barWidth, 1.0f), guiContext->colors[CLR_INPUT_EDIT]);
 		}
-		//guiContext->position.y -= height;
-		//guiContext->nextPosition(height);
 		guiContext->nextPosition();
 	}
 

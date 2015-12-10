@@ -15,6 +15,8 @@
 #include "..\particles\ParticleManager.h"
 #include "..\editor\DialogsEditor.h"
 #include "..\editor\SpriteTemplatesEditor.h"
+#include "..\editor\SpriteTemplatesState.h"
+#include "..\editor\ParticlesEditState.h"
 
 namespace ds {
 
@@ -102,12 +104,14 @@ void BaseApp::prepare() {
 		_dialogsEditor = new DialogsEditor(&gui);
 		_templatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
 		_templatesEditor->init();
+		stateMachine->add(new SpriteTemplatesState());
+		stateMachine->add(new ParticlesEditState(particles));
 	}
 	logKeyBindings();
 
 
 	v2 dp;
-	dp.x = _settings.screenWidth - 500.0f;
+	dp.x = _settings.screenWidth - 350.0f;
 	dp.y = _settings.screenHeight - 10.0f;
 	_editor.dialogPos = dp;
 	_editor.position = dp;
@@ -125,6 +129,8 @@ void BaseApp::logKeyBindings() {
 	LOG << "F5 -> toggle performance overlay";
 	LOG << "F6 -> toggle editor";
 	LOG << "F7 -> debug renderer";
+	LOG << "F8 -> particle editor";
+	LOG << "F9 -> sprite template editor";
 }
 
 void BaseApp::activateMonitoring(float threshold) {
@@ -387,6 +393,9 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 	else if (virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
 		m_DebugInfo.debugRenderer = true;
 	}
+	else if (virtualKey == VK_F8) {
+		stateMachine->activate("ParticlesEditState");
+	}
 #endif
 }
 
@@ -400,9 +409,16 @@ void BaseApp::showPerformceOverlay(v2* position) {
 	gui::start(EDITOR_ID, position);
 	int state = 1;
 	if (gui::begin("Performance", &state)) {
-		float val[16];// = { 0.2f, 0.4f, 0.3f, 0.1f, 0.15f, 0.6f, 1.0f, 0.1f, 0.9f, 0.75f };
+		float val[16];
 		int count = profiler::get_total_times(val, 16);
-		gui::Histogram(17, val, count, 0.0f, 16.0f, 1.0f);
+		float max = 0.0f;
+		for (int i = 0; i < 16; ++i) {
+			if (val[i] > max) {
+				max = val[i];
+			}
+		}
+		max = ceil(max);
+		gui::Histogram(17, val, count, 0.0f, max, 1.0f);
 	}
 	gui::end();
 }
@@ -419,8 +435,9 @@ void BaseApp::showEditor() {
 			_editor.dialogIndex = 3;
 		}
 		if (_templatesEditor != 0 && gui::Button(EDITOR_ID + 5, "SPT")) {
-			_templatesEditor->init();
-			_editor.dialogIndex = 4;
+			//_templatesEditor->init();
+			//_editor.dialogIndex = 4;
+			stateMachine->activate("SpriteTemplatesState");
 		}
 		if (gui::Button(EDITOR_ID + 6, "SCG")) {
 			_editor.dialogIndex = 5;
@@ -431,10 +448,7 @@ void BaseApp::showEditor() {
 		gui::endGroup();
 		gui::beginGroup();
 		if (gui::Button(EDITOR_ID + 8, "PS")) {
-			_editor.dialogIndex = 7;
-		}
-		if (gui::Button(EDITOR_ID + 9, "PF")) {
-			_editor.dialogIndex = 8;
+			stateMachine->activate("ParticlesEditState");
 		}
 		gui::endGroup();
 	}
@@ -447,27 +461,11 @@ void BaseApp::showEditor() {
 		//gui.showDialog();
 		_dialogsEditor->showDialog();
 	}
-	if (_editor.dialogIndex == 4) {
-		//renderer::getSpriteTemplates()->showDialog();
-		_templatesEditor->showDialog();
-	}
 	if (_editor.dialogIndex == 5) {
 		renderer::getSpriteGroupContainer()->showDialog();
 	}
 	if (_editor.dialogIndex == 6) {
 		_bmfDialog.show();
-	}
-	if (_editor.dialogIndex == 7) {
-		particles->showDialog();
-	}
-	if (_editor.dialogIndex == 8) {
-		int state = 1;
-		if (gui::begin("Performance", &state)) {
-			float val[16];// = { 0.2f, 0.4f, 0.3f, 0.1f, 0.15f, 0.6f, 1.0f, 0.1f, 0.9f, 0.75f };
-			int count = profiler::get_total_times(val, 16);
-			gui::Histogram(17, val, count, 0.0f, 16.0f, 1.0f);
-		}
-		gui::end();
 	}
 }
 

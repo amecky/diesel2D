@@ -94,6 +94,28 @@ namespace ds {
 		m_Emitter.clear();
 	}
 
+	void NewParticleSystem::removeModifierByName(const char* name) {
+		Modifiers::iterator it = m_Modifiers.begin();
+		while (it != m_Modifiers.end()) {
+			if (strcmp((*it)->getName(),name) == 0) {
+				delete (*it);
+				it = m_Modifiers.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+	}
+
+	ParticleModifier* NewParticleSystem::getModifier(ParticleModifierType type) {
+		for (size_t i = 0; i < m_Modifiers.size(); ++i) {
+			if (m_Modifiers[i]->getType() == type) {
+				return m_Modifiers[i];
+			}
+		}
+		return 0;
+	}
+
 	void NewParticleSystem::load(BinaryLoader* loader) {	
 		clear();
 		while ( loader->openChunk() == 0 ) {	

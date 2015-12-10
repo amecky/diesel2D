@@ -8,7 +8,8 @@
 namespace ds {
 
 enum ParticleModifierType {
-	PMT_POSITION
+	PMT_POSITION,
+	PMT_LINEAR_SIZE
 };
 // -------------------------------------------------------
 // Particle modifier
@@ -54,6 +55,9 @@ public:
 	DATA& getData() const {
 		return m_Data;
 	}
+	DATA* getData() {
+		return &m_Data;
+	}
 protected:
 	DataTranslator<DATA> m_Translator;
 	DATA m_Data;
@@ -79,7 +83,7 @@ public:
 		return PMT_POSITION;
 	}
 	const char* getName() const {
-		return "PositionModifier";
+		return "Position";
 	}
 };
 
@@ -110,7 +114,7 @@ public:
 		return PMT_POSITION;
 	}
 	const char* getName() const {
-		return "TimeModifier";
+		return "Time";
 	}
 };
 
@@ -151,7 +155,7 @@ public:
 		return PMT_POSITION;
 	}
 	const char* getName() const {
-		return "LinearColorModifier";
+		return "LinearColor";
 	}
 };
 
@@ -189,10 +193,10 @@ public:
 		}
 	}
 	const ParticleModifierType getType() const {
-		return PMT_POSITION;
+		return PMT_LINEAR_SIZE;
 	}
 	const char* getName() const {
-		return "LinearSizeModifier";
+		return "LinearSize";
 	}
 };
 
@@ -233,7 +237,7 @@ public:
 		return PMT_POSITION;
 	}
 	const char* getName() const {
-		return "PerpendicularMoveModifier";
+		return "PerpendicularMove";
 	}
 };
 
@@ -270,7 +274,7 @@ public:
 		return PMT_POSITION;
 	}
 	const char* getName() const {
-		return "ColorPathModifier";
+		return "ColorPath";
 	}
 };
 
@@ -307,7 +311,7 @@ public:
 		return PMT_POSITION;
 	}
 	const char* getName() const {
-		return "AlphaPathModifier";
+		return "AlphaPath";
 	}
 };
 
@@ -342,7 +346,7 @@ public:
 		return PMT_POSITION;
 	}
 	const char* getName() const {
-		return "DampingVelocityModifier";
+		return "DampingVelocity";
 	}
 };
 
@@ -379,7 +383,7 @@ public:
 		return PMT_POSITION;
 	}
 	const char* getName() const {
-		return "SizePathModifier";
+		return "SizePath";
 	}
 };
 
@@ -402,7 +406,7 @@ public:
 		return PMT_POSITION;
 	}
 	const char* getName() const {
-		return "VelocityRotationModifier";
+		return "VelocityRotation";
 	}
 };
 

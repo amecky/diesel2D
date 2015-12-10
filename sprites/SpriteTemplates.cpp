@@ -54,6 +54,10 @@ namespace ds {
 		return _map[index].sprite;
 	}
 
+	const Sprite& SpriteTemplates::get(int index) const {
+		return _map[index].sprite;
+	}
+
 	bool SpriteTemplates::get(const char* name, Sprite* sprite) {
 		IdString hash = string::murmur_hash(name);
 		int idx = getIndex(hash);

@@ -23,6 +23,9 @@ enum ParticleGeneratorType {
 	PGT_POINT,
 	PGT_SIZE,
 	PGT_CIRCLE,
+	PGT_LIFETIME,
+	PGT_RADIAL_VELOCITY,
+	PGT_RANDOM,
 	PGT_UNKNOWN
 };
 // -------------------------------------------------------
@@ -66,7 +69,9 @@ public:
 		DataTranslator<DATA>& translator = getTranslator();
 		translator.readChunk(*loader,&m_Data);
 	}
-
+	DATA* getData() {
+		return &m_Data;
+	}
 protected:
 	DataTranslator<DATA> m_Translator;
 	DATA m_Data;
@@ -94,7 +99,7 @@ public:
 		}
 	}
 	const char* getName() const {
-		return "DefaultParticleGenerator";
+		return "Default";
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_DEFAULT;
@@ -152,7 +157,7 @@ public:
 		}
 	}
 	const char* getName() const {
-		return "RingGenerator";
+		return "Ring";
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_RING;
@@ -195,7 +200,7 @@ public:
 		}
 	}
 	const char* getName() const {
-		return "CircleGenerator";
+		return "Circle";
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_CIRCLE;
@@ -237,7 +242,7 @@ public:
 		return PGT_POINT;
 	}
 	const char* getName() const {
-		return "LineGeneratorData";
+		return "Line";
 	}
 };
 // -------------------------------------------------------
@@ -282,7 +287,7 @@ public:
 		return PGT_POINT;
 	}
 	const char* getName() const {
-		return "PointGenerator";
+		return "Point";
 	}
 };
 
@@ -331,7 +336,7 @@ public:
 		}
 	}
 	const char* getName() const {
-		return "SphereGenerator";
+		return "Sphere";
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_POINT;
@@ -376,7 +381,7 @@ public:
 		
 	}
 	const char* getName() const {
-		return "RandomSphereGenerator";
+		return "RandomSphere";
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_POINT;
@@ -415,10 +420,10 @@ public:
 		}
 	}
 	const char* getName() const {
-		return "RadialVelocityGenerator";
+		return "RadialVelocity";
 	}
 	const ParticleGeneratorType getType() const {
-		return PGT_DEFAULT;
+		return PGT_RADIAL_VELOCITY;
 	}
 };
 
@@ -455,7 +460,7 @@ public:
 		return PGT_DEFAULT;
 	}
 	const char* getName() const {
-		return "VelocityGenerator";
+		return "Velocity";
 	}
 };
 
@@ -488,10 +493,10 @@ public:
 		}
 	}
 	const ParticleGeneratorType getType() const {
-		return PGT_DEFAULT;
+		return PGT_LIFETIME;
 	}
 	const char* getName() const {
-		return "LifetimeGenerator";
+		return "Lifetime";
 	}
 };
 
@@ -524,7 +529,7 @@ public:
 		return PGT_DEFAULT;
 	}
 	const char* getName() const {
-		return "ColorGenerator";
+		return "Color";
 	}
 };
 
@@ -575,7 +580,7 @@ public:
 		return PGT_DEFAULT;
 	}
 	const char* getName() const {
-		return "HSVColorGenerator";
+		return "HSVColor";
 	}
 };
 
@@ -611,7 +616,7 @@ public:
 		return PGT_SIZE;
 	}
 	const char* getName() const {
-		return "SizeGenerator";
+		return "Size";
 	}
 };
 
@@ -645,10 +650,10 @@ public:
 		}
 	}
 	const ParticleGeneratorType getType() const {
-		return PGT_DEFAULT;
+		return PGT_RANDOM;
 	}
 	const char* getName() const {
-		return "ParticleRandomGenerator";
+		return "Random";
 	}
 };
 

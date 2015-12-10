@@ -84,7 +84,8 @@ typedef std::vector<ParticleModifier*> Modifiers;
 class NewParticleSystem : public Serializer {
 
 public:
-	NewParticleSystem() {
+	NewParticleSystem(int id) {
+		_id = id;
 		m_Array.initialize(MAX_PARTICLES);
 		
 	}
@@ -140,6 +141,8 @@ public:
 	void addModifier(ParticleModifier* modifier) {
 		m_Modifiers.push_back(modifier);
 	}
+	ParticleModifier* getModifier(ParticleModifierType type);
+
 	void setPosition(const Vector3f& position) {
 		_generatorData.position = position;
 	}
@@ -160,6 +163,10 @@ public:
 	const Modifiers& getModifiers() const {
 		return m_Modifiers;
 	}
+	int getID() const {
+		return _id;
+	}
+	void removeModifierByName(const char* name);
 private:
 	ParticleGenerator* createGenerator(int id);
 	ParticleModifier* createModifier(int id);
@@ -173,7 +180,7 @@ private:
 	ParticleEmitter m_Emitter;
 	char m_DebugName[32];
 	//EmitterInstances m_Instances;
-
+	int _id;
 	PModifier modifiers[32];
 	int dataIndices[32];
 	int numModifiers;

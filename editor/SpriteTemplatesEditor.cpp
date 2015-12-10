@@ -7,6 +7,7 @@ namespace ds {
 	SpriteTemplatesEditor::SpriteTemplatesEditor(SpriteTemplates* templates) : AssetEditor(templates) , _templates(templates) {
 		_offset = 0;
 		_state = 1;
+		_position = v2(20, 710);
 	}
 
 
@@ -14,6 +15,7 @@ namespace ds {
 	}
 
 	void SpriteTemplatesEditor::showDialog() {
+		gui::start(SPRITE_TEMPLATES_ID, &_position);
 		if (gui::begin("Sprite Templates", &_state)) {
 			gui::ComboBox(SPRITE_TEMPLATES_ID + 20, &_model, &_offset);
 			buttonGroup(SPRITE_TEMPLATES_ID + 9);
@@ -48,6 +50,20 @@ namespace ds {
 			}
 			gui::end();
 		}
+	}
+
+	bool SpriteTemplatesEditor::hasSelection() const {
+		return _model.hasSelection();
+	}
+
+	const Sprite& SpriteTemplatesEditor::getSelection() const {
+		int entry = _model.getSelectedValue();
+		return _templates->get(entry);
+	}
+
+	Sprite& SpriteTemplatesEditor::getSelection() {
+		int entry = _model.getSelectedValue();
+		return _templates->get(entry);
 	}
 
 	void SpriteTemplatesEditor::init() {

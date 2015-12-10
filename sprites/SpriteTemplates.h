@@ -23,6 +23,7 @@ public:
 	const bool contains(int id) const;
 	bool get(const char* name,Sprite* sprite);
 	Sprite& get(int index);
+	const Sprite& get(int index) const;
 	bool exportData(JSONWriter& writer);
 	bool importData(JSONReader& reader);
 	bool saveData(BinaryWriter& writer);

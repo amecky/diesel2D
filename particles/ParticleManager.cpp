@@ -14,9 +14,7 @@ namespace ds {
 		for ( int i = 0; i < 512; ++i ) {
 			m_Index[i] = -1;
 		}
-		_dialogState = 1;
-		_offset = 0;
-		_dialogPos = v2(512, 384);
+		
 	}
 
 	// --------------------------------------------------------------------------
@@ -59,11 +57,21 @@ namespace ds {
 		system->stop();
 	}
 
+	void ParticleManager::fillModel(gui::ComponentModel<int>* model) {
+		model->clear();
+		char buffer[32];
+		for (size_t i = 0; i < m_Systems.size(); ++i) {
+			sprintf_s(buffer, 32, "%s (%d)", m_Systems[i]->getDebugName(), m_Systems[i]->getID());
+			LOG << "----> '" << buffer << "'";
+			model->add(buffer, m_Systems[i]->getID());
+		}
+	}
+
 	// --------------------------------------------------------------------------
 	// load binary file
 	// --------------------------------------------------------------------------
 	void ParticleManager::load(BinaryLoader* loader) {
-		char buffer[32];
+		
 		while ( loader->openChunk() == 0 ) {		
 			if ( loader->getChunkID() == CHNK_PARTICLESYSTEM ) {
 				int id = 0;
@@ -74,14 +82,12 @@ namespace ds {
 				loader->read(&max);
 				LOG << "loading particle system: " << id << " file: " << file;
 				// FIXME: check if we already have one with this id
-				NewParticleSystem* system = new NewParticleSystem;
+				NewParticleSystem* system = new NewParticleSystem(id);
 				system->setDebugName(file.c_str());
 				ds::assets::load(file.c_str(),system,CVT_NPS);
 				m_Index[id] = m_Systems.size();
 				m_Systems.push_back(system);
-				sprintf_s(buffer, 32, "%s (%d)", file.c_str(), id);
-				LOG << "----> '" << buffer << "'";
-				_model.add(buffer, id);
+				
 			}
 			loader->closeChunk();
 		}		
@@ -189,60 +195,5 @@ namespace ds {
 		descriptorIndex = renderer::addDescriptor(desc);
 	}
 
-	void ParticleManager::showDialog() {
-		gui::start(DIALOG_MANAGER_ID, &_dialogPos);
-		if (gui::begin("Particlesystem", &_dialogState)) {
-			gui::ComboBox(DIALOG_MANAGER_ID + 1, &_model, &_offset);
-			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 4, "Load")) {
-			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 5, "Save")) {
-			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 6, "Add")) {
-			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 7, "Start")) {
-				if (_model.hasSelection()) {
-					int id = _model.getSelectedValue();
-					start(id, v2(512, 384));
-				}
-			}
-			gui::endGroup();
-		}
-		gui::end();
-		if (_model.hasSelection()) {
-			int id = _model.getSelectedValue();
-			NewParticleSystem* system = m_Systems[id];
-			if (gui::begin("System", &_dialogState)) {
-				ParticleEmitter& emitter = system->getEmitter();
-				ParticleEmitterData& data = emitter.getEmitterData();
-				/*
-				uint32 ejectionPeriod;
-				uint32 ejectionVariance;
-				uint32 ejectionCounter;
-				uint32 count;
-				float duration; // seconds
-				int loops; // how many ticks to run
-				*/
-				gui::InputInt(SPRITE_TEMPLATES_ID + 2, "count", &data.count);
-				gui::InputInt(SPRITE_TEMPLATES_ID + 3, "ejectionPeriod", &data.ejectionPeriod);
-				gui::InputInt(SPRITE_TEMPLATES_ID + 4, "ejectionVariance", &data.ejectionVariance);
-				gui::InputInt(SPRITE_TEMPLATES_ID + 5, "ejectionCounter", &data.ejectionCounter);
-				const Generators& generators = emitter.getGenerators();
-				std::vector<std::string> names;
-				for (size_t i = 0; i < generators.size(); ++i) {
-					names.push_back(generators[i]->getName());
-				}
-				int s = 0;
-				int o = 0;
-				gui::ComboBox(SPRITE_TEMPLATES_ID + 6, names, &s, &o);
-				const Modifiers& modifiers = system->getModifiers();
-				std::vector<std::string> mnames;
-				for (size_t i = 0; i < modifiers.size(); ++i) {
-					mnames.push_back(modifiers[i]->getName());
-				}
-				gui::ComboBox(SPRITE_TEMPLATES_ID + 7, mnames, &s, &o);
-			}
-			gui::end();
-		}
-	}
+	
 }
