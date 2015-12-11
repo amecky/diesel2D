@@ -6,14 +6,7 @@
 #include "..\renderer\graphics.h"
 
 namespace ds {
-
-BloomComponentConverter::BloomComponentConverter() : Converter("BloomComponentConverter") {
-}
-
-
-BloomComponentConverter::~BloomComponentConverter(void) {
-}
-
+/*
 void BloomComponentConverter::convert(JSONReader& reader,BinaryWriter& writer) {
 	Category* c = reader.getCategory("bloom");
 	writer.startChunk(CHNK_BLOOM_COMPONENT,1);
@@ -26,7 +19,7 @@ void BloomComponentConverter::convert(JSONReader& reader,BinaryWriter& writer) {
 	writer.write(c->getFloat("blur_amount",0.0f));
 	writer.closeChunk();					
 }
-
+*/
 const int SC_X = 512.0f;
 const int SC_Y = 384.0f;
 
@@ -39,7 +32,7 @@ BloomComponent::~BloomComponent(void) {
 
 int BloomComponent::init(int baseTarget,int texID) {
 	Color clr(0, 0, 0, 255);
-	assets::load("bloom",this,1);
+	//assets::load("bloom",this,1);
 	_baseRT = baseTarget;
 	int currentTarget = m_Settings.firstTarget;
 	// Bloom

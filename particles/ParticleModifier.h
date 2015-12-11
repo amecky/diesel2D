@@ -4,14 +4,27 @@
 #include "..\io\BinaryWriter.h"
 #include "..\data\DataTranslator.h"
 #include "..\utils\Profiler.h"
+#include "ParticleSystemData.h"
 
 namespace ds {
 
 enum ParticleModifierType {
 	PMT_POSITION,
 	PMT_LINEAR_SIZE,
-	PMT_LINEAR_ALPHA
+	PMT_LINEAR_ALPHA,
+	PMT_LINEAR_COLOR,
+	PMT_DAMPING_VELOCITY,
+	PMT_EOL
 };
+
+struct ParticleModifierData {
+
+	void read(Category* category) {}
+	void load(BinaryLoader* loader) {}
+	void save(BinaryWriter* writer) {}
+
+};
+
 // -------------------------------------------------------
 // Particle modifier
 // -------------------------------------------------------
@@ -22,10 +35,42 @@ public:
 	virtual ~ParticleModifier() {}
 	virtual void update(ParticleArray* array,float dt) = 0;
 	virtual void init(ParticleArray* array, uint32 start, uint32 end) = 0;
-	virtual void convert(Category* category,BinaryWriter& writer) {} 
+
+	virtual void update(ParticleArray* array, const ParticleModifierData* data, float dt) {}
+	virtual void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {}
+
+
+	virtual void read(Category* category) {} 
 	virtual void load(BinaryLoader* loader) {}
+	virtual void save(BinaryWriter* writer) {}
+
+
 	virtual const ParticleModifierType getType() const = 0;
 	virtual const char* getName() const = 0;
+	int getChunkID() {
+		return getType() + 100;
+	}
+};
+
+
+// -------------------------------------------------------
+// Linear color modifier
+// -------------------------------------------------------
+struct MyLinearColorModifierData : ParticleModifierData {
+
+	Color startColor;
+	Color endColor;
+
+	MyLinearColorModifierData() : startColor(255, 255, 255, 255), endColor(0, 0, 0, 0) {}
+
+	void read(Category* category) {
+	}
+
+	void load(BinaryLoader* loader) {
+	}
+
+	void save(BinaryWriter* writer) {
+	}
 };
 
 // -------------------------------------------------------
@@ -42,16 +87,18 @@ public:
 		return m_Translator;
 	}
 
-	void convert(Category* category,BinaryWriter& writer) {
+	void read(Category* category) {
 		DATA data;
 		DataTranslator<DATA>& translator = getTranslator();
 		translator.read(category,&data);
-		translator.saveChunk(writer,1,&data,true);
 	}
-
 	virtual void load(BinaryLoader* loader) {
 		DataTranslator<DATA>& translator = getTranslator();
 		translator.readChunk(*loader,&m_Data);
+	}
+	virtual void save(BinaryWriter* writer) {
+		DataTranslator<DATA>& translator = getTranslator();
+		translator.saveChunk(*writer, getChunkID(), &m_Data);
 	}
 	DATA& getData() const {
 		return m_Data;
@@ -153,7 +200,7 @@ public:
 		}
 	}
 	const ParticleModifierType getType() const {
-		return PMT_POSITION;
+		return PMT_LINEAR_COLOR;
 	}
 	const char* getName() const {
 		return "LinearColor";
@@ -360,7 +407,7 @@ public:
 // -------------------------------------------------------
 // DampingVelocityModifier
 // -------------------------------------------------------
-struct DampingVelocityModifierData {
+struct DampingVelocityModifierData : ParticleModifierData {
 
 	float damping;
 
@@ -385,7 +432,7 @@ public:
 	}
 	void init(ParticleArray* array, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
-		return PMT_POSITION;
+		return PMT_DAMPING_VELOCITY;
 	}
 	const char* getName() const {
 		return "DampingVelocity";

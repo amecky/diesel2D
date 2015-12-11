@@ -1,11 +1,7 @@
 #include "NewParticleSystemConverter.h"
-#include "..\io\BinaryWriter.h"
-#include "..\utils\PlainTextReader.h"
-#include "..\particles\ParticleModifier.h"
-#include "..\particles\ParticleEmitter.h"
 
 namespace ds {
-
+	/*
 void NewParticleSystemConverter::convert(JSONReader& reader,BinaryWriter& writer) {	
 	Category* root = reader.getCategory("particlesystem");
 	if ( root != 0 ) {
@@ -169,5 +165,5 @@ void NewParticleSystemConverter::convert(JSONReader& reader,BinaryWriter& writer
 		}		
 	}
 }
-
+*/
 }

@@ -2,10 +2,11 @@
 #include "..\base\GameState.h"
 #include "..\particles\ParticleManager.h"
 #include "..\ui\IMGUI.h"
+#include "AssetEditor.h"
 
 namespace ds {
 
-	class ParticlesEditState : public GameState {
+	class ParticlesEditState : public GameState , public AssetEditor {
 
 	public:
 		ParticlesEditState(ParticleManager* particles);
@@ -15,6 +16,10 @@ namespace ds {
 		int onGUIButton(DialogID dlgID, int button);
 		void activate();
 		void deactivate();
+
+		void showDialog() {}
+
+		void init();
 	private:
 		void renderSelection();
 		void reloadNames();
@@ -42,7 +47,6 @@ namespace ds {
 		int _add_generator_offset;
 		int _selected_id;
 		int _part_selection;
-		bool _show_add;
 		std::vector<std::string> _generator_names;
 		std::vector<std::string> _modifier_names;
 		std::vector<std::string> _available_modifiers;

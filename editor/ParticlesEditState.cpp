@@ -5,7 +5,7 @@
 
 namespace ds {
 
-	ParticlesEditState::ParticlesEditState(ParticleManager* particles) : GameState("ParticlesEditState"), _particles(particles) {
+	ParticlesEditState::ParticlesEditState(ParticleManager* particles) : GameState("ParticlesEditState"), AssetEditor(particles) , _particles(particles) {
 		_dialogState = 1;
 		_offset = 0;
 		_dialogPos = v2(10, 710);
@@ -18,7 +18,6 @@ namespace ds {
 		_add_generator_offset = 0;
 		_add_generator_state = 1;
 		_selected_id = -1;
-		_show_add = false;
 		_available_modifiers.push_back("Position");
 		_available_modifiers.push_back("LinearColor");
 		_available_modifiers.push_back("LinearSize");
@@ -89,15 +88,9 @@ namespace ds {
 	void ParticlesEditState::renderSelection() {
 		if (gui::begin("Particlesystem", &_dialogState)) {
 			gui::ComboBox(DIALOG_MANAGER_ID + 1, &_model, &_offset);
+			buttonGroup(DIALOG_MANAGER_ID + 4);
 			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 4, "Load")) {
-			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 5, "Save")) {
-			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 6, "Add")) {
-				_show_add = true;
-			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 7, "Start")) {
+			if (gui::Button(DIALOG_MANAGER_ID + 7, "Start")) {
 				if (_model.hasSelection()) {
 					int id = _model.getSelectedValue();
 					float cx = renderer::getScreenWidth() * 0.5f;
@@ -108,15 +101,15 @@ namespace ds {
 			}
 			gui::endGroup();
 		}
-		if (_show_add) {
+		if (_showAdd) {
 			int ret = _dialog.showEmbedded("Please provide a name", "Name");
 			if (ret == 1) {
 				//int id = _templates->createEmptyTemplate(_dialog.getText());
 				//_model.add(_dialog.getText(), id);
-				_show_add = false;
+				_showAdd = false;
 			}
 			if (ret == 2) {
-				_show_add = false;
+				_showAdd = false;
 			}
 		}
 	}
@@ -149,6 +142,9 @@ namespace ds {
 		}
 	}
 
+	void ParticlesEditState::init() {
+		_particles->fillModel(&_model);
+	}
 	// --------------------------------------------
 	// render modifier selection
 	// --------------------------------------------
@@ -200,12 +196,25 @@ namespace ds {
 			gui::InputVec2(SPRITE_TEMPLATES_ID + 10, "Min scale", &data->minScale);
 			gui::InputVec2(SPRITE_TEMPLATES_ID + 11, "Max scale", &data->maxScale);
 		}
-		if (_modifier_names[_modifier_state] == "LinearAlpha") {
+		else if (_modifier_names[_modifier_state] == "LinearAlpha") {
 			gui::Header(SPRITE_TEMPLATES_ID + 14, "Linear alpha modifier");
 			LinearAlphaModifier* modifier = static_cast<LinearAlphaModifier*>(system->getModifier(PMT_LINEAR_ALPHA));
 			LinearAlphaModifierData* data = modifier->getData();
 			gui::InputFloat(SPRITE_TEMPLATES_ID + 10, "Start", &data->startAlpha);
 			gui::InputFloat(SPRITE_TEMPLATES_ID + 11, "End", &data->endAlpha);
+		}
+		else if (_modifier_names[_modifier_state] == "LinearColor") {
+			gui::Header(SPRITE_TEMPLATES_ID + 14, "Linear color modifier");
+			LinearColorModifier* modifier = static_cast<LinearColorModifier*>(system->getModifier(PMT_LINEAR_COLOR));
+			LinearColorModifierData* data = modifier->getData();
+			gui::InputColor(SPRITE_TEMPLATES_ID + 10, "Start", &data->startColor);
+			gui::InputColor(SPRITE_TEMPLATES_ID + 11, "End", &data->endColor);
+		}
+		else if (_modifier_names[_modifier_state] == "DampingVelocity") {
+			gui::Header(SPRITE_TEMPLATES_ID + 14, "Damping velocity modifier");
+			DampingVelocityModifier* modifier = static_cast<DampingVelocityModifier*>(system->getModifier(PMT_DAMPING_VELOCITY));
+			DampingVelocityModifierData* data = modifier->getData();
+			gui::InputFloat(SPRITE_TEMPLATES_ID + 10, "Damping", &data->damping);
 		}
 	}
 
@@ -344,6 +353,24 @@ namespace ds {
 			}
 			else if (gui::Button(DIALOG_MANAGER_ID + 10, "Modifiers")) {
 				_part_selection = 3;
+			}
+			gui::endGroup();
+			gui::beginGroup();
+			if (gui::Button(DIALOG_MANAGER_ID + 11, "Load")) {
+				system->load();
+				_selected_id = -1;
+				reloadNames();
+			}
+			else if (gui::Button(DIALOG_MANAGER_ID + 12, "Save")) {
+				system->save();
+			}
+			else if (gui::Button(DIALOG_MANAGER_ID + 13, "Import")) {
+				system->importJSON();
+				_selected_id = -1;
+				reloadNames();
+			}
+			else if (gui::Button(DIALOG_MANAGER_ID + 14, "Export")) {
+				system->exportJSON();
 			}
 			gui::endGroup();
 			if (_part_selection == 1) {

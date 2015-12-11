@@ -10,21 +10,6 @@ namespace ds {
 const int SAMPLE_COUNT = 15;
 
 // -------------------------------------------------------
-// Bloom component converter
-// -------------------------------------------------------
-class BloomComponentConverter : public Converter {
-
-public:
-	BloomComponentConverter(void);
-	~BloomComponentConverter(void);
-	void convert(JSONReader& reader,BinaryWriter& writer);
-
-	const char* getResourceDirectory() {
-		return "content\\resources";
-	}
-};
-
-// -------------------------------------------------------
 // Bloom settings
 // -------------------------------------------------------
 struct BloomSettings  {

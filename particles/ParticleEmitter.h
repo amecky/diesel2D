@@ -38,11 +38,13 @@ public:
 	ParticleGenerator() {}
 	virtual ~ParticleGenerator() {}
 	virtual void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) = 0;
-	virtual void convert(Category* category,BinaryWriter& writer) {} 
+	virtual void read(Category* category) {} 
 	virtual void load(BinaryLoader* loader) {}
 	virtual const ParticleGeneratorType getType() const = 0;
 	virtual const char* getName() const = 0;
-	//virtual const int getChunkID() const = 0;
+	int getChunkID() {
+		return getType() + 200;
+	}
 };
 
 // -------------------------------------------------------
@@ -59,11 +61,10 @@ public:
 		return m_Translator;
 	}
 
-	void convert(Category* category,BinaryWriter& writer) {
+	void read(Category* category) {
 		DATA data;
 		DataTranslator<DATA>& translator = getTranslator();
 		translator.read(category,&data);
-		translator.saveChunk(writer,1,&data,true);
 	}
 
 	virtual void load(BinaryLoader* loader) {

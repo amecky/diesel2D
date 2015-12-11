@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "..\base\Settings.h"
 #include "..\sprites\SpriteGroup.h"
+#include "..\compiler\Converter.h"
 
 namespace ds {
 

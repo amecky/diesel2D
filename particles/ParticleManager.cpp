@@ -29,6 +29,11 @@ namespace ds {
 		//SAFE_RELEASE(vertexBuffer);
 	}
 
+	NewParticleSystem* ParticleManager::create(int id, const char* name) {
+		NewParticleSystem* system = new NewParticleSystem(id, name, &_factory);
+		return system;
+	}
+
 	// --------------------------------------------------------------------------
 	// start specific particlesystem
 	// --------------------------------------------------------------------------
@@ -67,9 +72,72 @@ namespace ds {
 		}
 	}
 
+	bool ParticleManager::exportData(JSONWriter& writer) {
+		for (size_t i = 0; i < m_Systems.size(); ++i) {
+			writer.startCategory(m_Systems[i]->getDebugName());
+			writer.write("id", m_Systems[i]->getID());
+			writer.write("file", m_Systems[i]->getDebugName());
+			writer.endCategory();
+		}
+		return true;
+	}
+
+	bool ParticleManager::importData(JSONReader& reader) {
+		LOG << "importing data";
+		std::vector<Category*> categories = reader.getCategories();
+		for (size_t i = 0; i < categories.size(); ++i) {
+			Category* c = categories[i];
+			LOG << "name: " << c->getName();
+			std::string name = c->getProperty("file");
+			int id = -1;
+			c->getInt("id", &id);
+			if (id != -1) {
+				NewParticleSystem* system = create(id, name.c_str());
+				LOG << "id: " << id << " name: " << name;
+				system->load();
+				//ds::assets::load(name.c_str(), system, CVT_NPS);
+				m_Index[id] = m_Systems.size();
+				m_Systems.push_back(system);
+			}
+		}
+		return true;
+	}
+
+	bool ParticleManager::saveData(BinaryWriter& writer) {
+		for (size_t i = 0; i < m_Systems.size(); ++i) {
+			writer.startChunk(CHNK_PARTICLESYSTEM, 1);
+			writer.write(m_Systems[i]->getID());
+			writer.write(m_Systems[i]->getDebugName());
+			writer.closeChunk();
+		}
+		return true;
+	}
+
+	bool ParticleManager::loadData(BinaryLoader& loader) {
+		LOG << "loading particle systems";
+		while (loader.openChunk() == 0) {
+			if (loader.getChunkID() == CHNK_PARTICLESYSTEM) {
+				int id = -1;
+				loader.read(&id);
+				std::string name;
+				loader.read(name);
+				if (id != -1) {
+					NewParticleSystem* system = create(id, name.c_str());
+					LOG << "id: " << id << " name: " << name;
+					system->load();
+					m_Index[id] = m_Systems.size();
+					m_Systems.push_back(system);
+				}
+			}
+			loader.closeChunk();
+		}
+		return true;
+	}
+
 	// --------------------------------------------------------------------------
 	// load binary file
 	// --------------------------------------------------------------------------
+	/*
 	void ParticleManager::load(BinaryLoader* loader) {
 		
 		while ( loader->openChunk() == 0 ) {		
@@ -93,7 +161,7 @@ namespace ds {
 		}		
 		LOG << "Number of particle systems: " << m_Systems.size();
 	}
-
+	*/
 	// --------------------------------------------------------------------------
 	// update
 	// --------------------------------------------------------------------------

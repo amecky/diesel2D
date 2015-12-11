@@ -1,7 +1,7 @@
 #pragma once
 #include "ParticleSystem.h"
 #include "..\lib\container\List.h"
-#include "..\io\Serializer.h"
+#include "..\compiler\DataFile.h"
 #include <IPath.h>
 #include "..\data\Gizmo.h"
 #include "Particle.h"
@@ -11,59 +11,9 @@
 #include "ParticleEmitter.h"
 #include "..\utils\Profiler.h"
 #include "..\compiler\AssetCompiler.h"
+#include "ParticleSystemFactory.h"
 
 namespace ds {
-	
-	struct ModifierData {
-
-		char* buffer;
-		int index;
-		int num;
-		int entries[64];
-
-		ModifierData() : buffer(0) , index(0) , num(0) {}
-
-		~ModifierData() {
-			if (buffer != 0) {
-				delete[] buffer;
-			}
-		}
-
-		void allocate(int size) {
-			buffer = new char[size];
-		}
-
-		template<class T>
-		const bool get(int id,T* t,int size) const {
-			int idx = entries[id];
-			char* data = buffer + idx;
-			memcpy(t, data, size);
-			return true;
-		}
-
-		template<class T>
-		int add(const T& t) {
-			int current = index;
-			entries[num++] = current;
-			char* data = buffer + index;
-			memcpy(data, &t, sizeof(t));
-			index += sizeof(t);
-			return current;
-		}
-	};
-
-	typedef void(*PModifier)(const ModifierData&, ParticleArray*, float);
-	typedef void(*PGenerator)(const ModifierData&, ParticleArray*, const Vector3f&, float, uint32, uint32);
-
-	struct LiveOverTimeData {
-
-		float ttl;
-
-	};
-
-	void lifeOverTime(const ModifierData& data, ParticleArray* array, float dt);
-
-	void move(const ModifierData& data, ParticleArray* array, float dt);
 
 // -------------------------------------------------------
 // New particle system
@@ -79,14 +29,38 @@ struct NewParticleSystemData {
 	Texture texture;
 };
 
+// -------------------------------------------------------
+// Modifier instance
+// -------------------------------------------------------
+struct ModifierInstance {
+
+	ParticleModifier* modifier;
+	ParticleModifierData* data;
+};
+
+
+// -------------------------------------------------------
+// Generator instance
+// -------------------------------------------------------
+struct GeneratorInstance {
+
+	int data_index;
+	ParticleGenerator* generator;
+
+};
+
 typedef std::vector<ParticleModifier*> Modifiers;
 
-class NewParticleSystem : public Serializer {
+class NewParticleSystem : public DataFile {
 
 public:
-	NewParticleSystem(int id) {
+	NewParticleSystem(int id,const char* name, ParticleSystemFactory* factory) {
+		strcpy_s(m_DebugName, 32, name);
+		sprintf_s(_json_name, 64, "particles\\%s.json", name);
 		_id = id;
 		m_Array.initialize(MAX_PARTICLES);
+		_count_modifiers = 0;
+		_factory = factory;
 		
 	}
 	virtual ~NewParticleSystem() {
@@ -102,19 +76,6 @@ public:
 	void init(const Rect& r,uint32 textureID) {
 		m_Data.textureID = textureID;
 		m_Data.textureRect = r;		
-	}
-
-	template<class T>
-	void addPM(const PModifier& modifier,const T& t) {
-		modifiers[numModifiers] = modifier;
-		dataIndices[numModifiers] = m_ModifierData.add(t);
-		++numModifiers;
-	}
-
-	void addPM(const PModifier& modifier) {
-		modifiers[numModifiers] = modifier;
-		dataIndices[numModifiers] = -1;
-		++numModifiers;
 	}
 
 	void update(float elapsed);
@@ -138,15 +99,24 @@ public:
 	void stop() {
 		m_Emitter.stop();
 	}
+
 	void addModifier(ParticleModifier* modifier) {
 		m_Modifiers.push_back(modifier);
 	}
+
+	void addModifier(ParticleModifier* modifier,ParticleModifierData* data) {
+		ModifierInstance& instance = _modifier_instances[_count_modifiers++];
+		instance.modifier = modifier;
+		instance.data = data;
+	}
+
+	ParticleModifierData* getData(const char* modifierName);
+
 	ParticleModifier* getModifier(ParticleModifierType type);
 
 	void setPosition(const Vector3f& position) {
 		_generatorData.position = position;
 	}
-	void load(BinaryLoader* loader);
 	void setDebugName(const char* name);
 	const int getCountAlive() const {
 		return m_Array.countAlive;
@@ -167,6 +137,19 @@ public:
 		return _id;
 	}
 	void removeModifierByName(const char* name);
+
+	bool exportData(JSONWriter& writer);
+	bool importData(JSONReader& reader);
+	bool saveData(BinaryWriter& writer);
+	bool loadData(BinaryLoader& loader);
+	const char* getJSONFileName() const {
+		return _json_name;
+	}
+	const char* getFileName() const {
+		return m_DebugName;
+	}
+
+
 private:
 	ParticleGenerator* createGenerator(int id);
 	ParticleModifier* createModifier(int id);
@@ -179,14 +162,15 @@ private:
 	Modifiers m_Modifiers;
 	ParticleEmitter m_Emitter;
 	char m_DebugName[32];
-	//EmitterInstances m_Instances;
+	char _json_name[64];
 	int _id;
-	PModifier modifiers[32];
+	
 	int dataIndices[32];
 	int numModifiers;
-	ModifierData m_ModifierData;
 
-	
+	ModifierInstance _modifier_instances[32];
+	int _count_modifiers;
+	ParticleSystemFactory* _factory;
 };
 
 }

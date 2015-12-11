@@ -223,11 +223,6 @@ void BaseApp::buildFrame() {
 	//gProfiler->reset();	
 	profiler::reset();
 	//PR_START("MAIN")
-	PR_START("FILEWATCHER");
-#ifdef DEBUG
-	assets::update();
-#endif
-	PR_END("FILEWATCHER");
 	renderer::drawCounter().reset();
 	debug::reset();
 	// handle key states

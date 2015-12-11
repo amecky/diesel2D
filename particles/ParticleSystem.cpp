@@ -13,30 +13,6 @@ namespace ds {
 		0.5f, -0.5f, -0.5f, -0.5f
 	};
 
-	void lifeOverTime(const ModifierData& data, ParticleArray* array, float dt) {
-		LiveOverTimeData myData;
-		if (data.get(100, &myData, sizeof(LiveOverTimeData))) {
-			for (uint32 i = 0; i < array->countAlive; ++i) {
-				array->timer[i].x += dt;
-				array->timer[i].y = array->timer[i].x / array->timer[i].z;
-			}
-			uint32 cnt = 0;
-			while (cnt < array->countAlive) {
-				if (array->timer[cnt].x > array->timer[cnt].z) {
-					array->kill(cnt);
-				}
-				++cnt;
-			}
-		}
-	}
-
-	void move(const ModifierData& data, ParticleArray* array, float dt) {
-		for (uint32 i = 0; i < array->countAlive; ++i) {
-			array->velocity[i] += array->acceleration[i] * dt;
-			array->position[i] += array->velocity[i] * dt;
-		}
-	}
-
 	void NewParticleSystem::start(const ParticleGeneratorData& data) {
 		_generatorData = data;
 		PR_START("NPS:emitterStart");
@@ -60,8 +36,14 @@ namespace ds {
 		start(data);
 	}
 
-	void NewParticleSystem::setDebugName(const char* name) {
-		strncpy(m_DebugName,name,32);
+	ParticleModifierData* NewParticleSystem::getData(const char* modifierName) {
+		for (int i = 0; i < _count_modifiers; ++i) {
+			const ModifierInstance& instance = _modifier_instances[i];
+			if (strcmp(instance.modifier->getName(), modifierName) == 0) {
+				return instance.data;
+			}
+		}
+		return 0;
 	}
 
 	void NewParticleSystem::update(float elapsed) {
@@ -72,7 +54,11 @@ namespace ds {
 		for (size_t i = 0; i < m_Modifiers.size(); ++i) {
 			m_Modifiers[i]->update(&m_Array, elapsed);
 		}
-		//buildVertices();
+
+		for (int i = 0; i < _count_modifiers; ++i) {
+			const ModifierInstance& instance = _modifier_instances[i];
+			instance.modifier->update(&m_Array, instance.data, elapsed);
+		}
 		PR_END("NPS:update");
 	}
 
@@ -116,41 +102,110 @@ namespace ds {
 		return 0;
 	}
 
-	void NewParticleSystem::load(BinaryLoader* loader) {	
+	bool NewParticleSystem::exportData(JSONWriter& writer) {
+		return true;
+	}
+
+	bool NewParticleSystem::importData(JSONReader& reader) {
 		clear();
-		while ( loader->openChunk() == 0 ) {	
-			if (loader->getChunkID() >= 100 && loader->getChunkID() < 200) {
-				ParticleModifier* modifier = createModifier(loader->getChunkID());
+		Category* root = reader.getCategory("particlesystem");
+		if (root != 0) {
+			_id = root->getUInt32("id", 0);
+			m_Data.id = _id;
+			m_Data.textureID = root->getUInt32("texture_id", 0);
+			m_Data.textureRect = root->getRect("texture_rect");
+
+			Category* modifiers = root->getChild("modifiers");
+			if (modifiers != 0) {
+				std::vector<Category*> categories = modifiers->getChildren();
+				for (size_t i = 0; i < categories.size(); ++i) {
+					Category* c = categories[i];
+					if (_factory->addModifier(this, c->getName().c_str())) {
+						ParticleModifierData* data = getData(c->getName().c_str());
+						data->read(c);
+					}
+					//ParticleModifier* modifier = modifier::create_by_name(c->getName().c_str());
+					//if (modifier != 0) {
+						//modifier->read(c);
+						//addModifier(modifier);
+					//}
+					else {
+						LOGE << "cannot find modifier: " << c->getName();
+					}
+				}
+			}
+
+			Category* emitter = root->getChild("emitter");
+			if (emitter != 0) {
+				std::vector<Category*> categories = emitter->getChildren();
+				ParticleEmitterData& data = m_Emitter.getEmitterData();
+				data.count = emitter->getUInt32("count", 10);
+				data.ejectionPeriod = emitter->getUInt32("ejection_period", 0);
+				data.ejectionVariance = emitter->getUInt32("ejection_variance", 0);
+				data.ejectionCounter = emitter->getUInt32("ejection_counter", 0);
+				data.duration = emitter->getFloat("duration", 0.0f);
+				for (size_t i = 0; i < categories.size(); ++i) {
+					Category* c = categories[i];
+					ParticleGenerator* generator = generator::create_by_name(c->getName().c_str());
+					if (generator != 0) {
+						generator->read(c);
+						addGenerator(generator);
+					}
+					else {
+						LOGE << "cannot find generator: " << c->getName();
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	bool NewParticleSystem::saveData(BinaryWriter& writer) {
+		for (int i = 0; i < _count_modifiers; ++i) {
+			writer.startChunk(1, 1);
+			const ModifierInstance& instance = _modifier_instances[i];
+			writer.write(instance.modifier->getChunkID);
+			writer.closeChunk();
+		}
+		return true;
+	}
+
+	bool NewParticleSystem::loadData(BinaryLoader& loader) {
+		clear();
+		while (loader.openChunk() == 0) {
+			if (loader.getChunkID() >= 100 && loader.getChunkID() < 200) {
+				ParticleModifier* modifier = createModifier(loader.getChunkID());
 				if (modifier != 0) {
-					modifier->load(loader);
+					modifier->load(&loader);
 					addModifier(modifier);
 				}
 			}
-			else if (loader->getChunkID() >= 200 && loader->getChunkID() < 300) {
-				ParticleGenerator* generator = createGenerator(loader->getChunkID());
+			else if (loader.getChunkID() >= 200 && loader.getChunkID() < 300) {
+				ParticleGenerator* generator = createGenerator(loader.getChunkID());
 				if (generator != 0) {
-					generator->load(loader);
+					generator->load(&loader);
 					addGenerator(generator);
 				}
 			}
-			else if ( loader->getChunkID() == 300 ) {
+			else if (loader.getChunkID() == 300) {
 				ParticleEmitterData& data = m_Emitter.getEmitterData();
-				loader->read(&data.count);
-				loader->read(&data.ejectionPeriod);
-				loader->read(&data.ejectionVariance);
-				loader->read(&data.ejectionCounter);
-				loader->read(&data.duration);
+				loader.read(&data.count);
+				loader.read(&data.ejectionPeriod);
+				loader.read(&data.ejectionVariance);
+				loader.read(&data.ejectionCounter);
+				loader.read(&data.duration);
 				m_Emitter.init();
 			}
-			else if ( loader->getChunkID() == 400 ) {
-				loader->read(&m_Data.id);
-				loader->read(&m_Data.textureID);
-				loader->read(&m_Data.textureRect);
+			else if (loader.getChunkID() == 400) {
+				loader.read(&m_Data.id);
+				loader.read(&m_Data.textureID);
+				loader.read(&m_Data.textureRect);
 				m_Data.texture = ds::math::buildTexture(m_Data.textureRect.top, m_Data.textureRect.left, m_Data.textureRect.width(), m_Data.textureRect.height());
 			}
-			loader->closeChunk();
+			loader.closeChunk();
 		}
 		prepareVertices();
+		return true;
 	}
 
 	void NewParticleSystem::prepareVertices() {

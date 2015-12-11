@@ -1,8 +1,9 @@
 #pragma once
+
 #include "Converter.h"
 
 namespace ds {
-
+	/*
 class NewParticleSystemConverter : public Converter {
 
 public:
@@ -14,5 +15,5 @@ public:
 		return "content\\particles";
 	}
 };
-
+*/
 }

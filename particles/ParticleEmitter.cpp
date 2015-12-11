@@ -184,18 +184,42 @@ namespace ds {
 				generator->init(10.0f, 2.0f);
 				return generator;
 			}
-				//Circle
-				//Line
-				//Point
-				//Sphere
-				//RandomSphere
-				//RadialVelocity
-				//Velocity
-				//Lifetime
-				//Color
-				//HSVColor
-				//Size
-				//Random
+			else if (strcmp(name, "Size") == 0) {
+				SizeGenerator* generator = new SizeGenerator();
+				generator->init(v2(1, 1), v2(0, 0));
+				return generator;
+			}
+			else if (strcmp(name, "Lifetime") == 0) {
+				LifetimeGenerator* generator = new LifetimeGenerator();
+				generator->init(1.0f, 0.0f);
+				return generator;
+			}
+			else if (strcmp(name, "Random") == 0) {
+				ParticleRandomGenerator* generator = new ParticleRandomGenerator();
+				generator->init(0.0f);
+				return generator;
+			}
+			else if (strcmp(name, "RadialVelocity") == 0) {
+				RadialVelocityGenerator* generator = new RadialVelocityGenerator();
+				generator->init(100.0f, 0.0f);
+				return generator;
+			}
+			else if (strcmp(name, "HSVColor") == 0) {
+				HSVColorGenerator* generator = new HSVColorGenerator();
+				generator->init(v3(1, 1, 1));
+				return generator;
+			}
+			else if (strcmp(name, "Color") == 0) {
+				ColorGenerator* generator = new ColorGenerator();
+				generator->init(Color::WHITE);
+				return generator;
+			}
+			//Circle
+			//Line
+			//Point
+			//Sphere
+			//RandomSphere
+			//Velocity
 			return 0;
 		}
 

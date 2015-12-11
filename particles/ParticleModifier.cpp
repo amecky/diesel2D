@@ -20,9 +20,16 @@ namespace ds {
 			//_available_modifiers.push_back("PerpendicularMove");
 			//_available_modifiers.push_back("ColorPath");
 			//_available_modifiers.push_back("AlphaPath");
-			//_available_modifiers.push_back("DampingVelocity");
+			else if (strcmp(name, "DampingVelocity") == 0) {
+				DampingVelocityModifier* modifier = new DampingVelocityModifier();
+				modifier->init(0.0f);
+				return modifier;
+			}
 			//_available_modifiers.push_back("SizePath");
-			//_available_modifiers.push_back("VelocityRotation");
+			else if (strcmp(name, "VelocityRotation") == 0) {
+				VelocityRotationModifier* modifier = new VelocityRotationModifier();
+				return modifier;
+			}
 			else if (strcmp(name, "Time") == 0) {
 				ParticleTimeModifier* modifier = new ParticleTimeModifier();
 				return modifier;
