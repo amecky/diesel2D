@@ -97,47 +97,47 @@ namespace gui {
 
 	void beginModal(const char* header);
 
-	void Label(int id,const char* text);
+	void Label(const char* text);
 
-	void Header(int id,const char* text);
+	void Header(const char* text);
 
 	void beginGroup();
 
 	void endGroup();
 
-	bool Button(int id,const char* label);
+	bool Button(const char* label);
 
 	void BoxTest();
 
-	void CheckBox(int id, const char* label,bool* selected);
+	void CheckBox(const char* label,bool* selected);
 
-	void InputFloat(int id,const char* label, float* v);
+	void InputFloat(const char* label, float* v);
 
-	void Input(int id, const char* label, char* str,int maxLength);
+	void Input(const char* label, char* str,int maxLength);
 
-	void InputFloat(int id, const char* label, float* v, float minValue, float maxValue, float step);
+	void InputFloat(const char* label, float* v, float minValue, float maxValue, float step);
 
-	void InputInt(int id, const char* label, int* v);
+	void InputInt(const char* label, int* v);
 
-	void InputInt(int id, const char* label, uint32* v);
+	void InputInt(const char* label, uint32* v);
 
-	void InputInt(int id, const char* label, int* v,int minValue, int maxValue, int step);
+	void InputInt(const char* label, int* v,int minValue, int maxValue, int step);
 
-	void InputVec2(int id, const char* label, v2* v);
+	void InputVec2(const char* label, v2* v);
 
-	void InputVec3(int id, const char* label, v3* v);
+	void InputVec3(const char* label, v3* v);
 
-	void InputRect(int id, const char* label, ds::Rect* v);
+	void InputRect(const char* label, ds::Rect* v);
 
-	void InputColor(int id, const char* label, ds::Color* v);
+	void InputColor(const char* label, ds::Color* v);
 
-	void ComboBox(int id,const std::vector<std::string>& entries, int* selected,int *offset,int max = 5);
+	void ComboBox(const std::vector<std::string>& entries, int* selected,int *offset,int max = 5);
 
-	void ComboBox(int id, AbstractComponentModel* model,int *offset,int max = 5);
+	void ComboBox(AbstractComponentModel* model,int *offset,int max = 5);
 
 	void DropDownBox(int id, const std::vector<std::string>& entries, int* selected,int* state);
 
-	void Histogram(int id, float* values, int num, float minValue, float maxValue, float step);
+	void Histogram(float* values, int num, float minValue, float maxValue, float step);
 
 	void sendKey(unsigned char c);
 

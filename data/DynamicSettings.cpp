@@ -173,18 +173,18 @@ namespace ds {
 	void DynamicGameSettings::showDialog(v2* pos) {
 		gui::start(20, pos);
 		if (gui::begin("Settings Dialog", &_state)) {
-			gui::ComboBox(DGS_DIALOG_ID + 1, &_model, &_offset, 10);
+			gui::ComboBox(&_model, &_offset, 10);
 			gui::beginGroup();
-			if (gui::Button(DGS_DIALOG_ID + 2, "Save")) {
+			if (gui::Button("Save")) {
 				save();
 			}
-			if (gui::Button(DGS_DIALOG_ID + 11, "Load")) {
+			if (gui::Button("Load")) {
 				load();
 			}
-			if (gui::Button(DGS_DIALOG_ID + 14, "Export")) {
+			if (gui::Button("Export")) {
 				exportJSON();
 			}
-			if (gui::Button(DGS_DIALOG_ID + 15, "Import")) {
+			if (gui::Button("Import")) {
 				importJSON();
 			}
 			gui::endGroup();
@@ -194,10 +194,10 @@ namespace ds {
 			if (gui::begin("Setting", &_state)) {
 				SettingsItem element = _model.getSelectedValue();
 				if (element.type == ST_FLOAT) {
-					gui::InputFloat(DGS_DIALOG_ID + 4, element.name, _floats[element.index]);
+					gui::InputFloat(element.name, _floats[element.index]);
 				}
 				else if (element.type == ST_RECT) {
-					gui::InputRect(DGS_DIALOG_ID + 4, element.name, _rects[element.index]);
+					gui::InputRect(element.name, _rects[element.index]);
 				}
 			}
 			gui::end();

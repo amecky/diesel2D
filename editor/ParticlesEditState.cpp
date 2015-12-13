@@ -87,10 +87,10 @@ namespace ds {
 	// --------------------------------------------
 	void ParticlesEditState::renderSelection() {
 		if (gui::begin("Particlesystem", &_dialogState)) {
-			gui::ComboBox(DIALOG_MANAGER_ID + 1, &_model, &_offset);
-			buttonGroup(DIALOG_MANAGER_ID + 4);
+			gui::ComboBox(&_model, &_offset);
+			buttonGroup();
 			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 7, "Start")) {
+			if (gui::Button("Start")) {
 				if (_model.hasSelection()) {
 					int id = _model.getSelectedValue();
 					float cx = renderer::getScreenWidth() * 0.5f;
@@ -151,22 +151,22 @@ namespace ds {
 	void ParticlesEditState::renderModifierSelection() {
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
-		gui::Header(SPRITE_TEMPLATES_ID + 14, "Modifiers");
-		gui::ComboBox(SPRITE_TEMPLATES_ID + 6, _modifier_names, &_modifier_state, &_modifier_offset);
+		gui::Header("Modifiers");
+		gui::ComboBox(_modifier_names, &_modifier_state, &_modifier_offset);
 		gui::beginGroup();
-		if (gui::Button(DIALOG_MANAGER_ID + 7, "Add")) {
+		if (gui::Button("Add")) {
 			_show_add_modifier = true;
 		}
-		else if (gui::Button(DIALOG_MANAGER_ID + 8, "Remove")) {
+		else if (gui::Button("Remove")) {
 			system->removeModifierByName(_modifier_names[_modifier_state].c_str());
 			_modifier_names.erase(_modifier_names.begin() + _modifier_state);
 		}
 		gui::endGroup();
 		if (_show_add_modifier) {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Add modifier");
-			gui::ComboBox(SPRITE_TEMPLATES_ID + 9, _available_modifiers, &_add_modifier_state, &_add_modifier_offset);
+			gui::Header("Add modifier");
+			gui::ComboBox(_available_modifiers, &_add_modifier_state, &_add_modifier_offset);
 			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 10, "Add")) {
+			if (gui::Button("Add")) {
 				if (_add_modifier_state != -1) {
 					ParticleModifier* modifier = modifier::create_by_name(_available_modifiers[_add_modifier_state].c_str());
 					if (modifier != 0) {
@@ -176,7 +176,7 @@ namespace ds {
 					_show_add_modifier = false;
 				}
 			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 11, "Cancel")) {
+			else if (gui::Button("Cancel")) {
 				_show_add_modifier = false;
 			}
 			gui::endGroup();
@@ -190,31 +190,31 @@ namespace ds {
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
 		if (_modifier_names[_modifier_state] == "LinearSize") {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Linear size modifier");
+			gui::Header("Linear size modifier");
 			LinearSizeModifier* modifier = static_cast<LinearSizeModifier*>(system->getModifier(PMT_LINEAR_SIZE));
 			LinearSizeModifierData* data = modifier->getData();
-			gui::InputVec2(SPRITE_TEMPLATES_ID + 10, "Min scale", &data->minScale);
-			gui::InputVec2(SPRITE_TEMPLATES_ID + 11, "Max scale", &data->maxScale);
+			gui::InputVec2("Min scale", &data->minScale);
+			gui::InputVec2("Max scale", &data->maxScale);
 		}
 		else if (_modifier_names[_modifier_state] == "LinearAlpha") {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Linear alpha modifier");
+			gui::Header("Linear alpha modifier");
 			LinearAlphaModifier* modifier = static_cast<LinearAlphaModifier*>(system->getModifier(PMT_LINEAR_ALPHA));
 			LinearAlphaModifierData* data = modifier->getData();
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 10, "Start", &data->startAlpha);
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 11, "End", &data->endAlpha);
+			gui::InputFloat("Start", &data->startAlpha);
+			gui::InputFloat("End", &data->endAlpha);
 		}
 		else if (_modifier_names[_modifier_state] == "LinearColor") {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Linear color modifier");
+			gui::Header("Linear color modifier");
 			LinearColorModifier* modifier = static_cast<LinearColorModifier*>(system->getModifier(PMT_LINEAR_COLOR));
 			LinearColorModifierData* data = modifier->getData();
-			gui::InputColor(SPRITE_TEMPLATES_ID + 10, "Start", &data->startColor);
-			gui::InputColor(SPRITE_TEMPLATES_ID + 11, "End", &data->endColor);
+			gui::InputColor("Start", &data->startColor);
+			gui::InputColor("End", &data->endColor);
 		}
 		else if (_modifier_names[_modifier_state] == "DampingVelocity") {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Damping velocity modifier");
+			gui::Header("Damping velocity modifier");
 			DampingVelocityModifier* modifier = static_cast<DampingVelocityModifier*>(system->getModifier(PMT_DAMPING_VELOCITY));
 			DampingVelocityModifierData* data = modifier->getData();
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 10, "Damping", &data->damping);
+			gui::InputFloat("Damping", &data->damping);
 		}
 	}
 
@@ -222,23 +222,23 @@ namespace ds {
 	// render generator selection
 	// --------------------------------------------
 	void ParticlesEditState::renderGeneratorSelection() {
-		gui::Header(SPRITE_TEMPLATES_ID + 14, "Generators");
-		gui::ComboBox(SPRITE_TEMPLATES_ID + 6, _generator_names, &_generator_state, &_generator_offset);
+		gui::Header("Generators");
+		gui::ComboBox(_generator_names, &_generator_state, &_generator_offset);
 		gui::beginGroup();
-		if (gui::Button(DIALOG_MANAGER_ID + 7, "Add")) {
+		if (gui::Button("Add")) {
 			_show_add_generator = true;
 		}
-		else if (gui::Button(DIALOG_MANAGER_ID + 8, "Remove")) {
+		else if (gui::Button("Remove")) {
 		}
 		gui::endGroup();
 		if (_show_add_generator) {
 			int id = _model.getSelectedValue();
 			NewParticleSystem* system = _particles->getParticleSystem(id);
 			ParticleEmitter& emitter = system->getEmitter();
-			gui::Header(SPRITE_TEMPLATES_ID + 15, "Add generator");
-			gui::ComboBox(SPRITE_TEMPLATES_ID + 9, _available_generators, &_add_generator_state, &_add_generator_offset);
+			gui::Header("Add generator");
+			gui::ComboBox(_available_generators, &_add_generator_state, &_add_generator_offset);
 			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 10, "Add")) {
+			if (gui::Button("Add")) {
 				if (_add_generator_state != -1) {
 					ParticleGenerator* generator = generator::create_by_name(_available_generators[_add_generator_state].c_str());
 					if (generator != 0) {
@@ -248,7 +248,7 @@ namespace ds {
 					_show_add_generator = false;
 				}
 			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 11, "Cancel")) {
+			else if (gui::Button("Cancel")) {
 				_show_add_generator = false;
 			}
 			gui::endGroup();
@@ -263,47 +263,47 @@ namespace ds {
 		NewParticleSystem* system = _particles->getParticleSystem(id);
 		ParticleEmitter& emitter = system->getEmitter();
 		if (_generator_names[_generator_state] == "Lifetime") {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Lifetime");
+			gui::Header("Lifetime");
 			LifetimeGenerator* generator = static_cast<LifetimeGenerator*>(emitter.getGenerator(PGT_LIFETIME));
 			LifetimeGeneratorData* data = generator->getData();
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 10, "TTL", &data->ttl);
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 11, "Variance", &data->variance);
+			gui::InputFloat("TTL", &data->ttl);
+			gui::InputFloat("Variance", &data->variance);
 		}
 		else if (_generator_names[_generator_state] == "RadialVelocity") {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Radial velocity");
+			gui::Header("Radial velocity");
 			RadialVelocityGenerator* generator = static_cast<RadialVelocityGenerator*>(emitter.getGenerator(PGT_RADIAL_VELOCITY));
 			RadialVelocityGeneratorData* data = generator->getData();
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 10, "Velocity", &data->velocity);
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 11, "Variance", &data->variance);
+			gui::InputFloat("Velocity", &data->velocity);
+			gui::InputFloat("Variance", &data->variance);
 		}
 		else if (_generator_names[_generator_state] == "Ring") {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Ring generator");
+			gui::Header("Ring generator");
 			RingGenerator* generator = static_cast<RingGenerator*>(emitter.getGenerator(PGT_RING));
 			RingGeneratorData* data = generator->getData();
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 10, "Radius", &data->radius);
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 11, "Variance", &data->variance);
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 12, "Step", &data->step);
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 13, "Angle Variance", &data->angleVariance);
+			gui::InputFloat("Radius", &data->radius);
+			gui::InputFloat("Variance", &data->variance);
+			gui::InputFloat("Step", &data->step);
+			gui::InputFloat("Angle Variance", &data->angleVariance);
 		}
 		else if (_generator_names[_generator_state] == "Random") {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Random generator");
+			gui::Header("Random generator");
 			ParticleRandomGenerator* generator = static_cast<ParticleRandomGenerator*>(emitter.getGenerator(PGT_RANDOM));
 			ParticleRandomGeneratorData* data = generator->getData();
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 10, "Min", &data->minRandom);
-			gui::InputFloat(SPRITE_TEMPLATES_ID + 11, "Max", &data->maxRandom);
+			gui::InputFloat("Min", &data->minRandom);
+			gui::InputFloat("Max", &data->maxRandom);
 		}
 		else if (_generator_names[_generator_state] == "Color") {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Color generator");
+			gui::Header("Color generator");
 			ColorGenerator* generator = static_cast<ColorGenerator*>(emitter.getGenerator(PGT_COLOR));
 			ColorGeneratorData* data = generator->getData();
-			gui::InputColor(SPRITE_TEMPLATES_ID + 10, "Color", &data->color);
+			gui::InputColor("Color", &data->color);
 		}
 		else if (_generator_names[_generator_state] == "Size") {
-			gui::Header(SPRITE_TEMPLATES_ID + 14, "Size generator");
+			gui::Header("Size generator");
 			SizeGenerator* generator = static_cast<SizeGenerator*>(emitter.getGenerator(PGT_SIZE));
 			SizeGeneratorData* data = generator->getData();
-			gui::InputVec2(SPRITE_TEMPLATES_ID + 10, "Scale", &data->scale);
-			gui::InputVec2(SPRITE_TEMPLATES_ID + 11, "Variance", &data->variance);
+			gui::InputVec2("Scale", &data->scale);
+			gui::InputVec2("Variance", &data->variance);
 		}
 		// HSVColor
 		// Point
@@ -314,7 +314,7 @@ namespace ds {
 	// render emitter settings
 	// --------------------------------------------
 	void ParticlesEditState::renderEmitterSettings() {
-		gui::Header(SPRITE_TEMPLATES_ID + 6, "System");
+		gui::Header("System");
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
 		ParticleEmitter& emitter = system->getEmitter();
@@ -322,13 +322,13 @@ namespace ds {
 		NewParticleSystemData& system_data = system->getParticleData();
 		char buffer[32];
 		sprintf_s(buffer, 32, "ID: %d", system->getID());
-		gui::Label(SPRITE_TEMPLATES_ID + 7, buffer);
-		gui::InputInt(SPRITE_TEMPLATES_ID + 2, "count", &data.count);
-		gui::InputInt(SPRITE_TEMPLATES_ID + 3, "ejectionPeriod", &data.ejectionPeriod);
-		gui::InputInt(SPRITE_TEMPLATES_ID + 4, "ejectionVariance", &data.ejectionVariance);
-		gui::InputInt(SPRITE_TEMPLATES_ID + 5, "ejectionCounter", &data.ejectionCounter);
+		gui::Label(buffer);
+		gui::InputInt("count", &data.count);
+		gui::InputInt("ejectionPeriod", &data.ejectionPeriod);
+		gui::InputInt("ejectionVariance", &data.ejectionVariance);
+		gui::InputInt("ejectionCounter", &data.ejectionCounter);
 		ds::Rect r = system_data.texture.rect;
-		gui::InputRect(SPRITE_TEMPLATES_ID + 6, "TextureRect", &r);
+		gui::InputRect("TextureRect", &r);
 		system_data.texture = math::buildTexture(r);
 	}
 
@@ -343,33 +343,33 @@ namespace ds {
 			int id = _model.getSelectedValue();
 			NewParticleSystem* system = _particles->getParticleSystem(id);
 			reloadNames();
-			gui::Header(DIALOG_MANAGER_ID + 7, "System");
+			gui::Header("System");
 			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 8, "Emitter")) {
+			if (gui::Button("Emitter")) {
 				_part_selection = 1;
 			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 9, "Generator")) {
+			else if (gui::Button("Generator")) {
 				_part_selection = 2;
 			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 10, "Modifiers")) {
+			else if (gui::Button("Modifiers")) {
 				_part_selection = 3;
 			}
 			gui::endGroup();
 			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 11, "Load")) {
+			if (gui::Button("Load")) {
 				system->load();
 				_selected_id = -1;
 				reloadNames();
 			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 12, "Save")) {
+			else if (gui::Button("Save")) {
 				system->save();
 			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 13, "Import")) {
+			else if (gui::Button("Import")) {
 				system->importJSON();
 				_selected_id = -1;
 				reloadNames();
 			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 14, "Export")) {
+			else if (gui::Button("Export")) {
 				system->exportJSON();
 			}
 			gui::endGroup();

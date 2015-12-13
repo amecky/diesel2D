@@ -608,9 +608,9 @@ namespace ds {
 	void GUIDialog::showAddDialog() {
 		if (_showAdd) {
 			if (gui::begin("Add element", &_state)) {
-				gui::ComboBox(GUI_DIALOG_ID + 24, _availableElements, &_selectedElement, &_elementOffset);
+				gui::ComboBox(_availableElements, &_selectedElement, &_elementOffset);
 				gui::beginGroup();
-				if (gui::Button(GUI_DIALOG_ID + 25, "OK")) {
+				if (gui::Button("OK")) {
 					if (_selectedElement != -1) {
 						int id = getNextID();
 						assert(id != -1);
@@ -641,7 +641,7 @@ namespace ds {
 					}
 					_showAdd = false;
 				}
-				if (gui::Button(GUI_DIALOG_ID + 26, "Cancel")) {
+				if (gui::Button("Cancel")) {
 					_showAdd = false;
 				}
 				gui::endGroup();
@@ -667,26 +667,26 @@ namespace ds {
 	// -------------------------------------------------------
 	void GUIDialog::showDialog() {
 		if (gui::begin("GUI Dialog", &_state)) {
-			gui::ComboBox(GUI_DIALOG_ID + 1, &_model, &_offset);
+			gui::ComboBox(&_model, &_offset);
 			gui::beginGroup();
-			if (gui::Button(GUI_DIALOG_ID + 2, "Save")) {
+			if (gui::Button("Save")) {
 				save();
 			}
-			if (gui::Button(GUI_DIALOG_ID + 11, "Load")) {
+			if (gui::Button("Load")) {
 				load();
 			}
-			if (gui::Button(GUI_DIALOG_ID + 14, "Export")) {
+			if (gui::Button("Export")) {
 				exportJSON();
 			}
-			if (gui::Button(GUI_DIALOG_ID + 15, "Import")) {
+			if (gui::Button("Import")) {
 				importJSON();
 			}
 			gui::endGroup();
 			gui::beginGroup();
-			if (gui::Button(GUI_DIALOG_ID + 10, "Add")) {
+			if (gui::Button("Add")) {
 				_showAdd = !_showAdd;
 			}
-			if (gui::Button(GUI_DIALOG_ID + 14, "Remove")) {
+			if (gui::Button("Remove")) {
 				if (_model.hasSelection()) {
 					const GUIModelItem& item = _model.getSelectedValue();
 					if (remove(item.id)) {
@@ -694,7 +694,7 @@ namespace ds {
 					}
 				}
 			}
-			if (gui::Button(GUI_DIALOG_ID + 12, "Up")) {
+			if (gui::Button("Up")) {
 				if (_model.hasSelection()) {
 					int index = _model.getSelection();
 					if (swap(index, index - 1)) {
@@ -703,7 +703,7 @@ namespace ds {
 					}
 				}
 			}
-			if (gui::Button(GUI_DIALOG_ID + 13, "Down")) {
+			if (gui::Button("Down")) {
 				if (_model.hasSelection()) {
 					int index = _model.getSelection();
 					if (swap(index, index + 1)) {
@@ -727,38 +727,38 @@ namespace ds {
 					GUIItem* item = &m_Items[gid.entryIndex];
 					char buffer[32];
 					sprintf_s(buffer, 32, "ID: %d", gid.id);
-					gui::Label(GUI_DIALOG_ID + 8, buffer);
-					gui::InputVec2(GUI_DIALOG_ID + 3, "Position", &item->pos);
-					gui::InputFloat(GUI_DIALOG_ID + 4, "Scale", &item->scale);
-					gui::InputColor(GUI_DIALOG_ID + 5, "Color", &item->color);
-					gui::CheckBox(GUI_DIALOG_ID + 6, "Centered", &item->centered);
+					gui::Label(buffer);
+					gui::InputVec2("Position", &item->pos);
+					gui::InputFloat("Scale", &item->scale);
+					gui::InputColor("Color", &item->color);
+					gui::CheckBox("Centered", &item->centered);
 					if (element.type == GIT_NUMBERS) {
 						GUINumber* number = &_numbers[gid.index];
-						gui::InputInt(GUI_DIALOG_ID + 7, "Value", &number->value);
-						gui::InputInt(GUI_DIALOG_ID + 8, "Length", &number->length);
+						gui::InputInt("Value", &number->value);
+						gui::InputInt("Length", &number->length);
 					}
 					else if (element.type == GIT_IMAGE) {
 						GUIImage* image = &_images[gid.index];
 						Rect r = image->texture.rect;
-						gui::InputRect(GUI_DIALOG_ID + 7, "Texture", &r);
+						gui::InputRect("Texture", &r);
 						image->texture = math::buildTexture(r);
 					}
 					else if (element.type == GIT_BUTTON) {
 						GUIButton* button = &_buttons[gid.index];
 						Rect r = button->texture.rect;
-						gui::InputRect(GUI_DIALOG_ID + 7, "Texture", &r);
+						gui::InputRect("Texture", &r);
 						button->texture = math::buildTexture(r);
-						gui::Input(GUI_DIALOG_ID + 8, "Text", button->text, 32);
+						gui::Input("Text", button->text, 32);
 					}
 					else if (element.type == GIT_IMAGE_BUTTON) {
 						GUIImageButton* button = &_imageButtons[gid.index];
 						Rect r = button->texture.rect;
-						gui::InputRect(GUI_DIALOG_ID + 7, "Texture", &r);
+						gui::InputRect("Texture", &r);
 						button->texture = math::buildTexture(r);
 					}
 					else if (element.type == GIT_TEXT) {
 						GUIText* text = &_texts[gid.index];
-						gui::Input(GUI_DIALOG_ID + 7, "Text", text->text, 32);
+						gui::Input("Text", text->text, 32);
 					}
 				}
 			}

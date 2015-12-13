@@ -21,9 +21,9 @@ namespace ds {
 	void BitmapFontsDialog::show() {
 		gui::start(DIALOG_MANAGER_ID, &_position);
 		if (gui::begin("Bitmap Fonts", &_state)) {
-			gui::ComboBox(DIALOG_MANAGER_ID + 1, &_fontNames, &_offset);
+			gui::ComboBox(&_fontNames, &_offset);
 			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 2, "Add")) {
+			if (gui::Button("Add")) {
 				//_showAdd = true;
 			}			
 			gui::endGroup();
@@ -35,18 +35,18 @@ namespace ds {
 			BitmapFont* font = renderer::getBitmapFont(name);
 			if (font != 0) {
 				if (gui::begin(font->name, &_state)) {
-					gui::InputInt(DIALOG_MANAGER_ID + 4,"start char",&font->startChar);
-					gui::InputInt(DIALOG_MANAGER_ID + 5, "end char", &font->endChar);
-					gui::InputInt(DIALOG_MANAGER_ID + 6, "charHeight", &font->charHeight);
-					gui::InputInt(DIALOG_MANAGER_ID + 7, "gridHeight", &font->gridHeight);
-					gui::InputInt(DIALOG_MANAGER_ID + 8, "startX", &font->startX);
-					gui::InputInt(DIALOG_MANAGER_ID + 9, "startY", &font->startY);
-					gui::InputInt(DIALOG_MANAGER_ID + 10, "width", &font->width);
-					gui::InputInt(DIALOG_MANAGER_ID + 11, "height", &font->height);
-					gui::InputInt(DIALOG_MANAGER_ID + 12, "padding", &font->padding);
-					gui::InputInt(DIALOG_MANAGER_ID + 13, "textureSize", &font->textureSize);
+					gui::InputInt("start char",&font->startChar);
+					gui::InputInt("end char", &font->endChar);
+					gui::InputInt("charHeight", &font->charHeight);
+					gui::InputInt("gridHeight", &font->gridHeight);
+					gui::InputInt("startX", &font->startX);
+					gui::InputInt("startY", &font->startY);
+					gui::InputInt("width", &font->width);
+					gui::InputInt("height", &font->height);
+					gui::InputInt("padding", &font->padding);
+					gui::InputInt("textureSize", &font->textureSize);
 					gui::beginGroup();
-					if (gui::Button(DIALOG_MANAGER_ID + 3, "Save")) {
+					if (gui::Button("Save")) {
 						//_showAdd = true;
 					}
 					gui::endGroup();

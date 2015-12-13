@@ -1850,19 +1850,19 @@ namespace ds {
 			if (gui::begin("Draw Calls", &state)) {
 				char buffer[256];
 				sprintf(buffer, "DrawCounter IDX: %d", renderContext->drawCounter.indexCounter);
-				gui::Label(EDITOR_ID + 1, buffer);
+				gui::Label(buffer);
 				sprintf(buffer, "Vertices: %d", renderContext->drawCounter.numPrim);
-				gui::Label(EDITOR_ID + 2, buffer);
+				gui::Label(buffer);
 				sprintf(buffer, "Sprites: %d", renderContext->drawCounter.sprites);
-				gui::Label(EDITOR_ID + 3, buffer);
+				gui::Label(buffer);
 				sprintf(buffer, "Flushes: %d", renderContext->drawCounter.flushes);
-				gui::Label(EDITOR_ID + 4, buffer);
+				gui::Label(buffer);
 				sprintf(buffer, "DrawCalls: %d", renderContext->drawCounter.drawCalls);
-				gui::Label(EDITOR_ID + 5, buffer);
+				gui::Label(buffer);
 				sprintf(buffer, "Textures: %d", renderContext->drawCounter.textures);
-				gui::Label(EDITOR_ID + 6, buffer);
+				gui::Label(buffer);
 				sprintf(buffer, "Shaders: %d", renderContext->drawCounter.shaders);
-				gui::Label(EDITOR_ID + 7, buffer);
+				gui::Label(buffer);
 			}
 			gui::end();
 		}

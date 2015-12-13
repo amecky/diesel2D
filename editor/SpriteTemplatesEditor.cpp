@@ -17,8 +17,8 @@ namespace ds {
 	void SpriteTemplatesEditor::showDialog() {
 		gui::start(SPRITE_TEMPLATES_ID, &_position);
 		if (gui::begin("Sprite Templates", &_state)) {
-			gui::ComboBox(SPRITE_TEMPLATES_ID + 20, &_model, &_offset);
-			buttonGroup(SPRITE_TEMPLATES_ID + 9);
+			gui::ComboBox(&_model, &_offset);
+			buttonGroup();
 		}
 		gui::end();
 
@@ -39,13 +39,13 @@ namespace ds {
 				int entry = _model.getSelectedValue();
 				Sprite& sprite = _templates->get(entry);
 				ds::Rect r = sprite.texture.rect;
-				gui::InputInt(SPRITE_TEMPLATES_ID + 2, "Texture_id", &sprite.texture.textureID);
-				gui::InputVec2(SPRITE_TEMPLATES_ID + 3, "Position", &sprite.position);
-				gui::InputRect(SPRITE_TEMPLATES_ID + 4, "TextureRect", &r);
-				gui::InputVec2(SPRITE_TEMPLATES_ID + 5, "Scale", &sprite.scale);
-				gui::InputFloat(SPRITE_TEMPLATES_ID + 6, "Rotation", &sprite.rotation);
-				gui::InputColor(SPRITE_TEMPLATES_ID + 7, "Color", &sprite.color);
-				gui::InputInt(SPRITE_TEMPLATES_ID + 8, "Type", &sprite.type);
+				gui::InputInt("Texture_id", &sprite.texture.textureID);
+				gui::InputVec2("Position", &sprite.position);
+				gui::InputRect("TextureRect", &r);
+				gui::InputVec2("Scale", &sprite.scale);
+				gui::InputFloat("Rotation", &sprite.rotation);
+				gui::InputColor("Color", &sprite.color);
+				gui::InputInt("Type", &sprite.type);
 				sprite.texture = math::buildTexture(r);
 			}
 			gui::end();

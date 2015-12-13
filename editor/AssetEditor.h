@@ -15,23 +15,23 @@ namespace ds {
 		virtual void init() = 0;
 
 	protected:
-		void buttonGroup(int startIndex) {
+		void buttonGroup() {
 			gui::beginGroup();
-			if (gui::Button(startIndex, "Add")) {
+			if (gui::Button("Add")) {
 				_showAdd = true;
 			}
-			if (gui::Button(startIndex + 1, "Load")) {
+			if (gui::Button("Load")) {
 				_data->load();
 				init();
 			}
-			if (gui::Button(startIndex + 2, "Save")) {
+			if (gui::Button("Save")) {
 				_data->save();
 			}
-			if (gui::Button(startIndex + 3, "Import")) {
+			if (gui::Button("Import")) {
 				_data->importJSON();
 				init();
 			}
-			if (gui::Button(startIndex + 4, "Export")) {
+			if (gui::Button("Export")) {
 				_data->exportJSON();
 			}
 			gui::endGroup();

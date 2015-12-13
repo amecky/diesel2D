@@ -391,6 +391,9 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 	else if (virtualKey == VK_F8) {
 		stateMachine->activate("ParticlesEditState");
 	}
+	else if (virtualKey == VK_F9) {
+		stateMachine->activate("SpriteTemplatesState");
+	}	
 #endif
 }
 
@@ -413,7 +416,7 @@ void BaseApp::showPerformceOverlay(v2* position) {
 			}
 		}
 		max = ceil(max);
-		gui::Histogram(17, val, count, 0.0f, max, 1.0f);
+		gui::Histogram(val, count, 0.0f, max, 1.0f);
 	}
 	gui::end();
 }
@@ -422,27 +425,27 @@ void BaseApp::showEditor() {
 	gui::start(EDITOR_ID, &_editor.position);
 	if (gui::begin("Game", &_editor.state)) {
 		gui::beginGroup();
-		if (gui::Button(EDITOR_ID + 3, "GSM")) {
+		if (gui::Button("GSM")) {
 			_editor.dialogIndex = 2;
 		}
-		if (_dialogsEditor != 0 && gui::Button(EDITOR_ID + 4, "DLG")) {
+		if (_dialogsEditor != 0 && gui::Button("DLG")) {
 			_dialogsEditor->init();
 			_editor.dialogIndex = 3;
 		}
-		if (_templatesEditor != 0 && gui::Button(EDITOR_ID + 5, "SPT")) {
+		if (_templatesEditor != 0 && gui::Button("SPT")) {
 			//_templatesEditor->init();
 			//_editor.dialogIndex = 4;
 			stateMachine->activate("SpriteTemplatesState");
 		}
-		if (gui::Button(EDITOR_ID + 6, "SCG")) {
+		if (gui::Button("SCG")) {
 			_editor.dialogIndex = 5;
 		}
-		if (gui::Button(EDITOR_ID + 7, "BMF")) {
+		if (gui::Button("BMF")) {
 			_editor.dialogIndex = 6;
 		}
 		gui::endGroup();
 		gui::beginGroup();
-		if (gui::Button(EDITOR_ID + 8, "PS")) {
+		if (gui::Button("PS")) {
 			stateMachine->activate("ParticlesEditState");
 		}
 		gui::endGroup();
@@ -473,7 +476,7 @@ void BaseApp::showProfilerSnapshot(v2* position) {
 			ProfileSnapshot& pd = _snapshots[i];
 			int ident = pd.level * 2;
 			sprintf(buffer, "%3d - %3.8f - %.11s", pd.invokeCounter, pd.totalTime, pd.name);
-			gui::Label(EDITOR_ID + 1 + i, buffer);
+			gui::Label(buffer);
 		}
 	}
 	gui::end();

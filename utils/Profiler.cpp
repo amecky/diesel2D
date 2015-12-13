@@ -238,7 +238,7 @@ namespace profiler {
 				int ident = pd.level * 2;
 				//float per = pd.totalTime / norm * 100.0f;
 				sprintf(buffer, "%3d - %3.8f - %.11s", pd.invokeCounter, pd.totalTime,pd.name);
-				gui::Label(EDITOR_ID + 1 + i, buffer);
+				gui::Label(buffer);
 			}
 		}
 		gui::end();

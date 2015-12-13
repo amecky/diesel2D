@@ -29,24 +29,24 @@ namespace ds {
 	void DialogsEditor::showDialog() {
 		gui::start(DIALOG_MANAGER_ID, &_dialogPos);
 		if (gui::begin("Dialogs", &_dialogState)) {
-			gui::ComboBox(DIALOG_MANAGER_ID + 1, &_model, &_offset);
+			gui::ComboBox(&_model, &_offset);
 			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 2, "Activate")) {
+			if (gui::Button("Activate")) {
 				if (_model.hasSelection()) {
 					const char* name = _model.getSelectedValue();
 					_manager->activate(name);
 				}
 			}
-			else if (gui::Button(DIALOG_MANAGER_ID + 3, "Deactivate")) {
+			else if (gui::Button("Deactivate")) {
 				if (_model.hasSelection()) {
 					const char* name = _model.getSelectedValue();
 					_manager->deactivate(name);
 				}
 			}
 			gui::endGroup();
-			buttonGroup(DIALOG_MANAGER_ID + 4);
+			buttonGroup();
 			gui::beginGroup();
-			if (gui::Button(DIALOG_MANAGER_ID + 7, "Remove")) {
+			if (gui::Button("Remove")) {
 				if (_model.hasSelection()) {
 					const char* name = _model.getSelectedValue();
 					if (_manager->remove(name)) {

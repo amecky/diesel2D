@@ -151,8 +151,8 @@ namespace ds {
 		PR_START("GameStateMachine::showDialog");
 		gui::start(GAMESTATE_ID,&_dialogPos);
 		if (gui::begin("GameStates", &_dialogState)) {
-			gui::ComboBox(GAMESTATE_ID + 1, &_model, &_offset);
-			if (gui::Button(GAMESTATE_ID + 2, "Activate")) {
+			gui::ComboBox(&_model, &_offset);
+			if (gui::Button("Activate")) {
 				if (_model.hasSelection()) {
 					GameState* state = _model.getSelectedValue();
 					activate(state->getName());

@@ -164,7 +164,7 @@ namespace ds {
 		for (int i = 0; i < _count_modifiers; ++i) {
 			writer.startChunk(1, 1);
 			const ModifierInstance& instance = _modifier_instances[i];
-			writer.write(instance.modifier->getChunkID);
+			writer.write(instance.modifier->getChunkID());
 			writer.closeChunk();
 		}
 		return true;

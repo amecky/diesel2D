@@ -64,9 +64,9 @@ namespace ds {
 	void SpriteGroup::showDialog() {
 		gui::start(SPRITE_GROUP_ID, &_position);
 		if (gui::begin("SpriteGroup", &_state)) {
-			gui::ComboBox(SPRITE_GROUP_ID + 14, &_model, &_offset);
+			gui::ComboBox(&_model, &_offset);
 			gui::beginGroup();
-			if (gui::Button(SPRITE_GROUP_ID + 9, "Add")) {
+			if (gui::Button("Add")) {
 				Sprite sp;
 				sp.id = _currentSID;
 				sp.position = v2(512, 384);
@@ -77,12 +77,12 @@ namespace ds {
 				_model.add(buffer, _currentSID);
 				++_currentSID;
 			}
-			if (gui::Button(SPRITE_GROUP_ID + 10, "Save")) {
+			if (gui::Button("Save")) {
 				save();
 			}
-			if (gui::Button(SPRITE_GROUP_ID + 11, "Up")) {
+			if (gui::Button("Up")) {
 			}
-			if (gui::Button(SPRITE_GROUP_ID + 12, "Down")) {
+			if (gui::Button("Down")) {
 			}
 			gui::endGroup();
 		}
@@ -92,13 +92,13 @@ namespace ds {
 				int idx = _model.getSelection();
 				Sprite& sprite = _sprites[idx];
 				Rect r = sprite.texture.rect;
-				gui::InputInt(SPRITE_GROUP_ID + 2, "Texture_id", &sprite.texture.textureID);
-				gui::InputVec2(SPRITE_GROUP_ID + 3, "Position", &sprite.position);
-				gui::InputRect(SPRITE_GROUP_ID + 4, "TextureRect", &r);
-				gui::InputVec2(SPRITE_GROUP_ID + 5, "Scale", &sprite.scale);
-				gui::InputFloat(SPRITE_GROUP_ID + 6, "Rotation", &sprite.rotation);
-				gui::InputColor(SPRITE_GROUP_ID + 7, "Color", &sprite.color);
-				gui::InputInt(SPRITE_GROUP_ID + 8, "Type", &sprite.type);
+				gui::InputInt("Texture_id", &sprite.texture.textureID);
+				gui::InputVec2("Position", &sprite.position);
+				gui::InputRect("TextureRect", &r);
+				gui::InputVec2("Scale", &sprite.scale);
+				gui::InputFloat("Rotation", &sprite.rotation);
+				gui::InputColor("Color", &sprite.color);
+				gui::InputInt("Type", &sprite.type);
 				sprite.texture = math::buildTexture(r);
 
 			}
@@ -150,7 +150,7 @@ namespace ds {
 	void SpriteGroupContainer::showDialog() {
 		gui::start(SPRITE_GROUP_CONTAINER_ID, &_position);
 		if (gui::begin("SpriteGroupContainer", &_state)) {
-			gui::ComboBox(SPRITE_GROUP_CONTAINER_ID + 1, &_model, &_offset);
+			gui::ComboBox(&_model, &_offset);
 		}
 		gui::end();
 		if (_model.hasSelection()) {

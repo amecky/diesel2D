@@ -24,6 +24,25 @@ namespace gui {
 		TD_TILE_BOTH,
 		TD_TILE_Y
 	};
+
+	typedef uint32 HashedId;
+
+	static HashedId NULL_HASH = 0;
+
+	HashedId HashId(const char *id) {
+		// https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+		HashedId hash = 0x84222325;
+		while (*id) hash = (hash ^ static_cast<uint8_t>(*id++)) * 0x000001b3;
+		assert(hash != NULL_HASH);
+		return hash;
+	}
+
+	HashedId HashPointer(const void *ptr) {
+		HashedId hash = static_cast<HashedId>(reinterpret_cast<size_t>(ptr)) * 2654435761;
+		assert(hash != NULL_HASH);
+		return hash;
+	}
+
 	// -------------------------------------------------------
 	// DrawCall
 	// -------------------------------------------------------
@@ -185,8 +204,8 @@ namespace gui {
 		bool buttonPressed;
 		bool clicked;
 		bool released;
-		int hot;
-		int active;
+		HashedId hot;
+		HashedId active;
 		bool grouped;
 		char inputText[32];
 		KeyInput keyInput;
@@ -419,7 +438,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// check if widget is hot
 	// -------------------------------------------------------
-	bool isHot(int id, const v2& pos, const v2& size,float offsetX = 0.0f,float offsetY = 0.0f) {
+	bool isHot(HashedId id, const v2& pos, const v2& size, float offsetX = 0.0f, float offsetY = 0.0f) {
 		v2 p = pos;
 		p.x += offsetX;
 		p.y += offsetY;		
@@ -433,7 +452,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// handle mouse interaction
 	// -------------------------------------------------------
-	bool isSelected(int id, const v2& pos, const v2& size,bool setActive = true) {
+	bool isSelected(HashedId id, const v2& pos, const v2& size, bool setActive = true) {
 		if (guiContext->clicked && isCursorInside(pos, size)) {
 			if (setActive) {
 				guiContext->active = id;
@@ -446,7 +465,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// is box selected
 	// -------------------------------------------------------
-	bool isBoxSelected(int id, const v2& pos, const v2& size,bool setActive = true) {
+	bool isBoxSelected(HashedId id, const v2& pos, const v2& size, bool setActive = true) {
 		if (guiContext->clicked) {
 			v2 p = pos;
 			p.x += size.x * 0.5f;
@@ -569,15 +588,17 @@ namespace gui {
 	// -------------------------------------------------------
 	// Label
 	// -------------------------------------------------------
-	void Label(int id,const char* text) {
+	void Label(const char* text) {
 		v2 p = guiContext->position;
+		HashedId id = HashId(text);
 		bool hot = isHot(id,p, getTextSize(text));
 		guiContext->addText(p, text);
 		guiContext->nextPosition();
 	}
 
-	void Header(int id, const char* text) {
+	void Header(const char* text) {
 		v2 p = guiContext->position;
+		HashedId id = HashId(text);
 		bool hot = isHot(id, p, getTextSize(text));
 		guiContext->addHeader(p, text);
 		guiContext->nextPosition(36.0f);
@@ -761,7 +782,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// input string
 	// -------------------------------------------------------
-	void Input(int id, const char* label, char* str, int maxLength) {
+	void Input(const char* label, char* str, int maxLength) {
+		HashedId id = HashPointer(str);
 		InputScalar(id, 0, str, maxLength,400.0f);
 		v2 p = guiContext->position;
 		p.x += 410.0f;
@@ -772,7 +794,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// input float
 	// -------------------------------------------------------
-	void InputFloat(int id, const char* label, float* v) {
+	void InputFloat(const char* label, float* v) {
+		HashedId id = HashPointer(v);
 		InputScalar(id, 0, v);
 		v2 p = guiContext->position;
 		p.x += INPUT_BOX_WIDTH + 10.0f;
@@ -783,7 +806,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// input int
 	// -------------------------------------------------------
-	void InputInt(int id, const char* label, int* v) {		
+	void InputInt(const char* label, int* v) {		
+		HashedId id = HashPointer(v);
 		InputScalar(id, 0, v);
 		v2 p = guiContext->position;
 		p.x += INPUT_BOX_WIDTH + 10.0f;
@@ -794,7 +818,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// input int
 	// -------------------------------------------------------
-	void InputInt(int id, const char* label, uint32* v) {
+	void InputInt(const char* label, uint32* v) {
+		HashedId id = HashPointer(v);
 		int tmp = *v;
 		InputScalar(id, 0, &tmp);
 		v2 p = guiContext->position;
@@ -807,7 +832,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// input int using steps
 	// -------------------------------------------------------
-	void InputFloat(int id, const char* label, float* v, float minValue, float maxValue, float step) {
+	void InputFloat(const char* label, float* v, float minValue, float maxValue, float step) {
+		HashedId id = HashPointer(v);
 		v2 p = guiContext->position;
 		guiContext->addImage(p, guiContext->textures[ICN_MINUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
@@ -841,7 +867,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// input int using steps
 	// -------------------------------------------------------
-	void InputInt(int id, const char* label, int* v,int minValue,int maxValue,int step) {
+	void InputInt(const char* label, int* v,int minValue,int maxValue,int step) {
+		HashedId id = HashPointer(v);
 		v2 p = guiContext->position;
 		guiContext->addImage(p, guiContext->textures[ICN_MINUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
@@ -875,7 +902,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// input v2
 	// -------------------------------------------------------
-	void InputVec2(int id, const char* label, v2* v) {
+	void InputVec2(const char* label, v2* v) {
+		HashedId id = HashPointer(v);
 		InputScalar(id, 0, &v->x);
 		InputScalar(id, 1, &v->y);	
 		v2 p = guiContext->position;
@@ -887,15 +915,16 @@ namespace gui {
 	// -------------------------------------------------------
 	// input color
 	// -------------------------------------------------------
-	void InputColor(int id, const char* label, ds::Color* v) {
+	void InputColor(const char* label, ds::Color* v) {
 		int r = v->r * 255.0f;
 		int g = v->g * 255.0f;
 		int b = v->b * 255.0f;
 		int a = v->a * 255.0f;
-		InputScalar(id, 0, &r, 40.0f);
-		InputScalar(id, 1, &g, 40.0f);
-		InputScalar(id, 2, &b, 40.0f);
-		InputScalar(id, 3, &a, 40.0f);
+		HashedId hash = HashPointer(v);
+		InputScalar(hash, 0, &r, 40.0f);
+		InputScalar(hash, 1, &g, 40.0f);
+		InputScalar(hash, 2, &b, 40.0f);
+		InputScalar(hash, 3, &a, 40.0f);
 		*v = ds::Color(r, g, b, a);
 		v2 p = guiContext->position;
 		p.x += 200.0f;
@@ -908,7 +937,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// input vec3
 	// -------------------------------------------------------
-	void InputVec3(int id, const char* label, v3* v) {
+	void InputVec3(const char* label, v3* v) {
+		HashedId id = HashPointer(v);
 		InputScalar(id, 0, &v->x);
 		InputScalar(id, 1, &v->y);
 		InputScalar(id, 2, &v->z);
@@ -921,7 +951,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// input rect
 	// -------------------------------------------------------
-	void InputRect(int id, const char* label, ds::Rect* v) {
+	void InputRect(const char* label, ds::Rect* v) {
+		HashedId id = HashPointer(v);
 		int top = v->top;
 		int left = v->left;
 		int width = v->width();
@@ -989,8 +1020,9 @@ namespace gui {
 	// -------------------------------------------------------
 	// combo box with model
 	// -------------------------------------------------------	
-	void ComboBox(int id, AbstractComponentModel* model,int *offset,int max) {
+	void ComboBox(AbstractComponentModel* model,int *offset,int max) {
 		PR_START("IMGUI::ComboBox");
+		HashedId id = HashPointer(model);
 		prepareComboBox(id, offset, model->size(),max);
 		float width = 200.0f;
 		v2 p = guiContext->position;
@@ -1018,7 +1050,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// combo box strings
 	// -------------------------------------------------------	
-	void ComboBox(int id, const std::vector<std::string>& entries, int* selected,int *offset,int max) {
+	void ComboBox(const std::vector<std::string>& entries, int* selected,int *offset,int max) {
+		HashedId id = HashPointer(&entries);
 		prepareComboBox(id, offset, entries.size(),max);
 		float width = 200.0f;
 		v2 p = guiContext->position;
@@ -1100,7 +1133,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// checkbox
 	// -------------------------------------------------------	
-	void CheckBox(int id, const char* label, bool* selected) {
+	void CheckBox(const char* label, bool* selected) {
+		HashedId id = HashId(label);
 		v2 p = guiContext->position;
 		if (*selected) {
 			guiContext->addImage(p, guiContext->textures[ICN_CHECKBOX_SELECTED], BOX_HEIGHT * 0.5f);			
@@ -1122,10 +1156,11 @@ namespace gui {
 	// -------------------------------------------------------
 	// button
 	// -------------------------------------------------------	
-	bool Button(int id,const char* label) {
+	bool Button(const char* label) {
 		v2 textDim = getTextSize(label);
 		float width = textDim.x + BUTTON_PADDING * 2.0f;
 		v2 p = guiContext->position;
+		HashedId id = HashId(label);
 		bool hot = isHot(id, p, v2(width, BUTTON_HEIGHT),width * 0.5f);
 		guiContext->addTiledXBox(p, width, ds::math::buildTexture(105.0f, 155.0f, 150.0f, 24.0f), BUTTON_HEIGHT);
 		p.x = guiContext->position.x + (width - textDim.x) / 2.0f;
@@ -1143,8 +1178,9 @@ namespace gui {
 	// -------------------------------------------------------
 	// Histogram
 	// -------------------------------------------------------	
-	void Histogram(int id, float* values, int num, float minValue, float maxValue, float step) {
+	void Histogram(float* values, int num, float minValue, float maxValue, float step) {
 		v2 p = guiContext->position;
+		HashedId id = HashPointer(values);
 		float width = 200.0f;
 		float height = 100.0f;
 		float barWidth = 10.0f;
@@ -1400,15 +1436,15 @@ namespace gui {
 		}
 		else {
 			int state = 1;
-			gui::Header(INPUT_DIALOG_ID + 6, "Input");
-			gui::Label(INPUT_DIALOG_ID + 1, header);
-			gui::Input(INPUT_DIALOG_ID + 2, label, _text, 32);
+			gui::Header("Input");
+			gui::Label(header);
+			gui::Input(label, _text, 32);
 			gui::beginGroup();
-			if (gui::Button(INPUT_DIALOG_ID + 3, "OK")) {
+			if (gui::Button("OK")) {
 				_button = 1;
 				_active = false;
 			}
-			if (gui::Button(INPUT_DIALOG_ID + 4, "Cancel")) {
+			if (gui::Button("Cancel")) {
 				_button = 2;
 				_active = false;
 			}
@@ -1426,14 +1462,14 @@ namespace gui {
 		else {
 			int state = 1;
 			gui::begin("Input",&state);
-			gui::Label(INPUT_DIALOG_ID + 1, header);
-			gui::Input(INPUT_DIALOG_ID + 2, label, _text, 32);
+			gui::Label(header);
+			gui::Input(label, _text, 32);
 			gui::beginGroup();
-			if (gui::Button(INPUT_DIALOG_ID + 3, "OK")) {
+			if (gui::Button("OK")) {
 				_button = 1;
 				_active = false;
 			}
-			if (gui::Button(INPUT_DIALOG_ID + 4, "Cancel")) {
+			if (gui::Button("Cancel")) {
 				_button = 2;
 				_active = false;
 			}
