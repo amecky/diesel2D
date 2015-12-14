@@ -13,7 +13,7 @@ namespace ds {
 			}
 			if (strcmp(name, "LinearColor") == 0) {
 				LinearColorModifier* modifier = new LinearColorModifier();
-				modifier->init(Color::WHITE, Color::BLACK);
+				//modifier->init(Color::WHITE, Color::BLACK);
 				return modifier;
 			}
 			//_available_modifiers.push_back("LinearSize");
@@ -22,7 +22,7 @@ namespace ds {
 			//_available_modifiers.push_back("AlphaPath");
 			else if (strcmp(name, "DampingVelocity") == 0) {
 				DampingVelocityModifier* modifier = new DampingVelocityModifier();
-				modifier->init(0.0f);
+				//modifier->init(0.0f);
 				return modifier;
 			}
 			//_available_modifiers.push_back("SizePath");
@@ -36,7 +36,7 @@ namespace ds {
 			}
 			else if (strcmp(name, "LinearAlpha") == 0) {
 				LinearAlphaModifier* modifier = new LinearAlphaModifier();
-				modifier->init(1.0f, 0.0f);
+				//modifier->init(1.0f, 0.0f);
 				return modifier;
 			}
 			return 0;

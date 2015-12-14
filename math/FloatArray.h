@@ -45,6 +45,8 @@ public:
 	void add(float timeStep,float value);
 	//! Gets the value at the given time
 	float get(float time);
+
+	const float get(float time) const;
 	//! Reset the internal list
 	void reset() {
 		m_Count = 0;
@@ -119,6 +121,13 @@ struct ColorPath {
 		color->g = green.get(time) * norm;
 		color->b = blue.get(time) * norm;
 		color->a = norm;		
+	}
+	void get(float time, Color* color) const {
+		float norm = alpha.get(time);
+		color->r = red.get(time) * norm;
+		color->g = green.get(time) * norm;
+		color->b = blue.get(time) * norm;
+		color->a = norm;
 	}
 	const float getTimeStep(int idx) const {
 		return red.key(idx);

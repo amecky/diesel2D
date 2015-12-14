@@ -2,26 +2,12 @@
 #include "ParticleEmitter.h"
 
 namespace ds {
-
-	void ParticleSpawner::tick(float dt) {
-
-	}
-
-	int ParticleSpawner::spawn(ParticleArray* array) {
-		uint32 start = array->countAlive;
-		uint32 end = start + 100;// m_EmitterData.count;
-		if (end > array->count) {
-			end = array->count;
-		}
-		return end - start;
-	}
-
-
+	/*
 	// -------------------------------------------------------
 	// ParticleEmitter
 	// -------------------------------------------------------
 	ParticleEmitter::ParticleEmitter() {
-		add(new DefaultParticleGenerator());
+		//add(new DefaultParticleGenerator());
 	}
 
 	// -------------------------------------------------------
@@ -31,22 +17,14 @@ namespace ds {
 		clear(false);
 	}
 
-	void ParticleEmitter::createInstance(ParticleEmitterInstance* instance) {
+	//void ParticleEmitter::createInstance(ParticleEmitterInstance* instance) {
 
-	}
+	//}
 
 	// -------------------------------------------------------
 	// clear
 	// -------------------------------------------------------
-	void ParticleEmitter::clear(bool addDefault) {
-		Generators::iterator it = m_Generators.begin();
-		while (it != m_Generators.end()) {
-			delete (*it);
-			it = m_Generators.erase(it);
-		}
-		if (addDefault) {
-			add(new DefaultParticleGenerator());
-		}
+	void ParticleEmitter::clear(bool addDefault) {		
 		m_Active = false;
 		m_Timer = 0.0f;
 		m_Accu = 0.0f;
@@ -64,10 +42,10 @@ namespace ds {
 	// -------------------------------------------------------
 	// generate
 	// -------------------------------------------------------
-	void ParticleEmitter::generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32* start, uint32* end, bool started) {
+	void ParticleEmitter::generate(ParticleArray* array, const v3& pos, float dt, uint32* start, uint32* end, bool started) {
 		if (m_Active) {
 			if (m_Burst) {
-				generate(array, data, m_EmitterData.count, start, end, dt);
+				generate(array, pos, m_EmitterData.count, start, end, dt);
 				m_Active = false;
 			}
 			else {
@@ -75,7 +53,7 @@ namespace ds {
 				if (m_Accu >= m_Frequency) {
 					int count = (int)m_Accu;
 					m_Accu -= count;
-					generate(array, data, count, start, end, dt);
+					generate(array, pos, count, start, end, dt);
 				}
 				if (!m_Endless) {
 					if (m_Timer >= m_EmitterData.duration) {
@@ -90,15 +68,26 @@ namespace ds {
 	// -------------------------------------------------------
 	// generate
 	// -------------------------------------------------------
-	void ParticleEmitter::generate(ParticleArray* array, const ParticleGeneratorData& data, int count, uint32* start, uint32* end, float dt) {
+	void ParticleEmitter::generate(ParticleArray* array, const v3& pos, int count, uint32* start, uint32* end, float dt) {
 		*start = array->countAlive;
 		*end = *start + count;
 		//uint32 end = start + started;
 		if (*end > array->count) {
 			*end = array->count;
 		}		
-		for (size_t i = 0; i < m_Generators.size(); ++i) {
-			m_Generators[i]->generate(array, data, dt, *start, *end);
+		//for (size_t i = 0; i < m_Generators.size(); ++i) {
+			//m_Generators[i]->generate(array, data, dt, *start, *end);
+		//}
+		for (uint32 i = *start; i < *end; ++i) {
+			array->color[i] = Color::WHITE;
+			array->scale[i] = Vector2f(1, 1);
+			array->rotation[i] = 0.0f;
+			array->timer[i] = Vector3f(0, 1, 1);
+			array->random[i] = 1.0f;
+			array->acceleration[i] = Vector3f(0, 0, 0);
+			array->velocity[i] = Vector3f(0, 0, 0);
+			array->position[i] = pos;
+			array->type[i] = 1;
 		}
 		for (uint32 i = *start; i < *end; ++i) {
 			array->wake(i);
@@ -108,21 +97,21 @@ namespace ds {
 	// -------------------------------------------------------
 	// get generator
 	// -------------------------------------------------------
-	ParticleGenerator* ParticleEmitter::getGenerator(ParticleGeneratorType type) {
-		for (size_t i = 0; i < m_Generators.size(); ++i) {
-			if (m_Generators[i]->getType() == type) {
-				return m_Generators[i];
-			}
-		}
-		return 0;
-	}
+	//ParticleGenerator* ParticleEmitter::getGenerator(ParticleGeneratorType type) {
+		//for (size_t i = 0; i < m_Generators.size(); ++i) {
+			//if (m_Generators[i]->getType() == type) {
+				//return m_Generators[i];
+			//}
+		//}
+		//return 0;
+	//}
 
 	// -------------------------------------------------------
 	// add generator
 	// -------------------------------------------------------
-	void ParticleEmitter::add(ParticleGenerator* generator) {
-		m_Generators.push_back(generator);
-	}
+	//void ParticleEmitter::add(ParticleGenerator* generator) {
+		//m_Generators.push_back(generator);
+	//}
 
 	// -------------------------------------------------------
 	// get emitter data
@@ -132,20 +121,13 @@ namespace ds {
 	}
 
 	// -------------------------------------------------------
-	// get particle spawner
-	// -------------------------------------------------------
-	ParticleSpawner& ParticleEmitter::getParticleSpawner() {
-		return m_Spawner;
-	}
-
-	// -------------------------------------------------------
 	// tick
 	// -------------------------------------------------------
 	void ParticleEmitter::tick(float dt) {
 		if (m_Active) {
 			m_Timer += dt;
 			// emitt particles
-			if (m_Timer >= m_Duration) {
+			if (m_Timer >= m_EmitterData.duration) {
 				m_Active = false;
 			}
 		}
@@ -156,74 +138,26 @@ namespace ds {
 		LOG << "--> total: " << total;
 		LOG << "--> duration: " << m_EmitterData.duration;
 		if (m_EmitterData.duration == 0.0f) {
-			m_Burst = true;
-			m_Endless = false;
+			m_EmitterData.burst = true;
+			m_EmitterData.endless = false;
+			m_EmitterData.frequency = 0.0f;
 		}
 		else if (m_EmitterData.duration < 0.0f) {
-			m_Endless = true;
-			m_Burst = false;
-			m_Frequency = total / 60.0f;
+			m_EmitterData.endless = true;
+			m_EmitterData.burst = false;
+			m_EmitterData.frequency = total / 60.0f;
 		}
 		else {
 			//m_Frequency = total / (m_EmitterData.duration * 60.0f);
-			m_Frequency = total / 60.0f;
-			m_Burst = false;
-			m_Endless = false;
+			m_EmitterData.frequency = total / 60.0f;
+			m_EmitterData.burst = false;
+			m_EmitterData.endless = false;
 		}
-		LOG << "--> burst: " << m_Burst;
-		LOG << "--> endless: " << m_Endless;
-		LOG << "--> frequency: " << m_Frequency;
+		LOG << "--> burst: " << m_EmitterData.burst;
+		LOG << "--> endless: " << m_EmitterData.endless;
+		LOG << "--> frequency: " << m_EmitterData.frequency;
 	}
-
-
-	namespace generator {
-
-		ParticleGenerator* create_by_name(const char* name) {
-			if (strcmp(name, "Ring") == 0) {
-				RingGenerator* generator = new RingGenerator();
-				generator->init(10.0f, 2.0f);
-				return generator;
-			}
-			else if (strcmp(name, "Size") == 0) {
-				SizeGenerator* generator = new SizeGenerator();
-				generator->init(v2(1, 1), v2(0, 0));
-				return generator;
-			}
-			else if (strcmp(name, "Lifetime") == 0) {
-				LifetimeGenerator* generator = new LifetimeGenerator();
-				generator->init(1.0f, 0.0f);
-				return generator;
-			}
-			else if (strcmp(name, "Random") == 0) {
-				ParticleRandomGenerator* generator = new ParticleRandomGenerator();
-				generator->init(0.0f);
-				return generator;
-			}
-			else if (strcmp(name, "RadialVelocity") == 0) {
-				RadialVelocityGenerator* generator = new RadialVelocityGenerator();
-				generator->init(100.0f, 0.0f);
-				return generator;
-			}
-			else if (strcmp(name, "HSVColor") == 0) {
-				HSVColorGenerator* generator = new HSVColorGenerator();
-				generator->init(v3(1, 1, 1));
-				return generator;
-			}
-			else if (strcmp(name, "Color") == 0) {
-				ColorGenerator* generator = new ColorGenerator();
-				generator->init(Color::WHITE);
-				return generator;
-			}
-			//Circle
-			//Line
-			//Point
-			//Sphere
-			//RandomSphere
-			//Velocity
-			return 0;
-		}
-
-	}
+	*/
 }
 
 

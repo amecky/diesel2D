@@ -18,17 +18,7 @@ namespace ds {
 		_add_generator_offset = 0;
 		_add_generator_state = 1;
 		_selected_id = -1;
-		_available_modifiers.push_back("Position");
-		_available_modifiers.push_back("LinearColor");
-		_available_modifiers.push_back("LinearSize");
-		_available_modifiers.push_back("PerpendicularMove");
-		_available_modifiers.push_back("ColorPath");
-		_available_modifiers.push_back("AlphaPath");
-		_available_modifiers.push_back("DampingVelocity");
-		_available_modifiers.push_back("SizePath");
-		_available_modifiers.push_back("VelocityRotation");
-		_available_modifiers.push_back("Time");
-		_available_modifiers.push_back("LinearAlpha");
+
 		_show_add_modifier = false;
 
 		_available_generators.push_back("Ring");
@@ -127,18 +117,18 @@ namespace ds {
 		NewParticleSystem* system = _particles->getParticleSystem(id);
 		if (reload) {
 			_modifier_names.clear();
-			const Modifiers& modifiers = system->getModifiers();
-			for (size_t i = 0; i < modifiers.size(); ++i) {
-				_modifier_names.push_back(modifiers[i]->getName());
-			}
+			//const Modifiers& modifiers = system->getModifiers();
+			//for (size_t i = 0; i < modifiers.size(); ++i) {
+				//_modifier_names.push_back(modifiers[i]->getName());
+			//}
 		}
 		if (reload) {
 			_generator_names.clear();
-			ParticleEmitter& emitter = system->getEmitter();
-			const Generators& generators = emitter.getGenerators();
-			for (size_t i = 0; i < generators.size(); ++i) {
-				_generator_names.push_back(generators[i]->getName());
-			}
+			//ParticleEmitter& emitter = system->getEmitter();
+			//const Generators& generators = emitter.getGenerators();
+			//for (size_t i = 0; i < generators.size(); ++i) {
+				//_generator_names.push_back(generators[i]->getName());
+			//}
 		}
 	}
 
@@ -164,15 +154,15 @@ namespace ds {
 		gui::endGroup();
 		if (_show_add_modifier) {
 			gui::Header("Add modifier");
-			gui::ComboBox(_available_modifiers, &_add_modifier_state, &_add_modifier_offset);
+			gui::ComboBox(_particles->getFactory().getModifierNames(), &_add_modifier_state, &_add_modifier_offset);
 			gui::beginGroup();
 			if (gui::Button("Add")) {
 				if (_add_modifier_state != -1) {
-					ParticleModifier* modifier = modifier::create_by_name(_available_modifiers[_add_modifier_state].c_str());
-					if (modifier != 0) {
-						system->addModifier(modifier);
-						_modifier_names.push_back(_available_modifiers[_add_modifier_state]);
-					}
+					//ParticleModifier* modifier = modifier::create_by_name(_available_modifiers[_add_modifier_state].c_str());
+					//if (modifier != 0) {
+						//system->addModifier(modifier);
+						//_modifier_names.push_back(_available_modifiers[_add_modifier_state]);
+					//}
 					_show_add_modifier = false;
 				}
 			}
@@ -189,6 +179,7 @@ namespace ds {
 	void ParticlesEditState::renderModifierSettings() {		
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
+		/*
 		if (_modifier_names[_modifier_state] == "LinearSize") {
 			gui::Header("Linear size modifier");
 			LinearSizeModifier* modifier = static_cast<LinearSizeModifier*>(system->getModifier(PMT_LINEAR_SIZE));
@@ -216,6 +207,7 @@ namespace ds {
 			DampingVelocityModifierData* data = modifier->getData();
 			gui::InputFloat("Damping", &data->damping);
 		}
+		*/
 	}
 
 	// --------------------------------------------
@@ -234,17 +226,19 @@ namespace ds {
 		if (_show_add_generator) {
 			int id = _model.getSelectedValue();
 			NewParticleSystem* system = _particles->getParticleSystem(id);
-			ParticleEmitter& emitter = system->getEmitter();
+			//ParticleEmitter& emitter = system->getEmitter();
 			gui::Header("Add generator");
 			gui::ComboBox(_available_generators, &_add_generator_state, &_add_generator_offset);
 			gui::beginGroup();
 			if (gui::Button("Add")) {
 				if (_add_generator_state != -1) {
+					/*
 					ParticleGenerator* generator = generator::create_by_name(_available_generators[_add_generator_state].c_str());
 					if (generator != 0) {
 						emitter.add(generator);
 						_modifier_names.push_back(_available_generators[_add_generator_state]);
 					}
+					*/
 					_show_add_generator = false;
 				}
 			}
@@ -261,7 +255,8 @@ namespace ds {
 	void ParticlesEditState::renderGeneratorSettings() {
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
-		ParticleEmitter& emitter = system->getEmitter();
+		//ParticleEmitter& emitter = system->getEmitter();
+		/*
 		if (_generator_names[_generator_state] == "Lifetime") {
 			gui::Header("Lifetime");
 			LifetimeGenerator* generator = static_cast<LifetimeGenerator*>(emitter.getGenerator(PGT_LIFETIME));
@@ -305,6 +300,7 @@ namespace ds {
 			gui::InputVec2("Scale", &data->scale);
 			gui::InputVec2("Variance", &data->variance);
 		}
+		*/
 		// HSVColor
 		// Point
 		// Circle
@@ -317,8 +313,8 @@ namespace ds {
 		gui::Header("System");
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
-		ParticleEmitter& emitter = system->getEmitter();
-		ParticleEmitterData& data = emitter.getEmitterData();
+		//ParticleEmitter& emitter = system->getEmitter();
+		ParticleEmitterData& data = system->getEmitterData();
 		NewParticleSystemData& system_data = system->getParticleData();
 		char buffer[32];
 		sprintf_s(buffer, 32, "ID: %d", system->getID());

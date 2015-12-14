@@ -13,27 +13,32 @@ namespace ds {
 		0.5f, -0.5f, -0.5f, -0.5f
 	};
 
-	void NewParticleSystem::start(const ParticleGeneratorData& data) {
-		_generatorData = data;
-		PR_START("NPS:emitterStart");
-		m_Emitter.start();
-		PR_END("NPS:emitterStart");
-		PR_START("NPS:emitterGenerate");
-		uint32 start = 0;
-		uint32 end = 0;
-		m_Emitter.generate(&m_Array, data, 0.0f,&start, &end);
-		//LOG << "---- start: " << start << " end: " << end;
-		PR_END("NPS:emitterGenerate");
-		PR_START("NPS:emitterModifiers");
-		for (size_t i = 0; i < m_Modifiers.size(); ++i) {
-			m_Modifiers[i]->init(&m_Array, start, end);
+	// -------------------------------------------------
+	// start new instance
+	// -------------------------------------------------
+	ID NewParticleSystem::start(const Vector3f& startPosition) {
+		if (_emitter_instances.numObjects < 64) {
+			ID id = _emitter_instances.add();
+			ParticleEmitterInstance& instance = _emitter_instances.get(id);
+			instance.timer = 0.0f;
+			instance.accumulated = 0.0f;
+			instance.pos = startPosition;
+			PR_START("NPS:emitterGenerate");
+			uint32 start = 0;
+			uint32 end = 0;
+			emittParticles(instance, 0.0f, &start, &end);
+			PR_END("NPS:emitterGenerate");
+			PR_START("NPS:emitterModifiers");
+			for (int i = 0; i < _count_modifiers; ++i) {
+				const ModifierInstance& instance = _modifier_instances[i];
+				instance.modifier->init(&m_Array, instance.data, start, end);
+			}
+			PR_END("NPS:emitterModifiers");
+			return id;
 		}
-		PR_END("NPS:emitterModifiers");
-	}
-
-	void NewParticleSystem::start(const Vector3f& startPosition) {
-		ParticleGeneratorData data(startPosition);
-		start(data);
+		else {
+			return INVALID_ID;
+		}
 	}
 
 	ParticleModifierData* NewParticleSystem::getData(const char* modifierName) {
@@ -46,15 +51,84 @@ namespace ds {
 		return 0;
 	}
 
+	ParticleGeneratorData* NewParticleSystem::getGeneratorData(const char* generatorName) {
+		for (int i = 0; i < _count_generators; ++i) {
+			const GeneratorInstance& instance = _generator_instances[i];
+			if (strcmp(instance.generator->getName(), generatorName) == 0) {
+				return instance.data;
+			}
+		}
+		return 0;
+	}
+
+	// -------------------------------------------------
+	// tick emitter instances
+	// -------------------------------------------------
+	void NewParticleSystem::tickEmitters(float dt) {
+		for (int i = 0; i < _emitter_instances.numObjects; ++i) {
+			ParticleEmitterInstance& instance = _emitter_instances.objects[i];
+			instance.timer += dt;
+			if (_emitter_data.duration >= 0.0f && instance.timer > _emitter_data.duration) {
+				_emitter_instances.remove(instance.id);
+			}
+		}
+	}
+
+	// -------------------------------------------------------
+	// generate
+	// -------------------------------------------------------
+	void NewParticleSystem::emittParticles(ParticleEmitterInstance& instance, float dt, uint32* start, uint32* end) {
+		if (_emitter_data.frequency > 0.0f) {
+			instance.accumulated += _emitter_data.frequency;
+			if (instance.accumulated >= _emitter_data.frequency) {
+				int count = (int)instance.accumulated;
+				instance.accumulated -= count;
+				emittParticles(instance, count, start, end, dt);
+			}
+		}
+		else {
+			emittParticles(instance, _emitter_data.count, start, end, dt);
+		}
+	}
+
+	// -------------------------------------------------------
+	// generate
+	// -------------------------------------------------------
+	void NewParticleSystem::emittParticles(const ParticleEmitterInstance& instance, int count, uint32* start, uint32* end, float dt) {
+		*start = m_Array.countAlive;
+		*end = *start + count;
+		if (*end > m_Array.count) {
+			*end = m_Array.count;
+		}
+		for (uint32 i = *start; i < *end; ++i) {
+			m_Array.color[i] = Color::WHITE;
+			m_Array.scale[i] = Vector2f(1, 1);
+			m_Array.rotation[i] = 0.0f;
+			m_Array.timer[i] = Vector3f(0, 1, 1);
+			m_Array.random[i] = 1.0f;
+			m_Array.acceleration[i] = Vector3f(0, 0, 0);
+			m_Array.velocity[i] = Vector3f(0, 0, 0);
+			m_Array.position[i] = instance.pos;
+			m_Array.type[i] = 1;
+		}
+		for (uint32 i = *start; i < *end; ++i) {
+			m_Array.wake(i);
+		}
+		for (int i = 0; i < _count_generators; ++i) {
+			const GeneratorInstance& instance = _generator_instances[i];
+			instance.generator->generate(&m_Array, instance.data, 0.0f, *start, *end);
+		}
+	}
+
 	void NewParticleSystem::update(float elapsed) {
 		PR_START("NPS:update");
 		uint32 start = 0;
 		uint32 end = 0;
-		m_Emitter.generate(&m_Array, _generatorData, elapsed, &start, &end);
-		for (size_t i = 0; i < m_Modifiers.size(); ++i) {
-			m_Modifiers[i]->update(&m_Array, elapsed);
+		tickEmitters(elapsed);
+		for (int i = 0; i < _emitter_instances.numObjects; ++i) {
+			ParticleEmitterInstance& instance = _emitter_instances.objects[i];
+			emittParticles(instance, elapsed, &start, &end);
 		}
-
 		for (int i = 0; i < _count_modifiers; ++i) {
 			const ModifierInstance& instance = _modifier_instances[i];
 			instance.modifier->update(&m_Array, instance.data, elapsed);
@@ -72,33 +146,30 @@ namespace ds {
 	}
 
 	void NewParticleSystem::clear() {
-		Modifiers::iterator it = m_Modifiers.begin();
-		while (it != m_Modifiers.end()) {
-			delete (*it);
-			it = m_Modifiers.erase(it);
+		LOG << "clearing particlesystem: " << m_DebugName;
+		for (int i = 0; i < _count_modifiers; ++i) {
+			const ModifierInstance& instance = _modifier_instances[i];
+			if (instance.data != 0) {
+				delete instance.data;
+			}
 		}
-		m_Emitter.clear();
+		for (int i = 0; i < _count_generators; ++i) {
+			const GeneratorInstance& instance = _generator_instances[i];
+			if (instance.data != 0) {
+				delete instance.data;
+			}
+		}
+		_count_generators = 0;
+		_count_modifiers = 0;
+		_emitter_instances.clear();
 	}
 
 	void NewParticleSystem::removeModifierByName(const char* name) {
-		Modifiers::iterator it = m_Modifiers.begin();
-		while (it != m_Modifiers.end()) {
-			if (strcmp((*it)->getName(),name) == 0) {
-				delete (*it);
-				it = m_Modifiers.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
+		
 	}
 
 	ParticleModifier* NewParticleSystem::getModifier(ParticleModifierType type) {
-		for (size_t i = 0; i < m_Modifiers.size(); ++i) {
-			if (m_Modifiers[i]->getType() == type) {
-				return m_Modifiers[i];
-			}
-		}
+		
 		return 0;
 	}
 
@@ -107,6 +178,7 @@ namespace ds {
 	}
 
 	bool NewParticleSystem::importData(JSONReader& reader) {
+		LOG << "importing data";
 		clear();
 		Category* root = reader.getCategory("particlesystem");
 		if (root != 0) {
@@ -114,7 +186,8 @@ namespace ds {
 			m_Data.id = _id;
 			m_Data.textureID = root->getUInt32("texture_id", 0);
 			m_Data.textureRect = root->getRect("texture_rect");
-
+			m_Data.texture = math::buildTexture(m_Data.textureRect);
+			// read modifiers
 			Category* modifiers = root->getChild("modifiers");
 			if (modifiers != 0) {
 				std::vector<Category*> categories = modifiers->getChildren();
@@ -122,49 +195,76 @@ namespace ds {
 					Category* c = categories[i];
 					if (_factory->addModifier(this, c->getName().c_str())) {
 						ParticleModifierData* data = getData(c->getName().c_str());
-						data->read(c);
+						if (data != 0) {
+							data->read(c);
+						}
 					}
-					//ParticleModifier* modifier = modifier::create_by_name(c->getName().c_str());
-					//if (modifier != 0) {
-						//modifier->read(c);
-						//addModifier(modifier);
-					//}
 					else {
 						LOGE << "cannot find modifier: " << c->getName();
 					}
 				}
 			}
-
-			Category* emitter = root->getChild("emitter");
-			if (emitter != 0) {
-				std::vector<Category*> categories = emitter->getChildren();
-				ParticleEmitterData& data = m_Emitter.getEmitterData();
-				data.count = emitter->getUInt32("count", 10);
-				data.ejectionPeriod = emitter->getUInt32("ejection_period", 0);
-				data.ejectionVariance = emitter->getUInt32("ejection_variance", 0);
-				data.ejectionCounter = emitter->getUInt32("ejection_counter", 0);
-				data.duration = emitter->getFloat("duration", 0.0f);
+			Category* generators = root->getChild("generators");
+			if (generators != 0) {
+				std::vector<Category*> categories = generators->getChildren();
 				for (size_t i = 0; i < categories.size(); ++i) {
 					Category* c = categories[i];
-					ParticleGenerator* generator = generator::create_by_name(c->getName().c_str());
-					if (generator != 0) {
-						generator->read(c);
-						addGenerator(generator);
+					if (_factory->addGenerator(this, c->getName().c_str())) {
+						ParticleGeneratorData* data = getGeneratorData(c->getName().c_str());
+						if (data != 0) {
+							data->read(c);
+						}
 					}
 					else {
-						LOGE << "cannot find generator: " << c->getName();
+						LOGE << "cannot find generators: " << c->getName();
 					}
 				}
+			}
+			// emitter
+			Category* emitter = root->getChild("emitter");
+			if (emitter != 0) {
+				_emitter_data.count = emitter->getUInt32("count", 10);
+				_emitter_data.ejectionPeriod = emitter->getUInt32("ejection_period", 0);
+				_emitter_data.ejectionVariance = emitter->getUInt32("ejection_variance", 0);
+				_emitter_data.ejectionCounter = emitter->getUInt32("ejection_counter", 0);
+				_emitter_data.duration = emitter->getFloat("duration", 0.0f);
+				initEmitterData();
 			}
 		}
 		return true;
 	}
 
 	bool NewParticleSystem::saveData(BinaryWriter& writer) {
+		// save system data
+		writer.startChunk(1, 1);
+		writer.write(_id);
+		writer.write(m_Data.textureID);
+		writer.write(m_Data.textureRect);
+		writer.closeChunk();
+		// save emitter data
+		writer.startChunk(2, 1);
+		writer.write(_emitter_data.count);
+		writer.write(_emitter_data.ejectionPeriod);
+		writer.write(_emitter_data.ejectionVariance);
+		writer.write(_emitter_data.ejectionCounter);
+		writer.write(_emitter_data.duration);
+		writer.closeChunk();
+		for (int i = 0; i < _count_generators; ++i) {
+			writer.startChunk(3, 1);
+			const GeneratorInstance& instance = _generator_instances[i];
+			writer.write(instance.generator->getChunkID());
+			if (instance.data != 0) {
+				instance.data->save(&writer);
+			}
+			writer.closeChunk();
+		}
 		for (int i = 0; i < _count_modifiers; ++i) {
-			writer.startChunk(1, 1);
+			writer.startChunk(4, 1);
 			const ModifierInstance& instance = _modifier_instances[i];
 			writer.write(instance.modifier->getChunkID());
+			if (instance.data != 0) {
+				instance.data->save(&writer);
+			}
 			writer.closeChunk();
 		}
 		return true;
@@ -173,30 +273,37 @@ namespace ds {
 	bool NewParticleSystem::loadData(BinaryLoader& loader) {
 		clear();
 		while (loader.openChunk() == 0) {
-			if (loader.getChunkID() >= 100 && loader.getChunkID() < 200) {
-				ParticleModifier* modifier = createModifier(loader.getChunkID());
-				if (modifier != 0) {
-					modifier->load(&loader);
-					addModifier(modifier);
+			if (loader.getChunkID() == 4) {
+				int cid = -1;
+				loader.read(&cid);
+				ParticleModifierData* data = _factory->addModifier(this, cid);
+				if ( data != 0) {
+					data->load(&loader);
+				}
+				else {
+					LOGE << "cannot find modifier: " << cid;
 				}
 			}
-			else if (loader.getChunkID() >= 200 && loader.getChunkID() < 300) {
-				ParticleGenerator* generator = createGenerator(loader.getChunkID());
-				if (generator != 0) {
-					generator->load(&loader);
-					addGenerator(generator);
+			else if (loader.getChunkID() == 3) {
+				int cid = -1;
+				loader.read(&cid);
+				ParticleGeneratorData* data = _factory->addGenerator(this, cid);
+				if (data != 0) {
+					data->load(&loader);
+				}
+				else {
+					LOGE << "cannot find generators: " << cid;
 				}
 			}
-			else if (loader.getChunkID() == 300) {
-				ParticleEmitterData& data = m_Emitter.getEmitterData();
-				loader.read(&data.count);
-				loader.read(&data.ejectionPeriod);
-				loader.read(&data.ejectionVariance);
-				loader.read(&data.ejectionCounter);
-				loader.read(&data.duration);
-				m_Emitter.init();
+			else if (loader.getChunkID() == 2) {
+				loader.read(&_emitter_data.count);
+				loader.read(&_emitter_data.ejectionPeriod);
+				loader.read(&_emitter_data.ejectionVariance);
+				loader.read(&_emitter_data.ejectionCounter);
+				loader.read(&_emitter_data.duration);
+				initEmitterData();
 			}
-			else if (loader.getChunkID() == 400) {
+			else if (loader.getChunkID() == 1) {
 				loader.read(&m_Data.id);
 				loader.read(&m_Data.textureID);
 				loader.read(&m_Data.textureRect);
@@ -243,21 +350,46 @@ namespace ds {
 		PR_END("NPS:buildVertices");
 	}
 
+	void NewParticleSystem::initEmitterData() {
+		float total = static_cast<float>(_emitter_data.count);
+		LOG << "--> total: " << total;
+		LOG << "--> duration: " << _emitter_data.duration;
+		if (_emitter_data.duration == 0.0f) {
+			_emitter_data.burst = true;
+			_emitter_data.endless = false;
+			_emitter_data.frequency = 0.0f;
+		}
+		else if (_emitter_data.duration < 0.0f) {
+			_emitter_data.endless = true;
+			_emitter_data.burst = false;
+			_emitter_data.frequency = total / 60.0f;
+		}
+		else {
+			//m_Frequency = total / (m_EmitterData.duration * 60.0f);
+			_emitter_data.frequency = total / 60.0f;
+			_emitter_data.burst = false;
+			_emitter_data.endless = false;
+		}
+		LOG << "--> burst: " << _emitter_data.burst;
+		LOG << "--> endless: " << _emitter_data.endless;
+		LOG << "--> frequency: " << _emitter_data.frequency;
+	}
+
 	ParticleGenerator* NewParticleSystem::createGenerator(int id) {
 		switch (id) {
 			case 200: return new RingGenerator; break;
-			case 201: return new ParticleRandomGenerator; break;
-			case 202: return new LifetimeGenerator; break;
-			case 203: return  new RadialVelocityGenerator; break;
-			case 204: return new SizeGenerator; break;
-			case 205: return new ColorGenerator; break;
-			case 206: return new HSVColorGenerator; break;
-			case 207: return new PointGenerator; break;
-			case 208: return new CircleGenerator; break;
-			case 209: return new LineGenerator; break;
-			case 210: return new VelocityGenerator; break;
-			case 211: return new SphereGenerator; break;
-			case 212: return new RandomSphereGenerator; break;
+			//case 201: return new ParticleRandomGenerator; break;
+			//case 202: return new LifetimeGenerator; break;
+			//case 203: return  new RadialVelocityGenerator; break;
+			//case 204: return new SizeGenerator; break;
+			//case 205: return new ColorGenerator; break;
+			//case 206: return new HSVColorGenerator; break;
+			//case 207: return new PointGenerator; break;
+			//case 208: return new CircleGenerator; break;
+			//case 209: return new LineGenerator; break;
+			//case 210: return new VelocityGenerator; break;
+			//case 211: return new SphereGenerator; break;
+			//case 212: return new RandomSphereGenerator; break;
 			default: return 0;
 		}
 	}

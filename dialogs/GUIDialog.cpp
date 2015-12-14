@@ -394,7 +394,7 @@ namespace ds {
 					if (item.type == GIT_NUMBERS) {
 						const GUINumber& number = _numbers[id.index];
 						string::formatInt(number.value, buffer, 32, number.length);
-						v2 size = font::calculateSize(*m_BitmapFont, buffer, 2.0f, item.scale, item.scale);
+						v2 size = font::calculateSize(*m_BitmapFont, buffer, 2, item.scale, item.scale);
 						float ty = p.y - size.y * 0.5f;
 						if (item.centered) {
 							p.x = renderer::getScreenWidth() * 0.5f;
@@ -404,7 +404,7 @@ namespace ds {
 					}
 					else if (item.type == GIT_TEXT) {
 						const GUIText& text = _texts[id.index];
-						v2 size = font::calculateSize(*m_BitmapFont, text.text, 2.0f, item.scale, item.scale);
+						v2 size = font::calculateSize(*m_BitmapFont, text.text, 2, item.scale, item.scale);
 						float ty = p.y - size.y * 0.5f;
 						if (item.centered) {
 							p.x = renderer::getScreenWidth() * 0.5f;
@@ -414,7 +414,7 @@ namespace ds {
 					}
 					else if (item.type == GIT_TIMER) {
 						const GameTimer& timer = _timers[id.index];
-						sprintf_s(buffer, 32, "%02d:%02d", timer.getMinutes(), timer.getSeconds());
+						sprintf_s(buffer, 32, "%02d:%02d", timer.getMinutes(), 2, timer.getSeconds());
 						v2 size = font::calculateSize(*m_BitmapFont, buffer, item.scale);
 						float ty = p.y - size.y * 0.5f;
 						p += v2(size.x * -0.5f, -size.y * 0.5f);

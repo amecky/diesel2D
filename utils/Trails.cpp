@@ -84,9 +84,9 @@ namespace ds {
 				Vector2f p = _world->getPosition(it->first);
 				if (it->second.emitType == TET_DISTANCE) {
 					if (distance(p, it->second.prevPosition) > it->second.distance) {
-						ParticleGeneratorData data(it->second.prevPosition);
-						data.rotation = it->second.angle;
-						_particles->start(it->second.particleSystem, data);
+						//ParticleGeneratorData data(it->second.prevPosition);
+						//data.rotation = it->second.angle;
+						//_particles->start(it->second.particleSystem, data);
 						it->second.prevPosition = p;
 					}
 				}
@@ -94,9 +94,9 @@ namespace ds {
 					++it->second.frameCounter;
 					if (it->second.frameCounter >= it->second.frames) {
 						it->second.frameCounter = 0;
-						ParticleGeneratorData data(it->second.prevPosition);
-						data.rotation = it->second.angle;
-						_particles->start(it->second.particleSystem, data);
+						//ParticleGeneratorData data(it->second.prevPosition);
+						//data.rotation = it->second.angle;
+						//_particles->start(it->second.particleSystem, data);
 						it->second.prevPosition = p;
 					}
 				}
@@ -104,9 +104,9 @@ namespace ds {
 					it->second.timer += dt;
 					if (it->second.timer >= it->second.time) {
 						it->second.timer = 0.0f;
-						ParticleGeneratorData data(it->second.prevPosition);
-						data.rotation = it->second.angle;
-						_particles->start(it->second.particleSystem, data);
+						//ParticleGeneratorData data(it->second.prevPosition);
+						//data.rotation = it->second.angle;
+						//_particles->start(it->second.particleSystem, data);
 						it->second.prevPosition = p;
 					}
 				}

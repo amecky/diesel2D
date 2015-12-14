@@ -44,7 +44,7 @@ namespace ds {
 		system->start(pos);
 		PR_END("ParticleManager::start");
 	}
-
+	/*
 	void ParticleManager::start(uint32 id, const ParticleGeneratorData& data) {
 		PR_START("ParticleManager::start");
 		assert(m_Index[id] != -1);
@@ -52,7 +52,7 @@ namespace ds {
 		system->start(data);
 		PR_END("ParticleManager::start");
 	}
-
+	*/
 	// --------------------------------------------------------------------------
 	// stop specific particlesystem
 	// --------------------------------------------------------------------------

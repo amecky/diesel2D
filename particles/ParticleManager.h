@@ -17,7 +17,7 @@ public:
 	ParticleManager();
 	~ParticleManager();
 	void init(const Descriptor& desc);
-	void start(uint32 id, const ParticleGeneratorData& data);
+	//void start(uint32 id, const ParticleGeneratorData& data);
 	void start(uint32 id,const Vector3f& pos);
 	void stop(uint32 id);
 	//void load(BinaryLoader* loader);

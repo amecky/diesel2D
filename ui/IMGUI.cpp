@@ -1079,7 +1079,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// combo box
 	// -------------------------------------------------------	
-	void DropDownBox(int id, const std::vector<std::string>& entries, int* selected,int* state) {
+	void DropDownBox(const std::vector<std::string>& entries, int* selected,int* state) {
+		HashedId id = HashPointer(&entries);
 		int max = entries.size();
 		float width = 200.0f;
 		v2 p = guiContext->position;

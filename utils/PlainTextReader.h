@@ -90,6 +90,7 @@ void getIdString(const std::string& name,IdString* ret) {
 			color->a = static_cast<float>(a) / 255.0f;
 		}
 	}
+	
 	ds::Rect getRect(const std::string& name) {
 		float top = static_cast<float>(getInt(0,name));
 		float left = static_cast<float>(getInt(1,name));
@@ -369,6 +370,19 @@ public:
 			}
 			*ret = false;
 		}		
+	}
+
+	void getColorPath(ds::ColorPath* path) {
+		std::vector<std::string> propertyNames;
+		getPropertyNames(propertyNames);
+		ds::Color value(1.0f, 1.0f, 1.0f, 1.0f);
+		for (size_t i = 0; i < propertyNames.size(); ++i) {
+			float timeStep = 0.0f;
+			std::istringstream ist(propertyNames[i]);
+			ist >> timeStep;
+			getColor(propertyNames[i], &value);
+			path->add(timeStep, value);
+		}
 	}
 	
 	template<class T> T read(const std::string& name,const T& defaultValue) {

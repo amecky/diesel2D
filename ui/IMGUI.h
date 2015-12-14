@@ -135,7 +135,7 @@ namespace gui {
 
 	void ComboBox(AbstractComponentModel* model,int *offset,int max = 5);
 
-	void DropDownBox(int id, const std::vector<std::string>& entries, int* selected,int* state);
+	void DropDownBox(const std::vector<std::string>& entries, int* selected,int* state);
 
 	void Histogram(float* values, int num, float minValue, float maxValue, float step);
 

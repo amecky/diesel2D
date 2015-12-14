@@ -49,7 +49,6 @@ namespace ds {
 		int _part_selection;
 		std::vector<std::string> _generator_names;
 		std::vector<std::string> _modifier_names;
-		std::vector<std::string> _available_modifiers;
 		std::vector<std::string> _available_generators;
 	};
 

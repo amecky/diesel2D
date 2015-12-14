@@ -36,21 +36,23 @@ struct ModifierInstance {
 
 	ParticleModifier* modifier;
 	ParticleModifierData* data;
-};
 
+	ModifierInstance() : modifier(0), data(0) {}
+};
 
 // -------------------------------------------------------
 // Generator instance
 // -------------------------------------------------------
 struct GeneratorInstance {
-
-	int data_index;
 	ParticleGenerator* generator;
+	ParticleGeneratorData* data;
 
+	GeneratorInstance() : generator(0), data(0) {}
 };
 
-typedef std::vector<ParticleModifier*> Modifiers;
-
+// -------------------------------------------------------
+// Particle system
+// -------------------------------------------------------
 class NewParticleSystem : public DataFile {
 
 public:
@@ -60,11 +62,12 @@ public:
 		_id = id;
 		m_Array.initialize(MAX_PARTICLES);
 		_count_modifiers = 0;
+		_count_generators = 0;
 		_factory = factory;
 		
 	}
 	virtual ~NewParticleSystem() {
-		clear();
+		clear();		
 	}
 
 	void clear();
@@ -82,26 +85,20 @@ public:
 
 	void render();
 
-	ParticleEmitter& getEmitter() {
-		return m_Emitter;
-	}
+	//ParticleEmitter& getEmitter() {
+		//return m_Emitter;
+	//}
 	NewParticleSystemData& getParticleData() {
 		return m_Data;
 	}
 	void addGenerator(ParticleGenerator* generator) {
-		m_Emitter.add(generator);
+		//m_Emitter.add(generator);
 	}
 
-	void start(const Vector3f& startPosition);
-
-	void start(const ParticleGeneratorData& data);
+	ID start(const Vector3f& startPosition);
 
 	void stop() {
-		m_Emitter.stop();
-	}
-
-	void addModifier(ParticleModifier* modifier) {
-		m_Modifiers.push_back(modifier);
+		//m_Emitter.stop();
 	}
 
 	void addModifier(ParticleModifier* modifier,ParticleModifierData* data) {
@@ -110,12 +107,20 @@ public:
 		instance.data = data;
 	}
 
+	void addGenerator(ParticleGenerator* generator, ParticleGeneratorData* data) {
+		GeneratorInstance& instance = _generator_instances[_count_generators++];
+		instance.generator = generator;
+		instance.data = data;
+	}
+
 	ParticleModifierData* getData(const char* modifierName);
+
+	ParticleGeneratorData* getGeneratorData(const char* generatorName);
 
 	ParticleModifier* getModifier(ParticleModifierType type);
 
 	void setPosition(const Vector3f& position) {
-		_generatorData.position = position;
+		//_generatorData.position = position;
 	}
 	void setDebugName(const char* name);
 	const int getCountAlive() const {
@@ -129,9 +134,6 @@ public:
 	}
 	const Texture& getTexture() const {
 		return m_Data.texture;
-	}
-	const Modifiers& getModifiers() const {
-		return m_Modifiers;
 	}
 	int getID() const {
 		return _id;
@@ -149,18 +151,22 @@ public:
 		return m_DebugName;
 	}
 
-
+	ParticleEmitterData& getEmitterData() {
+		return _emitter_data;
+	}
 private:
+	void tickEmitters(float dt);
+	void initEmitterData();
+	void emittParticles(ParticleEmitterInstance& instance, float dt, uint32* start, uint32* end);
+	void emittParticles(const ParticleEmitterInstance& instance, int count, uint32* start, uint32* end, float dt);
+
 	ParticleGenerator* createGenerator(int id);
 	ParticleModifier* createModifier(int id);
 	void prepareVertices();
 	void buildVertices();
-	ParticleGeneratorData _generatorData;
 	NewParticleSystemData m_Data;
 	ParticleSettings m_Settings;
 	ParticleArray m_Array;
-	Modifiers m_Modifiers;
-	ParticleEmitter m_Emitter;
 	char m_DebugName[32];
 	char _json_name[64];
 	int _id;
@@ -170,7 +176,11 @@ private:
 
 	ModifierInstance _modifier_instances[32];
 	int _count_modifiers;
+	GeneratorInstance _generator_instances[32];
+	int _count_generators;
 	ParticleSystemFactory* _factory;
+	EmitterInstances _emitter_instances;
+	ParticleEmitterData _emitter_data;
 };
 
 }

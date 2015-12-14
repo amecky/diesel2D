@@ -14,14 +14,20 @@ enum ParticleModifierType {
 	PMT_LINEAR_ALPHA,
 	PMT_LINEAR_COLOR,
 	PMT_DAMPING_VELOCITY,
+	PMT_LIFECYCLE,
+	PMT_VELOCITY_ROTATION,
+	PMT_PERPENDICULAR_MOVE,
+	PMT_COLOR_PATH,
+	PMT_ALPHA_PATH,
+	PMT_SIZE_PATH,
 	PMT_EOL
 };
 
 struct ParticleModifierData {
 
-	void read(Category* category) {}
-	void load(BinaryLoader* loader) {}
-	void save(BinaryWriter* writer) {}
+	virtual void read(Category* category) = 0;
+	virtual void load(BinaryLoader* loader) = 0;
+	virtual void save(BinaryWriter* writer) = 0;
 
 };
 
@@ -33,82 +39,13 @@ class ParticleModifier {
 public:
 	ParticleModifier() {}
 	virtual ~ParticleModifier() {}
-	virtual void update(ParticleArray* array,float dt) = 0;
-	virtual void init(ParticleArray* array, uint32 start, uint32 end) = 0;
-
-	virtual void update(ParticleArray* array, const ParticleModifierData* data, float dt) {}
-	virtual void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {}
-
-
-	virtual void read(Category* category) {} 
-	virtual void load(BinaryLoader* loader) {}
-	virtual void save(BinaryWriter* writer) {}
-
-
+	virtual void update(ParticleArray* array, const ParticleModifierData* data, float dt) = 0;
+	virtual void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) = 0;
 	virtual const ParticleModifierType getType() const = 0;
 	virtual const char* getName() const = 0;
 	int getChunkID() {
 		return getType() + 100;
 	}
-};
-
-
-// -------------------------------------------------------
-// Linear color modifier
-// -------------------------------------------------------
-struct MyLinearColorModifierData : ParticleModifierData {
-
-	Color startColor;
-	Color endColor;
-
-	MyLinearColorModifierData() : startColor(255, 255, 255, 255), endColor(0, 0, 0, 0) {}
-
-	void read(Category* category) {
-	}
-
-	void load(BinaryLoader* loader) {
-	}
-
-	void save(BinaryWriter* writer) {
-	}
-};
-
-// -------------------------------------------------------
-// Abstract particle modifier
-// -------------------------------------------------------
-template<class DATA>
-class AbstractParticleModifier : public ParticleModifier {
-
-public:
-	AbstractParticleModifier() : ParticleModifier() {}
-	virtual ~AbstractParticleModifier() {}
-
-	DataTranslator<DATA>& getTranslator() {
-		return m_Translator;
-	}
-
-	void read(Category* category) {
-		DATA data;
-		DataTranslator<DATA>& translator = getTranslator();
-		translator.read(category,&data);
-	}
-	virtual void load(BinaryLoader* loader) {
-		DataTranslator<DATA>& translator = getTranslator();
-		translator.readChunk(*loader,&m_Data);
-	}
-	virtual void save(BinaryWriter* writer) {
-		DataTranslator<DATA>& translator = getTranslator();
-		translator.saveChunk(*writer, getChunkID(), &m_Data);
-	}
-	DATA& getData() const {
-		return m_Data;
-	}
-	DATA* getData() {
-		return &m_Data;
-	}
-protected:
-	DataTranslator<DATA> m_Translator;
-	DATA m_Data;
 };
 
 // -------------------------------------------------------
@@ -120,18 +57,18 @@ public:
 	ParticlePositionModifier() : ParticleModifier() {}
 	virtual ~ParticlePositionModifier() {}
 
-	void update(ParticleArray* array,float dt) {
+	void  update(ParticleArray* array, const ParticleModifierData* data, float dt) {
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
 			array->velocity[i] += array->acceleration[i] * dt;
 			array->position[i] += array->velocity[i] * dt;
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {}
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
 		return PMT_POSITION;
 	}
 	const char* getName() const {
-		return "Position";
+		return "position";
 	}
 };
 
@@ -144,7 +81,7 @@ public:
 	ParticleTimeModifier() : ParticleModifier() {}
 	virtual ~ParticleTimeModifier() {}
 
-	void update(ParticleArray* array,float dt) {
+	void  update(ParticleArray* array, const ParticleModifierData* data, float dt) {
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
 			array->timer[i].x += dt;
 			array->timer[i].y = array->timer[i].x / array->timer[i].z;
@@ -157,250 +94,295 @@ public:
 			++cnt;
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {}
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
-		return PMT_POSITION;
+		return PMT_LIFECYCLE;
 	}
 	const char* getName() const {
-		return "Time";
+		return "lifecycle";
 	}
 };
 
 // -------------------------------------------------------
 // Linear color modifier
 // -------------------------------------------------------
-struct LinearColorModifierData {
+struct LinearColorModifierData : ParticleModifierData {
 
 	Color startColor;
 	Color endColor;
 
 	LinearColorModifierData() : startColor(255,255,255,255) , endColor(0,0,0,0) {}
+
+	void read(Category* category) {
+		category->getColor("start_color", &startColor);
+		category->getColor("end_color", &endColor);
+	}
+
+	void load(BinaryLoader* loader) {
+		loader->read(&startColor);
+		loader->read(&endColor);
+	}
+
+	void save(BinaryWriter* writer) {
+		writer->write(startColor);
+		writer->write(endColor);
+	}
 };
 
-class LinearColorModifier : public AbstractParticleModifier<LinearColorModifierData> {
+class LinearColorModifier : public ParticleModifier {
 
 public:
-	LinearColorModifier() : AbstractParticleModifier<LinearColorModifierData>() {
-		m_Translator.add("start_color",&LinearColorModifierData::startColor);
-		m_Translator.add("end_color",&LinearColorModifierData::endColor);
+	LinearColorModifier() : ParticleModifier() {
 	}
 	virtual ~LinearColorModifier() {}
-	void init(const Color& start,const Color& end) {
-		m_Data.startColor = start;
-		m_Data.endColor = end;
-	}
-	void update(ParticleArray* array,float dt) {
+	
+	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		const LinearColorModifierData* my_data = static_cast<const LinearColorModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
-			array->color[i] = color::lerp(m_Data.startColor,m_Data.endColor,array->timer[i].y);			
+			array->color[i] = color::lerp(my_data->startColor, my_data->endColor, array->timer[i].y);
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		assert(data != 0);
+		const LinearColorModifierData* my_data = static_cast<const LinearColorModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->color[i] = m_Data.startColor;
+			array->color[i] = my_data->startColor;
 		}
 	}
 	const ParticleModifierType getType() const {
 		return PMT_LINEAR_COLOR;
 	}
 	const char* getName() const {
-		return "LinearColor";
+		return "linear_color";
 	}
 };
 
 // -------------------------------------------------------
 // Linear color modifier
 // -------------------------------------------------------
-struct LinearAlphaModifierData {
+struct LinearAlphaModifierData : ParticleModifierData {
 
 	float startAlpha;
 	float endAlpha;
 
 	LinearAlphaModifierData() : startAlpha(1.0f), endAlpha(0.0f) {}
+
+	void read(Category* category) {
+		category->getFloat("start_alpha", &startAlpha);
+		category->getFloat("end_alpha", &endAlpha);
+	}
+
+	void load(BinaryLoader* loader) {
+		loader->read(&startAlpha);
+		loader->read(&endAlpha);
+	}
+
+	void save(BinaryWriter* writer) {
+		writer->write(startAlpha);
+		writer->write(endAlpha);
+	}
 };
 
-class LinearAlphaModifier : public AbstractParticleModifier<LinearAlphaModifierData> {
+class LinearAlphaModifier : public ParticleModifier {
 
 public:
-	LinearAlphaModifier() : AbstractParticleModifier<LinearAlphaModifierData>() {
-		m_Translator.add("start", &LinearAlphaModifierData::startAlpha);
-		m_Translator.add("end", &LinearAlphaModifierData::endAlpha);
+	LinearAlphaModifier() : ParticleModifier() {
 	}
 	virtual ~LinearAlphaModifier() {}
-	void init(float start, float end) {
-		m_Data.startAlpha = start;
-		m_Data.endAlpha = end;
-	}
-	void update(ParticleArray* array, float dt) {
+	void  update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		const LinearAlphaModifierData* my_data = static_cast<const LinearAlphaModifierData*>(data);
 		for (uint32 i = 0; i < array->countAlive; ++i) {
-			array->color[i].a = tweening::interpolate(tweening::easeInOutQuad,m_Data.startAlpha, m_Data.endAlpha, array->timer[i].y);
+			array->color[i].a = tweening::interpolate(tweening::easeInOutQuad, my_data->startAlpha, my_data->endAlpha, array->timer[i].y);
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		const LinearAlphaModifierData* my_data = static_cast<const LinearAlphaModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->color[i].a = m_Data.startAlpha;
+			array->color[i].a = my_data->startAlpha;
 		}
 	}
 	const ParticleModifierType getType() const {
 		return PMT_LINEAR_ALPHA;
 	}
 	const char* getName() const {
-		return "LinearAlpha";
+		return "linear_alpha";
 	}
 };
 
 // -------------------------------------------------------
 // Linear size modifier
 // -------------------------------------------------------
-struct LinearSizeModifierData {
+struct LinearSizeModifierData : ParticleModifierData {
 	
 	Vector2f minScale;
 	Vector2f maxScale;
 
 	LinearSizeModifierData() : minScale(0,0) , maxScale(1,1) {}
+
+	void read(Category* category) {
+		category->getVector2f("min_scale", &minScale);
+		category->getVector2f("max_scale", &maxScale);
+	}
+
+	void load(BinaryLoader* loader) {
+		loader->read(&minScale);
+		loader->read(&maxScale);
+	}
+
+	void save(BinaryWriter* writer) {
+		writer->write(minScale);
+		writer->write(maxScale);
+	}
 };
 
-class LinearSizeModifier : public AbstractParticleModifier<LinearSizeModifierData> {
+class LinearSizeModifier : public ParticleModifier {
 
 public:
-	LinearSizeModifier() : AbstractParticleModifier<LinearSizeModifierData>() {
-		m_Translator.add("min_scale",&LinearSizeModifierData::minScale);
-		m_Translator.add("max_scale",&LinearSizeModifierData::maxScale);
+	LinearSizeModifier() : ParticleModifier() {
 	}
 	virtual ~LinearSizeModifier() {}
-	void init(const Vector2f& minScale,const Vector2f& maxScale) {
-		m_Data.minScale = minScale;
-		m_Data.maxScale = maxScale;
-	}
-	void update(ParticleArray* array,float dt) {
+
+	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		const LinearSizeModifierData* my_data = static_cast<const LinearSizeModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {			
-			array->scale[i] = lerp(m_Data.minScale,m_Data.maxScale,array->timer[i].y);
+			array->scale[i] = lerp(my_data->minScale, my_data->maxScale, array->timer[i].y);
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		const LinearSizeModifierData* my_data = static_cast<const LinearSizeModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->scale[i] = m_Data.minScale;
+			array->scale[i] = my_data->minScale;
 		}
 	}
 	const ParticleModifierType getType() const {
 		return PMT_LINEAR_SIZE;
 	}
 	const char* getName() const {
-		return "LinearSize";
+		return "linear_size";
 	}
 };
 
 // -------------------------------------------------------
 // PerpendicularMoveModifier
 // -------------------------------------------------------
-struct PerpendicularMoveModifierData {
+struct PerpendicularMoveModifierData : ParticleModifierData {
 	
 	float radius;
 	float amplitude;
 
 	PerpendicularMoveModifierData() : radius(10.0f) , amplitude(1.0f) {}
+
+	void read(Category* category) {
+	}
 };
 
-class PerpendicularMoveModifier : public AbstractParticleModifier<PerpendicularMoveModifierData> {
+class PerpendicularMoveModifier : public ParticleModifier {
 
 public:
-	PerpendicularMoveModifier() : AbstractParticleModifier<PerpendicularMoveModifierData>() {
-		m_Translator.add("radius",&PerpendicularMoveModifierData::radius);
-		m_Translator.add("amplitude",&PerpendicularMoveModifierData::amplitude);
+	PerpendicularMoveModifier() : ParticleModifier() {
+
 	}
 
 	virtual ~PerpendicularMoveModifier() {}
-	void init(float radius,float amplitude) {
-		m_Data.radius = radius;
-		m_Data.amplitude = amplitude;
-	}
-	void update(ParticleArray* array,float dt) {
+	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		const PerpendicularMoveModifierData* my_data = static_cast<const PerpendicularMoveModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {	
 			Vector2f perp = Vector2f(-array->velocity[i].y,array->velocity[i].x);
 			perp = normalize(perp);
-			perp = perp * (sin(array->timer[i].x * m_Data.amplitude * array->random[i]) * m_Data.radius * array->random[i]);// * p->random;	
+			perp = perp * (sin(array->timer[i].x * my_data->amplitude * array->random[i]) * my_data->radius * array->random[i]);// * p->random;	
 			//array->position[i] += perp * dt;
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {}
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
-		return PMT_POSITION;
+		return PMT_PERPENDICULAR_MOVE;
 	}
 	const char* getName() const {
-		return "PerpendicularMove";
+		return "perpendicular_move";
 	}
 };
 
 // -------------------------------------------------------
 // ColorPathModifier
 // -------------------------------------------------------
-struct ColorPathModifierData {
+struct ColorPathModifierData : ParticleModifierData {
 
 	ColorPath path;
 
+	void read(Category* category) {
+		category->getColorPath(&path);
+	}
+
+	void load(BinaryLoader* loader) {
+		loader->read(&path);
+	}
+
+	void save(BinaryWriter* writer) {
+		writer->write(path);
+	}
 };
 
-class ColorPathModifier : public AbstractParticleModifier<ColorPathModifierData> {
+class ColorPathModifier : public ParticleModifier {
 
 public:
-	ColorPathModifier() : AbstractParticleModifier<ColorPathModifierData>() {
-		m_Translator.add("path",&ColorPathModifierData::path);
+	ColorPathModifier() : ParticleModifier() {
 	}
 	virtual ~ColorPathModifier() {}
-	void add(float time,const Color& clr) {
-		m_Data.path.add(time,clr);
-	}
-	void update(ParticleArray* array,float dt) {
+	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		const ColorPathModifierData* my_data = static_cast<const ColorPathModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
-			m_Data.path.update(array->timer[i].y,&array->color[i]);			
+			my_data->path.get(array->timer[i].y, &array->color[i]);
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		const ColorPathModifierData* my_data = static_cast<const ColorPathModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->color[i] = m_Data.path.getColor(0);
+			array->color[i] = my_data->path.getColor(0);
 		}
 	}
 	const ParticleModifierType getType() const {
-		return PMT_POSITION;
+		return PMT_COLOR_PATH;
 	}
 	const char* getName() const {
-		return "ColorPath";
+		return "color_path";
 	}
 };
 
 // -------------------------------------------------------
 // AlphaPathModifier
 // -------------------------------------------------------
-struct AlphaPathModifierData {
+struct AlphaPathModifierData : ParticleModifierData{
 
 	FloatArray path;
 
+	void read(Category* category) {
+	}
+
 };
 
-class AlphaPathModifier : public AbstractParticleModifier<AlphaPathModifierData> {
+class AlphaPathModifier : public ParticleModifier {
 
 public:
-	AlphaPathModifier() : AbstractParticleModifier<AlphaPathModifierData>() {
-		m_Translator.add("path", &AlphaPathModifierData::path);
+	AlphaPathModifier() : ParticleModifier() {
 	}
 	virtual ~AlphaPathModifier() {}
-	void add(float time, float a) {
-		m_Data.path.add(time, a);
-	}
-	void update(ParticleArray* array, float dt) {
+	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		const AlphaPathModifierData* my_data = static_cast<const AlphaPathModifierData*>(data);
 		for (uint32 i = 0; i < array->countAlive; ++i) {
-			array->color[i].a = m_Data.path.get(array->timer[i].y) / 255.0f;
+			//array->color[i].a = data.path.get(array->timer[i].y) / 255.0f;
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		const AlphaPathModifierData* my_data = static_cast<const AlphaPathModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->color[i].a = m_Data.path.get(0.0f);
+			//array->color[i].a = data.path.get(0.0f);
 		}
 	}
 	const ParticleModifierType getType() const {
-		return PMT_POSITION;
+		return PMT_ALPHA_PATH;
 	}
 	const char* getName() const {
-		return "AlphaPath";
+		return "alpha_path";
 	}
 };
 
@@ -411,68 +393,80 @@ struct DampingVelocityModifierData : ParticleModifierData {
 
 	float damping;
 
+	DampingVelocityModifierData() : damping(0.0f) {}
+
+	void read(Category* category) {
+		damping = category->getFloat("damping", 0.0f);
+	}
+
+	void load(BinaryLoader* loader) {
+		loader->read(&damping);
+	}
+
+	void save(BinaryWriter* writer) {
+		writer->write(damping);
+	}
+
 };
 
-class DampingVelocityModifier : public AbstractParticleModifier<DampingVelocityModifierData> {
+class DampingVelocityModifier : public ParticleModifier {
 
 public:
-	DampingVelocityModifier() : AbstractParticleModifier<DampingVelocityModifierData>() {
-		m_Translator.add("damping",&DampingVelocityModifierData::damping);
+	DampingVelocityModifier() : ParticleModifier() {
 	}
 	virtual ~DampingVelocityModifier() {}
-	void init(float damping) {
-		m_Data.damping = damping;
-	}
-	void update(ParticleArray* array,float dt) {
-		float d = m_Data.damping * 0.01f;
+	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		const DampingVelocityModifierData* my_data = static_cast<const DampingVelocityModifierData*>(data);
+		float d = my_data->damping * 0.01f;
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
 			Vector3f v = array->velocity[i] * d;
 			array->velocity[i] -= v * dt;
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {}
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
 		return PMT_DAMPING_VELOCITY;
 	}
 	const char* getName() const {
-		return "DampingVelocity";
+		return "damping_velocity";
 	}
 };
 
 // -------------------------------------------------------
 // SizePathModifier
 // -------------------------------------------------------
-struct SizePathModifierData {
+struct SizePathModifierData : ParticleModifierData{
 
 	Vector2fPath path;
 
+	void read(Category* category) {
+	}
+
 };
 
-class SizePathModifier : public AbstractParticleModifier<SizePathModifierData> {
+class SizePathModifier : public ParticleModifier {
 
 public:
-	SizePathModifier() : AbstractParticleModifier<SizePathModifierData>() {
-		m_Translator.add("path",&SizePathModifierData::path);
+	SizePathModifier() : ParticleModifier() {
 	}
 	virtual ~SizePathModifier() {}
-	void add(float time,const Vector2f& v) {
-		m_Data.path.add(time,v);
-	}
-	void update(ParticleArray* array,float dt) {
+	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		const SizePathModifierData* my_data = static_cast<const SizePathModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
-			m_Data.path.update(array->timer[i].y,&array->scale[i]);			
+			//data.path.update(array->timer[i].y,&array->scale[i]);			
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		const SizePathModifierData* my_data = static_cast<const SizePathModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->scale[i] = m_Data.path.getVec2(0);
+			array->scale[i] = my_data->path.getVec2(0);
 		}
 	}
 	const ParticleModifierType getType() const {
-		return PMT_POSITION;
+		return PMT_SIZE_PATH;
 	}
 	const char* getName() const {
-		return "SizePath";
+		return "size_path";
 	}
 };
 
@@ -485,17 +479,17 @@ public:
 	VelocityRotationModifier() : ParticleModifier() {}
 	virtual ~VelocityRotationModifier() {}
 
-	void update(ParticleArray* array,float dt) {
+	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
 			//array->rotation[i] = math::getTargetAngle(V2_RIGHT,array->velocity[i]);			
 		}
 	}
-	void init(ParticleArray* array, uint32 start, uint32 end) {}
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {}
 	const ParticleModifierType getType() const {
-		return PMT_POSITION;
+		return PMT_VELOCITY_ROTATION;
 	}
 	const char* getName() const {
-		return "VelocityRotation";
+		return "velocity_rotation";
 	}
 };
 
