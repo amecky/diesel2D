@@ -113,6 +113,18 @@ public:
 		instance.data = data;
 	}
 
+	const ModifierInstance& getModifierInstance(int id) const {
+		return _modifier_instances[id];
+	}
+
+	const GeneratorInstance& getGeneratorInstance(int id) const {
+		return _generator_instances[id];
+	}
+
+	void getModifierNames(std::vector<std::string>& names);
+
+	void getGeneratorNames(std::vector<std::string>& names);
+
 	ParticleModifierData* getData(const char* modifierName);
 
 	ParticleGeneratorData* getGeneratorData(const char* generatorName);

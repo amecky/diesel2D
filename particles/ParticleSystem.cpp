@@ -375,38 +375,17 @@ namespace ds {
 		LOG << "--> frequency: " << _emitter_data.frequency;
 	}
 
-	ParticleGenerator* NewParticleSystem::createGenerator(int id) {
-		switch (id) {
-			case 200: return new RingGenerator; break;
-			//case 201: return new ParticleRandomGenerator; break;
-			//case 202: return new LifetimeGenerator; break;
-			//case 203: return  new RadialVelocityGenerator; break;
-			//case 204: return new SizeGenerator; break;
-			//case 205: return new ColorGenerator; break;
-			//case 206: return new HSVColorGenerator; break;
-			//case 207: return new PointGenerator; break;
-			//case 208: return new CircleGenerator; break;
-			//case 209: return new LineGenerator; break;
-			//case 210: return new VelocityGenerator; break;
-			//case 211: return new SphereGenerator; break;
-			//case 212: return new RandomSphereGenerator; break;
-			default: return 0;
+	void NewParticleSystem::getModifierNames(std::vector<std::string>& names) {
+		names.clear();
+		for (int i = 0; i < _count_modifiers; ++i) {
+			names.push_back(_modifier_instances[i].modifier->getName());
 		}
 	}
 
-	ParticleModifier* NewParticleSystem::createModifier(int id) {
-		switch (id) {
-			case 100: return new ParticleTimeModifier; break;
-			case 101: return new ParticlePositionModifier; break;
-			case 102: return new LinearColorModifier; break;
-			case 103: return new LinearSizeModifier; break;
-			case 104: return new PerpendicularMoveModifier; break;
-			case 105: return new ColorPathModifier; break;
-			case 106: return new DampingVelocityModifier; break;
-			case 107: return new SizePathModifier; break;
-			case 108: return new VelocityRotationModifier; break;
-			case 109: return new AlphaPathModifier; break;
-			default: return 0;
+	void NewParticleSystem::getGeneratorNames(std::vector<std::string>& names) {
+		names.clear();
+		for (int i = 0; i < _count_generators; ++i) {
+			names.push_back(_generator_instances[i].generator->getName());
 		}
 	}
 

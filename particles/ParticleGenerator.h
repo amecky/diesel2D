@@ -621,45 +621,56 @@ public:
 		return "size";
 	}
 };
-/*
+
 // -------------------------------------------------------
 // ParticleRandomGenerator
 // -------------------------------------------------------
-struct ParticleRandomGeneratorData {
+struct ParticleRandomGeneratorData : ParticleGeneratorData {
 
 	float minRandom;
 	float maxRandom;
 
 	ParticleRandomGeneratorData() : minRandom(0.0f) , maxRandom(1.0f) {}
+
+	void read(Category* category) {
+		minRandom = category->getFloat("min", 0.0f);
+		maxRandom = category->getFloat("max", 1.0f);
+	}
+
+	void load(BinaryLoader* loader) {
+		loader->read(&minRandom);
+		loader->read(&maxRandom);
+	}
+
+	void save(BinaryWriter* writer) {
+		writer->write(minRandom);
+		writer->write(maxRandom);
+	}
 };
 
-class ParticleRandomGenerator : public AbstractParticleGenerator<ParticleRandomGeneratorData> {
+class ParticleRandomGenerator : public ParticleGenerator {
 
 public:
-	ParticleRandomGenerator() : AbstractParticleGenerator<ParticleRandomGeneratorData>() {
-		m_Translator.add("min_random",&ParticleRandomGeneratorData::minRandom);
-		m_Translator.add("max_random",&ParticleRandomGeneratorData::maxRandom);
+	ParticleRandomGenerator() : ParticleGenerator() {
 	}
 	virtual ~ParticleRandomGenerator() {}
-	void init(float random) {
-		m_Data.minRandom = random;
-		m_Data.maxRandom = 1.0f;
-	}
-	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData* data, float dt, uint32 start, uint32 end) {
+		assert(data != 0);
+		const ParticleRandomGeneratorData* my_data = static_cast<const ParticleRandomGeneratorData*>(data);
 		uint32 count = end - start;
 		for ( uint32 i = 0; i < count; ++i ) {	
-			array->random[start+i] = ds::math::random(m_Data.minRandom,m_Data.maxRandom);
+			array->random[start+i] = ds::math::random(my_data->minRandom,my_data->maxRandom);
 		}
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_RANDOM;
 	}
 	const char* getName() const {
-		return "Random";
+		return "random";
 	}
 };
 
-*/
+
 
 
 }

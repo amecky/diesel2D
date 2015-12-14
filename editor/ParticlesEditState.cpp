@@ -18,25 +18,8 @@ namespace ds {
 		_add_generator_offset = 0;
 		_add_generator_state = 1;
 		_selected_id = -1;
-
 		_show_add_modifier = false;
-
-		_available_generators.push_back("Ring");
-		_available_generators.push_back("Circle");
-		_available_generators.push_back("Line");
-		_available_generators.push_back("Point");
-		_available_generators.push_back("Sphere");
-		_available_generators.push_back("RandomSphere");
-		_available_generators.push_back("RadialVelocity");
-		_available_generators.push_back("Velocity");
-		_available_generators.push_back("Lifetime");
-		_available_generators.push_back("Color");
-		_available_generators.push_back("HSVColor");
-		_available_generators.push_back("Size");
-		_available_generators.push_back("Random");
 		_show_add_generator = false;
-
-
 	}
 
 
@@ -116,19 +99,10 @@ namespace ds {
 		}
 		NewParticleSystem* system = _particles->getParticleSystem(id);
 		if (reload) {
-			_modifier_names.clear();
-			//const Modifiers& modifiers = system->getModifiers();
-			//for (size_t i = 0; i < modifiers.size(); ++i) {
-				//_modifier_names.push_back(modifiers[i]->getName());
-			//}
+			system->getModifierNames(_modifier_names);
 		}
 		if (reload) {
-			_generator_names.clear();
-			//ParticleEmitter& emitter = system->getEmitter();
-			//const Generators& generators = emitter.getGenerators();
-			//for (size_t i = 0; i < generators.size(); ++i) {
-				//_generator_names.push_back(generators[i]->getName());
-			//}
+			system->getGeneratorNames(_generator_names);
 		}
 	}
 
@@ -179,35 +153,30 @@ namespace ds {
 	void ParticlesEditState::renderModifierSettings() {		
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
-		/*
-		if (_modifier_names[_modifier_state] == "LinearSize") {
+		const ModifierInstance& instance = system->getModifierInstance(_modifier_state);
+		if (instance.modifier->getType() == PMT_LINEAR_SIZE) {
 			gui::Header("Linear size modifier");
-			LinearSizeModifier* modifier = static_cast<LinearSizeModifier*>(system->getModifier(PMT_LINEAR_SIZE));
-			LinearSizeModifierData* data = modifier->getData();
+			LinearSizeModifierData* data = static_cast<LinearSizeModifierData*>(instance.data);
 			gui::InputVec2("Min scale", &data->minScale);
 			gui::InputVec2("Max scale", &data->maxScale);
 		}
-		else if (_modifier_names[_modifier_state] == "LinearAlpha") {
-			gui::Header("Linear alpha modifier");
-			LinearAlphaModifier* modifier = static_cast<LinearAlphaModifier*>(system->getModifier(PMT_LINEAR_ALPHA));
-			LinearAlphaModifierData* data = modifier->getData();
-			gui::InputFloat("Start", &data->startAlpha);
-			gui::InputFloat("End", &data->endAlpha);
-		}
-		else if (_modifier_names[_modifier_state] == "LinearColor") {
+		else if (instance.modifier->getType() == PMT_LINEAR_COLOR) {
 			gui::Header("Linear color modifier");
-			LinearColorModifier* modifier = static_cast<LinearColorModifier*>(system->getModifier(PMT_LINEAR_COLOR));
-			LinearColorModifierData* data = modifier->getData();
+			LinearColorModifierData* data = static_cast<LinearColorModifierData*>(instance.data);
 			gui::InputColor("Start", &data->startColor);
 			gui::InputColor("End", &data->endColor);
 		}
-		else if (_modifier_names[_modifier_state] == "DampingVelocity") {
+		else if (instance.modifier->getType() == PMT_DAMPING_VELOCITY) {
+			DampingVelocityModifierData* data = static_cast<DampingVelocityModifierData*>(instance.data);
 			gui::Header("Damping velocity modifier");
-			DampingVelocityModifier* modifier = static_cast<DampingVelocityModifier*>(system->getModifier(PMT_DAMPING_VELOCITY));
-			DampingVelocityModifierData* data = modifier->getData();
 			gui::InputFloat("Damping", &data->damping);
 		}
-		*/
+		else if (instance.modifier->getType() == PMT_LINEAR_ALPHA) {
+			LinearAlphaModifierData* data = static_cast<LinearAlphaModifierData*>(instance.data);
+			gui::Header("Linear alpha modifier");
+			gui::InputFloat("Start", &data->startAlpha);
+			gui::InputFloat("End", &data->endAlpha);
+		}
 	}
 
 	// --------------------------------------------
@@ -228,7 +197,7 @@ namespace ds {
 			NewParticleSystem* system = _particles->getParticleSystem(id);
 			//ParticleEmitter& emitter = system->getEmitter();
 			gui::Header("Add generator");
-			gui::ComboBox(_available_generators, &_add_generator_state, &_add_generator_offset);
+			gui::ComboBox(_particles->getFactory().getGeneratorNames(), &_add_generator_state, &_add_generator_offset);
 			gui::beginGroup();
 			if (gui::Button("Add")) {
 				if (_add_generator_state != -1) {
@@ -255,52 +224,44 @@ namespace ds {
 	void ParticlesEditState::renderGeneratorSettings() {
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
-		//ParticleEmitter& emitter = system->getEmitter();
-		/*
-		if (_generator_names[_generator_state] == "Lifetime") {
+		const GeneratorInstance& instance = system->getGeneratorInstance(_generator_state);
+		if (instance.generator->getType() == PGT_LIFETIME) {
+			LifetimeGeneratorData* data = static_cast<LifetimeGeneratorData*>(instance.data);
 			gui::Header("Lifetime");
-			LifetimeGenerator* generator = static_cast<LifetimeGenerator*>(emitter.getGenerator(PGT_LIFETIME));
-			LifetimeGeneratorData* data = generator->getData();
 			gui::InputFloat("TTL", &data->ttl);
 			gui::InputFloat("Variance", &data->variance);
 		}
-		else if (_generator_names[_generator_state] == "RadialVelocity") {
+		else if (instance.generator->getType() == PGT_RADIAL_VELOCITY) {
+			RadialVelocityGeneratorData* data = static_cast<RadialVelocityGeneratorData*>(instance.data);
 			gui::Header("Radial velocity");
-			RadialVelocityGenerator* generator = static_cast<RadialVelocityGenerator*>(emitter.getGenerator(PGT_RADIAL_VELOCITY));
-			RadialVelocityGeneratorData* data = generator->getData();
 			gui::InputFloat("Velocity", &data->velocity);
 			gui::InputFloat("Variance", &data->variance);
 		}
-		else if (_generator_names[_generator_state] == "Ring") {
+		else if (instance.generator->getType() == PGT_RING) {
+			RingGeneratorData* data = static_cast<RingGeneratorData*>(instance.data);
 			gui::Header("Ring generator");
-			RingGenerator* generator = static_cast<RingGenerator*>(emitter.getGenerator(PGT_RING));
-			RingGeneratorData* data = generator->getData();
 			gui::InputFloat("Radius", &data->radius);
 			gui::InputFloat("Variance", &data->variance);
 			gui::InputFloat("Step", &data->step);
 			gui::InputFloat("Angle Variance", &data->angleVariance);
 		}
-		else if (_generator_names[_generator_state] == "Random") {
+		else if (instance.generator->getType() == PGT_RANDOM) {
 			gui::Header("Random generator");
-			ParticleRandomGenerator* generator = static_cast<ParticleRandomGenerator*>(emitter.getGenerator(PGT_RANDOM));
-			ParticleRandomGeneratorData* data = generator->getData();
+			ParticleRandomGeneratorData* data = static_cast<ParticleRandomGeneratorData*>(instance.data);
 			gui::InputFloat("Min", &data->minRandom);
 			gui::InputFloat("Max", &data->maxRandom);
 		}
-		else if (_generator_names[_generator_state] == "Color") {
+		else if (instance.generator->getType() == PGT_COLOR) {
 			gui::Header("Color generator");
-			ColorGenerator* generator = static_cast<ColorGenerator*>(emitter.getGenerator(PGT_COLOR));
-			ColorGeneratorData* data = generator->getData();
+			ColorGeneratorData* data = static_cast<ColorGeneratorData*>(instance.data);
 			gui::InputColor("Color", &data->color);
 		}
-		else if (_generator_names[_generator_state] == "Size") {
+		else if (instance.generator->getType() == PGT_SIZE) {
 			gui::Header("Size generator");
-			SizeGenerator* generator = static_cast<SizeGenerator*>(emitter.getGenerator(PGT_SIZE));
-			SizeGeneratorData* data = generator->getData();
+			SizeGeneratorData* data = static_cast<SizeGeneratorData*>(instance.data);
 			gui::InputVec2("Scale", &data->scale);
 			gui::InputVec2("Variance", &data->variance);
 		}
-		*/
 		// HSVColor
 		// Point
 		// Circle
@@ -313,7 +274,6 @@ namespace ds {
 		gui::Header("System");
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
-		//ParticleEmitter& emitter = system->getEmitter();
 		ParticleEmitterData& data = system->getEmitterData();
 		NewParticleSystemData& system_data = system->getParticleData();
 		char buffer[32];
