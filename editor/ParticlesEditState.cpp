@@ -110,6 +110,8 @@ namespace ds {
 			_modifier_offset = 0;
 			_generator_state = 0;
 			_generator_offset = 0;
+			_show_add_modifier = false;
+			_show_add_generator = false;
 			reload = true;
 		}
 		NewParticleSystem* system = _particles->getParticleSystem(id);
