@@ -46,6 +46,24 @@ namespace tweening {
 		return start + (end - start) * pow (t, 4);
 	}
 
+	float easeInBack(float start, float end, float t) {
+		float s = 1.70158f;
+		return (end - start) * t * ((s + 1.0f) * t - s) + start;
+	}
+	float easeOutBack(float start, float end, float t) {
+		float s = 1.70158f;
+		return (end - start) * ((t - 1.0f) * t * ((s + 1.0f) * t + s) + 1.0f) + start;
+	}
+
+	float easeInOutBack(float start, float end, float t) {
+		float s = 1.70158f;
+		if ( t < 0.5f ) {
+			return (end - start) / 2.0f * (t * t * (((s *= (1.525f)) + 1.0f) * t - s)) + start;
+		}
+		float postFix = t -= 2;
+		return (end - start) / 2.0f * ((postFix) * t * (((s *= (1.525f)) + 1) * t + s) + 2.0f) + start;
+	}
+
 	// -------------------------------------------------------
 	// interpolate
 	// -------------------------------------------------------

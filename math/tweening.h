@@ -19,6 +19,12 @@ namespace tweening {
 
 	float easeInQuart(float start,float end,float t);
 
+	float easeInBack(float start, float end, float t);
+
+	float easeOutBack(float start, float end, float t);
+
+	float easeInOutBack(float start, float end, float t);
+
 	float interpolate(TweeningType type,float start,float end,float t);
 
 	Vector2f interpolate(TweeningType type,const Vector2f& start,const Vector2f& end,float t);
