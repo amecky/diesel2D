@@ -26,6 +26,7 @@ namespace ds {
 		_known_generators[_count_generators++] = new LifetimeGenerator();
 		_known_generators[_count_generators++] = new SizeGenerator();
 		_known_generators[_count_generators++] = new ColorGenerator();
+		_known_generators[_count_generators++] = new HSVColorGenerator();
 		for (int i = 0; i < _count_generators; ++i) {
 			_known_generator_names.push_back(_known_generators[i]->getName());
 		}
@@ -101,6 +102,7 @@ namespace ds {
 			case PGT_LIFETIME: return new LifetimeGeneratorData(); break;
 			case PGT_SIZE: return new SizeGeneratorData(); break;
 			case PGT_COLOR: return new ColorGeneratorData(); break;
+			case PGT_HSV_COLOR: return new HSVColorGeneratorData(); break;
 		}
 		return 0;
 	}
@@ -111,6 +113,7 @@ namespace ds {
 			case PMT_LINEAR_SIZE: return new LinearSizeModifierData(); break;
 			case PMT_COLOR_PATH: return new ColorPathModifierData(); break;
 			case PMT_LINEAR_COLOR: return new LinearColorModifierData(); break;
+			case PMT_LINEAR_ALPHA: return new LinearAlphaModifierData(); break;
 		}
 		return 0;
 	}

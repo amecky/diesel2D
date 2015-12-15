@@ -2,16 +2,16 @@
 
 namespace ds {
 
-	struct ParticleSystemData {
+	struct ParticleSystemDataTest {
 
 		char* buffer;
 		int index;
 		int num;
 		int entries[64];
 
-		ParticleSystemData() : buffer(0), index(0), num(0) {}
+		ParticleSystemDataTest() : buffer(0), index(0), num(0) {}
 
-		~ParticleSystemData() {
+		~ParticleSystemDataTest() {
 			if (buffer != 0) {
 				delete[] buffer;
 			}

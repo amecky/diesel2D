@@ -1,5 +1,7 @@
 #pragma once
 #include <Vector.h>
+#include "..\utils\Color.h"
+
 // http://gizma.com/easing/
 namespace tweening {
 
@@ -20,6 +22,8 @@ namespace tweening {
 	float interpolate(TweeningType type,float start,float end,float t);
 
 	Vector2f interpolate(TweeningType type,const Vector2f& start,const Vector2f& end,float t);
+
+	ds::Color interpolate(TweeningType type, const ds::Color& start, const ds::Color& end, float t);
 
 };
 

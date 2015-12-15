@@ -25,6 +25,7 @@ enum ParticleGeneratorType {
 	PGT_RADIAL_VELOCITY,
 	PGT_RANDOM,
 	PGT_COLOR,
+	PGT_HSV_COLOR,
 	PGT_UNKNOWN
 };
 // -------------------------------------------------------
@@ -519,58 +520,83 @@ public:
 		return "color";
 	}
 };
-/*
+
 // -------------------------------------------------------
 // ColorGenerator
 // -------------------------------------------------------
-struct HSVColorGeneratorData {
+struct HSVColorGeneratorData : ParticleGeneratorData {
 
 	v3 hsv;
 	float hueVariance;
 	float saturationVariance;
 	float valueVariance;
 	float alpha;
+
+	HSVColorGeneratorData() : hsv(360, 100, 100), hueVariance(0.0f), saturationVariance(0.0f), valueVariance(0.0f), alpha(255.0f) {}
+
+	void read(Category* category) {
+		hsv = category->getVector3f("hsv");
+		alpha = category->getFloat("alpha",255.0f);
+		hueVariance = category->getFloat("hue_variance",0.0f);
+		saturationVariance = category->getFloat("saturation_variance",0.0f);
+		valueVariance = category->getFloat("value_variance",0.0f);
+	}
+
+	void load(BinaryLoader* loader) {
+		loader->read(&hsv);
+		loader->read(&hueVariance);
+		loader->read(&saturationVariance);
+		loader->read(&valueVariance);
+		loader->read(&alpha);
+	}
+
+	void save(BinaryWriter* writer) {		
+		writer->write(hsv);
+		writer->write(hueVariance);
+		writer->write(saturationVariance);
+		writer->write(valueVariance);
+		writer->write(alpha);
+	}
 };
 
-class  HSVColorGenerator : public AbstractParticleGenerator<HSVColorGeneratorData> {
+class  HSVColorGenerator : public ParticleGenerator {
 
 public:
-	HSVColorGenerator() : AbstractParticleGenerator<HSVColorGeneratorData>() {
-		m_Translator.add("hsv", &HSVColorGeneratorData::hsv);
-		m_Translator.add("alpha", &HSVColorGeneratorData::alpha);
-		m_Translator.add("hue_variance", &HSVColorGeneratorData::hueVariance);
-		m_Translator.add("saturation_variance", &HSVColorGeneratorData::saturationVariance);
-		m_Translator.add("value_variance", &HSVColorGeneratorData::valueVariance);
+	HSVColorGenerator() : ParticleGenerator() {
+		
 	}
 	
 	virtual ~HSVColorGenerator() {}
 	
-	void init(const Vector3f& hsv) {
-		m_Data.hsv = hsv;
-	}
-
-	void generate(ParticleArray* array, const ParticleGeneratorData& data, float dt, uint32 start, uint32 end) {
+	void generate(ParticleArray* array, const ParticleGeneratorData* data, float dt, uint32 start, uint32 end) {
+		assert(data != 0);
 		uint32 count = end - start;
+		const HSVColorGeneratorData* my_data = static_cast<const HSVColorGeneratorData*>(data);
 		for (uint32 i = 0; i < count; ++i) {
-			float hv = ds::math::random(-m_Data.hueVariance, m_Data.hueVariance);
-			float h = math::clamp(m_Data.hsv.x + hv, 0.0f, 360.0f);
-			float sv = ds::math::random(-m_Data.saturationVariance, m_Data.saturationVariance);
-			float s = math::clamp(m_Data.hsv.y + sv, 0.0f, 100.0f);
-			float vv = ds::math::random(-m_Data.valueVariance, m_Data.valueVariance);
-			float v = math::clamp(m_Data.hsv.z + vv, 0.0f, 100.0f);
+			float hv = ds::math::random(-my_data->hueVariance, my_data->hueVariance);
+			float h = math::clamp(my_data->hsv.x + hv, 0.0f, 360.0f);
+			float sv = ds::math::random(-my_data->saturationVariance, my_data->saturationVariance);
+			float s = math::clamp(my_data->hsv.y + sv, 0.0f, 100.0f);
+			float vv = ds::math::random(-my_data->valueVariance, my_data->valueVariance);
+			float v = math::clamp(my_data->hsv.z + vv, 0.0f, 100.0f);
 			Color c = color::hsvToColor(h, s, v);			
-			c.a = m_Data.alpha;
+			if (my_data->alpha > 1.0f) {
+				c.a = my_data->alpha / 255.0f;
+			}
+			else {
+				c.a = my_data->alpha;
+			}
 			array->color[start + i] = c;
 		}
 	}
 	const ParticleGeneratorType getType() const {
-		return PGT_DEFAULT;
+		return PGT_HSV_COLOR;
 	}
 	const char* getName() const {
-		return "HSVColor";
+		return "hsv_color";
 	}
 };
-*/
+
 // -------------------------------------------------------
 // SizeGenerator
 // -------------------------------------------------------

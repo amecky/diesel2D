@@ -164,9 +164,9 @@ uint32 BinaryWriter::write(const ds::ColorPath& v) {
 	int size = v.size();
 	fwrite(&size,sizeof(int),1,m_Stream);
 	for ( int i = 0;i < size; ++i ) {
-		float ts = v.getTimeStep(i);
+		float ts = v.key(i);
 		fwrite(&ts,sizeof(float),1,m_Stream);
-		ds::Color c = v.getColor(i);
+		ds::Color c = v.value(i);
 		if (c.r > 1.0f) {
 			c.r /= 255.0f;
 			c.g /= 255.0f;
@@ -186,9 +186,9 @@ uint32 BinaryWriter::write(const ds::Vector2fPath& v) {
 	int size = v.size();
 	fwrite(&size,sizeof(int),1,m_Stream);
 	for ( int i = 0;i < size; ++i ) {
-		float ts = v.getTimeStep(i);
+		float ts = v.key(i);
 		fwrite(&ts,sizeof(float),1,m_Stream);
-		Vector2f c = v.getVec2(i);
+		Vector2f c = v.value(i);
 		fwrite(&c.x, sizeof (float), 1, m_Stream);
 		fwrite(&c.y, sizeof (float), 1, m_Stream);
 	}

@@ -60,4 +60,16 @@ namespace tweening {
 		return Vector2f(interpolate(type,start.x,end.x,t),interpolate(type,start.y,end.y,t));
 	}
 
+	// -------------------------------------------------------
+	// Vector2f interpolate
+	// -------------------------------------------------------
+	ds::Color interpolate(TweeningType type, const ds::Color& start, const ds::Color& end, float t) {
+		return ds::Color(
+			interpolate(type, start.r, end.r, t), 
+			interpolate(type, start.g, end.g, t),
+			interpolate(type, start.b, end.b, t),
+			interpolate(type, start.a, end.a, t)
+		);
+	}
+
 }

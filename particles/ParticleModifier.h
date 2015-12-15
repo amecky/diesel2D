@@ -137,6 +137,7 @@ public:
 	virtual ~LinearColorModifier() {}
 	
 	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		assert(data != 0);
 		const LinearColorModifierData* my_data = static_cast<const LinearColorModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
 			array->color[i] = color::lerp(my_data->startColor, my_data->endColor, array->timer[i].y);
@@ -190,12 +191,14 @@ public:
 	}
 	virtual ~LinearAlphaModifier() {}
 	void  update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		assert(data != 0);
 		const LinearAlphaModifierData* my_data = static_cast<const LinearAlphaModifierData*>(data);
 		for (uint32 i = 0; i < array->countAlive; ++i) {
 			array->color[i].a = tweening::interpolate(tweening::easeInOutQuad, my_data->startAlpha, my_data->endAlpha, array->timer[i].y);
 		}
 	}
 	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		assert(data != 0);
 		const LinearAlphaModifierData* my_data = static_cast<const LinearAlphaModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
 			array->color[i].a = my_data->startAlpha;
@@ -243,12 +246,14 @@ public:
 	virtual ~LinearSizeModifier() {}
 
 	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		assert(data != 0);
 		const LinearSizeModifierData* my_data = static_cast<const LinearSizeModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {			
 			array->scale[i] = lerp(my_data->minScale, my_data->maxScale, array->timer[i].y);
 		}
 	}
 	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		assert(data != 0);
 		const LinearSizeModifierData* my_data = static_cast<const LinearSizeModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
 			array->scale[i] = my_data->minScale;
@@ -285,6 +290,7 @@ public:
 
 	virtual ~PerpendicularMoveModifier() {}
 	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		assert(data != 0);
 		const PerpendicularMoveModifierData* my_data = static_cast<const PerpendicularMoveModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {	
 			Vector2f perp = Vector2f(-array->velocity[i].y,array->velocity[i].x);
@@ -329,15 +335,17 @@ public:
 	}
 	virtual ~ColorPathModifier() {}
 	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		assert(data != 0);
 		const ColorPathModifierData* my_data = static_cast<const ColorPathModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
 			my_data->path.get(array->timer[i].y, &array->color[i]);
 		}
 	}
 	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		assert(data != 0);
 		const ColorPathModifierData* my_data = static_cast<const ColorPathModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->color[i] = my_data->path.getColor(0);
+			array->color[i] = my_data->path.value(0);
 		}
 	}
 	const ParticleModifierType getType() const {
@@ -367,12 +375,14 @@ public:
 	}
 	virtual ~AlphaPathModifier() {}
 	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		assert(data != 0);
 		const AlphaPathModifierData* my_data = static_cast<const AlphaPathModifierData*>(data);
 		for (uint32 i = 0; i < array->countAlive; ++i) {
 			//array->color[i].a = data.path.get(array->timer[i].y) / 255.0f;
 		}
 	}
 	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		assert(data != 0);
 		const AlphaPathModifierData* my_data = static_cast<const AlphaPathModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
 			//array->color[i].a = data.path.get(0.0f);
@@ -416,6 +426,7 @@ public:
 	}
 	virtual ~DampingVelocityModifier() {}
 	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		assert(data != 0);
 		const DampingVelocityModifierData* my_data = static_cast<const DampingVelocityModifierData*>(data);
 		float d = my_data->damping * 0.01f;
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
@@ -451,15 +462,17 @@ public:
 	}
 	virtual ~SizePathModifier() {}
 	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		assert(data != 0);
 		const SizePathModifierData* my_data = static_cast<const SizePathModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
-			//data.path.update(array->timer[i].y,&array->scale[i]);			
+			my_data->path.get(array->timer[i].y,&array->scale[i]);			
 		}
 	}
 	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
+		assert(data != 0);
 		const SizePathModifierData* my_data = static_cast<const SizePathModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->scale[i] = my_data->path.getVec2(0);
+			array->scale[i] = my_data->path.value(0);
 		}
 	}
 	const ParticleModifierType getType() const {

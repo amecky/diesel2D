@@ -7,15 +7,6 @@
 
 namespace ds {
 
-	struct ParticleSettings {
-
-		Vector2f scale;
-		Rect textureRect;
-		Color color;
-		float ttl;
-
-	};
-
 	// -------------------------------------------------------
 	// Particle array
 	// -------------------------------------------------------

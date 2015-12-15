@@ -44,31 +44,6 @@ struct ParticleEmitterInstance {
 };
 
 typedef DataArray<ParticleEmitterInstance, 64> EmitterInstances;
-/*
-class ParticleEmitter {
-
-public:
-	ParticleEmitter();
-	~ParticleEmitter();
-	//void clear(bool addDefault = true);
-	//void start();
-	//void generate(ParticleArray* array, const v3& pos, float dt, uint32* start, uint32* end, bool started = true);
-	//ParticleEmitterData& getEmitterData();
-	//void tick(float dt);
-	//void init();
-	//void stop();
-private:
-	void generate(ParticleArray* array, const v3& pos, int count, uint32* start, uint32* end, float dt);
-	ParticleEmitterData m_EmitterData;
-	//float m_Duration;
-	float m_Timer;
-	bool m_Active;
-	//bool m_Burst;
-	//bool m_Endless;
-	float m_Accu;
-	//float m_Frequency;
-};
-*/
 
 }
 

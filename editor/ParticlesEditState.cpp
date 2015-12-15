@@ -72,13 +72,24 @@ namespace ds {
 					_particles->start(id, position);
 				}
 			}
+			if (gui::Button("Remove")) {
+				if (_model.hasSelection()) {
+					int id = _model.getSelectedValue();
+					_particles->removeSystem(id);
+					_model.remove(id);
+				}
+			}
 			gui::endGroup();
 		}
 		if (_showAdd) {
 			int ret = _dialog.showEmbedded("Please provide a name", "Name");
 			if (ret == 1) {
-				//int id = _templates->createEmptyTemplate(_dialog.getText());
-				//_model.add(_dialog.getText(), id);
+				NewParticleSystem* system = _particles->create(_dialog.getText());
+				if (system != 0) {
+					char buffer[64];
+					sprintf_s(buffer, 64, "%s (%d)", system->getDebugName(), system->getID());
+					_model.add(buffer, system->getID());
+				}
 				_showAdd = false;
 			}
 			if (ret == 2) {
@@ -95,6 +106,10 @@ namespace ds {
 		int id = _model.getSelectedValue();
 		if (_selected_id != id) {
 			_selected_id = id;
+			_modifier_state = 0;
+			_modifier_offset = 0;
+			_generator_state = 0;
+			_generator_offset = 0;
 			reload = true;
 		}
 		NewParticleSystem* system = _particles->getParticleSystem(id);
@@ -154,28 +169,30 @@ namespace ds {
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
 		const ModifierInstance& instance = system->getModifierInstance(_modifier_state);
-		if (instance.modifier->getType() == PMT_LINEAR_SIZE) {
-			gui::Header("Linear size modifier");
-			LinearSizeModifierData* data = static_cast<LinearSizeModifierData*>(instance.data);
-			gui::InputVec2("Min scale", &data->minScale);
-			gui::InputVec2("Max scale", &data->maxScale);
-		}
-		else if (instance.modifier->getType() == PMT_LINEAR_COLOR) {
-			gui::Header("Linear color modifier");
-			LinearColorModifierData* data = static_cast<LinearColorModifierData*>(instance.data);
-			gui::InputColor("Start", &data->startColor);
-			gui::InputColor("End", &data->endColor);
-		}
-		else if (instance.modifier->getType() == PMT_DAMPING_VELOCITY) {
-			DampingVelocityModifierData* data = static_cast<DampingVelocityModifierData*>(instance.data);
-			gui::Header("Damping velocity modifier");
-			gui::InputFloat("Damping", &data->damping);
-		}
-		else if (instance.modifier->getType() == PMT_LINEAR_ALPHA) {
-			LinearAlphaModifierData* data = static_cast<LinearAlphaModifierData*>(instance.data);
-			gui::Header("Linear alpha modifier");
-			gui::InputFloat("Start", &data->startAlpha);
-			gui::InputFloat("End", &data->endAlpha);
+		if (instance.modifier != 0) {
+			if (instance.modifier->getType() == PMT_LINEAR_SIZE) {
+				gui::Header("Linear size modifier");
+				LinearSizeModifierData* data = static_cast<LinearSizeModifierData*>(instance.data);
+				gui::InputVec2("Min scale", &data->minScale);
+				gui::InputVec2("Max scale", &data->maxScale);
+			}
+			else if (instance.modifier->getType() == PMT_LINEAR_COLOR) {
+				gui::Header("Linear color modifier");
+				LinearColorModifierData* data = static_cast<LinearColorModifierData*>(instance.data);
+				gui::InputColor("Start", &data->startColor);
+				gui::InputColor("End", &data->endColor);
+			}
+			else if (instance.modifier->getType() == PMT_DAMPING_VELOCITY) {
+				DampingVelocityModifierData* data = static_cast<DampingVelocityModifierData*>(instance.data);
+				gui::Header("Damping velocity modifier");
+				gui::InputFloat("Damping", &data->damping);
+			}
+			else if (instance.modifier->getType() == PMT_LINEAR_ALPHA) {
+				LinearAlphaModifierData* data = static_cast<LinearAlphaModifierData*>(instance.data);
+				gui::Header("Linear alpha modifier");
+				gui::InputFloat("Start", &data->startAlpha);
+				gui::InputFloat("End", &data->endAlpha);
+			}
 		}
 	}
 
@@ -256,6 +273,16 @@ namespace ds {
 			ColorGeneratorData* data = static_cast<ColorGeneratorData*>(instance.data);
 			gui::InputColor("Color", &data->color);
 		}
+		else if (instance.generator->getType() == PGT_HSV_COLOR) {
+			gui::Header("HSV Color generator");
+			HSVColorGeneratorData* data = static_cast<HSVColorGeneratorData*>(instance.data);
+			gui::InputVec3("HSV",&data->hsv);
+			gui::InputFloat("hue variance", &data->hueVariance);
+			gui::InputFloat("saturationVariance", &data->saturationVariance);
+			gui::InputFloat("valueVariance", &data->valueVariance);
+			gui::InputFloat("alpha", &data->alpha);
+
+		}
 		else if (instance.generator->getType() == PGT_SIZE) {
 			gui::Header("Size generator");
 			SizeGeneratorData* data = static_cast<SizeGeneratorData*>(instance.data);
@@ -275,7 +302,7 @@ namespace ds {
 		int id = _model.getSelectedValue();
 		NewParticleSystem* system = _particles->getParticleSystem(id);
 		ParticleEmitterData& data = system->getEmitterData();
-		NewParticleSystemData& system_data = system->getParticleData();
+		ParticleSystemData& system_data = system->getParticleData();
 		char buffer[32];
 		sprintf_s(buffer, 32, "ID: %d", system->getID());
 		gui::Label(buffer);

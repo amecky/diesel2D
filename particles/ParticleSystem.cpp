@@ -13,6 +13,20 @@ namespace ds {
 		0.5f, -0.5f, -0.5f, -0.5f
 	};
 
+	NewParticleSystem::NewParticleSystem(int id, const char* name, ParticleSystemFactory* factory) {
+		strcpy_s(m_DebugName, 32, name);
+		sprintf_s(_json_name, 64, "particles\\%s.json", name);
+		_id = id;
+		m_Array.initialize(MAX_PARTICLES);
+		_count_modifiers = 0;
+		_count_generators = 0;
+		_factory = factory;
+
+	}
+
+	NewParticleSystem::~NewParticleSystem() {
+		clear();
+	}
 	// -------------------------------------------------
 	// start new instance
 	// -------------------------------------------------
@@ -139,7 +153,7 @@ namespace ds {
 	void NewParticleSystem::render() {
 		PR_START("NPS:render");
 		if (m_Array.countAlive > 0) {
-			ds::sprites::draw(m_Data.texture, m_Array);
+			ds::sprites::draw(_system_data.texture, m_Array);
 			renderer::drawCounter().particles += m_Array.countAlive;
 		}
 		PR_END("NPS:render");
@@ -183,10 +197,10 @@ namespace ds {
 		Category* root = reader.getCategory("particlesystem");
 		if (root != 0) {
 			_id = root->getUInt32("id", 0);
-			m_Data.id = _id;
-			m_Data.textureID = root->getUInt32("texture_id", 0);
-			m_Data.textureRect = root->getRect("texture_rect");
-			m_Data.texture = math::buildTexture(m_Data.textureRect);
+			_system_data.id = _id;
+			_system_data.textureID = root->getUInt32("texture_id", 0);
+			Rect r = root->getRect("texture_rect");
+			_system_data.texture = math::buildTexture(r);
 			// read modifiers
 			Category* modifiers = root->getChild("modifiers");
 			if (modifiers != 0) {
@@ -238,8 +252,8 @@ namespace ds {
 		// save system data
 		writer.startChunk(1, 1);
 		writer.write(_id);
-		writer.write(m_Data.textureID);
-		writer.write(m_Data.textureRect);
+		writer.write(_system_data.textureID);
+		writer.write(_system_data.texture.rect);
 		writer.closeChunk();
 		// save emitter data
 		writer.startChunk(2, 1);
@@ -304,10 +318,11 @@ namespace ds {
 				initEmitterData();
 			}
 			else if (loader.getChunkID() == 1) {
-				loader.read(&m_Data.id);
-				loader.read(&m_Data.textureID);
-				loader.read(&m_Data.textureRect);
-				m_Data.texture = ds::math::buildTexture(m_Data.textureRect.top, m_Data.textureRect.left, m_Data.textureRect.width(), m_Data.textureRect.height());
+				loader.read(&_system_data.id);
+				loader.read(&_system_data.textureID);
+				Rect r;
+				loader.read(&r);
+				_system_data.texture = ds::math::buildTexture(r);
 			}
 			loader.closeChunk();
 		}
@@ -317,14 +332,14 @@ namespace ds {
 
 	void NewParticleSystem::prepareVertices() {
 		for (int i = 0; i < MAX_PARTICLES; ++i) {
-			m_Array.vertices[i* 4].uv.x = m_Data.texture.uv.x;
-			m_Array.vertices[i * 4].uv.y = m_Data.texture.uv.y;
-			m_Array.vertices[i * 4 + 1].uv.x = m_Data.texture.uv.z;
-			m_Array.vertices[i * 4 + 1].uv.y = m_Data.texture.uv.y;
-			m_Array.vertices[i * 4 + 2].uv.x = m_Data.texture.uv.z;
-			m_Array.vertices[i * 4 + 2].uv.y = m_Data.texture.uv.w;
-			m_Array.vertices[i * 4 + 3].uv.x = m_Data.texture.uv.x;
-			m_Array.vertices[i * 4 + 3].uv.y = m_Data.texture.uv.w;
+			m_Array.vertices[i * 4].uv.x = _system_data.texture.uv.x;
+			m_Array.vertices[i * 4].uv.y = _system_data.texture.uv.y;
+			m_Array.vertices[i * 4 + 1].uv.x = _system_data.texture.uv.z;
+			m_Array.vertices[i * 4 + 1].uv.y = _system_data.texture.uv.y;
+			m_Array.vertices[i * 4 + 2].uv.x = _system_data.texture.uv.z;
+			m_Array.vertices[i * 4 + 2].uv.y = _system_data.texture.uv.w;
+			m_Array.vertices[i * 4 + 3].uv.x = _system_data.texture.uv.x;
+			m_Array.vertices[i * 4 + 3].uv.y = _system_data.texture.uv.w;
 		}
 	}
 
@@ -337,8 +352,8 @@ namespace ds {
 			//cor = cor - ds::renderer::getSelectedViewport().getPosition();
 		
 			for (int j = 0; j < 4; ++j) {
-				p.x = VP_ARRAY[j * 2] * m_Data.texture.dim.x;
-				p.y = VP_ARRAY[j * 2 + 1] * m_Data.texture.dim.y;
+				p.x = VP_ARRAY[j * 2] * _system_data.texture.dim.x;
+				p.y = VP_ARRAY[j * 2 + 1] * _system_data.texture.dim.y;
 				//vector::srt(cor, p, m_Array.scale[i], m_Array.rotation[i], &dp);
 				dp = vector::srt(cor, p, m_Array.scale[i].x, m_Array.scale[i].y, m_Array.rotation[i]);
 				m_Array.vertices[i * 4 + j].x = dp.x;

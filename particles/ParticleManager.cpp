@@ -7,26 +7,28 @@
 
 namespace ds {
 
+	const int MAX_PARTICLE_SYSTEMS = 128;
+
 	// --------------------------------------------------------------------------
 	// constructor
 	// --------------------------------------------------------------------------
 	ParticleManager::ParticleManager() {		
-		for ( int i = 0; i < 512; ++i ) {
-			m_Index[i] = -1;
+		_systems = new NewParticleSystem*[MAX_PARTICLE_SYSTEMS];
+		for (int i = 0; i < 128; ++i) {
+			_systems[i] = 0;
 		}
-		
 	}
 
 	// --------------------------------------------------------------------------
 	// destructor
 	// --------------------------------------------------------------------------
 	ParticleManager::~ParticleManager(void) {
-		ParticleSystems::iterator it = m_Systems.begin();
-		while ( it != m_Systems.end() ) {
-			delete (*it);
-			it = m_Systems.erase(it);
+		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
+			if (_systems[i] != 0) {
+				delete _systems[i];
+			}
+			_systems[i] = 0;
 		}
-		//SAFE_RELEASE(vertexBuffer);
 	}
 
 	NewParticleSystem* ParticleManager::create(int id, const char* name) {
@@ -34,50 +36,61 @@ namespace ds {
 		return system;
 	}
 
+	NewParticleSystem* ParticleManager::create(const char* name) {
+		int idx = -1;
+		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
+			if (_systems[i] == 0 && idx == -1) {
+				idx = i;
+			}
+		}
+		if (idx != -1) {
+			NewParticleSystem* system = new NewParticleSystem(idx, name, &_factory);
+			_systems[idx] = system;
+			return system;
+		}
+		return 0;
+	}
+
 	// --------------------------------------------------------------------------
 	// start specific particlesystem
 	// --------------------------------------------------------------------------
 	void ParticleManager::start(uint32 id,const Vector3f& pos) {	
 		PR_START("ParticleManager::start");
-		assert(m_Index[id] != -1);
-		NewParticleSystem* system = m_Systems[m_Index[id]];
+		NewParticleSystem* system = _systems[id];
+		assert(system != 0);
 		system->start(pos);
 		PR_END("ParticleManager::start");
 	}
-	/*
-	void ParticleManager::start(uint32 id, const ParticleGeneratorData& data) {
-		PR_START("ParticleManager::start");
-		assert(m_Index[id] != -1);
-		NewParticleSystem* system = m_Systems[m_Index[id]];
-		system->start(data);
-		PR_END("ParticleManager::start");
-	}
-	*/
+
 	// --------------------------------------------------------------------------
 	// stop specific particlesystem
 	// --------------------------------------------------------------------------
 	void ParticleManager::stop(uint32 id) {
-		assert(m_Index[id] != -1);
-		NewParticleSystem* system = m_Systems[m_Index[id]];
-		system->stop();
+		//assert(m_Index[id] != -1);
+		//NewParticleSystem* system = m_Systems[m_Index[id]];
+		//system->stop();
 	}
 
 	void ParticleManager::fillModel(gui::ComponentModel<int>* model) {
 		model->clear();
 		char buffer[32];
-		for (size_t i = 0; i < m_Systems.size(); ++i) {
-			sprintf_s(buffer, 32, "%s (%d)", m_Systems[i]->getDebugName(), m_Systems[i]->getID());
-			LOG << "----> '" << buffer << "'";
-			model->add(buffer, m_Systems[i]->getID());
+		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
+			if (_systems[i] != 0) {
+				sprintf_s(buffer, 32, "%s (%d)", _systems[i]->getDebugName(), _systems[i]->getID());
+				LOG << "----> '" << buffer << "'";
+				model->add(buffer, _systems[i]->getID());
+			}
 		}
 	}
 
 	bool ParticleManager::exportData(JSONWriter& writer) {
-		for (size_t i = 0; i < m_Systems.size(); ++i) {
-			writer.startCategory(m_Systems[i]->getDebugName());
-			writer.write("id", m_Systems[i]->getID());
-			writer.write("file", m_Systems[i]->getDebugName());
-			writer.endCategory();
+		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
+			if (_systems[i] != 0) {
+				writer.startCategory(_systems[i]->getDebugName());
+				writer.write("id", i);
+				writer.write("file", _systems[i]->getDebugName());
+				writer.endCategory();
+			}
 		}
 		return true;
 	}
@@ -95,20 +108,20 @@ namespace ds {
 				NewParticleSystem* system = create(id, name.c_str());
 				LOG << "id: " << id << " name: " << name;
 				system->load();
-				//ds::assets::load(name.c_str(), system, CVT_NPS);
-				m_Index[id] = m_Systems.size();
-				m_Systems.push_back(system);
+				_systems[id] = system;
 			}
 		}
 		return true;
 	}
 
 	bool ParticleManager::saveData(BinaryWriter& writer) {
-		for (size_t i = 0; i < m_Systems.size(); ++i) {
-			writer.startChunk(CHNK_PARTICLESYSTEM, 1);
-			writer.write(m_Systems[i]->getID());
-			writer.write(m_Systems[i]->getDebugName());
-			writer.closeChunk();
+		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
+			if (_systems[i] != 0) {
+				writer.startChunk(CHNK_PARTICLESYSTEM, 1);
+				writer.write(i);
+				writer.write(_systems[i]->getDebugName());
+				writer.closeChunk();
+			}
 		}
 		return true;
 	}
@@ -125,8 +138,7 @@ namespace ds {
 					NewParticleSystem* system = create(id, name.c_str());
 					LOG << "id: " << id << " name: " << name;
 					system->load();
-					m_Index[id] = m_Systems.size();
-					m_Systems.push_back(system);
+					_systems[id] = system;
 				}
 			}
 			loader.closeChunk();
@@ -134,41 +146,22 @@ namespace ds {
 		return true;
 	}
 
-	// --------------------------------------------------------------------------
-	// load binary file
-	// --------------------------------------------------------------------------
-	/*
-	void ParticleManager::load(BinaryLoader* loader) {
-		
-		while ( loader->openChunk() == 0 ) {		
-			if ( loader->getChunkID() == CHNK_PARTICLESYSTEM ) {
-				int id = 0;
-				loader->read(&id);
-				std::string file;
-				loader->read(file);
-				int max = 512;
-				loader->read(&max);
-				LOG << "loading particle system: " << id << " file: " << file;
-				// FIXME: check if we already have one with this id
-				NewParticleSystem* system = new NewParticleSystem(id);
-				system->setDebugName(file.c_str());
-				ds::assets::load(file.c_str(),system,CVT_NPS);
-				m_Index[id] = m_Systems.size();
-				m_Systems.push_back(system);
-				
-			}
-			loader->closeChunk();
-		}		
-		LOG << "Number of particle systems: " << m_Systems.size();
+	void  ParticleManager::removeSystem(int id) {
+		assert(_systems[id] != 0);
+		NewParticleSystem* system = _systems[id];
+		delete system;
+		_systems[id] = 0;
 	}
-	*/
+	
 	// --------------------------------------------------------------------------
 	// update
 	// --------------------------------------------------------------------------
 	void ParticleManager::update(float elapsed) {
 		PR_START("ParticleManager::update");
-		for ( size_t i = 0; i < m_Systems.size(); ++i ) {
-			m_Systems[i]->update(elapsed);
+		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
+			if (_systems[i] != 0) {
+				_systems[i]->update(elapsed);
+			}
 		}
 		PR_END("ParticleManager::update");
 	}
@@ -181,28 +174,30 @@ namespace ds {
 		int batchSize = 0;
 		begin();
 		PR_START("ParticleManager::render");
-		for (size_t i = 0; i < m_Systems.size(); ++i) {
-			const ParticleArray& array = m_Systems[i]->getArray();
-			const Texture& t = m_Systems[i]->getTexture();
-			if (array.countAlive > 0) {
-				for (int j = 0; j < array.countAlive; ++j) {
-					if (m_ParticleIndex > 2048) {
-						flush();
-					}
-					for (int k = 0; k < 4; ++k) {
-						particles[m_ParticleIndex].x = array.position[j].x;
-						particles[m_ParticleIndex].y = array.position[j].y;
-						particles[m_ParticleIndex].z = array.position[j].z;
-						particles[m_ParticleIndex].uv = t.getUV(k);
-						particles[m_ParticleIndex].scale = array.scale[j];
-						particles[m_ParticleIndex].dimension = t.dim;
-						particles[m_ParticleIndex].rotationIndex.x = array.rotation[j];
-						particles[m_ParticleIndex].rotationIndex.y = k;
-						particles[m_ParticleIndex].color = array.color[j];					
-						++m_ParticleIndex;
+		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
+			if (_systems[i] != 0) {
+				const ParticleArray& array = _systems[i]->getArray();
+				const Texture& t = _systems[i]->getTexture();
+				if (array.countAlive > 0) {
+					for (int j = 0; j < array.countAlive; ++j) {
+						if (m_ParticleIndex > 2048) {
+							flush();
+						}
+						for (int k = 0; k < 4; ++k) {
+							particles[m_ParticleIndex].x = array.position[j].x;
+							particles[m_ParticleIndex].y = array.position[j].y;
+							particles[m_ParticleIndex].z = array.position[j].z;
+							particles[m_ParticleIndex].uv = t.getUV(k);
+							particles[m_ParticleIndex].scale = array.scale[j];
+							particles[m_ParticleIndex].dimension = t.dim;
+							particles[m_ParticleIndex].rotationIndex.x = array.rotation[j];
+							particles[m_ParticleIndex].rotationIndex.y = k;
+							particles[m_ParticleIndex].color = array.color[j];
+							++m_ParticleIndex;
+						}
 					}
 				}
-			}		
+			}
 		}
 		if (m_ParticleIndex > 0) {
 			flush();
@@ -216,15 +211,10 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	void ParticleManager::debug() {
 		LOG << "---- Particlesystems -----";
-		LOG << "Number of systems: " << m_Systems.size();
-		for (int i = 0; i < 512; ++i) {
-			if (m_Index[i] != -1) {
-				LOG << i << " = " << m_Index[i];
+		for (size_t i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
+			if (_systems[i] != 0) {
+				LOG << i << " = " << _systems[i]->getDebugName() << " - alive: " << _systems[i]->getCountAlive();
 			}
-		}
-		for (size_t i = 0; i < m_Systems.size(); ++i) {
-			LOG << i << " = " << m_Systems[i]->getDebugName() << " - alive: " << m_Systems[i]->getCountAlive();
-			// max / alive
 		}
 	}
 
