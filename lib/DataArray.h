@@ -2,6 +2,9 @@
 #include <limits.h>
 #include <assert.h>
 
+// iterator:
+// https://gist.github.com/jeetsukumaran/307264
+
 #define INDEX_MASK 0xffff
 #define NEW_OBJECT_ID_ADD 0x10000
 
