@@ -14,7 +14,7 @@ namespace ds {
 		~ParticleSystemFactory();
 
 		bool addModifier(NewParticleSystem* system, ParticleModifierType type);
-		bool addModifier(NewParticleSystem* system, const char* modifierName);
+		bool addModifier(NewParticleSystem* system, const char* modifierName) const;
 		ParticleModifierData* addModifier(NewParticleSystem* system, int chunkID);
 
 		bool addGenerator(NewParticleSystem* system, const char* generatorName);
@@ -27,7 +27,7 @@ namespace ds {
 			return _known_generator_names;
 		}
 	private:
-		ParticleModifierData* createData(ParticleModifierType type);
+		ParticleModifierData* createData(ParticleModifierType type) const;
 		ParticleGeneratorData* createData(ParticleGeneratorType type);
 		ParticleSystemFactory(const ParticleSystemFactory& other) {}
 		std::vector<std::string> _known_modifier_names;

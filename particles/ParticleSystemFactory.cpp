@@ -51,7 +51,7 @@ namespace ds {
 		return false;
 	}
 
-	bool ParticleSystemFactory::addModifier(NewParticleSystem* system, const char* modifierName) {
+	bool ParticleSystemFactory::addModifier(NewParticleSystem* system, const char* modifierName) const {
 		for (int i = 0; i < _count_modifiers; ++i) {
 			if (strcmp(_known_modifiers[i]->getName(),modifierName) == 0) {
 				ParticleModifierData* data = createData(_known_modifiers[i]->getType());
@@ -107,7 +107,7 @@ namespace ds {
 		return 0;
 	}
 
-	ParticleModifierData* ParticleSystemFactory::createData(ParticleModifierType type) {
+	ParticleModifierData* ParticleSystemFactory::createData(ParticleModifierType type) const {
 		switch (type) {
 			case PMT_DAMPING_VELOCITY: return new DampingVelocityModifierData(); break;
 			case PMT_LINEAR_SIZE: return new LinearSizeModifierData(); break;

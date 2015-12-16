@@ -1405,9 +1405,9 @@ namespace gui {
 						p.x -= 10.0f;
 						ds::sprites::drawTiledX(p, dim.x, ds::math::buildTexture(140.0, 0.0f, 150.0f, 16.0f), 16.0f);
 						// draw text
-						p.y -= 7.0f;
+						p.y -= 8.0f;
 						p.x += 20.0f;
-						ds::sprites::drawText(guiContext->font, p.x, p.y, call.text, 2);
+						ds::sprites::drawText(guiContext->font, p.x, p.y, call.text, call.padding);
 					}
 				}
 

@@ -267,6 +267,10 @@ namespace sprites {
 		draw(sprite.position, sprite.texture, sprite.rotation, sprite.scale.x, sprite.scale.y,sprite.color);
 	}
 
+	void draw(const BasicSprite& sprite) {
+		draw(sprite.position, sprite.texture, sprite.rotation, sprite.scale.x, sprite.scale.y, sprite.color);
+	}
+
 	void draw(const DataContainer& container,const Texture& texture,int posIdx) {
 		const Vector2f* p = container.getChannel<Vector2f>(posIdx);
 		for ( int i = 0; i < container.size(); ++i ) {

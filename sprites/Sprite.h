@@ -6,6 +6,19 @@
 
 namespace ds {
 
+	struct BasicSprite {
+
+		ID id;
+		v2 position;
+		v2 scale;
+		float rotation;
+		Texture texture;
+		Color color;
+
+		BasicSprite() : id(INVALID_ID), position(0, 0), scale(1, 1), rotation(0.0f), color(Color::WHITE) {}
+
+	};
+
 	typedef unsigned int SID;
 	const unsigned int INVALID_SID = UINT_MAX;
 

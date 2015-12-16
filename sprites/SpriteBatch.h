@@ -26,6 +26,8 @@ namespace sprites {
 
 	void draw(const Sprite& sprite);
 
+	void draw(const BasicSprite& sprite);
+
 	void draw(const Shape& shape,const Texture& tex);
 
 	void draw(const DataContainer& container,const Texture& texture,int posIdx);
