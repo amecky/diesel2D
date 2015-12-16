@@ -25,8 +25,64 @@ struct DataArray {
 	unsigned short free_enqueue;
 	unsigned short free_dequeue;
 
+	class iterator {
+	public:
+		typedef iterator self_type;
+		typedef U value_type;
+		typedef U& reference;
+		typedef U* pointer;
+		//typedef std::forward_iterator_tag iterator_category;
+		typedef int difference_type;
+		iterator(pointer ptr) : ptr_(ptr) { }
+		self_type operator++() { self_type i = *this; ptr_++; return i; }
+		self_type operator++(int junk) { ptr_++; return *this; }
+		reference operator*() { return *ptr_; }
+		pointer operator->() { return ptr_; }
+		bool operator==(const self_type& rhs) { return ptr_ == rhs.ptr_; }
+		bool operator!=(const self_type& rhs) { return ptr_ != rhs.ptr_; }
+	private:
+		pointer ptr_;
+	};
+
+	class const_iterator {
+
+	public:
+		typedef const_iterator self_type;
+		typedef U value_type;
+		typedef U& reference;
+		typedef U* pointer;
+		typedef int difference_type;
+		//typedef std::forward_iterator_tag iterator_category;
+		const_iterator(pointer ptr) : ptr_(ptr) { }
+		self_type operator++() { self_type i = *this; ptr_++; return i; }
+		self_type operator++(int junk) { ptr_++; return *this; }
+		const reference operator*() { return *ptr_; }
+		const pointer operator->() { return ptr_; }
+		bool operator==(const self_type& rhs) { return ptr_ == rhs.ptr_; }
+		bool operator!=(const self_type& rhs) { return ptr_ != rhs.ptr_; }
+	private:
+		pointer ptr_;
+	};
+
+
 	DataArray() {
 		clear();
+	}
+
+	iterator begin() {
+		return iterator(objects);
+	}
+
+	iterator end() {
+		return iterator(objects + numObjects);
+	}
+
+	const_iterator begin() const {
+		return const_iterator(objects);
+	}
+
+	const_iterator end() const {
+		return const_iterator(objects + numObjects);
 	}
 
 	void clear() {
@@ -69,7 +125,7 @@ struct DataArray {
 		return o.id;
 	}
 
-	void remove(ID id) {
+	iterator remove(ID id) {
 		Index &in = indices[id & INDEX_MASK];
 		assert(in.index != USHRT_MAX);
 		U& o = objects[in.index];
@@ -78,6 +134,10 @@ struct DataArray {
 		in.index = USHRT_MAX;
 		indices[free_enqueue].next = id & INDEX_MASK;
 		free_enqueue = id & INDEX_MASK;
+		if (numObjects == 0) {
+			return begin();
+		}
+		return iterator(objects + indices[o.id & INDEX_MASK].index);
 	}
 };
 

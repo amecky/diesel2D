@@ -79,11 +79,17 @@ namespace ds {
 	// tick emitter instances
 	// -------------------------------------------------
 	void NewParticleSystem::tickEmitters(float dt) {
-		for (int i = 0; i < _emitter_instances.numObjects; ++i) {
-			ParticleEmitterInstance& instance = _emitter_instances.objects[i];
-			instance.timer += dt;
-			if (_emitter_data.duration >= 0.0f && instance.timer > _emitter_data.duration) {
-				_emitter_instances.remove(instance.id);
+		EmitterInstances::iterator it = _emitter_instances.begin();
+		while (it != _emitter_instances.end()) {
+		//for (int i = 0; i < _emitter_instances.numObjects; ++i) {
+			//ParticleEmitterInstance& instance = _emitter_instances.objects[i];
+			it->timer += dt;
+			if (_emitter_data.duration >= 0.0f && it->timer > _emitter_data.duration) {
+				LOG << "!--> removing: " << it->id;
+				it = _emitter_instances.remove(it->id);
+			}
+			else {
+				++it;
 			}
 		}
 	}
