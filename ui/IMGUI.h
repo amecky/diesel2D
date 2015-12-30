@@ -107,8 +107,6 @@ namespace gui {
 
 	bool Button(const char* label);
 
-	void BoxTest();
-
 	void CheckBox(const char* label,bool* selected);
 
 	void InputFloat(const char* label, float* v);
@@ -150,8 +148,6 @@ namespace gui {
 	void shutdown();
 
 	void endFrame();
-
-	//int InputDialog(const char* message, const char* label, char* text);
 
 	class InputDialog {
 

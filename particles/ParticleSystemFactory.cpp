@@ -17,6 +17,7 @@ namespace ds {
 		_known_modifiers[_count_modifiers++] = new AlphaPathModifier();
 		_known_modifiers[_count_modifiers++] = new LinearColorModifier();
 		_known_modifiers[_count_modifiers++] = new SizePathModifier();
+		_known_modifiers[_count_modifiers++] = new RotationModifier();
 		for (int i = 0; i < _count_modifiers; ++i) {
 			_known_modifier_names.push_back(_known_modifiers[i]->getName());
 		}
@@ -27,6 +28,7 @@ namespace ds {
 		_known_generators[_count_generators++] = new SizeGenerator();
 		_known_generators[_count_generators++] = new ColorGenerator();
 		_known_generators[_count_generators++] = new HSVColorGenerator();
+		_known_generators[_count_generators++] = new RotationVelocityGenerator();
 		for (int i = 0; i < _count_generators; ++i) {
 			_known_generator_names.push_back(_known_generators[i]->getName());
 		}
@@ -38,6 +40,10 @@ namespace ds {
 			delete _known_modifiers[i];
 		}
 		delete[] _known_modifiers;
+		for (int i = 0; i < _count_generators; ++i) {
+			delete _known_generators[i];
+		}
+		delete[] _known_generators;
 	}
 
 	bool ParticleSystemFactory::addModifier(NewParticleSystem* system, ParticleModifierType type) {
@@ -51,7 +57,7 @@ namespace ds {
 		return false;
 	}
 
-	bool ParticleSystemFactory::addModifier(NewParticleSystem* system, const char* modifierName) {
+	bool ParticleSystemFactory::addModifier(NewParticleSystem* system, const char* modifierName) const {
 		for (int i = 0; i < _count_modifiers; ++i) {
 			if (strcmp(_known_modifiers[i]->getName(),modifierName) == 0) {
 				ParticleModifierData* data = createData(_known_modifiers[i]->getType());
@@ -103,11 +109,12 @@ namespace ds {
 			case PGT_SIZE: return new SizeGeneratorData(); break;
 			case PGT_COLOR: return new ColorGeneratorData(); break;
 			case PGT_HSV_COLOR: return new HSVColorGeneratorData(); break;
+			case PGT_ROTATION_VELOCITY: return new RotationVelocityGeneratorData(); break;
 		}
 		return 0;
 	}
 
-	ParticleModifierData* ParticleSystemFactory::createData(ParticleModifierType type) {
+	ParticleModifierData* ParticleSystemFactory::createData(ParticleModifierType type) const {
 		switch (type) {
 			case PMT_DAMPING_VELOCITY: return new DampingVelocityModifierData(); break;
 			case PMT_LINEAR_SIZE: return new LinearSizeModifierData(); break;

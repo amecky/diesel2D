@@ -14,7 +14,7 @@ namespace ds {
 			v2 ret(0.0f, 0.0f);
 			int len = strlen(text);
 			ret.y = bitmapFont.charHeight * scaleY;
-			for (size_t cnt = 0; cnt < len; ++cnt) {
+			for (int cnt = 0; cnt < len; ++cnt) {
 				char c = text[cnt];
 				if (bitmapFont.contains(c)) {
 					CharDef cd = bitmapFont.getCharDef(c);
@@ -38,7 +38,7 @@ namespace ds {
 			if (total >= len) {
 				total = len;
 			}
-			for (size_t cnt = 0; cnt < total; ++cnt) {
+			for (int cnt = 0; cnt < total; ++cnt) {
 				char c = text[cnt];
 				if (bitmapFont.contains(c)) {
 					CharDef cd = bitmapFont.getCharDef(c);
@@ -59,7 +59,7 @@ namespace ds {
 			float padding = 0.0f;
 			float z = 0.0f;			
 			int len = strlen(text);
-			for ( size_t cnt = 0; cnt < len; ++cnt ) {
+			for (int cnt = 0; cnt < len; ++cnt) {
 				char c = text[cnt];
 				if (bitmapFont.contains(c)) {
 					CharDef cd = bitmapFont.getCharDef(c);

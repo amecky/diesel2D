@@ -9,27 +9,12 @@
 #include "..\compiler\AssetCompiler.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\DialogResources.h"
+#include "..\io\FileRepository.h"
 
 namespace ds {
 
 	typedef std::map<D3DRENDERSTATETYPE, DWORD> RenderStates;
 	typedef List<RasterizerState*> RasterizerStates;
-	typedef List<DebugMessage> DebugMessages;
-
-	struct DebugContext {
-
-		bool initialized;
-		std::vector<Sprite> characters;
-		ID3DXFont* font;
-		LPD3DXSPRITE debugSprite;
-
-		DebugContext() : initialized(false) {}
-
-		void init(ID3DXFont* font, float ts = 1.0f) {
-			initialized = true;
-		}
-
-	};
 
 	struct RenderTargetQuad {
 
@@ -92,11 +77,9 @@ namespace ds {
 		// new stuff
 		RasterizerState rsState;
 		// debug
-		DebugMessages debugMessages;
 		RenderTargetQuad renderTargetQuad;
 		SpriteTemplates spriteTemplates;
 		SpriteGroupContainer spriteGroudContainer;
-		DebugContext debugContext;
 		dVector<MeshData> meshData;
 		MeshArray meshes;
 		Vector2f mousePosition;
@@ -297,9 +280,6 @@ namespace ds {
 			// create default buffers
 			renderContext->quadIndexBufferIndex = renderer::createQuadIndexBuffer(8192);
 			buildRenderTargetQuad();
-			// prepare debug
-			debug::loadSystemFont("Verdana", "Verdana", 10, false);
-			D3DXCreateSprite(renderContext->device, &renderContext->debugContext.debugSprite);
 		}
 
 		// ---------------------------------------------------------------------
@@ -349,8 +329,6 @@ namespace ds {
 			for (size_t i = 0; i < renderContext->bitmapFonts.size(); ++i) {
 				delete renderContext->bitmapFonts[i];
 			}
-			LOG << "Releasing system font";
-			SAFE_RELEASE(renderContext->debugContext.font);
 			delete renderContext->camera;
 			if (renderContext->device != NULL) {
 				renderContext->device->Release();
@@ -1284,8 +1262,14 @@ namespace ds {
 			sprintf(fileName, "%s\\%s.png", dirName, name);
 			//sprintf(fileName, "%s\\%s.tga", dirName, name);
 			LOG << "Trying to load texture " << fileName;
-			HR(D3DXCreateTextureFromFileEx(renderContext->device, fileName, 0, 0, 1, 0,
-				D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
+			int fileSize = -1;			
+			char* data = repository::load(fileName,&fileSize, repository::FT_BINARY);
+			file::saveBinary(name, data, fileSize);
+			HR(D3DXCreateTextureFromFileInMemoryEx(renderContext->device, data, fileSize, D3DX_DEFAULT, D3DX_DEFAULT, 1, 0, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
+			delete[] data;
+			assert(tr->texture != 0);
+			//HR(D3DXCreateTextureFromFileEx(renderContext->device, fileName, 0, 0, 1, 0,
+			//	D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
 			tr->width = imageInfo.Width;
 			tr->height = imageInfo.Height;
 			LOG << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
@@ -1732,118 +1716,7 @@ namespace ds {
 		}
 	}
 
-	namespace debug {
-
-		// -------------------------------------------------------
-		// Loads system font
-		// -------------------------------------------------------
-		void loadSystemFont(const char* name, const char* fontName, int size, bool bold) {
-			LOG << "Loading font " << fontName << " size " << size;
-			UINT type = FW_NORMAL;
-			if (bold) {
-				type = FW_BOLD;
-			}
-			HDC hDC = GetDC(renderContext->hwnd);
-			int nHeight = -MulDiv(size, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-			HR(D3DXCreateFontA(renderContext->device, nHeight, 0, type, 0, false, DEFAULT_CHARSET,
-				DEFAULT_QUALITY, ANTIALIASED_QUALITY,
-				DEFAULT_PITCH | FF_DONTCARE,
-				fontName, &renderContext->debugContext.font));
-			ReleaseDC(renderContext->hwnd,hDC);
-		}
-
-		void reset() {
-			renderContext->debugMessages.clear();
-			renderContext->debugContext.characters.clear();
-		}
-		// -------------------------------------------------------
-		// Draw debug messages
-		// -------------------------------------------------------
-		void drawDebugMessages() {
-			if ( renderContext->debugMessages.num() > 0) {
-				IDirect3DDevice9 * pDevice = renderContext->device;
-				ID3DXFont *font = renderContext->debugContext.font;
-				if (font != 0) {
-					RECT font_rect;
-					renderContext->debugContext.debugSprite->Begin(D3DXSPRITE_ALPHABLEND);
-					for (size_t i = 0; i < renderContext->debugMessages.num(); ++i) {
-						DebugMessage* message = &renderContext->debugMessages[i];
-						SetRect(&font_rect, message->x, message->y, message->x + 200, message->y + 60);
-						font->DrawTextA(renderContext->debugContext.debugSprite, message->message.c_str(), -1, &font_rect, DT_LEFT | DT_NOCLIP, message->color);
-					}
-					renderContext->debugContext.debugSprite->End();
-				}
-			}
-				/*
-				float ts = renderContext->debugContext.textScale;
-				for (size_t i = 0; i < renderContext->debugMessages.num(); ++i) {
-					DebugMessage* message = &renderContext->debugMessages[i];
-					font::createText(*renderContext->debugContext.bitmapFont,Vector2f(message->x,message->y), message->message, message->color, renderContext->debugContext.characters, ts, ts);
-				}				
-				for (size_t i = 0; i < renderContext->debugContext.characters.size(); ++i) {
-					Sprite& sp = renderContext->debugContext.characters[i];
-					sprites::draw(sp.position, sp.texture, 0.0f, ts, ts, sp.color);
-				}
-				*/
-//			}
-		}
-
-		Vector2f getTextSize(const char* text) {
-			IDirect3DDevice9 * pDevice = renderContext->device;
-			ID3DXFont *font = renderContext->debugContext.font;
-			Vector2f size;
-			if (font != 0) {
-				RECT font_rect;
-				font->DrawTextA(renderContext->debugContext.debugSprite, text, strlen(text), &font_rect, DT_CALCRECT, D3DCOLOR_XRGB(0, 0, 0));
-				size.x = font_rect.right - font_rect.left;
-				size.y = font_rect.bottom - font_rect.top;
-			}
-			return size;
-		}
-
-		void debug(int x, int y, char* format, ...) {
-			va_list args;
-			va_start(args, format);
-			debug(x, y, Color(1.0f, 1.0f, 1.0f, 1.0f), format, args);
-			va_end(args);
-		}
-
-		void debug(int x, int y, char* format, va_list args) {
-			debug(x, y, Color(1.0f, 1.0f, 1.0f, 1.0f), format, args);
-		}
-
-		void debug(int x, int y, const Color& color, char* format, ...) {
-			va_list args;
-			va_start(args, format);
-			debug(x, y, color, format, args);
-			va_end(args);
-		}
-
-		void debug(int x, int y, const Color& color, char* format, va_list args) {
-			DebugMessage message;
-			char buffer[1024];
-			memset(buffer, 0, sizeof(buffer));
-			int written = vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, format, args);			
-			message.message = std::string(buffer);
-			message.x = x;
-			message.y = y;
-			message.color = color;
-			renderContext->debugMessages.append(message);
-		}
-
-		void debug(int x, int y, const char* text) {
-			DebugMessage message;
-			message.message = std::string(text);
-			message.x = x;
-			message.y = y;
-			message.color = Color(1.0f, 1.0f, 1.0f, 1.0f);
-			renderContext->debugMessages.append(message);
-		}
-
-		void showProfiler(int x, int y) {
-			//gProfiler->show(x,y,this);
-		}
-
+	/*
 		void showDrawCounter(v2* position) {
 			gui::start(EDITOR_ID, position);
 			int state = 1;
@@ -1880,5 +1753,5 @@ namespace ds {
 			LOG << "Particles: " << renderContext->drawCounter.particles;
 		}
 
-	}
+	*/
 }

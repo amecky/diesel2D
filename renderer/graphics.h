@@ -523,22 +523,4 @@ namespace ds {
 		SpriteGroupContainer* getSpriteGroupContainer();
 	}
 
-	namespace debug {
-
-		Vector2f getTextSize(const char* text);
-		void loadSystemFont(const char* name, const char* fontName, int size, bool bold);
-		void reset();
-		//void initialize(BitmapFont* font,float ts = 1.0f);
-		void drawDebugMessages();
-		void debug(int x, int y, const char* text);
-		void debug(int x, int y, char* format, ...);
-		void debug(int x, int y, char* format, va_list args);
-		void debug(int x, int y, const Color& color, char* format, ...);
-		void debug(int x, int y, const Color& color, char* format, va_list args);
-		void showProfiler(int x, int y);
-		void showDrawCounter(v2* position);
-		void printDrawCounter();
-
-	}
-
 }

@@ -102,17 +102,11 @@ public:
 	}
 	void removeModifierByName(const char* name);
 
-	bool exportData(JSONWriter& writer);
-	bool importData(JSONReader& reader);
-	bool saveData(BinaryWriter& writer);
-	bool loadData(BinaryLoader& loader);
-	const char* getJSONFileName() const {
+	bool saveData(JSONWriter& writer);
+	bool loadData(JSONReader& reader);
+	const char* getFileName() const {
 		return _json_name;
 	}
-	const char* getFileName() const {
-		return m_DebugName;
-	}
-
 	ParticleEmitterData& getEmitterData() {
 		return _emitter_data;
 	}

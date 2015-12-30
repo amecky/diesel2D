@@ -9,6 +9,10 @@ namespace string {
 
 	std::vector<std::string> split(const std::string& str,const char delimiter = ',');
 
+	int count_delimiters(const char* text, const char delimiter = ',');
+
+	int split(const char* text, float* array, int max, const char delimiter = ',');
+
 	void split(const std::string& str,std::vector<std::string>& list,const char delimiter = ',');
 
 	void trim(std::string& str);
@@ -21,6 +25,8 @@ namespace string {
 
 	void formatInt(int value,std::string& str);
 
+	int extract_used_characters(const char* text, char* array, int max);
+
 	void formatTime(int minutes,int seconds,std::string& str);
 
 	IdString murmur_hash(const char* text);
@@ -30,6 +36,8 @@ namespace string {
 	void formatDateTime(std::string& str);
 
 	bool isDigit(const char c);
+
+	bool isNumeric(const char* text);
 
 	bool isWhitespace(const char c);
 

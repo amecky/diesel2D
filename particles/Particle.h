@@ -12,16 +12,16 @@ namespace ds {
 	// -------------------------------------------------------
 	struct ParticleArray {
 
-		Vector3f* position;
-		Vector3f* velocity;
-		Vector3f* acceleration;
-		Vector3f* normal;
-		Vector2f* scale;
+		v3* position;
+		v3* velocity;
+		v3* acceleration;
+		v3* normal;
+		v2* scale;
+		v2* baseScale;
 		float* rotation;
-		Vector3f* timer;	
-		float* random;
+		float* rotationVelocity;
+		v3* timer;	
 		Color* color;
-		int* type;
 		PTCVertex* vertices;
 		char* buffer;
 
@@ -37,19 +37,19 @@ namespace ds {
 		}
 
 		void initialize(unsigned int maxParticles) {
-			int size = maxParticles * ( sizeof(Vector3f) * 4 + sizeof(Vector2f) + sizeof(float) + sizeof(Vector3f) + sizeof(float) + sizeof(Color) + sizeof(int) + 4 * sizeof(PTCVertex));
+			int size = maxParticles * ( sizeof(v3) * 4 + sizeof(v2) * 2 + sizeof(float) * 2 + sizeof(v3) + sizeof(Color) + 4 * sizeof(PTCVertex));
 			buffer = new char[size];
 			position = (Vector3f*)(buffer);
 			velocity = (Vector3f*)(position + maxParticles);
 			acceleration = (Vector3f*)(velocity + maxParticles);
 			normal = (Vector3f*)(acceleration + maxParticles);
 			scale = (Vector2f*)(normal + maxParticles);
-			timer = (Vector3f*)(scale + maxParticles);
-			rotation = (float*)(timer + maxParticles);
-			random = (float*)(rotation + maxParticles);
-			color = (Color*)(random + maxParticles);
-			type = (int*)(color + maxParticles);
-			vertices = (PTCVertex*)(type + maxParticles);
+			baseScale = (v2*)(scale + maxParticles);
+			rotation = (float*)(baseScale + maxParticles);
+			rotationVelocity = (float*)(rotation + maxParticles);
+			timer = (Vector3f*)(rotationVelocity + maxParticles);
+			color = (Color*)(timer + maxParticles);
+			vertices = (PTCVertex*)(color + maxParticles);
 			count = maxParticles;
 			countAlive = 0;
 		}
@@ -61,9 +61,10 @@ namespace ds {
 				acceleration[a] = acceleration[b];
 				normal[a] = normal[b];
 				scale[a] = scale[b];
+				baseScale[a] = baseScale[b];
 				rotation[a] = rotation[b];
+				rotationVelocity[a] = rotationVelocity[b];
 				timer[a] = timer[b];
-				random[a] = random[b];
 				color[a] = color[b];
 			}
 		}

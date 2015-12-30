@@ -13,6 +13,34 @@ namespace ds {
 	DynamicGameSettings::~DynamicGameSettings() {}
 
 	// -------------------------------------------------------
+	// add int
+	// -------------------------------------------------------
+	void DynamicGameSettings::addInt(const char* name, int* value, int defaultValue) {
+		*value = defaultValue;
+		SettingsItem item;
+		item.name = name;
+		item.type = ST_INT;
+		item.index = _ints.size();
+		_ints.push_back(value);
+		_items.push_back(item);
+		_model.add(name, item);
+	}
+
+	// -------------------------------------------------------
+	// set float
+	// -------------------------------------------------------
+	bool DynamicGameSettings::setInt(const char* name, int value) {
+		for (int i = 0; i < _items.size(); ++i) {
+			const SettingsItem& item = _items[i];
+			if (strcmp(item.name, name) == 0) {
+				*_ints[item.index] = value;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// -------------------------------------------------------
 	// add float
 	// -------------------------------------------------------
 	void DynamicGameSettings::addFloat(const char* name, float* value, float defaultValue) {
@@ -67,7 +95,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void DynamicGameSettings::exportJSON() {
 		char buffer[64];
-		sprintf(buffer, "content\\settings.json");
+		sprintf_s(buffer, 64, "content\\%s.json", getName());
 		JSONWriter jw;
 		jw.open(buffer);
 		jw.startCategory("settings");
@@ -88,7 +116,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void DynamicGameSettings::importJSON() {
 		char buffer[64];
-		sprintf(buffer, "content\\settings.json");
+		sprintf_s(buffer, 64, "content\\%s.json",getName());
 		JSONReader reader;
 		if (reader.parse(buffer)) {
 			Category* c = reader.getCategory("settings");
@@ -116,7 +144,7 @@ namespace ds {
 	void DynamicGameSettings::load() {
 		BinaryLoader loader;
 		char buffer[64];
-		sprintf(buffer, "assets\\%u", string::murmur_hash("settings"));
+		sprintf(buffer, "assets\\%u", string::murmur_hash(getName()));
 		LOG << "loading file: " << buffer;
 		int signature[] = { 0, 8, 15 };
 		if (loader.open(buffer, signature, 3) == IO_OK) {
@@ -149,7 +177,7 @@ namespace ds {
 	// -------------------------------------------------------
 	void DynamicGameSettings::save() {
 		char buffer[64];
-		sprintf(buffer, "assets\\%u", string::murmur_hash("settings"));
+		sprintf(buffer, "assets\\%u", string::murmur_hash(getName()));
 		BinaryWriter writer;
 		int signature[] = { 0, 8, 15 };
 		writer.open(buffer, signature, 3);
@@ -189,19 +217,56 @@ namespace ds {
 			}
 			gui::endGroup();
 		}
-		gui::end();
 		if (_model.hasSelection()) {
-			if (gui::begin("Setting", &_state)) {
-				SettingsItem element = _model.getSelectedValue();
+			SettingsItem element = _model.getSelectedValue();
+			gui::Header(element.name);
+			if (element.type == ST_FLOAT) {
+				gui::InputFloat(element.name, _floats[element.index]);
+			}
+			else if (element.type == ST_INT) {
+				gui::InputInt(element.name, _ints[element.index]);
+			}
+			else if (element.type == ST_RECT) {
+				gui::InputRect(element.name, _rects[element.index]);
+			}
+		}
+		gui::end();
+	}
+
+	// -------------------------------------------------------
+	// show dialog
+	// -------------------------------------------------------
+	void DynamicGameSettings::showCompleteDialog(v2* pos) {
+		gui::start(20, pos);
+		if (gui::begin("Settings Dialog", &_state)) {
+			for (int i = 0; i < _items.size(); ++i) {
+				const SettingsItem& element = _items[i];
 				if (element.type == ST_FLOAT) {
 					gui::InputFloat(element.name, _floats[element.index]);
+				}
+				else if (element.type == ST_INT) {
+					gui::InputInt(element.name, _ints[element.index]);
 				}
 				else if (element.type == ST_RECT) {
 					gui::InputRect(element.name, _rects[element.index]);
 				}
 			}
-			gui::end();
+			gui::beginGroup();
+			if (gui::Button("Save")) {
+				save();
+			}
+			if (gui::Button("Load")) {
+				load();
+			}
+			if (gui::Button("Export")) {
+				exportJSON();
+			}
+			if (gui::Button("Import")) {
+				importJSON();
+			}
+			gui::endGroup();
 		}
+		gui::end();
 	}
 
 }

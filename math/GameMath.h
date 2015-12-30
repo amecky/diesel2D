@@ -106,7 +106,9 @@ namespace ds {
 
 		bool solveQuadraticFormula(const float a,const float b,const float c,float* r1,float* r2);
 
-		bool circleSweepTest(const Vector2f& a0,const Vector2f& a1,float ra,const Vector2f& b0,const Vector2f& b1,float rb,float* u0,float* u1);			
+		bool circleSweepTest(const Vector2f& a0,const Vector2f& a1,float ra,const Vector2f& b0,const Vector2f& b1,float rb,float* u0,float* u1);	
+
+		uint32 nextPowerOf2(uint32 v);
 
 		struct TexCoord {
 

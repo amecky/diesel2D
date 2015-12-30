@@ -79,11 +79,14 @@ namespace ds {
 	// tick emitter instances
 	// -------------------------------------------------
 	void NewParticleSystem::tickEmitters(float dt) {
-		for (int i = 0; i < _emitter_instances.numObjects; ++i) {
-			ParticleEmitterInstance& instance = _emitter_instances.objects[i];
-			instance.timer += dt;
-			if (_emitter_data.duration >= 0.0f && instance.timer > _emitter_data.duration) {
-				_emitter_instances.remove(instance.id);
+		EmitterInstances::iterator it = _emitter_instances.begin();
+		while (it != _emitter_instances.end()) {
+			it->timer += dt;
+			if (_emitter_data.duration >= 0.0f && it->timer > _emitter_data.duration) {
+				it = _emitter_instances.remove(it->id);
+			}
+			else {
+				++it;
 			}
 		}
 	}
@@ -116,14 +119,14 @@ namespace ds {
 		}
 		for (uint32 i = *start; i < *end; ++i) {
 			m_Array.color[i] = Color::WHITE;
-			m_Array.scale[i] = Vector2f(1, 1);
+			m_Array.scale[i] = v2(1, 1);
+			m_Array.baseScale[i] = v2(1, 1);
 			m_Array.rotation[i] = 0.0f;
-			m_Array.timer[i] = Vector3f(0, 1, 1);
-			m_Array.random[i] = 1.0f;
-			m_Array.acceleration[i] = Vector3f(0, 0, 0);
-			m_Array.velocity[i] = Vector3f(0, 0, 0);
+			m_Array.rotationVelocity[i] = 0.0f;
+			m_Array.timer[i] = v3(0, 1, 1);
+			m_Array.acceleration[i] = v3(0, 0, 0);
+			m_Array.velocity[i] = v3(0, 0, 0);
 			m_Array.position[i] = instance.pos;
-			m_Array.type[i] = 1;
 		}
 		for (uint32 i = *start; i < *end; ++i) {
 			m_Array.wake(i);
@@ -187,11 +190,11 @@ namespace ds {
 		return 0;
 	}
 
-	bool NewParticleSystem::exportData(JSONWriter& writer) {
+	bool NewParticleSystem::saveData(JSONWriter& writer) {
 		return true;
 	}
 
-	bool NewParticleSystem::importData(JSONReader& reader) {
+	bool NewParticleSystem::loadData(JSONReader& reader) {
 		LOG << "importing data";
 		clear();
 		Category* root = reader.getCategory("particlesystem");
@@ -245,88 +248,6 @@ namespace ds {
 				initEmitterData();
 			}
 		}
-		return true;
-	}
-
-	bool NewParticleSystem::saveData(BinaryWriter& writer) {
-		// save system data
-		writer.startChunk(1, 1);
-		writer.write(_id);
-		writer.write(_system_data.textureID);
-		writer.write(_system_data.texture.rect);
-		writer.closeChunk();
-		// save emitter data
-		writer.startChunk(2, 1);
-		writer.write(_emitter_data.count);
-		writer.write(_emitter_data.ejectionPeriod);
-		writer.write(_emitter_data.ejectionVariance);
-		writer.write(_emitter_data.ejectionCounter);
-		writer.write(_emitter_data.duration);
-		writer.closeChunk();
-		for (int i = 0; i < _count_generators; ++i) {
-			writer.startChunk(3, 1);
-			const GeneratorInstance& instance = _generator_instances[i];
-			writer.write(instance.generator->getChunkID());
-			if (instance.data != 0) {
-				instance.data->save(&writer);
-			}
-			writer.closeChunk();
-		}
-		for (int i = 0; i < _count_modifiers; ++i) {
-			writer.startChunk(4, 1);
-			const ModifierInstance& instance = _modifier_instances[i];
-			writer.write(instance.modifier->getChunkID());
-			if (instance.data != 0) {
-				instance.data->save(&writer);
-			}
-			writer.closeChunk();
-		}
-		return true;
-	}
-
-	bool NewParticleSystem::loadData(BinaryLoader& loader) {
-		clear();
-		while (loader.openChunk() == 0) {
-			if (loader.getChunkID() == 4) {
-				int cid = -1;
-				loader.read(&cid);
-				ParticleModifierData* data = _factory->addModifier(this, cid);
-				if ( data != 0) {
-					data->load(&loader);
-				}
-				else {
-					LOGE << "cannot find modifier: " << cid;
-				}
-			}
-			else if (loader.getChunkID() == 3) {
-				int cid = -1;
-				loader.read(&cid);
-				ParticleGeneratorData* data = _factory->addGenerator(this, cid);
-				if (data != 0) {
-					data->load(&loader);
-				}
-				else {
-					LOGE << "cannot find generators: " << cid;
-				}
-			}
-			else if (loader.getChunkID() == 2) {
-				loader.read(&_emitter_data.count);
-				loader.read(&_emitter_data.ejectionPeriod);
-				loader.read(&_emitter_data.ejectionVariance);
-				loader.read(&_emitter_data.ejectionCounter);
-				loader.read(&_emitter_data.duration);
-				initEmitterData();
-			}
-			else if (loader.getChunkID() == 1) {
-				loader.read(&_system_data.id);
-				loader.read(&_system_data.textureID);
-				Rect r;
-				loader.read(&r);
-				_system_data.texture = ds::math::buildTexture(r);
-			}
-			loader.closeChunk();
-		}
-		prepareVertices();
 		return true;
 	}
 

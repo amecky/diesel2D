@@ -85,51 +85,7 @@ namespace ds {
 
 	}
 	
-	bool SpriteTemplates::loadData(BinaryLoader& loader) {
-		_map.clear();
-		_currentID = 0;
-		while (loader.openChunk() == 0) {
-			if (loader.getChunkID() == 1) {
-				MappingEntry entry;
-				Rect r;
-				std::string name;
-				loader.read(name);
-				strcpy(entry.name, name.c_str());
-				entry.hash = string::murmur_hash(entry.name);
-				loader.read(&entry.sprite.texture.textureID);
-				loader.read(&entry.sprite.position);
-				loader.read(&r);
-				entry.sprite.texture = math::buildTexture(r);
-				loader.read(&entry.sprite.scale);
-				loader.read(&entry.sprite.rotation);
-				loader.read(&entry.sprite.color);
-				loader.read(&entry.sprite.type);
-				entry.sprite.id = _currentID++;
-				_map.push_back(entry);
-			}
-			loader.closeChunk();
-		}
-		return true;
-	}
-
-	bool SpriteTemplates::saveData(BinaryWriter& writer) {
-		for (size_t i = 0; i < _map.size(); ++i) {
-			const MappingEntry& entry = _map[i];
-			writer.startChunk(1, 1);
-			writer.write(entry.name);
-			writer.write(entry.sprite.texture.textureID);
-			writer.write(entry.sprite.position);
-			writer.write(entry.sprite.texture.rect);
-			writer.write(entry.sprite.scale);
-			writer.write(entry.sprite.rotation);
-			writer.write(entry.sprite.color);
-			writer.write(entry.sprite.type);
-			writer.closeChunk();
-		}
-		return true;
-	}
-
-	bool SpriteTemplates::exportData(JSONWriter& writer) {
+	bool SpriteTemplates::saveData(JSONWriter& writer) {
 		for (size_t i = 0; i < _map.size(); ++i) {
 			const MappingEntry& entry = _map[i];
 			writer.startCategory("sprite");
@@ -146,17 +102,17 @@ namespace ds {
 		return true;
 	}
 
-	bool SpriteTemplates::importData(JSONReader& reader) {
+	bool SpriteTemplates::loadData(JSONReader& reader) {
 		_map.clear();
 		_currentID = 0;
 		std::vector<Category*> categories = reader.getCategories();
 		for (size_t i = 0; i < categories.size(); ++i) {
-			Category* c = categories[i];
-			LOG << "name: " << c->getName();
+			Category* c = categories[i];			
 			if (c->getName() == "sprite") {
 				MappingEntry entry;
 				Rect r;
 				std::string name = c->getProperty("name");
+				LOG << "name: " << name;
 				strcpy(entry.name, name.c_str());
 				entry.hash = string::murmur_hash(entry.name);
 				c->getInt("texture_id", &entry.sprite.texture.textureID);

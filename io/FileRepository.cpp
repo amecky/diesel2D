@@ -1,0 +1,265 @@
+#include "FileRepository.h"
+#include "..\utils\StringUtils.h"
+#include "..\utils\Log.h"
+#include "TextCompressor.h"
+
+namespace ds {
+
+	FileRepository::FileRepository() {
+	}
+
+
+	FileRepository::~FileRepository() {
+	}
+	
+
+	namespace repository {
+
+		struct RepositoryEntry {
+			char name[256];
+			IdString hash;
+			int index;
+			int size;
+			bool encoded;
+		};
+
+		struct FileRepo {
+			RepositoryMode mode;
+			std::vector<RepositoryEntry> entries;
+		};
+
+		static FileRepo* _repository = 0;
+
+		void initialize(RepositoryMode mode) {
+			_repository = new FileRepo;
+			_repository->mode = mode;
+			if (mode == RM_RELEASE) {
+				FILE* f = fopen("e.pak", "rb");
+				if (f) {
+					int sz = 0;
+					fread(&sz, sizeof(int), 1, f);
+					LOG << "repository entries: " << sz;
+					for ( int i = 0; i < sz; ++i ) {
+						RepositoryEntry entry;
+						fread(&entry.hash, sizeof(IdString), 1, f);
+						fread(&entry.size, sizeof(int), 1, f);
+						fread(&entry.index, sizeof(int), 1, f);
+						fread(&entry.encoded, sizeof(bool), 1, f);
+						_repository->entries.push_back(entry);
+					}
+					fclose(f);
+				}
+			}
+		}
+
+		bool already_loaded(const char* fileName) {
+			IdString hash = string::murmur_hash(fileName);
+			for (size_t i = 0; i < _repository->entries.size(); ++i) {
+				const RepositoryEntry& entry = _repository->entries[i];
+				if (entry.hash == hash) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		char* load(const char* fileName, int* size, FileType type) {
+			assert(_repository != 0);
+			*size = -1;
+			if (_repository->mode == RM_DEBUG) {
+				FILE *fp = fopen(fileName, "rb");
+				if (fp) {
+					LOG << "Loading '" << fileName << "'";
+					fseek(fp, 0, SEEK_END);
+					int sz = ftell(fp);
+					fseek(fp, 0, SEEK_SET);
+					LOG << "size: " << sz;
+					char* buffer = new char[sz + 1];
+					fread(buffer, 1, sz, fp);
+					buffer[sz] = '\0';
+					fclose(fp);
+					*size = sz;
+					if (!already_loaded(fileName)) {
+						RepositoryEntry entry;
+						entry.hash = string::murmur_hash(fileName);
+						sprintf_s(entry.name, 256, "%s", fileName);
+						entry.size = sz;
+						entry.index = -1;
+						if (type == FT_TEXT) {
+							entry.encoded = true;
+						}
+						else {
+							entry.encoded = false;
+						}
+						_repository->entries.push_back(entry);
+					}
+					return buffer;
+				}
+				else {
+					LOGE << "Cannot find file: '" << fileName << "'";
+					return 0;
+				}
+			}
+			else {
+				RepositoryEntry* selected = 0;
+				IdString hash = string::murmur_hash(fileName);
+				for (size_t i = 0; i < _repository->entries.size(); ++i) {
+					const RepositoryEntry& entry = _repository->entries[i];
+					if (entry.hash == hash) {
+						selected = &_repository->entries[i];
+					}
+				}
+				if (selected != 0) {
+					FILE* fp = fopen("c.pak","rb");
+					if (fp) {
+						LOG << "reading at " << selected->index << " size: " << selected->size;
+						fseek(fp, selected->index, SEEK_SET);
+						char* buffer = new char[selected->size];
+						fread(buffer, 1, selected->size, fp);
+						if (selected->encoded) {
+							LOG << "file is encoded";
+							char* result = compression::decode(buffer);
+							fclose(fp);
+							delete[] buffer;
+							*size = selected->size;
+							return result;
+						}
+						else {
+							LOG << "raw data";
+							*size = selected->size;
+							return buffer;
+						}
+					}
+					else {
+						LOGE << "Cannot find content PAK";
+						return 0;
+					}
+				}
+				else {
+					LOGE << "Cannot find matching entry for '" << fileName << "'";
+				}
+				return 0;
+			}
+			return 0;
+		}
+
+		char* read_file(const char* fileName,int* fileSize) {
+			FILE *fp = fopen(fileName, "rb");
+			if (fp) {
+				fseek(fp, 0, SEEK_END);
+				int sz = ftell(fp);
+				fseek(fp, 0, SEEK_SET);
+				char* buffer = new char[sz + 1];
+				fread(buffer, 1, sz, fp);
+				//buffer[sz] = '\0';
+				fclose(fp);
+				*fileSize = sz;
+				return buffer;
+			}
+			return 0;
+		}
+
+		void shutdown() {
+			if (_repository->mode == RM_DEBUG) {
+				LOG << "entries: " << _repository->entries.size();
+				FILE* fp = fopen("c.pak", "wb");
+				int index = 0;
+				for (size_t i = 0; i < _repository->entries.size(); ++i) {
+					RepositoryEntry& entry = _repository->entries[i];										
+					entry.index = index;
+					// read file
+					int fileSize = -1;
+					char* content = read_file(entry.name, &fileSize);
+					LOG << "adding file: " << entry.name << " file size: " << fileSize;
+					if (content != 0) {
+						// encode
+						if (entry.encoded) {
+							LOG << "file will be encoded";
+							int size = -1;
+							char* encoded = compression::encode(content, &size);
+							delete[] content;
+							int counter = 0;
+							// write buffer
+							for (int j = 0; j < size; ++j) {
+								fputc(encoded[j], fp);
+								++counter;
+							}
+							entry.size = counter;
+							index += counter;
+							delete[] encoded;
+						}
+						else {
+							LOG << "saving raw data";
+							int counter = 0;
+							// write buffer
+							for (int j = 0; j < fileSize; ++j) {
+								fputc(content[j], fp);
+								++counter;
+							}
+							entry.size = counter;
+							index += counter;
+							delete[] content;
+						}
+					}
+					else {
+						LOGE << "Cannot find file: '" << entry.name << "'";
+					}
+				}
+				fclose(fp);
+				// save directory
+				FILE* f = fopen("e.pak", "wb");
+				if (f) {
+					int sz = _repository->entries.size();
+					fwrite(&sz, sizeof(int), 1, f);
+					for (size_t i = 0; i < _repository->entries.size(); ++i) {
+						const RepositoryEntry& entry = _repository->entries[i];
+						LOG << i << " - name: '" << entry.name << "' index: " << entry.index;
+						fwrite(&entry.hash, sizeof(IdString), 1, f);
+						fwrite(&entry.size, sizeof(int), 1, f);
+						fwrite(&entry.index, sizeof(int), 1, f);
+						fwrite(&entry.encoded, sizeof(bool), 1, f);
+					}
+					fclose(f);
+				}
+			}
+			delete _repository;
+		}
+
+		void list() {
+			std::vector<RepositoryEntry> entries;
+			FILE* f = fopen("e.pak", "rb");
+			if (f) {
+				int sz = 0;
+				fread(&sz, sizeof(int), 1, f);
+				for (size_t i = 0; i < sz; ++i) {
+					RepositoryEntry entry;
+					fread(&entry.hash, sizeof(IdString), 1, f);
+					fread(&entry.size, sizeof(int), 1, f);
+					fread(&entry.index, sizeof(int), 1, f);
+					entries.push_back(entry);
+				}
+				fclose(f);
+			}
+			for (size_t i = 0; i < entries.size(); ++i) {
+				const RepositoryEntry& entry = entries[i];
+				LOG << entry.name << " size: " << entry.size << " index: " << entry.index;
+				FILE* fp = fopen("c.pak", "rb");
+				if (fp) {
+					fseek(fp, entry.index, SEEK_SET);
+					char* buffer = new char[entry.size + 1];
+					fread(buffer, 1, entry.size, fp);
+					char* result = compression::decode(buffer);
+					int len = strlen(result);
+					fclose(fp);
+					delete[] buffer;
+					LOG << "##### len: " << len;
+					LOG << "RESULT: '" << result << "'";
+					delete[] result;
+				}
+			}
+		}
+	}
+
+	
+
+}

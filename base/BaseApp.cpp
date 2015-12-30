@@ -17,6 +17,7 @@
 #include "..\editor\SpriteTemplatesEditor.h"
 #include "..\editor\SpriteTemplatesState.h"
 #include "..\editor\ParticlesEditState.h"
+#include "..\io\FileRepository.h"
 
 namespace ds {
 
@@ -24,6 +25,7 @@ namespace ds {
 // Constructing new BaseApp
 // -------------------------------------------------------	
 BaseApp::BaseApp() {
+	repository::initialize(repository::RM_RELEASE);
 	gBlockMemory = new DataBlockAllocator();
 	gFileWatcher = new FileWatcher();
 	m_Active = true;
@@ -47,7 +49,7 @@ BaseApp::BaseApp() {
 	rand.seed(GetTickCount());
 	audio = new AudioManager;
 	_totalTime = 0.0f;
-	stateMachine = new GameStateMachine;
+	_stateMachine = new GameStateMachine;
 	_editor.dialogPos = v2(750, 750);
 	_editor.position = v2(750, 750);
 	_editor.dialogIndex = -1;
@@ -57,7 +59,20 @@ BaseApp::BaseApp() {
 	_dialogsEditor = 0;
 	_templatesEditor = 0;
 	_perfHUDPos = v2(750, 750);
-	
+	_prepared = false;
+	Category root("root");
+	bool loaded = json::read_simplified_json("content\\engine_settings.json", &root);
+	//settings.mode = 1;		
+	if (loaded) {
+		Category* basic = root.getChild("basic_settings");
+		if (basic != 0) {
+			//full_screen = false
+			//synched = true
+			basic->getInt("screen_width", &_settings.screenWidth);
+			basic->getInt("screen_height", &_settings.screenHeight);
+			basic->getColor("clear_color", &_settings.clearColor);
+		}
+	}
 }
 
 // -------------------------------------------------------
@@ -66,12 +81,13 @@ BaseApp::BaseApp() {
 BaseApp::~BaseApp() {
 	LOG << "Destructing all elements";
 	sprites::shutdown();
+	repository::shutdown();
 	if (_dialogsEditor != 0) {
 		delete _dialogsEditor;
 	}
 	delete _templatesEditor;
 	delete particles;
-	delete stateMachine;
+	delete _stateMachine;
 	//delete gProfiler;
 	delete audio;
 	renderer::shutdown();	
@@ -82,42 +98,147 @@ BaseApp::~BaseApp() {
 	//delete renderContext;
 }
 
+void BaseApp::loadSettings(const Category* root) {
+	LOG << "---- Loading settings ----";
+	Category* init = root->getChild("init_actions");
+	if (init != 0) {
+		// load textures
+		if (init->hasProperty("textures")) {
+			const char* textureNames = init->getProperty("textures");
+			if (strchr(textureNames,',') == 0) {
+				int texture = ds::renderer::loadTexture(textureNames);
+				assert(texture != -1);
+			}
+			else {
+				std::vector<std::string> values = string::split(textureNames);
+				for (size_t i = 0; i < values.size(); ++i) {
+					int texture = ds::renderer::loadTexture(values[i].c_str());
+					assert(texture != -1);
+				}
+			}
+		}
+		else {
+			LOG << "No textures defined";
+		}
+		// load fonts
+		Category* fonts = init->getChild("fonts");
+		if (fonts != 0) {
+			std::vector<Category*> entries = fonts->getChildren();
+			for (size_t i = 0; i < entries.size(); ++i) {
+				std::string texName = entries[i]->getProperty("texture");
+				int texture = renderer::getTextureId(texName.c_str());
+				assert(texture != -1);
+				std::string file = entries[i]->getProperty("file");
+				BitmapFont* font = assets::loadFont(file.c_str() , texture);
+			}
+		}
+		else {
+			LOG << "No fonts defined";
+		}
+		// initialize text system
+		Category* textSystem = init->getChild("text_system");
+		if (textSystem != 0) {
+			std::string fontName = textSystem->getProperty("font");
+			BitmapFont* font = renderer::getBitmapFont(fontName.c_str());
+			assert(font != 0);
+			sprites::initializeTextSystem(font);
+		}
+		else {
+			LOG << "No textsystem defined";
+		}
+		// initialize IMGUI
+		Category* imgui = init->getChild("initialize_imgui");
+		if (imgui != 0) {
+			std::string fontName = imgui->getProperty("font");
+			BitmapFont* font = renderer::getBitmapFont(fontName.c_str());
+			assert(font != 0);
+			initializeGUI(font);
+		}
+		else {
+			LOG << "Not initializing IMGUI";
+		}
+		// load particles
+		if (init->getBool("load_particles", false)) {
+			LOG << "loading particle systems";
+			// prepare particle system
+			Descriptor desc;
+			desc.shader = shader::createParticleShader();
+			assert(desc.shader != 0);
+			desc.texture = 0;
+			desc.blendState = renderer::getDefaultBlendState();
+			particles->init(desc);
+			particles->load();
+		}
+		// load dialogs
+		if (init->getBool("load_dialogs", false)) {
+			gui::initialize();
+		}
+		// load sprite templates
+		if (init->getBool("load_sprite_templates", false)) {
+			assets::loadSpriteTemplates();
+		}
+		else {
+			LOG << "Not loading sprite templates";
+		}
+		// initialize editor
+		if (init->getBool("initialize_editor", false)) {
+			_bmfDialog.init();
+			_dialogsEditor = new DialogsEditor(&gui);
+			_templatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
+			_templatesEditor->init();
+			_stateMachine->add(new SpriteTemplatesState());
+			_stateMachine->add(new ParticlesEditState(particles));
+		}
+	}
+}
 // -------------------------------------------------------
 // Init
 // -------------------------------------------------------
 void BaseApp::prepare() {
+	assert(!_prepared);
 	LOG << "---> Init <---";
+	LOG << "---- Loading settings ----";
+	Category root("root");
+	bool loaded = json::read_simplified_json("content\\engine_settings.json", &root);
+	/*
 	//settings.mode = 1;		
+	if (loaded) {
+		Category* basic = root.getChild("basic_settings");
+		if (basic != 0) {
+			//full_screen = false
+			//synched = true
+			basic->getInt("screen_width", &_settings.screenWidth);
+			basic->getInt("screen_height", &_settings.screenHeight);
+			basic->getColor("clear_color", &_settings.clearColor);
+		}
+	}
+	*/
 	renderer::initialize(m_hWnd,_settings);   	
 	audio->initialize(m_hWnd);
 
 	profiler::init();
 	sprites::init();
+	if (loaded) {
+		loadSettings(&root);
+	}
+	else {
+		LOG << "No engine settings provided";
+	}
 	LOG << "---> Start loading content <---";
 	loadContent();	
 	LOG << "---> End loading content   <---";
-	stateMachine->initializeStates();
+	_stateMachine->initializeStates();
 	m_Loading = false;	
 	init();
-	if (_settings.initializeEditor) {
-		_bmfDialog.init();
-		_dialogsEditor = new DialogsEditor(&gui);
-		_templatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
-		_templatesEditor->init();
-		stateMachine->add(new SpriteTemplatesState());
-		stateMachine->add(new ParticlesEditState(particles));
-	}
 	logKeyBindings();
-
-
 	v2 dp;
 	dp.x = _settings.screenWidth - 350.0f;
 	dp.y = _settings.screenHeight - 10.0f;
 	_editor.dialogPos = dp;
 	_editor.position = dp;
 	_perfHUDPos = dp;
-
 	m_Running = true;
+	_prepared = true;
 }
 
 void BaseApp::logKeyBindings() {
@@ -144,7 +265,6 @@ void BaseApp::loadSprites() {
 }
 
 void BaseApp::initializeGUI(BitmapFont* font) {
-	//ds::assets::load("gui", &gui, CVT_GUI);
 	gui.init(font);
 	gui.load();
 }
@@ -224,23 +344,22 @@ void BaseApp::buildFrame() {
 	profiler::reset();
 	//PR_START("MAIN")
 	renderer::drawCounter().reset();
-	debug::reset();
 	// handle key states
 	PR_START("INPUT");
 	if ( m_KeyStates.keyDown ) {
 		m_KeyStates.keyDown = false;
-		stateMachine->onKeyDown(m_KeyStates.keyPressed);
+		_stateMachine->onKeyDown(m_KeyStates.keyPressed);
 		OnKeyDown(m_KeyStates.keyPressed);
 	}
 	if ( m_KeyStates.keyUp ) {
 		m_KeyStates.keyUp = false;
-		stateMachine->onKeyUp(m_KeyStates.keyReleased);
+		_stateMachine->onKeyUp(m_KeyStates.keyReleased);
 		OnKeyUp(m_KeyStates.keyReleased);
 	}
 	if ( m_KeyStates.onChar ) {
 		m_KeyStates.onChar = false;
 		if (m_KeyStates.ascii >= 0 && m_KeyStates.ascii < 256) {
-			stateMachine->onChar(m_KeyStates.ascii);
+			_stateMachine->onChar(m_KeyStates.ascii);
 			OnChar(m_KeyStates.ascii, 0);
 		}
 	}
@@ -248,7 +367,7 @@ void BaseApp::buildFrame() {
 	if ( !m_ButtonState.processed ) {
 		m_ButtonState.processed = true;
 		if ( m_ButtonState.down ) {
-			stateMachine->onButtonDown(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
+			_stateMachine->onButtonDown(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
 			OnButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);			
 		}
 		else {
@@ -256,10 +375,10 @@ void BaseApp::buildFrame() {
 			int selected;
 			if (gui.onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y, &did, &selected)) {
 				onGUIButton(did, selected);
-				stateMachine->onGUIButton(did, selected);
+				_stateMachine->onGUIButton(did, selected);
 			}
 			else {
-				stateMachine->onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
+				_stateMachine->onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
 				OnButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
 			}
 		}
@@ -273,7 +392,7 @@ void BaseApp::buildFrame() {
 		PR_END("GameObjects::update");
 		PR_START("Game::update");
 		update(m_GameTime.elapsed);
-		stateMachine->update(m_GameTime.elapsed);
+		_stateMachine->update(m_GameTime.elapsed);
 		PR_END("Game::update");
 		PR_END("UPDATE");
 	}
@@ -282,7 +401,7 @@ void BaseApp::buildFrame() {
 	renderer::setupMatrices();
 	PR_START("RENDER_GAME");
 	ds::sprites::begin();		
-	stateMachine->render();
+	_stateMachine->render();
 	draw();
 	ds::sprites::flush();
 	PR_END("RENDER_GAME");
@@ -295,7 +414,6 @@ void BaseApp::buildFrame() {
 		showEditor();
 	}
 	PRE("RENDER_EDITOR");
-	debug::drawDebugMessages();
 	if (m_DebugInfo.performanceOverlay) {
 		showPerformceOverlay(&_perfHUDPos);
 	}
@@ -306,7 +424,7 @@ void BaseApp::buildFrame() {
 #ifdef DEBUG		
 	if ( m_DebugInfo.showDrawCounter ) {
 		int y = ds::renderer::getSelectedViewport().getHeight() - 80;
-		debug::showDrawCounter(&_perfHUDPos);
+		//debug::showDrawCounter(&_perfHUDPos);
 	}
 	if ( m_DebugInfo.showProfiler ) {
 		++m_DebugInfo.profilerTicks;
@@ -324,7 +442,7 @@ void BaseApp::buildFrame() {
 	profiler::finalize();
 	if (m_DebugInfo.monitoring) {
 		if (profiler::get_current_total_time() > m_DebugInfo.treshold) {
-			debug::printDrawCounter();
+			//debug::printDrawCounter();
 			LOG << "--------------------------------";
 			profiler::print();
 		}
@@ -334,7 +452,7 @@ void BaseApp::buildFrame() {
 	//PR_END("MAIN")
 	if ( m_DebugInfo.printProfiler ) {
 		m_DebugInfo.printProfiler = false;
-		debug::printDrawCounter();
+		//debug::printDrawCounter();
 		LOG << "--------------------------------";
 		profiler::print();
 	}	
@@ -389,10 +507,10 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 		m_DebugInfo.debugRenderer = true;
 	}
 	else if (virtualKey == VK_F8) {
-		stateMachine->activate("ParticlesEditState");
+		_stateMachine->activate("ParticlesEditState");
 	}
 	else if (virtualKey == VK_F9) {
-		stateMachine->activate("SpriteTemplatesState");
+		_stateMachine->activate("SpriteTemplatesState");
 	}	
 #endif
 }
@@ -435,7 +553,7 @@ void BaseApp::showEditor() {
 		if (_templatesEditor != 0 && gui::Button("SPT")) {
 			//_templatesEditor->init();
 			//_editor.dialogIndex = 4;
-			stateMachine->activate("SpriteTemplatesState");
+			_stateMachine->activate("SpriteTemplatesState");
 		}
 		if (gui::Button("SCG")) {
 			_editor.dialogIndex = 5;
@@ -446,14 +564,14 @@ void BaseApp::showEditor() {
 		gui::endGroup();
 		gui::beginGroup();
 		if (gui::Button("PS")) {
-			stateMachine->activate("ParticlesEditState");
+			_stateMachine->activate("ParticlesEditState");
 		}
 		gui::endGroup();
 	}
 	gui::end();
 
 	if (_editor.dialogIndex == 2)  {
-		stateMachine->showDialog();
+		_stateMachine->showDialog();
 	}
 	if (_editor.dialogIndex == 3)  {
 		//gui.showDialog();
@@ -480,6 +598,18 @@ void BaseApp::showProfilerSnapshot(v2* position) {
 		}
 	}
 	gui::end();
+}
+
+void BaseApp::addGameState(GameState* gameState) {
+	_stateMachine->add(gameState);
+}
+
+void BaseApp::activate(const char* name) {
+	_stateMachine->activate(name);
+}
+
+void BaseApp::connectGameStates(const char* firstStateName, int outcome, const char* secondStateName) {
+	_stateMachine->connect(firstStateName, outcome, secondStateName);
 }
 
 }

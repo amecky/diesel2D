@@ -51,6 +51,8 @@ namespace file {
 
 	void logFileTime(const FILETIME& time);
 
+	bool saveBinary(const char* fileName, char* data, int size);
+
 	template<class T>
 	bool saveBinary(const char* fileName, T* t) {
 		IdString str = ds::string::murmur_hash(fileName);

@@ -29,6 +29,7 @@ namespace ds {
 			}
 			_systems[i] = 0;
 		}
+		delete[] _systems;
 	}
 
 	NewParticleSystem* ParticleManager::create(int id, const char* name) {
@@ -83,7 +84,7 @@ namespace ds {
 		}
 	}
 
-	bool ParticleManager::exportData(JSONWriter& writer) {
+	bool ParticleManager::saveData(JSONWriter& writer) {
 		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
 			if (_systems[i] != 0) {
 				writer.startCategory(_systems[i]->getDebugName());
@@ -95,7 +96,7 @@ namespace ds {
 		return true;
 	}
 
-	bool ParticleManager::importData(JSONReader& reader) {
+	bool ParticleManager::loadData(JSONReader& reader) {
 		LOG << "importing data";
 		std::vector<Category*> categories = reader.getCategories();
 		for (size_t i = 0; i < categories.size(); ++i) {
@@ -110,38 +111,6 @@ namespace ds {
 				system->load();
 				_systems[id] = system;
 			}
-		}
-		return true;
-	}
-
-	bool ParticleManager::saveData(BinaryWriter& writer) {
-		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
-			if (_systems[i] != 0) {
-				writer.startChunk(CHNK_PARTICLESYSTEM, 1);
-				writer.write(i);
-				writer.write(_systems[i]->getDebugName());
-				writer.closeChunk();
-			}
-		}
-		return true;
-	}
-
-	bool ParticleManager::loadData(BinaryLoader& loader) {
-		LOG << "loading particle systems";
-		while (loader.openChunk() == 0) {
-			if (loader.getChunkID() == CHNK_PARTICLESYSTEM) {
-				int id = -1;
-				loader.read(&id);
-				std::string name;
-				loader.read(name);
-				if (id != -1) {
-					NewParticleSystem* system = create(id, name.c_str());
-					LOG << "id: " << id << " name: " << name;
-					system->load();
-					_systems[id] = system;
-				}
-			}
-			loader.closeChunk();
 		}
 		return true;
 	}

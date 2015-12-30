@@ -50,6 +50,7 @@ namespace ds {
 	// render
 	// --------------------------------------------
 	void SpriteTemplatesState::render() {
+		ds::sprites::draw(v2(512, 384), math::buildTexture(0, 0, 1024, 1024),0.0f,1.0f,1.0f);
 		_editor->showDialog();
 		if (_editor->hasSelection()) {
 			Sprite& sprite = _editor->getSelection();

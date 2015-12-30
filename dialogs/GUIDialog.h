@@ -138,6 +138,7 @@ public:
 
 	GUID addTimer(int id,int x, int y, float scale = 1.0f, const Color& color = Color::WHITE, bool centered = true);
 	void resetTimer(int id);
+	void startTimer(int id);
 	GameTimer* getTimer(int id);
 
 	virtual int onButton(int button,int x,int y,bool down);
@@ -165,15 +166,10 @@ public:
 
 	void setTransition(int id, int type, float ttl);
 
-	bool exportData(JSONWriter& writer);
-	bool importData(JSONReader& reader);
-	bool saveData(BinaryWriter& writer);
-	bool loadData(BinaryLoader& loader);
-	const char* getJSONFileName() const {
-		return _jsonName;
-	}
+	bool saveData(JSONWriter& writer);
+	bool loadData(JSONReader& reader);
 	const char* getFileName() const {
-		return _name;
+		return _jsonName;
 	}
 	const char* getName() const {
 		return _name;

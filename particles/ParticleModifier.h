@@ -20,6 +20,7 @@ enum ParticleModifierType {
 	PMT_COLOR_PATH,
 	PMT_ALPHA_PATH,
 	PMT_SIZE_PATH,
+	PMT_ROTATION,
 	PMT_EOL
 };
 
@@ -250,13 +251,15 @@ public:
 		const LinearSizeModifierData* my_data = static_cast<const LinearSizeModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {			
 			array->scale[i] = lerp(my_data->minScale, my_data->maxScale, array->timer[i].y);
+			array->scale[i].x *= array->baseScale[i].x;
+			array->scale[i].y *= array->baseScale[i].y;
 		}
 	}
 	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
 		assert(data != 0);
 		const LinearSizeModifierData* my_data = static_cast<const LinearSizeModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->scale[i] = my_data->minScale;
+			array->scale[i] = array->baseScale[i] + my_data->minScale;
 		}
 	}
 	const ParticleModifierType getType() const {
@@ -295,7 +298,7 @@ public:
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {	
 			Vector2f perp = Vector2f(-array->velocity[i].y,array->velocity[i].x);
 			perp = normalize(perp);
-			perp = perp * (sin(array->timer[i].x * my_data->amplitude * array->random[i]) * my_data->radius * array->random[i]);// * p->random;	
+			perp = perp * (sin(array->timer[i].x * my_data->amplitude) * my_data->radius);// * p->random;	
 			//array->position[i] += perp * dt;
 		}
 	}
@@ -465,14 +468,16 @@ public:
 		assert(data != 0);
 		const SizePathModifierData* my_data = static_cast<const SizePathModifierData*>(data);
 		for ( uint32 i = 0; i < array->countAlive; ++i ) {
-			my_data->path.get(array->timer[i].y,&array->scale[i]);			
+			my_data->path.get(array->timer[i].y,&array->scale[i]);		
+			array->scale[i].x *= array->baseScale[i].x;
+			array->scale[i].y *= array->baseScale[i].y;
 		}
 	}
 	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {
 		assert(data != 0);
 		const SizePathModifierData* my_data = static_cast<const SizePathModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->scale[i] = my_data->path.value(0);
+			array->scale[i] = array->baseScale[i] + my_data->path.value(0);
 		}
 	}
 	const ParticleModifierType getType() const {
@@ -503,6 +508,29 @@ public:
 	}
 	const char* getName() const {
 		return "velocity_rotation";
+	}
+};
+
+// -------------------------------------------------------
+// RotationModifier
+// -------------------------------------------------------
+class RotationModifier : public ParticleModifier {
+
+public:
+	RotationModifier() : ParticleModifier() {}
+	virtual ~RotationModifier() {}
+
+	void update(ParticleArray* array, const ParticleModifierData* data, float dt) {
+		for (uint32 i = 0; i < array->countAlive; ++i) {
+			array->rotation[i] += array->rotationVelocity[i] * dt;
+		}
+	}
+	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {}
+	const ParticleModifierType getType() const {
+		return PMT_ROTATION;
+	}
+	const char* getName() const {
+		return "rotation";
 	}
 };
 

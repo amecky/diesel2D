@@ -24,6 +24,18 @@ namespace file {
 		return false;
 	}
 
+	bool saveBinary(const char* fileName, char* data, int size) {
+		FILE* f = fopen(fileName, "wb");
+		if (f) {
+			for (int i = 0; i < size; ++i) {
+				fputc(data[i], f);
+			}
+			fclose(f);
+			return true;
+		}
+		return false;
+	}
+
 	bool loadTextFile(const char* name,std::vector<std::string>& lines) {    
 		std::string line;
 		std::ifstream myfile(name);

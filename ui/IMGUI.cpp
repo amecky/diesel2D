@@ -261,65 +261,7 @@ namespace gui {
 			window.addTiledXYImage(position, texture, size, cornerSize);
 
 		}
-
-		void addTexturedBox(const v2& position, const v2& size,const ds::Rect& rect,float cornersize, const ds::Color& color) {			
-			v2 center = position;
-			center.x += size.x * 0.5f;
-			center.y -= size.y * 0.5f;
-			float ch = size.y - 2.0f * cornersize;
-			float cw = size.x - 2.0f * cornersize;
-			float hcz = cornersize * 0.5f;
-			float sx = (size.x - 2.0f * cornersize) / (rect.width() - 2.0f * cornersize);
-			float sy = (size.y - 2.0f * cornersize) / (rect.height() - 2.0f * cornersize);
-			// left top corner 
-			v2 p = center;
-			ds::Texture tex = ds::math::buildTexture(rect.top, rect.left,cornersize,cornersize, 512.0f, 512.0f);
-			p.x = center.x - cw * 0.5f - hcz;
-			p.y = center.y + ch * 0.5f + hcz;
-			window.addImage(p, tex);
-			// right top corner
-			tex = ds::math::buildTexture(rect.top, rect.right - cornersize, cornersize, cornersize, 512.0f, 512.0f);
-			p.x = center.x + cw * 0.5f + hcz;
-			p.y = center.y + ch * 0.5f + hcz;
-			window.addImage(p, tex);
-			// left bottom corner
-			tex = ds::math::buildTexture(rect.bottom - cornersize, rect.left, cornersize, cornersize, 512.0f, 512.0f);
-			p.x = center.x - cw * 0.5f - hcz;
-			p.y = center.y - ch * 0.5f - hcz;
-			window.addImage(p, tex);
-			// right bottom corner
-			tex = ds::math::buildTexture(rect.bottom - cornersize, rect.right - cornersize, cornersize, cornersize, 512.0f, 512.0f);
-			p.x = center.x + cw * 0.5f + hcz;
-			p.y = center.y - ch * 0.5f - hcz;
-			window.addImage(p, tex);
-			// top
-			tex = ds::math::buildTexture(rect.top, rect.left + cornersize, rect.width() - 2.0f * cornersize, cornersize, 512.0f, 512.0f);
-			p.x = center.x;
-			p.y = center.y + ch * 0.5f + hcz;
-			window.addImage(p, tex,v2(sx,1.0f));
-			// bottom
-			tex = ds::math::buildTexture(rect.bottom - cornersize, rect.left + cornersize, rect.width() - 2.0f * cornersize, cornersize, 512.0f, 512.0f);
-			p.x = center.x;
-			p.y = center.y - ch * 0.5f - hcz;
-			window.addImage(p, tex, v2(sx, 1.0f));
-			// left
-			tex = ds::math::buildTexture(rect.top + cornersize, rect.left, cornersize, rect.height() - 2.0f *cornersize, 512.0f, 512.0f);
-			p.x = center.x - cw * 0.5f - hcz;
-			p.y = center.y;
-			window.addImage(p, tex, v2(1.0f, sy));
-			// right
-			tex = ds::math::buildTexture(rect.top + cornersize, rect.right - cornersize, cornersize, rect.height() - 2.0f *cornersize, 512.0f, 512.0f);
-			p.x = center.x + cw * 0.5f + hcz;
-			p.y = center.y;
-			window.addImage(p, tex, v2(1.0f, sy));
-			// center
-			tex = ds::math::buildTexture(rect.top + cornersize, rect.left + cornersize, rect.width() - 2.0f * cornersize, rect.height() - 2.0f * cornersize, 512.0f, 512.0f);
-			p.x = center.x;
-			p.y = center.y;
-			window.addImage(p, tex, v2(sx, sy));
-
-		}
-
+		
 		void addImage(const v2& position, const ds::Texture& texture,float offsetX = 0.0f,float offsetY = 0.0f) {
 			v2 p = position;
 			p.x += offsetX;
@@ -1170,12 +1112,6 @@ namespace gui {
 		return isBoxSelected(id, p, v2(width, BUTTON_HEIGHT));
 	}
 
-	void BoxTest() {
-		v2 p = guiContext->position;
-		guiContext->addTexturedBox(p, v2(180, 120), ds::Rect(34, 256, 100, 60), 10.0f,ds::Color::WHITE);
-		guiContext->nextPosition(160.0f);
-	}
-
 	// -------------------------------------------------------
 	// Histogram
 	// -------------------------------------------------------	
@@ -1405,9 +1341,9 @@ namespace gui {
 						p.x -= 10.0f;
 						ds::sprites::drawTiledX(p, dim.x, ds::math::buildTexture(140.0, 0.0f, 150.0f, 16.0f), 16.0f);
 						// draw text
-						p.y -= 7.0f;
+						p.y -= 8.0f;
 						p.x += 20.0f;
-						ds::sprites::drawText(guiContext->font, p.x, p.y, call.text, 2);
+						ds::sprites::drawText(guiContext->font, p.x, p.y, call.text, call.padding);
 					}
 				}
 

@@ -27,13 +27,6 @@ namespace ds {
 			if (gui::Button("Save")) {
 				_data->save();
 			}
-			if (gui::Button("Import")) {
-				_data->importJSON();
-				init();
-			}
-			if (gui::Button("Export")) {
-				_data->exportJSON();
-			}
 			gui::endGroup();
 		}
 		bool _showAdd;

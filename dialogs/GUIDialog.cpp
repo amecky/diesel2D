@@ -217,6 +217,14 @@ namespace ds {
 		_timers[gid.index].reset();
 	}
 
+	void GUIDialog::startTimer(int id) {
+		int idx = getIndexByID(id);
+		const GUID& gid = _ids[idx];
+		GUIItem& item = m_Items[gid.entryIndex];
+		assert(item.type == GIT_TIMER);
+		_timers[gid.index].start();
+	}
+
 	GameTimer* GUIDialog::getTimer(int id) {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
@@ -414,7 +422,7 @@ namespace ds {
 					}
 					else if (item.type == GIT_TIMER) {
 						const GameTimer& timer = _timers[id.index];
-						sprintf_s(buffer, 32, "%02d:%02d", timer.getMinutes(), 2, timer.getSeconds());
+						sprintf_s(buffer, 32, "%02d:%02d", timer.getMinutes(), timer.getSeconds());
 						v2 size = font::calculateSize(*m_BitmapFont, buffer, item.scale);
 						float ty = p.y - size.y * 0.5f;
 						p += v2(size.x * -0.5f, -size.y * 0.5f);
@@ -675,12 +683,6 @@ namespace ds {
 			if (gui::Button("Load")) {
 				load();
 			}
-			if (gui::Button("Export")) {
-				exportJSON();
-			}
-			if (gui::Button("Import")) {
-				importJSON();
-			}
 			gui::endGroup();
 			gui::beginGroup();
 			if (gui::Button("Add")) {
@@ -787,65 +789,11 @@ namespace ds {
 	}
 
 	
+	
 	// -------------------------------------------------------
 	// save
 	// -------------------------------------------------------
-	bool GUIDialog::saveData(BinaryWriter& writer) {		
-		for (int i = 0; i < MAX_GUID; ++i) {
-			const GUID& gid = _ids[i];
-			if (gid.entryIndex != -1) {
-				const GUIItem& gi = m_Items[gid.entryIndex];
-				if (gi.type == GIT_IMAGE) {
-					writer.startChunk(CHNK_DLG_IMAGE, 1);
-					saveItem(writer, gid.id, gi);
-					const GUIImage& image = _images[gid.index];
-					writer.write(image.texture.rect);
-					writer.closeChunk();
-				}
-				else if (gi.type == GIT_BUTTON) {
-					writer.startChunk(CHNK_DLG_BUTTON, 1);
-					saveItem(writer, gid.id, gi);
-					const GUIButton& button = _buttons[gid.index];
-					writer.write(button.texture.rect);
-					writer.write(button.text);
-					writer.closeChunk();
-				}
-				else if (gi.type == GIT_IMAGE_BUTTON) {
-					writer.startChunk(CHNK_DLG_IMAGE_LINK, 1);
-					saveItem(writer, gid.id, gi);
-					const GUIImageButton& button = _imageButtons[gid.index];
-					writer.write(button.texture.rect);
-					writer.closeChunk();
-				}
-				else if (gi.type == GIT_TEXT) {
-					writer.startChunk(CHNK_DLG_TEXT, 1);
-					saveItem(writer, gid.id, gi);
-					const GUIText& text = _texts[gid.index];
-					writer.write(text.text);
-					writer.closeChunk();
-				}
-				else if (gi.type == GIT_TIMER) {
-					writer.startChunk(CHNK_DLG_TIMER, 1);
-					saveItem(writer, gid.id, gi);
-					writer.closeChunk();
-				}
-				else if (gi.type == GIT_NUMBERS) {
-					writer.startChunk(CHNK_DLG_NUMBERS, 1);
-					saveItem(writer, gid.id, gi);
-					const GUINumber& number = _numbers[gid.index];
-					writer.write(number.value);
-					writer.write(number.length);
-					writer.closeChunk();
-				}
-			}
-		}
-		return true;
-	}
-
-	// -------------------------------------------------------
-	// save
-	// -------------------------------------------------------
-	bool GUIDialog::exportData(JSONWriter& jw) {		
+	bool GUIDialog::saveData(JSONWriter& jw) {		
 		for (int i = 0; i < MAX_GUID; ++i) {
 			const GUID& gid = _ids[i];
 			if (gid.entryIndex != -1) {
@@ -898,13 +846,13 @@ namespace ds {
 	}
 
 	
-	bool GUIDialog::importData(JSONReader& reader) {
+	bool GUIDialog::loadData(JSONReader& reader) {
 		clear();
 		_model.clear();		
 		std::vector<Category*> categories = reader.getCategories();
 		for (size_t i = 0; i < categories.size(); ++i) {
 			Category* c = categories[i];
-			LOG << "name: " << c->getName();
+			//LOG << "name: " << c->getName();
 			if (c->getName() == "image" ) {
 				GUIItem item;
 				int id = loadItem(c, &item);
@@ -918,8 +866,8 @@ namespace ds {
 				int id = loadItem(c, &item);
 				Rect r;
 				c->getRect("rect", &r);
-				std::string label = c->getProperty("text");
-				GUID gid = addButton(id, item.pos.x, item.pos.y, label.c_str(), r, item.color, item.scale, item.centered);
+				const char* label = c->getProperty("text");
+				GUID gid = addButton(id, item.pos.x, item.pos.y, label, r, item.color, item.scale, item.centered);
 				addToModel(gid.id, GIT_BUTTON, "Button");
 			}
 			else if (c->getName() == "image_button") {
@@ -927,15 +875,15 @@ namespace ds {
 				int id = loadItem(c, &item);
 				Rect r;
 				c->getRect("rect", &r);
-				std::string label = c->getProperty("text");
+				const char* label = c->getProperty("text");
 				GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
 				addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
 			}
 			else if (c->getName() == "text") {
 				GUIItem item;
 				int id = loadItem(c, &item);
-				std::string label = c->getProperty("text");
-				GUID gid = addText(id, item.pos.x, item.pos.y, label.c_str(), item.color, item.scale, item.centered);
+				const char* label = c->getProperty("text");
+				GUID gid = addText(id, item.pos.x, item.pos.y, label, item.color, item.scale, item.centered);
 				addToModel(gid.id, GIT_TEXT, "Text");
 			}
 			else if (c->getName() == "numbers") {
@@ -983,65 +931,4 @@ namespace ds {
 		return id;
 	}
 
-	// -------------------------------------------------------
-	// load
-	// -------------------------------------------------------
-	bool GUIDialog::loadData(BinaryLoader& loader) {
-		clear();
-		_model.clear();
-		while (loader.openChunk() == 0) {
-			if (loader.getChunkID() == CHNK_DLG_IMAGE) {
-				GUIItem item;
-				int id = loadItem(loader,&item);
-				Rect r;
-				loader.read(&r);
-				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
-				addToModel(gid.id, GIT_IMAGE, "Image");
-			}
-			else if (loader.getChunkID() == CHNK_DLG_IMAGE_LINK) {
-				GUIItem item;
-				int id = loadItem(loader, &item);
-				Rect r;
-				loader.read(&r);
-				GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
-				addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
-			}
-			else if (loader.getChunkID() == CHNK_DLG_BUTTON) {
-				GUIItem item;
-				int id = loadItem(loader, &item);
-				Rect r;
-				loader.read(&r);
-				char text[32];
-				loader.read(text);
-				GUID gid = addButton(id, item.pos.x, item.pos.y, text, r, item.color, item.scale, item.centered);
-				addToModel(gid.id, GIT_BUTTON, "Button");
-			}
-			else if (loader.getChunkID() == CHNK_DLG_TEXT) {
-				GUIItem item;
-				int id = loadItem(loader, &item);
-				char text[32];
-				loader.read(text);
-				GUID gid = addText(id, item.pos.x, item.pos.y, text, item.color, item.scale, item.centered);
-				addToModel(gid.id, GIT_TEXT, "Text");
-			}
-			else if (loader.getChunkID() == CHNK_DLG_NUMBERS) {
-				GUIItem item;
-				int id = loadItem(loader, &item);
-				int value = 0;
-				loader.read(&value);
-				int length = 0;
-				loader.read(&length);
-				GUID gid = addNumber(id, item.pos, value, length, item.scale, item.color, item.centered);
-				addToModel(gid.id, GIT_NUMBERS, "Number");
-			}
-			else if (loader.getChunkID() == CHNK_DLG_TIMER) {
-				GUIItem item;
-				int id = loadItem(loader, &item);
-				GUID gid = addTimer(id, item.pos.x, item.pos.y, item.scale, item.color, item.centered);
-				addToModel(gid.id, GIT_TIMER, "Timer");
-			}
-			loader.closeChunk();
-		}		
-		return true;
-	}
 }

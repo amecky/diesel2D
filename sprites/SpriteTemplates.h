@@ -24,15 +24,10 @@ public:
 	bool get(const char* name,Sprite* sprite);
 	Sprite& get(int index);
 	const Sprite& get(int index) const;
-	bool exportData(JSONWriter& writer);
-	bool importData(JSONReader& reader);
-	bool saveData(BinaryWriter& writer);
-	bool loadData(BinaryLoader& loader);
-	const char* getJSONFileName() const {
-		return "resources\\sprite_templates.json";
-	}
+	bool saveData(JSONWriter& writer);
+	bool loadData(JSONReader& reader);
 	const char* getFileName() const {
-		return "sprite_templates";
+		return "resources\\sprite_templates.json";
 	}
 	int createEmptyTemplate(const char* name);
 	const TemplateMap& getTemplates() const {

@@ -53,6 +53,7 @@ typedef signed int int32;
 typedef signed __int64 int64;
 typedef unsigned char uint8;
 typedef unsigned char uchar;
+typedef unsigned char uchar32;
 typedef unsigned short uint16;
 typedef unsigned int uint32;
 typedef unsigned __int64 uint64;
@@ -71,12 +72,12 @@ typedef unsigned short ushort;
 #else
 	#ifndef HR
 		//#define HR(x) x;
-#define HR(x) { HRESULT hr = x ; if ( FAILED(hr) ) { char desc[1024]; sprintf(desc,"(DX) %s - %s",DXGetErrorString(hr),DXGetErrorDescription(hr));	char buf[2048];	sprintf_s(buf,"%s(%d) : Error: %s\n", __FILE__, __LINE__, desc);LOGE << buf; }}
+#define HR(x) { HRESULT hr = x ; if ( FAILED(hr) ) { char desc[1024]; sprintf_s(desc,1024, "(DX) %s - %s",DXGetErrorString(hr),DXGetErrorDescription(hr));	char buf[2048];	sprintf_s(buf,"%s(%d) : Error: %s\n", __FILE__, __LINE__, desc);LOGE << buf; }}
 	#endif
 #endif
 
 #ifndef XASSERT
-#define XASSERT(cond, s, ...) do { if (!(cond)) {char buf[2048];sprintf(buf,">> ERROR: " s "\n", ##__VA_ARGS__);OutputDebugStringA(buf); assert(cond);} } while (false)
+#define XASSERT(cond, s, ...) do { if (!(cond)) {char buf[2048];sprintf_s(buf,2048,">> ERROR: " s "\n", ##__VA_ARGS__);OutputDebugStringA(buf); assert(cond);} } while (false)
 #endif
 
 #ifndef BIT

@@ -44,16 +44,15 @@ void Gizmo::load(Category* category) {
 			category->getIdString(p->getName(),ip->getPtr());
 		}
 		if ( p->getType() == PT_FLOAT_ARRAY ) {
-			std::vector<std::string> propertyNames;
 			FloatArrayParam* ip = static_cast<FloatArrayParam*>(p);
 			ip->getPtr()->reset();
-			category->getPropertyNames(propertyNames);
-			for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-				if ( propertyNames[i] == "loop_mode" ) {
+			for (size_t i = 0; i < category->numProperties(); ++i ) {
+				const char* propertyName = category->getPropertyName(i);
+				if ( strcmp(propertyName,"loop_mode") == 0 ) {
 					// PLM_ZERO,PLM_LAST,PLM_LOOP
 					ip->getPtr()->setLoopMode(PLM_LOOP);
 				}
-				else if ( propertyNames[i] == "interpolation" ) {
+				else if ( strcmp(propertyName,"interpolation") ) {
 					// PI_LINEAR,PI_STEP,PI_CUBIC
 					std::string inMode = category->getProperty("interpolation");
 					if ( inMode == "PI_STEP") {
@@ -64,27 +63,26 @@ void Gizmo::load(Category* category) {
 					}
 				}
 				else {
-					float timeStep = atof(propertyNames[i].c_str());
+					float timeStep = atof(propertyName);
 					float value = 1.0f;
-					category->getFloat(propertyNames[i],&value);
+					category->getFloat(propertyName,&value);
 					ip->getPtr()->add(timeStep,value);
 				}
 			}
 		}
 		if ( p->getType() == PT_VEC2_PATH ) {
-			std::vector<std::string> propertyNames;
 			Vec2PathParam* ip = static_cast<Vec2PathParam*>(p);
 			ip->getPtr()->reset();
-			category->getPropertyNames(propertyNames);
-			for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-				if ( propertyNames[i] == "loop_mode" ) {
+			for (size_t i = 0; i < category->numProperties(); ++i) {
+				const char* propertyName = category->getPropertyName(i);
+				if ( strcmp(propertyName,"loop_mode") ) {
 					// PLM_ZERO,PLM_LAST,PLM_LOOP
 					ip->getPtr()->setLoopMode(PLM_LOOP);
 				}
-				else if ( propertyNames[i] == "velocity" ) {
+				else if ( strcmp(propertyName,"velocity") ) {
 
 				}
-				else if ( propertyNames[i] == "interpolation" ) {
+				else if ( strcmp(propertyName,"interpolation") ) {
 					// PI_LINEAR,PI_STEP,PI_CUBIC
 					std::string inMode = category->getProperty("interpolation");
 					if ( inMode == "PI_STEP") {
@@ -95,24 +93,23 @@ void Gizmo::load(Category* category) {
 					}
 				}
 				else {
-					float timeStep = atof(propertyNames[i].c_str());
+					float timeStep = atof(propertyName);
 					Vector2f value(1.0f);
-					category->getVector2f(propertyNames[i],&value);
+					category->getVector2f(propertyName,&value);
 					ip->getPtr()->add(timeStep,value);
 				}
 			}
 		}
 		if ( p->getType() == PT_COLOR_PATH ) {
-			std::vector<std::string> propertyNames;
 			ColorPathParam* ip = static_cast<ColorPathParam*>(p);
 			ip->getPtr()->reset();
-			category->getPropertyNames(propertyNames);
-			for ( size_t i = 0; i < propertyNames.size(); ++i ) {
-				if ( propertyNames[i] == "loop_mode" ) {
+			for (size_t i = 0; i < category->numProperties(); ++i) {
+				const char* propertyName = category->getPropertyName(i);
+				if ( strcmp(propertyName,"loop_mode") ) {
 					// PLM_ZERO,PLM_LAST,PLM_LOOP
 					ip->getPtr()->setLoopMode(PLM_LOOP);
 				}
-				else if ( propertyNames[i] == "interpolation" ) {
+				else if ( strcmp(propertyName,"interpolation") ) {
 					// PI_LINEAR,PI_STEP,PI_CUBIC
 					std::string inMode = category->getProperty("interpolation");
 					if ( inMode == "PI_STEP") {
@@ -123,9 +120,9 @@ void Gizmo::load(Category* category) {
 					}
 				}
 				else {
-					float timeStep = atof(propertyNames[i].c_str());
+					float timeStep = atof(propertyName);
 					ds::Color value(1.0f,1.0f,1.0f,1.0f);
-					category->getColor(propertyNames[i],&value);
+					category->getColor(propertyName,&value);
 					ip->getPtr()->add(timeStep,value);
 				}
 			}

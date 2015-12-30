@@ -23,9 +23,9 @@ enum ParticleGeneratorType {
 	PGT_CIRCLE,
 	PGT_LIFETIME,
 	PGT_RADIAL_VELOCITY,
-	PGT_RANDOM,
 	PGT_COLOR,
 	PGT_HSV_COLOR,
+	PGT_ROTATION_VELOCITY,
 	PGT_UNKNOWN
 };
 // -------------------------------------------------------
@@ -104,7 +104,6 @@ public:
 			//array->position[start + i].y = position.y;
 			//array->position[start + i].z = position.z + rad * sin(myAngle);
 			array->rotation[start + i] = myAngle;
-			array->type[start + i] = 1;
 			m_Angle += step;
 		}
 	}
@@ -365,6 +364,7 @@ struct RadialVelocityGeneratorData : ParticleGeneratorData {
 		writer->write(variance);
 	}
 };
+
 class RadialVelocityGenerator : public ParticleGenerator {
 
 public:
@@ -635,9 +635,10 @@ public:
 		assert(data != 0);
 		const SizeGeneratorData* my_data = static_cast<const SizeGeneratorData*>(data);
 		uint32 count = end - start;
-		for ( uint32 i = 0; i < count; ++i ) {	
+		for (uint32 i = 0; i < count; ++i) {
 			array->scale[start + i].x = ds::math::random(my_data->scale.x - my_data->variance.x, my_data->scale.x + my_data->variance.x);
 			array->scale[start + i].y = ds::math::random(my_data->scale.y - my_data->variance.y, my_data->scale.y + my_data->variance.y);
+			array->baseScale[start + i] = array->scale[start + i];
 		}
 	}
 	const ParticleGeneratorType getType() const {
@@ -649,55 +650,51 @@ public:
 };
 
 // -------------------------------------------------------
-// ParticleRandomGenerator
+// RotationVelocityGenerator
 // -------------------------------------------------------
-struct ParticleRandomGeneratorData : ParticleGeneratorData {
+struct RotationVelocityGeneratorData : ParticleGeneratorData {
 
-	float minRandom;
-	float maxRandom;
+	float velocity;
+	float variance;
 
-	ParticleRandomGeneratorData() : minRandom(0.0f) , maxRandom(1.0f) {}
+	RotationVelocityGeneratorData() : velocity(0.0f), variance(0.0f) {}
 
 	void read(Category* category) {
-		minRandom = category->getFloat("min", 0.0f);
-		maxRandom = category->getFloat("max", 1.0f);
+		velocity = DEGTORAD(category->getFloat("velocity", 10.0f));
+		variance = DEGTORAD(category->getFloat("variance", 0.0f));
 	}
 
 	void load(BinaryLoader* loader) {
-		loader->read(&minRandom);
-		loader->read(&maxRandom);
+		loader->read(&velocity);
+		loader->read(&variance);
 	}
 
 	void save(BinaryWriter* writer) {
-		writer->write(minRandom);
-		writer->write(maxRandom);
+		writer->write(RADTODEG(velocity));
+		writer->write(RADTODEG(variance));
 	}
 };
 
-class ParticleRandomGenerator : public ParticleGenerator {
+class RotationVelocityGenerator : public ParticleGenerator {
 
 public:
-	ParticleRandomGenerator() : ParticleGenerator() {
-	}
-	virtual ~ParticleRandomGenerator() {}
+	RotationVelocityGenerator() : ParticleGenerator() {}
+	virtual ~RotationVelocityGenerator() {}
 	void generate(ParticleArray* array, const ParticleGeneratorData* data, float dt, uint32 start, uint32 end) {
 		assert(data != 0);
-		const ParticleRandomGeneratorData* my_data = static_cast<const ParticleRandomGeneratorData*>(data);
 		uint32 count = end - start;
-		for ( uint32 i = 0; i < count; ++i ) {	
-			array->random[start+i] = ds::math::random(my_data->minRandom,my_data->maxRandom);
+		const RotationVelocityGeneratorData* my_data = static_cast<const RotationVelocityGeneratorData*>(data);
+		for (uint32 i = 0; i < count; ++i) {
+			array->rotationVelocity[i] = ds::math::random(my_data->velocity - my_data->variance, my_data->velocity + my_data->variance);
 		}
 	}
-	const ParticleGeneratorType getType() const {
-		return PGT_RANDOM;
-	}
 	const char* getName() const {
-		return "random";
+		return "rotation_velocity";
+	}
+	const ParticleGeneratorType getType() const {
+		return PGT_ROTATION_VELOCITY;
 	}
 };
-
-
-
 
 }
 

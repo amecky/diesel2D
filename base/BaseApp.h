@@ -13,6 +13,7 @@
 namespace ds {
 
 class GameStateMachine;
+class GameState;
 struct BitmapFont;
 class ParticleManager;
 class DialogsEditor;
@@ -110,6 +111,11 @@ public:
 		m_TwistedMousePos.y = renderer::getScreenHeight() - static_cast<float>(y);
 		renderer::setMousePosition(m_TwistedMousePos.x, m_TwistedMousePos.y);
 	}
+
+	void addGameState(GameState* gameState);
+	void activate(const char* name);
+	void connectGameStates(const char* firstStateName, int outcome, const char* secondStateName);
+
 protected:
 	void activateMonitoring(float threshold);
 	void loadSprites();
@@ -127,7 +133,7 @@ protected:
 
 	DialogManager gui;
 	AudioManager* audio;
-	GameStateMachine* stateMachine;
+	
 	ParticleManager* particles;
 	HINSTANCE hInstance;
 	HWND m_hWnd;
@@ -137,6 +143,7 @@ protected:
 	float _totalTime;
 	Settings _settings;
 private:
+	void loadSettings(const Category* root);
 	void showProfilerSnapshot(v2* position);
 	void showEditor();
 	Vector2f m_MousePos;
@@ -150,6 +157,7 @@ private:
 	ButtonState m_ButtonState;
 	MTRand_open rand;		
 	bool m_Running;
+	GameStateMachine* _stateMachine;
 
 	GameEditor _editor;
 	BitmapFontsDialog _bmfDialog;
@@ -158,6 +166,7 @@ private:
 	SpriteTemplatesEditor* _templatesEditor;
 	v2 _perfHUDPos;
 	ProfileSnapshot _snapshots[64];
+	bool _prepared;
 }; 
 
 }

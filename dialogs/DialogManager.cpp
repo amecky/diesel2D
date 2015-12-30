@@ -207,59 +207,35 @@ namespace ds {
 	}
 	
 	// -------------------------------------------------------
-	// save
-	// -------------------------------------------------------
-	bool DialogManager::saveData(BinaryWriter& writer) {
-		for (size_t i = 0; i < m_Dialogs.size(); ++i) {
-			const DialogDefinition& def = m_Dialogs[i];
-			writer.startChunk(CHNK_DLG_DEF, 1);
-			writer.write(def.name);
-			writer.write(def.hash);
-			writer.closeChunk();			
-		}
-		return true;
-	}
-
-	// -------------------------------------------------------
 	// export json
 	// -------------------------------------------------------
-	bool DialogManager::exportData(JSONWriter& writer) {
+	bool DialogManager::saveData(JSONWriter& writer) {
 		return true;
 	}
 
 	// -------------------------------------------------------
 	// import json
 	// -------------------------------------------------------
-	bool DialogManager::importData(JSONReader& reader) {
-		return true;
-	}
-	
-	// -------------------------------------------------------
-	// load
-	// -------------------------------------------------------
-	bool DialogManager::loadData(BinaryLoader& loader) {
-		//_model.clear();
+	bool DialogManager::loadData(JSONReader& reader) {
 		clear();
-		_index = 1;		
-		while (loader.openChunk() == 0) {
-			if (loader.getChunkID() == CHNK_DLG_DEF) {
+		_index = 1;
+		std::vector<Category*> categories = reader.getCategories();
+		for (size_t i = 0; i < categories.size(); ++i) {
+			Category* c = categories[i];
+			if (c->getName() != "gui") {
+				int id = c->getInt("id", -1);
+				std::string name = c->getProperty("file");
+				GUIDialog* dialog = new GUIDialog();
+				LOG << "Creating new dialog: " << name;
 				DialogDefinition def;
-				loader.read(def.name);
-				LOG << "dialog definition: " << def.name;
-				//assert(get(def.name) == 0);
-				if (get(def.name) == 0) {
-					loader.read(&def.hash);
-					GUIDialog* dialog = new GUIDialog();
-					LOG << "Creating new dialog: " << def.name;
-					def.dialog = dialog;
-					dialog->init(def.name, _index, m_Font);
-					m_Dialogs.push_back(def);
-					//_model.add(def.name, def);
-					++_index;
-				}
+				sprintf_s(def.name, 32, "%s", name.c_str());
+				def.hash = string::murmur_hash(name.c_str());
+				def.dialog = dialog;
+				dialog->init(def.name, _index, m_Font);
+				m_Dialogs.push_back(def);
 			}
-			loader.closeChunk();
 		}
 		return true;
 	}
+	
 }

@@ -31,15 +31,10 @@ public:
 	void removeSystem(int id);
 	void debug();
 	void fillModel(gui::ComponentModel<int>* model);
-	bool exportData(JSONWriter& writer);
-	bool importData(JSONReader& reader);
-	bool saveData(BinaryWriter& writer);
-	bool loadData(BinaryLoader& loader);
-	const char* getJSONFileName() const {
-		return "particles\\particlesystems.json";
-	}
+	bool saveData(JSONWriter& writer);
+	bool loadData(JSONReader& reader);
 	const char* getFileName() const {
-		return "particlesystems";
+		return "particles\\particlesystems.json";
 	}
 	const ParticleSystemFactory& getFactory() const {
 		return _factory;

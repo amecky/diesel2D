@@ -29,15 +29,10 @@ public:
 	GUIDialog* get(const char* dialogName);
 	GUIDialog* create(const char* dialogName);
 	void tick(float dt);
-	bool exportData(JSONWriter& writer);
-	bool importData(JSONReader& reader);
-	bool saveData(BinaryWriter& writer);
-	bool loadData(BinaryLoader& loader);
-	const char* getJSONFileName() const {
-		return "resources\\gui.json";
-	}
+	bool saveData(JSONWriter& writer);
+	bool loadData(JSONReader& reader);
 	const char* getFileName() const {
-		return "gui_dialogs";
+		return "resources\\gui.json";
 	}
 	const Dialogs& getDialogs() const {
 		return m_Dialogs;
