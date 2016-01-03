@@ -25,6 +25,9 @@ bool JSONWriter::open(const char* fileName) {
 // start category
 // ----------------------------------------------------------
 void JSONWriter::startCategory(const char* name) {
+	//if (_items > 0) {
+		//fprintf_s(f, "\n");
+	//}
 	writeIdent();
 	fprintf(f, "\"%s\" { ", name);
 	_open = true;
@@ -37,6 +40,16 @@ void JSONWriter::startCategory(const char* name) {
 // ----------------------------------------------------------
 void JSONWriter::write(const char* name, int value) {
 	
+	writeLineIdent();
+	fprintf_s(f, "\"%s\" : \"%d\"", name, value);
+	++_items;
+}
+
+// ----------------------------------------------------------
+// write uint32
+// ----------------------------------------------------------
+void JSONWriter::write(const char* name, uint32 value) {
+
 	writeLineIdent();
 	fprintf_s(f, "\"%s\" : \"%d\"", name, value);
 	++_items;
@@ -83,9 +96,18 @@ void JSONWriter::write(const char* name, bool value) {
 void JSONWriter::write(const char* name, const v2& value) {
 	
 	writeLineIdent();
-	int x = value.x;
-	int y = value.y;
-	fprintf(f, "\"%s\" : \"%d,%d\"", name, x,y);
+	fprintf(f, "\"%s\" : \"%.2f,%.2f\"", name, value.x, value.y);
+	++_items;
+
+}
+
+// ----------------------------------------------------------
+// write v3
+// ----------------------------------------------------------
+void JSONWriter::write(const char* name, const v3& value) {
+
+	writeLineIdent();
+	fprintf(f, "\"%s\" : \"%.2f,%.2f,%.2f\"", name, value.x, value.y, value.z);
 	++_items;
 
 }
@@ -122,10 +144,12 @@ void JSONWriter::write(const char* name, const ds::Rect& value) {
 // end category
 // ----------------------------------------------------------
 void JSONWriter::endCategory() {
-	writeIdent();
-	fprintf_s(f, "\n}\n");
-	_open = false;
+	_items = 0;
+	fprintf_s(f, "\n");
 	_ident -= 4;
+	writeIdent();
+	fprintf_s(f, "}");
+	_open = false;	
 }
 
 // ----------------------------------------------------------
@@ -140,6 +164,49 @@ void JSONWriter::writeLineIdent() {
 	}
 	for (int i = 0; i < _ident; ++i) {
 		fprintf(f, " ");
+	}
+}
+
+// ----------------------------------------------------------
+// write color path
+// ----------------------------------------------------------
+void JSONWriter::write(const ds::ColorPath& path) {
+	for (int i = 0; i < path.size(); ++i) {
+		const ds::Color& value = path.value(i);
+		float key = path.key(i);
+		writeLineIdent();
+		int r = value.r * 255.0f;
+		int g = value.g * 255.0f;
+		int b = value.b * 255.0f;
+		int a = value.a * 255.0f;
+		fprintf(f, "\"%.2f\" : \"%d,%d,%d,%d\"", key, r, g, b, a);
+		++_items;
+	}
+}
+
+// ----------------------------------------------------------
+// write color path
+// ----------------------------------------------------------
+void JSONWriter::write(const ds::Vector2fPath& path) {
+	for (int i = 0; i < path.size(); ++i) {
+		const v2& value = path.value(i);
+		float key = path.key(i);
+		writeLineIdent();
+		fprintf(f, "\"%.2f\" : \"%f,%f\"", key, value.x,value.y);
+		++_items;
+	}
+}
+
+// ----------------------------------------------------------
+// write color path
+// ----------------------------------------------------------
+void JSONWriter::write(const ds::FloatArray& path) {
+	for (int i = 0; i < path.size(); ++i) {
+		float value = path.value(i);
+		float key = path.key(i);
+		writeLineIdent();
+		fprintf(f, "\"%.2f\" : \"%f\"", key, value);
+		++_items;
 	}
 }
 

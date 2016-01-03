@@ -1,7 +1,7 @@
 #pragma once
 #include "Particle.h"
 #include "..\utils\PlainTextReader.h"
-#include "..\io\BinaryWriter.h"
+#include "..\utils\JSONWriter.h"
 #include "..\data\DataTranslator.h"
 #include "..\utils\Profiler.h"
 #include "ParticleSystemData.h"
@@ -27,8 +27,7 @@ enum ParticleModifierType {
 struct ParticleModifierData {
 
 	virtual void read(Category* category) = 0;
-	virtual void load(BinaryLoader* loader) = 0;
-	virtual void save(BinaryWriter* writer) = 0;
+	virtual void save(JSONWriter& writer) = 0;
 
 };
 
@@ -119,14 +118,9 @@ struct LinearColorModifierData : ParticleModifierData {
 		category->getColor("end_color", &endColor);
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&startColor);
-		loader->read(&endColor);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(startColor);
-		writer->write(endColor);
+	void save(JSONWriter& writer) {
+		writer.write("start_color", startColor);
+		writer.write("end_color", endColor);
 	}
 };
 
@@ -174,14 +168,9 @@ struct LinearAlphaModifierData : ParticleModifierData {
 		category->getFloat("end_alpha", &endAlpha);
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&startAlpha);
-		loader->read(&endAlpha);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(startAlpha);
-		writer->write(endAlpha);
+	void save(JSONWriter& writer) {
+		writer.write("start_alpha", startAlpha);
+		writer.write("end_alpha", endAlpha);
 	}
 };
 
@@ -228,14 +217,9 @@ struct LinearSizeModifierData : ParticleModifierData {
 		category->getVector2f("max_scale", &maxScale);
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&minScale);
-		loader->read(&maxScale);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(minScale);
-		writer->write(maxScale);
+	void save(JSONWriter& writer) {
+		writer.write("min_scale", minScale);
+		writer.write("max_scale", maxScale);
 	}
 };
 
@@ -322,12 +306,8 @@ struct ColorPathModifierData : ParticleModifierData {
 		category->getColorPath(&path);
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&path);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(path);
+	void save(JSONWriter& writer) {
+		writer.write(path);
 	}
 };
 
@@ -367,6 +347,10 @@ struct AlphaPathModifierData : ParticleModifierData{
 	FloatArray path;
 
 	void read(Category* category) {
+	}
+
+	void save(JSONWriter& writer) {
+		writer.write(path);
 	}
 
 };
@@ -412,12 +396,8 @@ struct DampingVelocityModifierData : ParticleModifierData {
 		damping = category->getFloat("damping", 0.0f);
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&damping);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(damping);
+	void save(JSONWriter& writer) {
+		writer.write("damping", damping);
 	}
 
 };
@@ -454,6 +434,10 @@ struct SizePathModifierData : ParticleModifierData{
 	Vector2fPath path;
 
 	void read(Category* category) {
+	}
+
+	void save(JSONWriter& writer) {
+		writer.write(path);
 	}
 
 };

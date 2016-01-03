@@ -10,8 +10,7 @@ namespace ds {
 	struct ParticleGeneratorData {
 
 		virtual void read(Category* category) = 0;
-		virtual void load(BinaryLoader* loader) = 0;
-		virtual void save(BinaryWriter* writer) = 0;
+		virtual void save(JSONWriter& writer) = 0;
 
 	};
 
@@ -63,18 +62,11 @@ struct RingGeneratorData : ParticleGeneratorData {
 		step = category->getFloat("step", 0.0f);
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&radius);
-		loader->read(&variance);
-		loader->read(&angleVariance);
-		loader->read(&step);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(radius);
-		writer->write(variance);
-		writer->write(angleVariance);
-		writer->write(step);
+	void save(JSONWriter& writer) {
+		writer.write("radius", radius);
+		writer.write("variance", variance);
+		writer.write("angle_variance", angleVariance);
+		writer.write("step", step);
 	}
 };
 
@@ -354,14 +346,9 @@ struct RadialVelocityGeneratorData : ParticleGeneratorData {
 		variance = category->getFloat("variance", 0.0f);
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&velocity);
-		loader->read(&variance);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(velocity);
-		writer->write(variance);
+	void save(JSONWriter& writer) {
+		writer.write("velocity", velocity);
+		writer.write("variance", variance);
 	}
 };
 
@@ -442,14 +429,9 @@ struct LifetimeGeneratorData : ParticleGeneratorData {
 		variance = category->getFloat("variance", 0.0f);
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&ttl);
-		loader->read(&variance);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(ttl);
-		writer->write(variance);
+	void save(JSONWriter& writer) {
+		writer.write("ttl", ttl);
+		writer.write("variance", variance);
 	}
 };
 
@@ -489,12 +471,8 @@ struct ColorGeneratorData : ParticleGeneratorData {
 		color = category->getColor("color", Color::WHITE);
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&color);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(color);
+	void save(JSONWriter& writer) {
+		writer.write("color", color);
 	}
 
 };
@@ -542,20 +520,12 @@ struct HSVColorGeneratorData : ParticleGeneratorData {
 		valueVariance = category->getFloat("value_variance",0.0f);
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&hsv);
-		loader->read(&hueVariance);
-		loader->read(&saturationVariance);
-		loader->read(&valueVariance);
-		loader->read(&alpha);
-	}
-
-	void save(BinaryWriter* writer) {		
-		writer->write(hsv);
-		writer->write(hueVariance);
-		writer->write(saturationVariance);
-		writer->write(valueVariance);
-		writer->write(alpha);
+	void save(JSONWriter& writer) {
+		writer.write("hsv", hsv);
+		writer.write("alpha", alpha);
+		writer.write("hue_variance", hueVariance);
+		writer.write("saturation_variance", saturationVariance);
+		writer.write("value_variance", valueVariance);
 	}
 };
 
@@ -612,14 +582,9 @@ struct SizeGeneratorData : ParticleGeneratorData {
 		variance = category->getVector2f("variance", v2(0, 0));
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&scale);
-		loader->read(&variance);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(scale);
-		writer->write(variance);
+	void save(JSONWriter& writer) {
+		writer.write("scale", scale);
+		writer.write("variance", variance);
 	}
 };
 
@@ -664,14 +629,9 @@ struct RotationVelocityGeneratorData : ParticleGeneratorData {
 		variance = DEGTORAD(category->getFloat("variance", 0.0f));
 	}
 
-	void load(BinaryLoader* loader) {
-		loader->read(&velocity);
-		loader->read(&variance);
-	}
-
-	void save(BinaryWriter* writer) {
-		writer->write(RADTODEG(velocity));
-		writer->write(RADTODEG(variance));
+	void save(JSONWriter& writer) {
+		writer.write("velocity", RADTODEG(velocity));
+		writer.write("variance", RADTODEG(variance));
 	}
 };
 

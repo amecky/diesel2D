@@ -25,7 +25,7 @@ namespace ds {
 // Constructing new BaseApp
 // -------------------------------------------------------	
 BaseApp::BaseApp() {
-	repository::initialize(repository::RM_RELEASE);
+	repository::initialize(repository::RM_DEBUG);
 	gBlockMemory = new DataBlockAllocator();
 	gFileWatcher = new FileWatcher();
 	m_Active = true;
