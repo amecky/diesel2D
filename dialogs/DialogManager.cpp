@@ -230,7 +230,7 @@ namespace ds {
 				sprintf_s(def.name, 32, "%s", name.c_str());
 				def.hash = string::murmur_hash(name.c_str());
 				def.dialog = dialog;
-				dialog->init(def.name, _index, m_Font);
+				dialog->init(def.name, id, m_Font);
 				m_Dialogs.push_back(def);
 			}
 		}
