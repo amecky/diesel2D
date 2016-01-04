@@ -125,7 +125,7 @@ void BaseApp::loadSettings(const Category* root) {
 				int texture = renderer::getTextureId(texName.c_str());
 				assert(texture != -1);
 				std::string file = entries[i]->getProperty("file");
-				BitmapFont* font = assets::loadFont(file.c_str() , texture);
+				BitmapFont* font = renderer::loadBitmapFont(file.c_str(), texture);
 			}
 		}
 		else {
@@ -171,7 +171,8 @@ void BaseApp::loadSettings(const Category* root) {
 		}
 		// load sprite templates
 		if (init->getBool("load_sprite_templates", false)) {
-			assets::loadSpriteTemplates();
+			//assets::loadSpriteTemplates();
+			renderer::loadSpriteTemplates();
 		}
 		else {
 			LOG << "Not loading sprite templates";

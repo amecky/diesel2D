@@ -8,7 +8,6 @@
 #include "ParticleModifier.h"
 #include "ParticleEmitter.h"
 #include "..\utils\Profiler.h"
-#include "..\compiler\AssetCompiler.h"
 #include "ParticleSystemFactory.h"
 
 namespace ds {

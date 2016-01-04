@@ -229,7 +229,6 @@
     <ClCompile Include="collision\CollisionDetectionSystem.cpp" />
     <ClCompile Include="collision\NarrowPhaseDetector.cpp" />
     <ClCompile Include="collision\SpatialHashingBroadPhaseDetector.cpp" />
-    <ClCompile Include="compiler\AssetCompiler.cpp" />
     <ClCompile Include="data\DynamicSettings.cpp" />
     <ClCompile Include="dialogs\DialogManager.cpp" />
     <ClCompile Include="dialogs\GUIDialog.cpp" />
@@ -240,7 +239,6 @@
     <ClCompile Include="editor\SpriteTemplatesEditor.cpp" />
     <ClCompile Include="editor\SpriteTemplatesState.cpp" />
     <ClCompile Include="io\FileRepository.cpp" />
-    <ClCompile Include="io\FileWatcher.cpp" />
     <ClCompile Include="io\TextCompressor.cpp" />
     <ClCompile Include="lib\DataContainer.cpp" />
     <ClCompile Include="math\CubicBezierPath.cpp" />
@@ -323,9 +321,7 @@
     <ClInclude Include="collision\CollisionTypes.h" />
     <ClInclude Include="collision\NarrowPhaseDetector.h" />
     <ClInclude Include="collision\SpatialHashingBroadPhaseDetector.h" />
-    <ClInclude Include="compiler\AssetCompiler.h" />
     <ClInclude Include="compiler\DataFile.h" />
-    <ClInclude Include="data\DataTranslator.h" />
     <ClInclude Include="data\DynamicSettings.h" />
     <ClInclude Include="DialogResources.h" />
     <ClInclude Include="dialogs\DialogManager.h" />
@@ -338,7 +334,6 @@
     <ClInclude Include="editor\SpriteTemplatesEditor.h" />
     <ClInclude Include="editor\SpriteTemplatesState.h" />
     <ClInclude Include="io\FileRepository.h" />
-    <ClInclude Include="io\FileWatcher.h" />
     <ClInclude Include="io\TextCompressor.h" />
     <ClInclude Include="lib\Bitset.h" />
     <ClInclude Include="lib\BlockDataArray.h" />

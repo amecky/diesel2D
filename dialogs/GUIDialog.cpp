@@ -3,7 +3,6 @@
 #include "..\utils\StringUtils.h"
 #include "..\utils\font.h"
 #include "..\utils\PlainTextReader.h"
-#include "..\io\FileWatcher.h"
 #include "..\renderer\graphics.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\DialogResources.h"

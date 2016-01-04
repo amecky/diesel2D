@@ -109,7 +109,7 @@ namespace ds {
 	// render
 	// --------------------------------------------
 	void ParticlesEditState::render() {
-		gui::start(DIALOG_MANAGER_ID, &_dialogPos);
+		gui::start(209, &_dialogPos);
 		int gen_id = -1;
 		renderSelection();
 		if (_model.hasSelection()) {

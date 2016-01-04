@@ -10,10 +10,10 @@
 #include "VertexDeclaration.h"
 #include "..\sprites\SpriteTemplates.h"
 #include "..\utils\StringUtils.h"
-#include "..\compiler\AssetCompiler.h"
 #include "Camera.h"
 #include "..\base\Settings.h"
 #include "..\sprites\SpriteGroup.h"
+#include "shader.h"
 
 namespace ds {
 

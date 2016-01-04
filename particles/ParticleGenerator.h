@@ -1,7 +1,6 @@
 #pragma once
 #include "..\utils\PlainTextReader.h"
 #include "Particle.h"
-#include "..\data\DataTranslator.h"
 
 namespace ds {
 

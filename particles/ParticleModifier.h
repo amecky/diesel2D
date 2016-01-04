@@ -2,7 +2,6 @@
 #include "Particle.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\utils\JSONWriter.h"
-#include "..\data\DataTranslator.h"
 #include "..\utils\Profiler.h"
 #include "ParticleSystemData.h"
 

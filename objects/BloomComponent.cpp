@@ -2,7 +2,6 @@
 #include "..\renderer\shader.h"
 #include "..\utils\Log.h"
 #include "..\utils\PlainTextReader.h"
-#include "..\compiler\AssetCompiler.h"
 #include "..\renderer\graphics.h"
 
 namespace ds {

@@ -91,14 +91,8 @@
     <ClCompile Include="memory\DataBlockAllocator.cpp">
       <Filter>memory</Filter>
     </ClCompile>
-    <ClCompile Include="io\FileWatcher.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
     <ClCompile Include="particles\ParticleSystem.cpp">
       <Filter>particles</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler\AssetCompiler.cpp">
-      <Filter>compiler</Filter>
     </ClCompile>
     <ClCompile Include="renderer\BitmapFont.cpp">
       <Filter>renderer</Filter>
@@ -404,9 +398,6 @@
     <ClInclude Include="memory\DataBlockAllocator.h">
       <Filter>memory</Filter>
     </ClInclude>
-    <ClInclude Include="io\FileWatcher.h">
-      <Filter>io</Filter>
-    </ClInclude>
     <ClInclude Include="lib\container\ImmutableBag.h">
       <Filter>lib\container</Filter>
     </ClInclude>
@@ -415,9 +406,6 @@
     </ClInclude>
     <ClInclude Include="particles\ParticleSystem.h">
       <Filter>particles</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\AssetCompiler.h">
-      <Filter>compiler</Filter>
     </ClInclude>
     <ClInclude Include="renderer\BitmapFont.h">
       <Filter>renderer</Filter>
@@ -436,9 +424,6 @@
     </ClInclude>
     <ClInclude Include="sprites\SpriteBatch.h">
       <Filter>sprites</Filter>
-    </ClInclude>
-    <ClInclude Include="data\DataTranslator.h">
-      <Filter>data</Filter>
     </ClInclude>
     <ClInclude Include="lib\DataArray.h">
       <Filter>lib</Filter>

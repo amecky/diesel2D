@@ -4,7 +4,6 @@
 #include "..\utils\mtrand.h"
 #include "..\dialogs\DialogManager.h"
 #include "..\audio\AudioManager.h"
-#include "..\compiler\AssetCompiler.h"
 #include "..\renderer\graphics.h"
 #include "Settings.h"
 #include "..\editor\BitmapFontsDialog.h"

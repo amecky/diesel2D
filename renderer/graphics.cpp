@@ -6,7 +6,6 @@
 #include "..\utils\font.h"
 #include "..\utils\ObjLoader.h"
 #include "..\utils\FileUtils.h"
-#include "..\compiler\AssetCompiler.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\DialogResources.h"
 #include "..\io\FileRepository.h"
