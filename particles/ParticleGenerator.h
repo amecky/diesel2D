@@ -1,8 +1,6 @@
 #pragma once
 #include "..\utils\PlainTextReader.h"
-#include "..\io\BinaryLoader.h"
 #include "Particle.h"
-#include "..\io\BinaryWriter.h"
 #include "..\data\DataTranslator.h"
 
 namespace ds {

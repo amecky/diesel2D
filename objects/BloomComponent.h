@@ -1,9 +1,7 @@
 #pragma once
 #include "..\renderer\render_types.h"
-#include "..\compiler\Converter.h"
 #include "..\sprites\Sprite.h"
 #include "..\sprites\SpriteBatch.h"
-#include "..\io\Serializer.h"
 
 namespace ds {
 
@@ -27,7 +25,7 @@ struct BloomSettings  {
 // -------------------------------------------------------
 // Bloom component
 // -------------------------------------------------------
-class BloomComponent : public Serializer {
+class BloomComponent {
 
 public:
 	BloomComponent(void);
@@ -35,7 +33,7 @@ public:
 	void update(float elapsed);
 	int init(int baseTarget,int texID);
 	void render();
-	void load(BinaryLoader* loader);
+	//void load(BinaryLoader* loader);
 	void useBloom(bool use) {
 		m_UseBloom = use;
 	}

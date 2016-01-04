@@ -117,7 +117,7 @@ namespace ds {
 			curve.get(nn,p);
 		}
 	}
-
+	/*
 	void CubicBezierPath::load(BinaryLoader* loader) {
 		m_Elements.clear();
 		Vector2f p0,p1,p2,p3;
@@ -139,5 +139,5 @@ namespace ds {
 		}		
 		build();
 	}
-
+	*/
 }

@@ -1,8 +1,6 @@
 #pragma once
 #include "..\utils\PlainTextReader.h"
-#include "..\io\BinaryLoader.h"
 #include "Particle.h"
-#include "..\io\BinaryWriter.h"
 #include "ParticleGenerator.h"
 
 namespace ds {
@@ -23,7 +21,7 @@ struct ParticleEmitterData {
 	float frequency;
 
 	ParticleEmitterData() : ejectionPeriod(0), ejectionVariance(0), ejectionCounter(0), count(1) {}
-
+	/*
 	void load(BinaryLoader* loader) {
 		loader->read(&count);
 		loader->read(&ejectionPeriod);
@@ -31,6 +29,7 @@ struct ParticleEmitterData {
 		loader->read(&ejectionCounter);
 		loader->read(&duration);
 	}
+	*/
 };
 
 struct ParticleEmitterInstance {

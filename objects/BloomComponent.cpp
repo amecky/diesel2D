@@ -80,7 +80,8 @@ void BloomComponent::render() {
 	}
 }
 
-void BloomComponent::load(BinaryLoader* loader) {
+//void BloomComponent::load(BinaryLoader* loader) {
+	/*
 	while ( loader->openChunk() == 0 ) {		
 		if ( loader->getChunkID() == CHNK_BLOOM_COMPONENT ) {	
 			loader->read(&m_Settings.firstTarget);
@@ -93,7 +94,8 @@ void BloomComponent::load(BinaryLoader* loader) {
 		}
 		loader->closeChunk();
 	}		
-}
+	*/
+//}
 
 
 }

@@ -1,14 +1,13 @@
 #pragma once
 #include <Vector.h>
 #include <vector>
-#include "..\io\Serializer.h"
 #include "BezierCurve.h"
 
 namespace ds {
 
 	const int MAX_CBP_STEPS = 64;
 
-	class CubicBezierPath : public Serializer {
+	class CubicBezierPath {
 
 	typedef std::vector<BezierCurve> BezierElements;
 
@@ -21,7 +20,6 @@ namespace ds {
 		void get(float t,Vector2f* p);
 		void approx(float u, Vector2f* p);
 		void tanget(float u, Vector2f* tangent);
-		void load(BinaryLoader* loader);
 		const int size() const {
 			return m_Elements.size();
 		}

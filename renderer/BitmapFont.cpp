@@ -1,8 +1,6 @@
 #include "BitmapFont.h"
 #include "..\utils\JSONWriter.h"
 #include "..\utils\PlainTextReader.h"
-#include "..\io\BinaryLoader.h"
-#include "..\io\BinaryWriter.h"
 
 namespace ds {
 
@@ -84,64 +82,6 @@ namespace ds {
 		}
 	}
 
-	// -------------------------------------------------------
-	// load
-	// -------------------------------------------------------
-	bool BitmapFont::load() {
-		BinaryLoader loader;
-		char buffer[64];
-		sprintf(buffer, "assets\\%u", hashName);
-		LOG << "loading file: " << buffer;
-		int signature[] = { 0, 8, 15 };
-		if (loader.open(buffer, signature, 3) == IO_OK) {
-			while (loader.openChunk() == 0) {
-				if (loader.getChunkID() == 1) {
-					loader.read(&startChar);
-					loader.read(&endChar);
-					loader.read(&charHeight);
-					loader.read(&gridHeight);
-					loader.read(&startX);
-					loader.read(&startY);
-					loader.read(&width);
-					loader.read(&height);
-					loader.read(&padding);
-					loader.read(&textureSize);
-					loader.closeChunk();
-					return true;
-				}
-			}
-		}
-		else {
-			LOG << "Error loading file";
-		}
-		return false;
-	}
-
-	// -------------------------------------------------------
-	// save
-	// -------------------------------------------------------
-	void BitmapFont::save() {
-		char buffer[64];
-		sprintf(buffer, "assets\\%u", hashName);
-		LOG << "saving file: " << buffer;
-		BinaryWriter writer;
-		int signature[] = { 0, 8, 15 };
-		writer.open(buffer, signature, 3);
-		writer.startChunk(1, 1);
-		writer.write(startChar);
-		writer.write(endChar);
-		writer.write(charHeight);
-		writer.write(gridHeight);
-		writer.write(startX);
-		writer.write(startY);
-		writer.write(width);
-		writer.write(height);
-		writer.write(padding);
-		writer.write(textureSize);
-		writer.closeChunk();		
-		writer.close();
-	}
-	
 	const bool BitmapFont::contains(char c) const {
 		int idx = (int)c - startChar;
 		return idx >= 0 && idx < definitions.size();

@@ -1,7 +1,6 @@
 #pragma once
 #include "render_types.h"
 #include "..\math\math_types.h"
-#include "..\io\Serializer.h"
 
 namespace ds {
 
@@ -15,7 +14,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// Shader
 	// -------------------------------------------------------
-	class Shader : public Serializer {
+	class Shader {
 
 	public:		
 		Shader(int id,const char* name);
@@ -40,7 +39,7 @@ namespace ds {
 		IdString getHashName() const {
 			return _hashName;
 		}
-		void load(BinaryLoader* loader);
+		//void load(BinaryLoader* loader);
 		const int getID() const {
 			return _id;
 		}

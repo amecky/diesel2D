@@ -3,8 +3,6 @@
 #include "..\utils\JSONWriter.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\DialogResources.h"
-#include "..\io\BinaryLoader.h"
-#include "..\io\BinaryWriter.h"
 
 namespace ds {
 
@@ -93,7 +91,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// export json
 	// -------------------------------------------------------
-	void DynamicGameSettings::exportJSON() {
+	void DynamicGameSettings::save() {
 		char buffer[64];
 		sprintf_s(buffer, 64, "content\\%s.json", getName());
 		JSONWriter jw;
@@ -114,7 +112,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// import json
 	// -------------------------------------------------------
-	void DynamicGameSettings::importJSON() {
+	void DynamicGameSettings::load() {
 		char buffer[64];
 		sprintf_s(buffer, 64, "content\\%s.json",getName());
 		JSONReader reader;
@@ -139,63 +137,6 @@ namespace ds {
 	}
 
 	// -------------------------------------------------------
-	// load
-	// -------------------------------------------------------
-	void DynamicGameSettings::load() {
-		BinaryLoader loader;
-		char buffer[64];
-		sprintf(buffer, "assets\\%u", string::murmur_hash(getName()));
-		LOG << "loading file: " << buffer;
-		int signature[] = { 0, 8, 15 };
-		if (loader.open(buffer, signature, 3) == IO_OK) {
-			while (loader.openChunk() == 0) {
-				if (loader.getChunkID() == 1) {
-					loader.read(buffer);
-					int type = -1;
-					loader.read(&type);
-					if (type == ST_FLOAT) {
-						float v = 0.0f;
-						loader.read(&v);
-						setFloat(buffer, v);
-					}
-					else if (type == ST_RECT) {
-						Rect r;
-						loader.read(&r);
-						setRect(buffer, r);
-					}
-				}
-				loader.closeChunk();
-			}
-		}
-		else {
-			LOG << "Error loading file";
-		}
-	}
-
-	// -------------------------------------------------------
-	// save
-	// -------------------------------------------------------
-	void DynamicGameSettings::save() {
-		char buffer[64];
-		sprintf(buffer, "assets\\%u", string::murmur_hash(getName()));
-		BinaryWriter writer;
-		int signature[] = { 0, 8, 15 };
-		writer.open(buffer, signature, 3);
-		for (int i = 0; i < _items.size(); ++i) {
-			const SettingsItem& item = _items[i];
-			writer.startChunk(1, 1);
-			writer.write(item.name);
-			writer.write(item.type);
-			switch (item.type) {
-				case ST_FLOAT: writer.write(*_floats[item.index]); break;
-				case ST_RECT: writer.write(*_rects[item.index]); break;
-			}
-			writer.closeChunk();
-		}
-		writer.close();
-	}
-
-	// -------------------------------------------------------
 	// show dialog
 	// -------------------------------------------------------
 	void DynamicGameSettings::showDialog(v2* pos) {
@@ -208,12 +149,6 @@ namespace ds {
 			}
 			if (gui::Button("Load")) {
 				load();
-			}
-			if (gui::Button("Export")) {
-				exportJSON();
-			}
-			if (gui::Button("Import")) {
-				importJSON();
 			}
 			gui::endGroup();
 		}
@@ -257,12 +192,6 @@ namespace ds {
 			}
 			if (gui::Button("Load")) {
 				load();
-			}
-			if (gui::Button("Export")) {
-				exportJSON();
-			}
-			if (gui::Button("Import")) {
-				importJSON();
 			}
 			gui::endGroup();
 		}

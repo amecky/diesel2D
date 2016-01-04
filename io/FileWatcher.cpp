@@ -2,7 +2,7 @@
 #include "..\utils\FileUtils.h"
 #include "..\utils\Log.h"
 #include "..\utils\StringUtils.h"
-
+/*
 ds::FileWatcher* gFileWatcher;
 
 namespace ds {
@@ -61,3 +61,4 @@ bool FileWatcher::contains(const char* fileName) {
 }
 
 }
+*/

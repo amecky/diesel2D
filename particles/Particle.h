@@ -2,7 +2,6 @@
 #include "..\utils\Color.h"
 #include "..\math\math_types.h"
 #include "..\utils\PlainTextReader.h"
-#include "..\io\BinaryLoader.h"
 #include "..\renderer\vertex_types.h"
 
 namespace ds {

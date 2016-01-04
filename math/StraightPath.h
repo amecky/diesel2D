@@ -1,7 +1,6 @@
 #pragma once
 #include <Vector.h>
 #include <vector>
-#include "..\io\Serializer.h"
 #include "CubicBezierPath.h"
 
 namespace ds {
@@ -14,7 +13,7 @@ namespace ds {
 
 	typedef std::vector<LineSegment> LineElements;
 
-	class StraightPath : public Serializer {
+	class StraightPath {
 
 	public:
 		StraightPath();
@@ -25,7 +24,7 @@ namespace ds {
 		void get(float t, Vector2f* p);
 		void approx(float u, Vector2f* p);
 		void tanget(float u, Vector2f* tangent);
-		void load(BinaryLoader* loader);
+		//void load(BinaryLoader* loader);
 		const int size() const {
 			return m_Elements.size();
 		}

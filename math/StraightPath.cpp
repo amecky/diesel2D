@@ -107,7 +107,7 @@ namespace ds {
 			*p = lerp(curve.start, curve.end, nn);
 		}
 	}
-
+	/*
 	void StraightPath::load(BinaryLoader* loader) {
 		m_Elements.clear();
 		Vector2f p0, p1;
@@ -125,7 +125,7 @@ namespace ds {
 		}
 		build();
 	}
-	
+	*/
 	GridPath::GridPath(float gridSize, const Vector2f& offset) : StraightPath(), m_GridSize(gridSize) , m_Offset(offset) {
 		m_HalfGridSize = m_GridSize * 0.5f;
 	}

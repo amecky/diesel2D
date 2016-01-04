@@ -1094,7 +1094,7 @@ namespace ds {
 			}
 			LOG << "Loading bitmap font " << name;
 			BitmapFont* font = new BitmapFont(name,textureId);
-			font->load();
+			font->importJSON();
 			//assets::load("xscale", font, ds::CVT_FONT);
 			renderContext->bitmapFonts.push_back(font);
 			initializeBitmapFont(font, textureId, fillColor);

@@ -1,8 +1,7 @@
 #pragma once
-#include "Serializer.h"
 #include <vector>
 #include "..\dxstdafx.h"
-
+/*
 namespace ds {
 
 class FileWatcher {
@@ -31,3 +30,4 @@ private:
 }
 
 extern ds::FileWatcher* gFileWatcher;
+*/

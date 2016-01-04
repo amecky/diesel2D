@@ -14,7 +14,6 @@
 #include "Camera.h"
 #include "..\base\Settings.h"
 #include "..\sprites\SpriteGroup.h"
-#include "..\compiler\Converter.h"
 
 namespace ds {
 
@@ -72,7 +71,7 @@ namespace ds {
 		}
 	};
 
-	struct DescriptorData : public Serializer {
+	struct DescriptorData {
 
 		IdString* hashes;
 		int* textures;
@@ -140,7 +139,8 @@ namespace ds {
 			return -1;
 		}
 
-		void load(BinaryLoader* loader) {
+		//void load(BinaryLoader* loader) {
+			/*
 			while (loader->openChunk() == 0) {
 				if (loader->getChunkID() == CHNK_DESCRIPTOR) {
 					IdString name;
@@ -180,10 +180,11 @@ namespace ds {
 				}
 				loader->closeChunk();
 			}
-		}
+			*/
+		//}
 	};
 
-	struct MeshArray : public Serializer {
+	struct MeshArray {
 
 		IdString* hashes;
 		int* descriptors;
@@ -251,7 +252,8 @@ namespace ds {
 			return -1;
 		}
 
-		void load(BinaryLoader* loader) {
+		//void load(BinaryLoader* loader) {
+			/*
 			while (loader->openChunk() == 0) {
 				if (loader->getChunkID() == CHNK_MESH) {
 					IdString name;
@@ -285,7 +287,8 @@ namespace ds {
 				}
 				loader->closeChunk();
 			}
-		}
+			*/
+		//}
 	};
 	struct DrawCounter {
 

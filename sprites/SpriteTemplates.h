@@ -1,6 +1,5 @@
 #pragma once
 #include "Sprite.h"
-#include "..\io\Serializer.h"
 #include <map>
 #include "..\ui\IMGUI.h"
 #include "..\compiler\DataFile.h"

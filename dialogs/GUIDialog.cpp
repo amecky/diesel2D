@@ -4,7 +4,6 @@
 #include "..\utils\font.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\io\FileWatcher.h"
-#include "..\compiler\Converter.h"
 #include "..\renderer\graphics.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\DialogResources.h"
@@ -767,7 +766,7 @@ namespace ds {
 			gui::end();
 		}
 	}
-
+	/*
 	void GUIDialog::saveItem(BinaryWriter& writer,int id,const GUIItem& item) {
 		writer.write(id);
 		writer.write(item.pos);
@@ -779,7 +778,7 @@ namespace ds {
 		writer.write(cnt);
 		writer.write(item.scale);
 	}
-
+	*/
 	void GUIDialog::saveItem(JSONWriter& writer, int id, const GUIItem& item) {
 		writer.write("id", id);
 		writer.write("pos", item.pos);
@@ -915,7 +914,7 @@ namespace ds {
 		category->getFloat("scale", &item->scale);
 		return id;
 	}
-
+	/*
 	int GUIDialog::loadItem(BinaryLoader& loader, GUIItem* item) {
 		int id = 0;
 		loader.read(&id);
@@ -930,5 +929,5 @@ namespace ds {
 		loader.read(&item->scale);
 		return id;
 	}
-
+	*/
 }

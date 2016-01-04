@@ -4,7 +4,7 @@
 #include "..\utils\Profiler.h"
 #include "..\utils\PlainTextReader.h"
 #include "..\memory\DataBlockAllocator.h"
-#include "..\io\FileWatcher.h"
+//#include "..\io\FileWatcher.h"
 #include "..\utils\FileUtils.h"
 #include "..\particles\ParticleSystem.h"
 #include "..\sprites\SpriteBatch.h"
@@ -13,7 +13,7 @@
 #include "..\ui\IMGUI.h"
 #include "..\DialogResources.h"
 #include "..\particles\ParticleManager.h"
-#include "..\editor\DialogsEditor.h"
+#include "..\editor\DialogEditorState.h"
 #include "..\editor\SpriteTemplatesEditor.h"
 #include "..\editor\SpriteTemplatesState.h"
 #include "..\editor\ParticlesEditState.h"
@@ -27,7 +27,7 @@ namespace ds {
 BaseApp::BaseApp() {
 	repository::initialize(repository::RM_DEBUG);
 	gBlockMemory = new DataBlockAllocator();
-	gFileWatcher = new FileWatcher();
+	//gFileWatcher = new FileWatcher();
 	m_Active = true;
 	m_GameTime.elapsed = 0.0f;
 	m_GameTime.elapsedMillis = 0;
@@ -50,15 +50,14 @@ BaseApp::BaseApp() {
 	audio = new AudioManager;
 	_totalTime = 0.0f;
 	_stateMachine = new GameStateMachine;
-	_editor.dialogPos = v2(750, 750);
-	_editor.position = v2(750, 750);
+	_editor.dialogPos = v2(10, 710);
+	_editor.position = v2(10, 710);
 	_editor.dialogIndex = -1;
 	_editor.state = 1;
 	particles = new ParticleManager;
 
-	_dialogsEditor = 0;
 	_templatesEditor = 0;
-	_perfHUDPos = v2(750, 750);
+	_perfHUDPos = v2(750, 710);
 	_prepared = false;
 	Category root("root");
 	bool loaded = json::read_simplified_json("content\\engine_settings.json", &root);
@@ -82,9 +81,6 @@ BaseApp::~BaseApp() {
 	LOG << "Destructing all elements";
 	sprites::shutdown();
 	repository::shutdown();
-	if (_dialogsEditor != 0) {
-		delete _dialogsEditor;
-	}
 	delete _templatesEditor;
 	delete particles;
 	delete _stateMachine;
@@ -92,7 +88,7 @@ BaseApp::~BaseApp() {
 	delete audio;
 	renderer::shutdown();	
 	gui::shutdown();
-	delete gFileWatcher;	
+	//delete gFileWatcher;	
 	delete gBlockMemory;
 
 	//delete renderContext;
@@ -183,11 +179,11 @@ void BaseApp::loadSettings(const Category* root) {
 		// initialize editor
 		if (init->getBool("initialize_editor", false)) {
 			_bmfDialog.init();
-			_dialogsEditor = new DialogsEditor(&gui);
 			_templatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
 			_templatesEditor->init();
 			_stateMachine->add(new SpriteTemplatesState());
 			_stateMachine->add(new ParticlesEditState(particles));
+			_stateMachine->add(new DialogEditorState(&gui));
 		}
 	}
 }
@@ -234,8 +230,8 @@ void BaseApp::prepare() {
 	v2 dp;
 	dp.x = _settings.screenWidth - 350.0f;
 	dp.y = _settings.screenHeight - 10.0f;
-	_editor.dialogPos = dp;
-	_editor.position = dp;
+	_editor.dialogPos.y = _settings.screenHeight - 10.0f;
+	_editor.position.y = _settings.screenHeight - 10.0f;
 	_perfHUDPos = dp;
 	m_Running = true;
 	_prepared = true;
@@ -243,15 +239,16 @@ void BaseApp::prepare() {
 
 void BaseApp::logKeyBindings() {
 	LOG << "-----------> Key Bindings   <-----------";
-	LOG << "F1 -> print profiler";
-	LOG << "F2 -> show draw counter";
-	LOG << "F3 -> show profiler";
-	LOG << "F4 -> toggle update flag";
-	LOG << "F5 -> toggle performance overlay";
-	LOG << "F6 -> toggle editor";
-	LOG << "F7 -> debug renderer";
-	LOG << "F8 -> particle editor";
-	LOG << "F9 -> sprite template editor";
+	LOG << "F1  -> print profiler";
+	LOG << "F2  -> show draw counter";
+	LOG << "F3  -> show profiler";
+	LOG << "F4  -> toggle update flag";
+	LOG << "F5  -> toggle performance overlay";
+	LOG << "F6  -> toggle editor";
+	LOG << "F7  -> debug renderer";
+	LOG << "F8  -> particle editor";
+	LOG << "F9  -> sprite template editor";
+	LOG << "F10 -> dialog editor";
 }
 
 void BaseApp::activateMonitoring(float threshold) {
@@ -502,6 +499,11 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 	}
 	else if (virtualKey == VK_F6) {
 		m_DebugInfo.showEditor = !m_DebugInfo.showEditor;
+		if (m_DebugInfo.showEditor) {
+			if (m_Running)  {
+				m_Running = false;
+			}
+		}
 	}
 	else if (virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
 		m_DebugInfo.debugRenderer = true;
@@ -512,6 +514,9 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 	else if (virtualKey == VK_F9) {
 		_stateMachine->activate("SpriteTemplatesState");
 	}	
+	else if (virtualKey == VK_F11) {
+		_stateMachine->activate("DialogEditorState");
+	}
 #endif
 }
 
@@ -546,13 +551,14 @@ void BaseApp::showEditor() {
 		if (gui::Button("GSM")) {
 			_editor.dialogIndex = 2;
 		}
-		if (_dialogsEditor != 0 && gui::Button("DLG")) {
-			_dialogsEditor->init();
-			_editor.dialogIndex = 3;
+		if (gui::Button("DLG")) {
+			m_DebugInfo.showEditor = false;
+			_stateMachine->activate("DialogEditorState");
 		}
 		if (_templatesEditor != 0 && gui::Button("SPT")) {
 			//_templatesEditor->init();
 			//_editor.dialogIndex = 4;
+			m_DebugInfo.showEditor = false;
 			_stateMachine->activate("SpriteTemplatesState");
 		}
 		if (gui::Button("SCG")) {
@@ -561,9 +567,8 @@ void BaseApp::showEditor() {
 		if (gui::Button("BMF")) {
 			_editor.dialogIndex = 6;
 		}
-		gui::endGroup();
-		gui::beginGroup();
 		if (gui::Button("PS")) {
+			m_DebugInfo.showEditor = false;
 			_stateMachine->activate("ParticlesEditState");
 		}
 		gui::endGroup();
@@ -572,10 +577,6 @@ void BaseApp::showEditor() {
 
 	if (_editor.dialogIndex == 2)  {
 		_stateMachine->showDialog();
-	}
-	if (_editor.dialogIndex == 3)  {
-		//gui.showDialog();
-		_dialogsEditor->showDialog();
 	}
 	if (_editor.dialogIndex == 5) {
 		renderer::getSpriteGroupContainer()->showDialog();

@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include "..\renderer\render_types.h"
-#include "..\io\Serializer.h"
 #include "..\sprites\Sprite.h"
 #include "..\math\tweening.h"
 #include "..\renderer\BitmapFont.h"
@@ -176,9 +175,9 @@ public:
 	}
 private:
 	GUIDialog(const GUIDialog& other) {}
-	void saveItem(BinaryWriter& writer, int id, const GUIItem& item);
+	//void saveItem(BinaryWriter& writer, int id, const GUIItem& item);
 	void saveItem(JSONWriter& writer, int id, const GUIItem& item);
-	int loadItem(BinaryLoader& loader, GUIItem* item);
+	//int loadItem(BinaryLoader& loader, GUIItem* item);
 	int loadItem(Category* category, GUIItem* item);
 	void addToModel(int id, GUIItemType type,const char* prefix);
 	void showAddDialog();

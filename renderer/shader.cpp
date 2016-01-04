@@ -173,8 +173,9 @@ namespace ds {
 		_FX->CommitChanges();
 	}
 
-	void Shader::load(BinaryLoader* loader) {
+	//void Shader::load(BinaryLoader* loader) {
 		// FIXME: clean up before
+		/*
 		while (loader->openChunk() == 0) {
 			if (loader->getChunkID() == CHNK_SPRITE) {
 				std::string name;
@@ -191,7 +192,8 @@ namespace ds {
 			}
 			loader->closeChunk();
 		}
-	}
+		*/
+	//}
 
 	namespace shader {
 

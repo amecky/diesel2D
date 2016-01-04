@@ -41,10 +41,6 @@ namespace ds {
 		void addRect(const char* name, Rect* value, const Rect& defaultValue);
 		bool setRect(const char* name, const Rect& value);
 
-		void exportJSON();
-
-		void importJSON();
-
 		void load();
 
 		void save();

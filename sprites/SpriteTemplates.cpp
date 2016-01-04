@@ -1,5 +1,4 @@
 #include "SpriteTemplates.h"
-#include "..\compiler\Converter.h"
 #include "..\DialogResources.h"
 #include "..\utils\JSONWriter.h"
 

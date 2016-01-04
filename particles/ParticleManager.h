@@ -1,7 +1,6 @@
 #pragma once
 #include "ParticleSystem.h"
 #include "..\compiler\AssetCompiler.h"
-#include "..\io\Serializer.h"
 #include "..\renderer\graphics.h"
 #include "..\ui\IMGUI.h"
 #include "ParticleSystemFactory.h"

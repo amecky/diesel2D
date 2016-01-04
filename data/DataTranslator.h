@@ -5,33 +5,11 @@
 #include "..\utils\Color.h"
 #include "..\utils\Log.h"
 #include "..\utils\PlainTextReader.h"
-#include "..\io\BinaryWriter.h"
-#include "..\io\BinaryLoader.h"
 #include "..\ui\IMGUI.h"
 #include "..\DialogResources.h"
 
 namespace ds {
-
-
-	class AbstractGameSettings {
-
-
-	public:
-		AbstractGameSettings() {}
-
-		virtual ~AbstractGameSettings() {}
-
-		virtual void save() = 0;
-
-		virtual void load() = 0;
-
-		virtual void exportJSON() = 0;
-		
-		virtual void importJSON() = 0;
-
-		//virtual void showDialog() = 0;
-	};
-
+	
 // -------------------------------------------------------
 // Data types
 // -------------------------------------------------------
@@ -500,6 +478,7 @@ public:
 	// -------------------------------------------------------
 	// save binary chunk
 	// -------------------------------------------------------
+	/*
 	void saveChunk(BinaryWriter& writer,uint32 chunkID,T* t,bool append = false) {
 		if ( !append ) {
 			writer.startChunk(chunkID,1);
@@ -549,9 +528,11 @@ public:
 			writer.closeChunk();
 		}
 	}
+	*/
 	// -------------------------------------------------------
 	// Read binary file
 	// -------------------------------------------------------
+	/*
 	void read(const char* fileName,uint32 chunkID,T* t) {
 		char buffer[256];
 		BinaryLoader loader;
@@ -631,9 +612,11 @@ public:
 			loader.close();
 		}
 	}
+	*/
 	// -------------------------------------------------------
 	// Read binary chunk
 	// -------------------------------------------------------
+	/*
 	void readChunk(BinaryLoader& loader,T* t) {
 		for ( size_t i = 0; i < m_Definitions.size(); ++i ) {
 			DataDefinition& def = m_Definitions[i];
@@ -701,6 +684,7 @@ public:
 			}
 		}
 	}
+	*/
 private:
 	ColorPath getColorPathValues(Category* category) {
 		ColorPath path;

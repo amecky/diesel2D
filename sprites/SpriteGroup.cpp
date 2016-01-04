@@ -134,6 +134,7 @@ namespace ds {
 	}
 
 	void SpriteGroupContainer::save() {
+		/*
 		BinaryWriter writer;
 		char buffer[64];
 		IdString hash = string::murmur_hash("SpriteGroupContainer");
@@ -145,6 +146,7 @@ namespace ds {
 
 			writer.close();
 		}
+		*/
 	}
 
 	void SpriteGroupContainer::showDialog() {

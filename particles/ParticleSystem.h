@@ -3,7 +3,6 @@
 #include "..\lib\container\List.h"
 #include "..\compiler\DataFile.h"
 #include <IPath.h>
-#include "..\data\Gizmo.h"
 #include "Particle.h"
 #include "..\renderer\Camera2D.h"
 #include "ParticleModifier.h"

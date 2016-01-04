@@ -82,9 +82,6 @@
     <ClCompile Include="utils\font.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="math\FloatArray.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
     <ClCompile Include="base\EventStream.cpp">
       <Filter>base</Filter>
     </ClCompile>
@@ -97,15 +94,6 @@
     <ClCompile Include="io\FileWatcher.cpp">
       <Filter>io</Filter>
     </ClCompile>
-    <ClCompile Include="io\BinaryLoader.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="io\BinaryWriter.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
-    <ClCompile Include="data\Gizmo.cpp">
-      <Filter>data</Filter>
-    </ClCompile>
     <ClCompile Include="particles\ParticleSystem.cpp">
       <Filter>particles</Filter>
     </ClCompile>
@@ -117,9 +105,6 @@
     </ClCompile>
     <ClCompile Include="particles\ParticleManager.cpp">
       <Filter>particles</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler\ParticleManagerConverter.cpp">
-      <Filter>compiler</Filter>
     </ClCompile>
     <ClCompile Include="objects\BloomComponent.cpp">
       <Filter>objects</Filter>
@@ -139,14 +124,8 @@
     <ClCompile Include="collision\SpatialHashingBroadPhaseDetector.cpp">
       <Filter>collision</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\NewParticleSystemConverter.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
     <ClCompile Include="math\tweening.cpp">
       <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="renderer\TextureLoader.cpp">
-      <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="sprites\modifiers.cpp">
       <Filter>sprites</Filter>
@@ -196,9 +175,6 @@
     <ClCompile Include="world\actions\MoveWithAction.cpp">
       <Filter>world\actions</Filter>
     </ClCompile>
-    <ClCompile Include="particles\ParticleEmitter.cpp">
-      <Filter>particles</Filter>
-    </ClCompile>
     <ClCompile Include="tasks\TaskManager.cpp">
       <Filter>tasks</Filter>
     </ClCompile>
@@ -218,9 +194,6 @@
       <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="world\actions\FollowStraightPathAction.cpp">
-      <Filter>world\actions</Filter>
-    </ClCompile>
-    <ClCompile Include="world\actions\ColorFadeToAction.cpp">
       <Filter>world\actions</Filter>
     </ClCompile>
     <ClCompile Include="utils\ObjLoader.cpp">
@@ -257,6 +230,42 @@
       <Filter>data</Filter>
     </ClCompile>
     <ClCompile Include="editor\BitmapFontsDialog.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\SpriteTemplatesEditor.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\ColorFadeToAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\SpriteTemplatesState.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\ParticlesEditState.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleModifier.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleSystemFactory.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleGenerator.cpp">
+      <Filter>particles</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\ParticleSystemEditor.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\DebugPanel.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="io\FileRepository.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\TextCompressor.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\DialogEditorState.cpp">
       <Filter>editor</Filter>
     </ClCompile>
   </ItemGroup>
@@ -395,26 +404,11 @@
     <ClInclude Include="memory\DataBlockAllocator.h">
       <Filter>memory</Filter>
     </ClInclude>
-    <ClInclude Include="io\Serializer.h">
-      <Filter>io</Filter>
-    </ClInclude>
     <ClInclude Include="io\FileWatcher.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="io\BinaryLoader.h">
-      <Filter>io</Filter>
-    </ClInclude>
-    <ClInclude Include="io\BinaryWriter.h">
       <Filter>io</Filter>
     </ClInclude>
     <ClInclude Include="lib\container\ImmutableBag.h">
       <Filter>lib\container</Filter>
-    </ClInclude>
-    <ClInclude Include="data\Param.h">
-      <Filter>data</Filter>
-    </ClInclude>
-    <ClInclude Include="data\Gizmo.h">
-      <Filter>data</Filter>
     </ClInclude>
     <ClInclude Include="base\ApplicationContext.h">
       <Filter>base</Filter>
@@ -425,23 +419,14 @@
     <ClInclude Include="compiler\AssetCompiler.h">
       <Filter>compiler</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\Converter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
     <ClInclude Include="renderer\BitmapFont.h">
       <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="particles\DynamicSettings.h">
-      <Filter>particles</Filter>
     </ClInclude>
     <ClInclude Include="sprites\Sprite.h">
       <Filter>sprites</Filter>
     </ClInclude>
     <ClInclude Include="particles\ParticleManager.h">
       <Filter>particles</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\ParticleManagerConverter.h">
-      <Filter>compiler</Filter>
     </ClInclude>
     <ClInclude Include="lib\container\dVector.h">
       <Filter>lib\container</Filter>
@@ -482,9 +467,6 @@
     <ClInclude Include="particles\ParticleModifier.h">
       <Filter>particles</Filter>
     </ClInclude>
-    <ClInclude Include="compiler\NewParticleSystemConverter.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
     <ClInclude Include="particles\ParticleEmitter.h">
       <Filter>particles</Filter>
     </ClInclude>
@@ -496,9 +478,6 @@
     </ClInclude>
     <ClInclude Include="lib\Bitset.h">
       <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer\TextureLoader.h">
-      <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="sprites\modifiers.h">
       <Filter>sprites</Filter>
@@ -616,6 +595,45 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="editor\BitmapFontsDialog.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\DataFile.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\SpriteTemplatesEditor.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\AssetEditor.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\SpriteTemplatesState.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\ParticlesEditState.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleSystemFactory.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleSystemData.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleGenerator.h">
+      <Filter>particles</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\ParticleSystemEditor.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\DebugPanel.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="io\FileRepository.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\TextCompressor.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\DialogEditorState.h">
       <Filter>editor</Filter>
     </ClInclude>
   </ItemGroup>

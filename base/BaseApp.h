@@ -16,7 +16,6 @@ class GameStateMachine;
 class GameState;
 struct BitmapFont;
 class ParticleManager;
-class DialogsEditor;
 class SpriteTemplatesEditor;
 
 
@@ -162,7 +161,6 @@ private:
 	GameEditor _editor;
 	BitmapFontsDialog _bmfDialog;
 
-	DialogsEditor* _dialogsEditor;
 	SpriteTemplatesEditor* _templatesEditor;
 	v2 _perfHUDPos;
 	ProfileSnapshot _snapshots[64];

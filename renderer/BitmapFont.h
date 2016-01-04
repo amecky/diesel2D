@@ -61,9 +61,9 @@ struct BitmapFont {
 
 	void addChar(uint32 ascii, int startX, int startY, int width);
 
-	bool load();
+	//bool load();
 
-	void save();
+	//void save();
 
 	void importJSON();
 
