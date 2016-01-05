@@ -182,6 +182,7 @@ void Category::getColorPath(ds::ColorPath* path) {
 	for (size_t i = 0; i < numProperties(); ++i) {
 		const char* propertyName = getPropertyName(i);
 		float timeStep = atof(propertyName);
+		value = getColor(propertyName);
 		path->add(timeStep, value);
 	}
 }

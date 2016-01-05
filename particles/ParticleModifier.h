@@ -242,7 +242,8 @@ public:
 		assert(data != 0);
 		const LinearSizeModifierData* my_data = static_cast<const LinearSizeModifierData*>(data);
 		for (uint32 i = start; i < end; ++i) {
-			array->scale[i] = array->baseScale[i] + my_data->minScale;
+			array->scale[i].x = array->baseScale[i].x * my_data->minScale.x;
+			array->scale[i].y = array->baseScale[i].y * my_data->minScale.y;
 		}
 	}
 	const ParticleModifierType getType() const {
