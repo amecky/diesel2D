@@ -125,10 +125,11 @@ namespace ds {
 						if (item.type == ST_FLOAT) {
 							c->getFloat(item.name, _floats[item.index]);
 						}
-						else {
-							if (item.type == ST_RECT) {
-								c->getRect(item.name, _rects[item.index]);
-							}
+						else if (item.type == ST_INT) {
+							c->getInt(item.name, _ints[item.index]);
+						}
+						else if (item.type == ST_RECT) {
+							c->getRect(item.name, _rects[item.index]);
 						}
 					}
 				}
