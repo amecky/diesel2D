@@ -61,7 +61,7 @@ void JSONWriter::write(const char* name, uint32 value) {
 void JSONWriter::write(const char* name, float value) {
 	
 	writeLineIdent();
-	fprintf(f, "\"%s\" : \"%.2f\"", name, value);
+	fprintf(f, "\"%s\" : \"%g\"", name, value);
 	++_items;
 }
 
@@ -96,7 +96,7 @@ void JSONWriter::write(const char* name, bool value) {
 void JSONWriter::write(const char* name, const v2& value) {
 	
 	writeLineIdent();
-	fprintf(f, "\"%s\" : \"%.2f,%.2f\"", name, value.x, value.y);
+	fprintf(f, "\"%s\" : \"%g,%g\"", name, value.x, value.y);
 	++_items;
 
 }
@@ -107,7 +107,7 @@ void JSONWriter::write(const char* name, const v2& value) {
 void JSONWriter::write(const char* name, const v3& value) {
 
 	writeLineIdent();
-	fprintf(f, "\"%s\" : \"%.2f,%.2f,%.2f\"", name, value.x, value.y, value.z);
+	fprintf(f, "\"%s\" : \"%g,%g,%g\"", name, value.x, value.y, value.z);
 	++_items;
 
 }
@@ -179,7 +179,7 @@ void JSONWriter::write(const ds::ColorPath& path) {
 		int g = value.g * 255.0f;
 		int b = value.b * 255.0f;
 		int a = value.a * 255.0f;
-		fprintf(f, "\"%.2f\" : \"%d,%d,%d,%d\"", key, r, g, b, a);
+		fprintf(f, "\"%g\" : \"%d,%d,%d,%d\"", key, r, g, b, a);
 		++_items;
 	}
 }
@@ -192,7 +192,7 @@ void JSONWriter::write(const ds::Vector2fPath& path) {
 		const v2& value = path.value(i);
 		float key = path.key(i);
 		writeLineIdent();
-		fprintf(f, "\"%.2f\" : \"%f,%f\"", key, value.x,value.y);
+		fprintf(f, "\"%g\" : \"%g,%g\"", key, value.x,value.y);
 		++_items;
 	}
 }
@@ -205,7 +205,7 @@ void JSONWriter::write(const ds::FloatArray& path) {
 		float value = path.value(i);
 		float key = path.key(i);
 		writeLineIdent();
-		fprintf(f, "\"%.2f\" : \"%f\"", key, value);
+		fprintf(f, "\"%g\" : \"%g\"", key, value);
 		++_items;
 	}
 }

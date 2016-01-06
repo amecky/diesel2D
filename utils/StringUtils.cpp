@@ -6,6 +6,84 @@
 
 namespace ds {
 
+
+	StringStream& StringStream::push(const char *data, uint32 n) {
+		for (uint32 i = 0; i < n; ++i) {
+			_buffer.push_back(data[i]);
+		}
+		return *this;
+	}
+
+	StringStream& StringStream::operator<<(char c) {
+		_buffer.push_back(c);
+		return *this;
+	}
+
+	StringStream& StringStream::operator<<(const char *s) {
+		return push(s, strlen(s));
+	}
+
+	StringStream& StringStream::operator<<(float f) {
+		char s[32];
+		sprintf_s(s, 32, "%g", f);
+		return push(s, strlen(s));
+	}
+
+	StringStream& StringStream::operator<<(int i) {
+		char s[32];
+		sprintf_s(s, 32, "%d", i);
+		return push(s, strlen(s));
+	}
+
+	StringStream& StringStream::operator<<(uint32 i) {
+		char s[32];
+		sprintf_s(s, 32, "%u", i);
+		return push(s, strlen(s));
+	}
+
+	StringStream& StringStream::operator<<(const v2& v) {
+		char s[32];
+		sprintf_s(s, 32, "x: %g y: %g", v.x, v.y);
+		return push(s, strlen(s));
+	}
+
+	StringStream& StringStream::operator<<(const v3& v) {
+		char s[32];
+		sprintf_s(s, 32, "x: %g y: %g z: %g", v.x, v.y, v.z);
+		return push(s, strlen(s));
+	}
+
+	StringStream& StringStream::operator<<(const Color& v) {
+		return *this;
+	}
+
+	StringStream& StringStream::operator<<(const Rect& v) {
+		return *this;
+	}
+
+	StringStream& StringStream::format(const char *format, ...) {
+		va_list args;
+
+		va_start(args, format);
+		int n = vsnprintf(NULL, 0, format, args);
+		va_end(args);
+		char* tmp = new char[n];
+
+		va_start(args, format);
+		vsnprintf(tmp, n, format, args);
+		va_end(args);
+		push(tmp, n);
+		delete[] tmp;
+		return *this;
+	}
+
+	const char* StringStream::c_str() {
+		_buffer.push_back('\0');
+		_buffer.pop_back();
+		return _buffer.data();
+	}
+
+
 	namespace string {
 
 		// -------------------------------------------------------

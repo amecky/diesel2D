@@ -2,8 +2,30 @@
 #include <vector>
 #include <string>
 #include "..\dxstdafx.h"
+#include "..\lib\collection_types.h"
 
 namespace ds {
+
+	class StringStream {
+
+	typedef Array<char> Buffer;
+
+	public:
+		StringStream& operator<<(char c);
+		StringStream& operator<<(const char *s);
+		StringStream& operator<<(float f);
+		StringStream& operator<<(int i);
+		StringStream& operator<<(uint32 i);
+		StringStream& operator<<(const v2& v);
+		StringStream& operator<<(const v3& v);
+		StringStream& operator<<(const Color& v);
+		StringStream& operator<<(const Rect& v);
+		StringStream& format(const char *format, ...);
+		const char *c_str();
+	private:
+		StringStream& push(const char *data, uint32 n);
+		Buffer _buffer;
+	};
 
 namespace string {
 
