@@ -2,6 +2,7 @@
 #include "..\dxstdafx.h"
 #include <assert.h>
 #include "..\math\GameMath.h"
+#include "..\memory\DefaultAllocator.h"
 
 namespace ds {
 
@@ -17,17 +18,18 @@ namespace ds {
 	class Array {
 
 	public:
-		Array() : _size(0), _capacity(0), _data(0) {
+		Array(Allocator* allocator = gDefaultMemory) : _allocator(allocator) , _size(0), _capacity(0), _data(0) {
 			_typeSize = sizeof(T);
 			_constructor = !__has_trivial_constructor(T);
 			_destructor = !__has_trivial_destructor(T);
 		}
 
-		explicit Array(uint32 size) : _size(size), _capacity(size) {
+		explicit Array(uint32 size, Allocator* allocator = gDefaultMemory) : _allocator(allocator), _size(size), _capacity(size) {
 			_typeSize = sizeof(T);
 			_constructor = !__has_trivial_constructor(T);
 			_destructor = !__has_trivial_destructor(T);
-			_data = (uchar*)malloc(size * _typeSize);
+			//_data = (uchar*)malloc(size * _typeSize);
+			_data = (uchar*)_allocator->allocate(size * _typeSize);
 			uchar* ptr = _data;
 			if (_constructor) {
 				for (uint32 i = 0; i < _size; ++i) {
@@ -40,17 +42,12 @@ namespace ds {
 		~Array() {
 			if (_data != 0) {
 				clear();
-				free(_data);
+				//free(_data);
+				_allocator->deallocate(_data);
 			}
 		}
 
-		Array(const Array &other) {
-			_typeSize = sizeof(T);
-			_size = other._size;
-			_capacity = other._capacity;
-			_data = (uchar*)malloc(_size * _typeSize);
-			memccpy(_data, other._data, sizeof(T) * _size);
-		}
+		
 
 		class iterator {
 			public:
@@ -169,7 +166,7 @@ namespace ds {
 			if (_size + 1 > _capacity) {
 				grow(_capacity * 2 + 8);
 			}			
-			uint32 delta = _size - position.index() - 1;
+			int delta = _size - position.index();
 			if (delta > 0) {
 				uchar* ptr = _data + position.index() * _typeSize;
 				uchar* next = ptr + _typeSize;
@@ -218,25 +215,77 @@ namespace ds {
 			return _size == 0;
 		}
 
-		void reserve(int newCapacity) {
-
+		void reserve(uint32 newCapacity) {
+			grow(newCapacity);
 		}
 
-		void resize(int newCapacity) {
-
-		}
-	private:
-		void grow(uint32 newCapacity) {
+		void resize(uint32 newCapacity) {
 			if (newCapacity > _capacity) {
-				uchar* newItems = (uchar*)malloc(newCapacity * _typeSize);
-				if (_data != 0) {
-					memcpy(newItems, _data, _size * _typeSize);
+				grow(newCapacity);
+			}
+			else if (newCapacity < _capacity) {
+				shrink(newCapacity);
+			}
+		}
+		
+	private:
+		void shrink(uint32 newCapacity) {
+			if (newCapacity < _capacity) {
+				if (_size > newCapacity) {
+					uchar* ptr = newItems + newCapacity * _typeSize;
+					if (_destructor) {
+						for (uint32 i = newCapacity; i < _size; ++i) {
+							Destructor<T>(ptr);
+							ptr += _typeSize;
+						}
+					}
+					_size = newCapacity;
 				}
-				free(_data);
+				//uchar* newItems = (uchar*)malloc(newCapacity * _typeSize);
+				uchar* newItems = (uchar*)_allocator->allocate(newCapacity * _typeSize);
+				if (_data != 0) {
+					memcpy(newItems, _data, newCapacity * _typeSize);
+				}
+				//free(_data);
+				_allocator->deallocate(_data);
 				_data = newItems;
 				_capacity = newCapacity;
 			}
 		}
+
+		void grow(uint32 newCapacity) {
+			if (newCapacity > _capacity) {
+				//uchar* newItems = (uchar*)malloc(newCapacity * _typeSize);
+				uchar* newItems = (uchar*)_allocator->allocate(newCapacity * _typeSize);
+				if (_data != 0) {
+					memcpy(newItems, _data, _size * _typeSize);
+				}
+				uchar* ptr = newItems + _size * _typeSize;
+				if (_constructor) {
+					for (uint32 i = _size; i < newCapacity; ++i) {
+						Construct<T>(ptr);
+						ptr += _typeSize;
+					}
+				}
+				if (_data != 0) {
+					//free(_data);
+					_allocator->deallocate(_data);
+				}
+				_data = newItems;
+				_capacity = newCapacity;
+			}
+		}
+
+		Array(const Array &other) {
+			_typeSize = sizeof(T);
+			_size = other._size;
+			_capacity = other._capacity;
+			//_data = (uchar*)malloc(_size * _typeSize);
+			_data = (uchar*)_allocator->allocate(_size * _typeSize);
+			memccpy(_data, other._data, sizeof(T) * _size);
+		}
+
+		Allocator* _allocator;
 		bool _constructor;
 		bool _destructor;
 		uint32 _typeSize;

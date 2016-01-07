@@ -3,7 +3,7 @@
 #include "..\math\math_types.h"
 #include "..\renderer\render_types.h"
 #include "..\utils\Color.h"
-#include <vector>
+#include "..\lib\collection_types.h"
 #include "..\ui\IMGUI.h"
 
 namespace ds {
@@ -53,10 +53,10 @@ namespace ds {
 
 		int _state;
 		int _offset;
-		std::vector<SettingsItem> _items;
-		std::vector<float*> _floats;
-		std::vector<int*> _ints;
-		std::vector<Rect*> _rects;
+		Array<SettingsItem> _items;
+		Array<float*> _floats;
+		Array<int*> _ints;
+		Array<Rect*> _rects;
 		gui::ComponentModel<SettingsItem> _model;
 	};
 }

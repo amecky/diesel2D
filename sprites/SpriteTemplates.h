@@ -1,6 +1,6 @@
 #pragma once
 #include "Sprite.h"
-#include <map>
+#include "..\lib\collection_types.h"
 #include "..\ui\IMGUI.h"
 #include "..\compiler\DataFile.h"
 
@@ -12,7 +12,7 @@ struct MappingEntry {
 	char name[32];
 };
 
-typedef std::vector<MappingEntry> TemplateMap;
+typedef Array<MappingEntry> TemplateMap;
 
 class SpriteTemplates : public DataFile {
 

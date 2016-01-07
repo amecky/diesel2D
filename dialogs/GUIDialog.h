@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "..\lib\collection_types.h"
 #include "..\renderer\render_types.h"
 #include "..\sprites\Sprite.h"
 #include "..\math\tweening.h"
@@ -105,13 +105,13 @@ struct GUITransition {
 // -------------------------------------------------------
 class GUIDialog : public DataFile {
 
-typedef std::vector<GUIItem> Items;
-typedef std::vector<GUINumber> Numbers;
-typedef std::vector<GUIText> Texts;
-typedef std::vector<GUIImage> Images;
-typedef std::vector<GUIButton> Buttons;
-typedef std::vector<GUIImageButton> ImageButtons;
-typedef std::vector<GameTimer> Timers;
+	typedef Array<GUIItem> Items;
+	typedef Array<GUINumber> Numbers;
+	typedef Array<GUIText> Texts;
+	typedef Array<GUIImage> Images;
+	typedef Array<GUIButton> Buttons;
+	typedef Array<GUIImageButton> ImageButtons;
+	typedef Array<GameTimer> Timers;
 
 public:
 	GUIDialog();

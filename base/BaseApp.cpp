@@ -18,6 +18,7 @@
 #include "..\editor\SpriteTemplatesState.h"
 #include "..\editor\ParticlesEditState.h"
 #include "..\io\FileRepository.h"
+#include "..\memory\DefaultAllocator.h"
 
 namespace ds {
 
@@ -25,8 +26,10 @@ namespace ds {
 // Constructing new BaseApp
 // -------------------------------------------------------	
 BaseApp::BaseApp() {
+	gDefaultMemory = new DefaultAllocator();
 	repository::initialize(repository::RM_DEBUG);
-	gBlockMemory = new DataBlockAllocator();
+	//gBlockMemory = new DataBlockAllocator();
+	
 	//gFileWatcher = new FileWatcher();
 	m_Active = true;
 	m_GameTime.elapsed = 0.0f;
@@ -55,7 +58,7 @@ BaseApp::BaseApp() {
 	_editor.dialogIndex = -1;
 	_editor.state = 1;
 	particles = new ParticleManager;
-
+	gui = new DialogManager;
 	_templatesEditor = 0;
 	_perfHUDPos = v2(750, 710);
 	_prepared = false;
@@ -81,17 +84,18 @@ BaseApp::~BaseApp() {
 	LOG << "Destructing all elements";
 	sprites::shutdown();
 	repository::shutdown();
+	delete _bmfDialog;
 	delete _templatesEditor;
 	delete particles;
+	delete gui;
 	delete _stateMachine;
 	//delete gProfiler;
 	delete audio;
 	renderer::shutdown();	
 	gui::shutdown();
-	//delete gFileWatcher;	
-	delete gBlockMemory;
-
-	//delete renderContext;
+	//delete gBlockMemory;
+	// FIXME: should be enabled
+	delete gDefaultMemory;
 }
 
 void BaseApp::loadSettings(const Category* root) {
@@ -119,7 +123,7 @@ void BaseApp::loadSettings(const Category* root) {
 		// load fonts
 		Category* fonts = init->getChild("fonts");
 		if (fonts != 0) {
-			std::vector<Category*> entries = fonts->getChildren();
+			const Array<Category*>& entries = fonts->getChildren();
 			for (size_t i = 0; i < entries.size(); ++i) {
 				std::string texName = entries[i]->getProperty("texture");
 				int texture = renderer::getTextureId(texName.c_str());
@@ -179,12 +183,13 @@ void BaseApp::loadSettings(const Category* root) {
 		}
 		// initialize editor
 		if (init->getBool("initialize_editor", false)) {
-			_bmfDialog.init();
+			_bmfDialog = new BitmapFontsDialog;
+			_bmfDialog->init();
 			_templatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
 			_templatesEditor->init();
 			_stateMachine->add(new SpriteTemplatesState());
 			_stateMachine->add(new ParticlesEditState(particles));
-			_stateMachine->add(new DialogEditorState(&gui));
+			_stateMachine->add(new DialogEditorState(gui));
 		}
 	}
 }
@@ -263,8 +268,8 @@ void BaseApp::loadSprites() {
 }
 
 void BaseApp::initializeGUI(BitmapFont* font) {
-	gui.init(font);
-	gui.load();
+	gui->init(font);
+	gui->load();
 }
 // -------------------------------------------------------
 // Creates the window
@@ -371,7 +376,7 @@ void BaseApp::buildFrame() {
 		else {
 			DialogID did;
 			int selected;
-			if (gui.onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y, &did, &selected)) {
+			if (gui->onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y, &did, &selected)) {
 				onGUIButton(did, selected);
 				_stateMachine->onGUIButton(did, selected);
 			}
@@ -385,8 +390,8 @@ void BaseApp::buildFrame() {
 	if ( m_Running ) {
 		_totalTime += m_GameTime.elapsed;
 		PR_START("UPDATE");
-		gui.updateMousePos(getMousePos());
-		gui.tick(m_GameTime.elapsed);
+		gui->updateMousePos(getMousePos());
+		gui->tick(m_GameTime.elapsed);
 		PR_END("GameObjects::update");
 		PR_START("Game::update");
 		update(m_GameTime.elapsed);
@@ -405,7 +410,7 @@ void BaseApp::buildFrame() {
 	PR_END("RENDER_GAME");
 	//m_World.draw();
 	PRS("RENDER_GUI");
-	gui.render();
+	gui->render();
 	PRE("RENDER_GUI");
 	PRS("RENDER_EDITOR");
 	if (m_DebugInfo.showEditor) {
@@ -451,7 +456,8 @@ void BaseApp::buildFrame() {
 	if ( m_DebugInfo.printProfiler ) {
 		m_DebugInfo.printProfiler = false;
 		//debug::printDrawCounter();
-		LOG << "--------------------------------";
+		LOG << "------------------------------------------------------------";
+		gDefaultMemory->debug();
 		profiler::print();
 	}	
 }
@@ -583,7 +589,7 @@ void BaseApp::showEditor() {
 		renderer::getSpriteGroupContainer()->showDialog();
 	}
 	if (_editor.dialogIndex == 6) {
-		_bmfDialog.show();
+		_bmfDialog->show();
 	}
 }
 

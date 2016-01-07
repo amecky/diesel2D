@@ -847,7 +847,7 @@ namespace ds {
 	bool GUIDialog::loadData(JSONReader& reader) {
 		clear();
 		_model.clear();		
-		std::vector<Category*> categories = reader.getCategories();
+		const Array<Category*>& categories = reader.getCategories();
 		for (size_t i = 0; i < categories.size(); ++i) {
 			Category* c = categories[i];
 			//LOG << "name: " << c->getName();

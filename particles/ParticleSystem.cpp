@@ -234,7 +234,7 @@ namespace ds {
 			// read modifiers
 			Category* modifiers = root->getChild("modifiers");
 			if (modifiers != 0) {
-				std::vector<Category*> categories = modifiers->getChildren();
+				const Array<Category*>& categories = modifiers->getChildren();
 				for (size_t i = 0; i < categories.size(); ++i) {
 					Category* c = categories[i];
 					if (_factory->addModifier(this, c->getName().c_str())) {
@@ -250,7 +250,7 @@ namespace ds {
 			}
 			Category* generators = root->getChild("generators");
 			if (generators != 0) {
-				std::vector<Category*> categories = generators->getChildren();
+				const Array<Category*>& categories = generators->getChildren();
 				for (size_t i = 0; i < categories.size(); ++i) {
 					Category* c = categories[i];
 					if (_factory->addGenerator(this, c->getName().c_str())) {

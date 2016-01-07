@@ -98,7 +98,7 @@ namespace ds {
 
 	bool ParticleManager::loadData(JSONReader& reader) {
 		LOG << "importing data";
-		std::vector<Category*> categories = reader.getCategories();
+		const Array<Category*>& categories = reader.getCategories();
 		for (size_t i = 0; i < categories.size(); ++i) {
 			Category* c = categories[i];
 			LOG << "name: " << c->getName();

@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "..\lib\collection_types.h"
 #include <map>
 #include "Sprite.h"
 #include "..\ui\IMGUI.h"
@@ -8,7 +8,7 @@ namespace ds {
 
 	class SpriteGroup {
 
-		typedef std::vector<Sprite> Sprites;
+		typedef Array<Sprite> Sprites;
 
 	public:
 		SpriteGroup(const char* name);

@@ -11,6 +11,7 @@
 #include "Log.h"
 #include "..\math\GameMath.h"
 #include "..\math\FloatArray.h"
+#include "..\lib\collection_types.h"
 
 // -------------------------------------------------------
 // Category
@@ -64,7 +65,7 @@ public:
 	void getColorPath(ds::ColorPath* path);
 	bool hasProperty(const char* name) const;
 	void addCategory(Category* cat);
-	const std::vector<Category*>& getChildren() const;
+	const ds::Array<Category*>& getChildren() const;
 	Category* getChild(const char* name) const;
 	void getFloat(const char* name, float* ret);
 	float getFloat(const char* name, float defaultValue = 0.0f);
@@ -79,7 +80,7 @@ private:
 	SectionEntry* getEntry(const char* name) const;
 	Entries m_Entries;
 	std::string m_Name;
-	std::vector<Category*> m_Children;
+	ds::Array<Category*> m_Children;
 };
 
 // -------------------------------------------------------
@@ -91,7 +92,7 @@ public:
 	JSONReader();
 	virtual ~JSONReader();
 	bool parse(const char* fileName);   
-	std::vector<Category*>& getCategories() {
+	ds::Array<Category*>& getCategories() {
 		return m_Categories;
 	}
 	Category* getCategory(const std::string& name);
@@ -104,7 +105,7 @@ public:
 	}
 	void clear();
 private:
-	std::vector<Category*> m_Categories;
+	ds::Array<Category*> m_Categories;
 };
 
 // -------------------------------------------------------

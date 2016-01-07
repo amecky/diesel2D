@@ -2,6 +2,7 @@
 #include "..\utils\StringUtils.h"
 #include "..\utils\Log.h"
 #include "TextCompressor.h"
+#include "..\lib\collection_types.h"
 
 namespace ds {
 
@@ -25,7 +26,7 @@ namespace ds {
 
 		struct FileRepo {
 			RepositoryMode mode;
-			std::vector<RepositoryEntry> entries;
+			Array<RepositoryEntry> entries;
 		};
 
 		static FileRepo* _repository = 0;
@@ -226,7 +227,7 @@ namespace ds {
 		}
 
 		void list() {
-			std::vector<RepositoryEntry> entries;
+			Array<RepositoryEntry> entries;
 			FILE* f = fopen("e.pak", "rb");
 			if (f) {
 				int sz = 0;

@@ -104,7 +104,7 @@ namespace ds {
 	bool SpriteTemplates::loadData(JSONReader& reader) {
 		_map.clear();
 		_currentID = 0;
-		std::vector<Category*> categories = reader.getCategories();
+		const Array<Category*>& categories = reader.getCategories();
 		for (size_t i = 0; i < categories.size(); ++i) {
 			Category* c = categories[i];			
 			if (c->getName() == "sprite") {

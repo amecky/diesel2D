@@ -11,10 +11,10 @@ Category::~Category() {
 	for (size_t i = 0; i < m_Entries.size(); ++i) {
 		delete m_Entries[i];
 	}
-	std::vector<Category*>::iterator it = m_Children.begin();
+	ds::Array<Category*>::iterator it = m_Children.begin();
 	while (it != m_Children.end()) {
 		delete *(it);
-		it = m_Children.erase(it);
+		it = m_Children.remove(it);
 	}
 }
 
@@ -201,7 +201,7 @@ void Category::addCategory(Category* cat) {
 	m_Children.push_back(cat);
 }
 
-const std::vector<Category*>& Category::getChildren() const {
+const ds::Array<Category*>& Category::getChildren() const {
 	return m_Children;
 }
 
@@ -292,10 +292,10 @@ JSONReader::JSONReader() {
 }
 
 JSONReader::~JSONReader() {
-	std::vector<Category*>::iterator it = m_Categories.begin();
+	ds::Array<Category*>::iterator it = m_Categories.begin();
 	while ( it != m_Categories.end()) {
 		delete (*it);
-		it = m_Categories.erase(it);
+		it = m_Categories.remove(it);
 	}
 }
 
@@ -316,10 +316,10 @@ Category* JSONReader::getCategory(const std::string& name) {
 // Clear all internal data
 // -------------------------------------------------------
 void JSONReader::clear() {
-	std::vector<Category*>::iterator it = m_Categories.begin();
+	ds::Array<Category*>::iterator it = m_Categories.begin();
 	while ( it != m_Categories.end() ) {
 		delete (*it);
-		it = m_Categories.erase(it);
+		it = m_Categories.remove(it);
 	}
 }
 // -------------------------------------------------------

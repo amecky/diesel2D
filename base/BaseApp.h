@@ -128,8 +128,7 @@ protected:
 	void logKeyBindings();
 	void showPerformceOverlay(v2* position);
 
-
-	DialogManager gui;
+	DialogManager* gui;
 	AudioManager* audio;
 	
 	ParticleManager* particles;
@@ -156,9 +155,8 @@ private:
 	MTRand_open rand;		
 	bool m_Running;
 	GameStateMachine* _stateMachine;
-
 	GameEditor _editor;
-	BitmapFontsDialog _bmfDialog;
+	BitmapFontsDialog* _bmfDialog;
 
 	SpriteTemplatesEditor* _templatesEditor;
 	v2 _perfHUDPos;
