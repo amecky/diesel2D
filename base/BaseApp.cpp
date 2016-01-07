@@ -110,7 +110,8 @@ void BaseApp::loadSettings(const Category* root) {
 				assert(texture != -1);
 			}
 			else {
-				std::vector<std::string> values = string::split(textureNames);
+				Array<std::string> values;
+				string::split(textureNames,values);
 				for (size_t i = 0; i < values.size(); ++i) {
 					int texture = ds::renderer::loadTexture(values[i].c_str());
 					assert(texture != -1);

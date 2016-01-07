@@ -96,9 +96,9 @@ namespace ds {
 			datetime << now->tm_mday << "." << (now->tm_mon + 1) << "." << (now->tm_year + 1900) << " " << now->tm_hour << ":" << now->tm_min;
 			str = datetime.str();
 		}
-
-		std::vector<std::string> split(const std::string& str, const char delimiter) {
-			std::vector<std::string> words;
+		/*
+		Array<std::string> split(const std::string& str, const char delimiter) {
+			Array<std::string> words;
 			std::string word;
 			std::stringstream stream(str);
 			while (getline(stream, word, delimiter)) {
@@ -106,7 +106,7 @@ namespace ds {
 			}
 			return words;
 		}
-
+		*/
 		bool isNumeric(const char* text) {
 			const char* p = text;
 			int cnt = 0;
@@ -141,7 +141,7 @@ namespace ds {
 			return cnt;
 		}
 
-		void split(const std::string& str, std::vector<std::string>& words, const char delimiter) {
+		void split(const std::string& str, Array<std::string>& words, const char delimiter) {
 			std::string word;
 			std::stringstream stream(str);
 			while (getline(stream, word, delimiter)) {

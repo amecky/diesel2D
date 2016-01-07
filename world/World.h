@@ -2,6 +2,7 @@
 #include <Vector.h>
 #include "..\utils\Color.h"
 #include "..\renderer\render_types.h"
+#include "..\lib\collection_types.h"
 #include <map>
 #include "..\sprites\Sprite.h"
 #include "..\sprites\SpriteArray.h"
@@ -10,7 +11,7 @@
 #include "..\math\tweening.h"
 #include "..\math\CubicBezierPath.h"
 #include "..\math\StraightPath.h"
-#include <vector>
+//#include <vector>
 
 namespace ds {
 
@@ -77,7 +78,7 @@ namespace ds {
 
 	class World {
 
-	typedef std::vector<AbstractAction*> Actions;
+	typedef Array<AbstractAction*> Actions;
 
 	public:
 		World();

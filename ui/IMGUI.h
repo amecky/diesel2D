@@ -38,7 +38,7 @@ namespace gui {
 			T value;
 		};
 
-		typedef std::vector<ModelEntry> Entries;
+		typedef ds::Array<ModelEntry> Entries;
 
 	public:
 		ComponentModel() : AbstractComponentModel() {}
@@ -66,7 +66,7 @@ namespace gui {
 			_selected = -1;
 		}
 		void remove(int idx) {
-			_entries.erase(_entries.begin() + idx);
+			_entries.remove(_entries.begin() + idx);
 			_selected = -1;
 		}
 		void swap(int currentIndex, int newIndex) {

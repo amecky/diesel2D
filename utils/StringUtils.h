@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include <string>
 #include "..\dxstdafx.h"
 #include "..\lib\collection_types.h"
@@ -29,13 +28,13 @@ namespace ds {
 
 namespace string {
 
-	std::vector<std::string> split(const std::string& str,const char delimiter = ',');
+	//Array<std::string> split(const std::string& str,const char delimiter = ',');
 
 	int count_delimiters(const char* text, const char delimiter = ',');
 
 	int split(const char* text, float* array, int max, const char delimiter = ',');
 
-	void split(const std::string& str,std::vector<std::string>& list,const char delimiter = ',');
+	void split(const std::string& str,Array<std::string>& list,const char delimiter = ',');
 
 	void trim(std::string& str);
 

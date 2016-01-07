@@ -44,7 +44,7 @@ namespace ds {
 		DrawCounter drawCounter;
 		D3DFORMAT format;
 		VDStruct vdStructs[MAX_VERDECLS];
-		std::vector<Shader*> shaders;
+		Array<Shader*> shaders;
 		int defaultShaderID;
 		int currentShaderID;
 		dVector<Viewport> viewPorts;

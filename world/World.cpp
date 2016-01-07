@@ -57,7 +57,7 @@ namespace ds {
 		Actions::iterator it = m_Actions.begin();
 		while ( it != m_Actions.end()) {
 			delete (*it);
-			it = m_Actions.erase(it);
+			it = m_Actions.remove(it);
 		}		
 		if ( m_Data.buffer != 0 ) {
 			delete[] m_Data.buffer;

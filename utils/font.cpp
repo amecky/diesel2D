@@ -53,7 +53,7 @@ namespace ds {
 		// -------------------------------------------------------
 		// Create text
 		// -------------------------------------------------------
-		void createText(const BitmapFont& bitmapFont, const v2& pos, const char* text, const Color& color, std::vector<Sprite>& sprites, float scaleX, float scaleY) {
+		void createText(const BitmapFont& bitmapFont, const v2& pos, const char* text, const Color& color, Array<Sprite>& sprites, float scaleX, float scaleY) {
 			float x = pos.x;
 			float y = pos.y;
 			float padding = 0.0f;
@@ -78,7 +78,7 @@ namespace ds {
 			}
 		}
 
-		void createCharacter(const BitmapFont& bitmapFont, const v2& pos, char c, const Color& color, std::vector<Sprite>& sprites, float scaleX, float scaleY) {
+		void createCharacter(const BitmapFont& bitmapFont, const v2& pos, char c, const Color& color, Array<Sprite>& sprites, float scaleX, float scaleY) {
 			float x = pos.x;
 			float y = pos.y;
 			float padding = 0.0f;

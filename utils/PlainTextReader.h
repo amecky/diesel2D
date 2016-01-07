@@ -41,7 +41,7 @@ struct SectionEntry {
 
 class Category {
 
-typedef std::vector<SectionEntry*> Entries;
+typedef ds::Array<SectionEntry*> Entries;
 
 public:
 	Category(const std::string& name);

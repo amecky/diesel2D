@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include "..\lib\collection_types.h"
 #include "..\utils\Color.h"
 #include "GraphicsDevice.h"
 #include "..\math\math_types.h"
@@ -23,7 +23,7 @@ struct VDElement {
 	VDUSAGE usage;
 };
 
-typedef std::vector<VDElement> VDElements;
+typedef Array<VDElement> VDElements;
 
 public:
 	VertexDeclaration(const char* handle);
