@@ -35,8 +35,8 @@ namespace ds {
 		int _add_modifier_offset;
 		Array<std::string> _modifier_names;
 
-		Array<std::string> _all_generator_names;
-		Array<std::string> _all_modifier_names;
+		//Array<std::string> _all_generator_names;
+		//Array<std::string> _all_modifier_names;
 	};
 
 }

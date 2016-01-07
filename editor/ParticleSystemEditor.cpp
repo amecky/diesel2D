@@ -4,8 +4,8 @@ namespace ds {
 
 	ParticleSystemEditor::ParticleSystemEditor(ParticleManager* particles) : _particles(particles) , _system(0) {
 		reset();
-		_all_generator_names = _particles->getFactory().getGeneratorNames();
-		_all_modifier_names = _particles->getFactory().getModifierNames();
+		//_all_generator_names = _particles->getFactory().getGeneratorNames();
+		//_all_modifier_names = _particles->getFactory().getModifierNames();
 	}
 
 
@@ -56,7 +56,7 @@ namespace ds {
 		gui::endGroup();
 		if (_show_add_generator) {
 			gui::Header("Add generator");
-			gui::ComboBox(_all_generator_names, &_add_generator_selection, &_add_generator_offset);
+			gui::ComboBox(_particles->getFactory().getGeneratorNames(), &_add_generator_selection, &_add_generator_offset);
 			gui::beginGroup();
 			if (gui::Button("Add")) {
 				if (_add_generator_selection != -1) {
@@ -152,12 +152,12 @@ namespace ds {
 		gui::endGroup();
 		if (_show_add_modifier) {
 			gui::Header("Add modifier");
-			gui::ComboBox(_all_modifier_names, &_add_modifier_state, &_add_modifier_offset);
+			gui::ComboBox(_particles->getFactory().getModifierNames(), &_add_modifier_state, &_add_modifier_offset);
 			gui::beginGroup();
 			if (gui::Button("Add")) {
 				if (_add_modifier_state != -1) {
-					if (_particles->getFactory().addModifier(_system, _all_modifier_names[_add_modifier_state].c_str())) {
-						_modifier_names.push_back(_all_modifier_names[_add_modifier_state]);
+					if (_particles->getFactory().addModifier(_system, _particles->getFactory().getModifierNames()[_add_modifier_state].c_str())) {
+						_modifier_names.push_back(_particles->getFactory().getModifierNames()[_add_modifier_state]);
 					}
 					_show_add_modifier = false;
 				}
