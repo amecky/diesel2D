@@ -83,6 +83,7 @@ namespace ds {
 	// Destructor
 	// -------------------------------------------------------
 	GUIDialog::~GUIDialog(void) {		
+		_availableElements.clear();
 	}
 
 	// -------------------------------------------------------

@@ -163,7 +163,6 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 	//flag |= _CRTDBG_DELAY_FREE_MEM_DF;
 	_CrtSetDbgFlag(flag); // Set flag to the new value
 #endif
-
 	WNDCLASS wincl;
 	wincl.hInstance = hThisInst;
 	wincl.lpszClassName = "Diesel";

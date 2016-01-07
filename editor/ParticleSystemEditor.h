@@ -27,13 +27,13 @@ namespace ds {
 		bool _show_add_generator;
 		int _add_generator_selection;
 		int _add_generator_offset;
-		Array<std::string> _generator_names;
+		Array<const char*> _generator_names;
 		int _modifier_offset;
 		int _modifier_selection;
 		bool _show_add_modifier;
 		int _add_modifier_state;
 		int _add_modifier_offset;
-		Array<std::string> _modifier_names;
+		Array<const char*> _modifier_names;
 
 		//Array<std::string> _all_generator_names;
 		//Array<std::string> _all_modifier_names;

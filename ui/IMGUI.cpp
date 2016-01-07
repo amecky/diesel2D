@@ -992,7 +992,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// combo box strings
 	// -------------------------------------------------------	
-	void ComboBox(const ds::Array<std::string>& entries, int* selected, int *offset, int max) {
+	void ComboBox(const ds::Array<const char*>& entries, int* selected, int *offset, int max) {
 		HashedId id = HashPointer(&entries);
 		prepareComboBox(id, offset, entries.size(),max);
 		float width = 200.0f;
@@ -1012,7 +1012,7 @@ namespace gui {
 			if (*selected == i) {
 				guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_SELECTED_LINE]);
 			}				
-			guiContext->addText(p, entries[i].c_str());			
+			guiContext->addText(p, entries[i]);			
 			p.y -= BOX_HEIGHT;
 		}
 		guiContext->nextPosition(height + BOX_HEIGHT);
@@ -1021,7 +1021,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// combo box
 	// -------------------------------------------------------	
-	void DropDownBox(const ds::Array<std::string>& entries, int* selected, int* state) {
+	void DropDownBox(const ds::Array<const char*>& entries, int* selected, int* state) {
 		HashedId id = HashPointer(&entries);
 		int max = entries.size();
 		float width = 200.0f;
@@ -1048,7 +1048,7 @@ namespace gui {
 			guiContext->addText(p, "Please select one");
 		}
 		else {
-			guiContext->addText(p, entries[idx].c_str());
+			guiContext->addText(p, entries[idx]);
 		}
 		
 		if (*state == 1) {		
@@ -1064,7 +1064,7 @@ namespace gui {
 				if (*selected == i) {
 					guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_SELECTED_LINE]);
 				}
-				guiContext->addText(p, entries[i].c_str());
+				guiContext->addText(p, entries[i]);
 				p.y -= BOX_HEIGHT;
 			}
 			guiContext->position.y -= height;

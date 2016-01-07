@@ -146,7 +146,7 @@ namespace ds {
 			_show_add_modifier = true;
 		}
 		else if (gui::Button("Remove")) {
-			_system->removeModifierByName(_modifier_names[_modifier_selection].c_str());
+			_system->removeModifierByName(_modifier_names[_modifier_selection]);
 			_modifier_names.remove(_modifier_names.begin() + _modifier_selection);
 		}
 		gui::endGroup();
@@ -156,7 +156,7 @@ namespace ds {
 			gui::beginGroup();
 			if (gui::Button("Add")) {
 				if (_add_modifier_state != -1) {
-					if (_particles->getFactory().addModifier(_system, _particles->getFactory().getModifierNames()[_add_modifier_state].c_str())) {
+					if (_particles->getFactory().addModifier(_system, _particles->getFactory().getModifierNames()[_add_modifier_state])) {
 						_modifier_names.push_back(_particles->getFactory().getModifierNames()[_add_modifier_state]);
 					}
 					_show_add_modifier = false;

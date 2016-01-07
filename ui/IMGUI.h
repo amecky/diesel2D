@@ -129,11 +129,11 @@ namespace gui {
 
 	void InputColor(const char* label, ds::Color* v);
 
-	void ComboBox(const ds::Array<std::string>& entries, int* selected,int *offset,int max = 5);
+	void ComboBox(const ds::Array<const char*>& entries, int* selected, int *offset, int max = 5);
 
 	void ComboBox(AbstractComponentModel* model,int *offset,int max = 5);
 
-	void DropDownBox(const ds::Array<std::string>& entries, int* selected, int* state);
+	void DropDownBox(const ds::Array<const char*>& entries, int* selected, int* state);
 
 	void Histogram(float* values, int num, float minValue, float maxValue, float step);
 

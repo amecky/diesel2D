@@ -20,18 +20,18 @@ namespace ds {
 		bool addGenerator(NewParticleSystem* system, const char* generatorName);
 		ParticleGeneratorData* addGenerator(NewParticleSystem* system, int chunkID);
 
-		const Array<std::string>& getModifierNames() const {
+		const Array<const char*>& getModifierNames() const {
 			return _known_modifier_names;
 		}
-		const Array<std::string>& getGeneratorNames() const {
+		const Array<const char*>& getGeneratorNames() const {
 			return _known_generator_names;
 		}
 	private:
 		ParticleModifierData* createData(ParticleModifierType type) const;
 		ParticleGeneratorData* createData(ParticleGeneratorType type);
 		ParticleSystemFactory(const ParticleSystemFactory& other) {}
-		Array<std::string> _known_modifier_names;
-		Array<std::string> _known_generator_names;
+		Array<const char*> _known_modifier_names;
+		Array<const char*> _known_generator_names;
 		
 		ParticleModifier** _known_modifiers;
 		ParticleGenerator** _known_generators;

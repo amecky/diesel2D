@@ -45,7 +45,7 @@ DefaultAllocator::~DefaultAllocator() {
 			}
 		}
 	}
-	delete[] _buffer;
+	free(_buffer);
 }
 
 void* DefaultAllocator::allocate(uint32 size, uint32 align) {
