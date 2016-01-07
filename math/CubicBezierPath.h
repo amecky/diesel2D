@@ -1,6 +1,6 @@
 #pragma once
 #include <Vector.h>
-#include <vector>
+#include "..\lib\collection_types.h"
 #include "BezierCurve.h"
 
 namespace ds {
@@ -9,7 +9,7 @@ namespace ds {
 
 	class CubicBezierPath {
 
-	typedef std::vector<BezierCurve> BezierElements;
+	typedef Array<BezierCurve> BezierElements;
 
 	public:
 		CubicBezierPath();

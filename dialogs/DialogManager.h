@@ -1,7 +1,6 @@
 #pragma once
 #include "..\dxstdafx.h"
 #include "GUIDialog.h"
-#include <vector>
 #include "..\compiler\DataFile.h"
 #include "..\ui\IMGUI.h"
 
@@ -13,7 +12,7 @@ struct DialogDefinition {
 	GUIDialog* dialog;
 };
 
-typedef std::vector<DialogDefinition> Dialogs;
+typedef Array<DialogDefinition> Dialogs;
 
 class DialogManager : public DataFile {
 

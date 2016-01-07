@@ -71,7 +71,22 @@ namespace ds {
 		};
 
 		Array& operator=(const Array &other) {
-
+			if (_size > 0) {
+				resize(other._size);
+				_size = other._size;
+				_capacity = other._capacity;
+				//_data = (uchar*)malloc(_size * _typeSize);
+				_data = (uchar*)_allocator->allocate(_size * _typeSize);
+				memcpy(_data, other._data, sizeof(T) * _size);
+			}
+			else {
+				_size = other._size;
+				_capacity = other._capacity;
+				//_data = (uchar*)malloc(_size * _typeSize);
+				_data = (uchar*)_allocator->allocate(_size * _typeSize);
+				memcpy(_data, other._data, sizeof(T) * _size);
+			}
+			return *this;
 		}
 
 		iterator begin() {
@@ -232,10 +247,10 @@ namespace ds {
 		void shrink(uint32 newCapacity) {
 			if (newCapacity < _capacity) {
 				if (_size > newCapacity) {
-					uchar* ptr = newItems + newCapacity * _typeSize;
+					uchar* ptr = _data + newCapacity * _typeSize;
 					if (_destructor) {
 						for (uint32 i = newCapacity; i < _size; ++i) {
-							Destructor<T>(ptr);
+							Destruct<T>(ptr);
 							ptr += _typeSize;
 						}
 					}

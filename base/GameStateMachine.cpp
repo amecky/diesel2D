@@ -18,7 +18,7 @@ namespace ds {
 		GameStates::iterator it = _gameStates.begin();
 		while (it != _gameStates.end()) {
 			delete (*it);
-			it = _gameStates.erase(it);
+			it = _gameStates.remove(it);
 		}
 	}
 

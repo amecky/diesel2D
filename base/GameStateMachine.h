@@ -2,6 +2,7 @@
 #include "GameState.h"
 #include "..\utils\Log.h"
 #include "..\ui\IMGUI.h"
+#include "..\lib\collection_types.h"
 
 namespace ds {
 
@@ -13,8 +14,8 @@ struct FSMConnection {
 	int outcome;
 };
 
-typedef std::vector<GameState*> GameStates;
-typedef std::vector<FSMConnection> Connections;
+typedef Array<GameState*> GameStates;
+typedef Array<FSMConnection> Connections;
 
 public:
 	GameStateMachine();

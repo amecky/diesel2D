@@ -992,7 +992,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// combo box strings
 	// -------------------------------------------------------	
-	void ComboBox(const std::vector<std::string>& entries, int* selected,int *offset,int max) {
+	void ComboBox(const ds::Array<std::string>& entries, int* selected, int *offset, int max) {
 		HashedId id = HashPointer(&entries);
 		prepareComboBox(id, offset, entries.size(),max);
 		float width = 200.0f;
@@ -1021,7 +1021,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// combo box
 	// -------------------------------------------------------	
-	void DropDownBox(const std::vector<std::string>& entries, int* selected,int* state) {
+	void DropDownBox(const ds::Array<std::string>& entries, int* selected, int* state) {
 		HashedId id = HashPointer(&entries);
 		int max = entries.size();
 		float width = 200.0f;

@@ -1,5 +1,6 @@
 #pragma once
 #include "..\particles\ParticleManager.h"
+#include "..\lib\collection_types.h"
 
 namespace ds {
 
@@ -26,16 +27,16 @@ namespace ds {
 		bool _show_add_generator;
 		int _add_generator_selection;
 		int _add_generator_offset;
-		std::vector<std::string> _generator_names;
+		Array<std::string> _generator_names;
 		int _modifier_offset;
 		int _modifier_selection;
 		bool _show_add_modifier;
 		int _add_modifier_state;
 		int _add_modifier_offset;
-		std::vector<std::string> _modifier_names;
+		Array<std::string> _modifier_names;
 
-		std::vector<std::string> _all_generator_names;
-		std::vector<std::string> _all_modifier_names;
+		Array<std::string> _all_generator_names;
+		Array<std::string> _all_modifier_names;
 	};
 
 }

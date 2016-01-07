@@ -2,7 +2,8 @@
 #include "..\utils\Profiler.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\renderer\graphics.h"
-#include <stdarg.h>
+//#include <stdarg.h>
+
 
 namespace ds {
 
@@ -338,14 +339,14 @@ namespace ds {
 		LOG << "--> frequency: " << _emitter_data.frequency;
 	}
 
-	void NewParticleSystem::getModifierNames(std::vector<std::string>& names) {
+	void NewParticleSystem::getModifierNames(Array<std::string>& names) {
 		names.clear();
 		for (int i = 0; i < _count_modifiers; ++i) {
 			names.push_back(_modifier_instances[i].modifier->getName());
 		}
 	}
 
-	void NewParticleSystem::getGeneratorNames(std::vector<std::string>& names) {
+	void NewParticleSystem::getGeneratorNames(Array<std::string>& names) {
 		names.clear();
 		for (int i = 0; i < _count_generators; ++i) {
 			names.push_back(_generator_instances[i].generator->getName());

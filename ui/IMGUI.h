@@ -1,8 +1,8 @@
 #pragma once
 #include <Vector.h>
-#include <vector>
 #include "..\renderer\BitmapFont.h"
 #include "..\renderer\render_types.h"
+#include "..\lib\collection_types.h"
 
 namespace gui {
 	
@@ -129,11 +129,11 @@ namespace gui {
 
 	void InputColor(const char* label, ds::Color* v);
 
-	void ComboBox(const std::vector<std::string>& entries, int* selected,int *offset,int max = 5);
+	void ComboBox(const ds::Array<std::string>& entries, int* selected,int *offset,int max = 5);
 
 	void ComboBox(AbstractComponentModel* model,int *offset,int max = 5);
 
-	void DropDownBox(const std::vector<std::string>& entries, int* selected,int* state);
+	void DropDownBox(const ds::Array<std::string>& entries, int* selected, int* state);
 
 	void Histogram(float* values, int num, float minValue, float maxValue, float step);
 

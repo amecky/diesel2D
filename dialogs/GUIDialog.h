@@ -202,7 +202,7 @@ private:
 	bool m_SupportHover;
 	int m_SelectedInput;
 
-	std::vector<std::string> _availableElements;
+	Array<std::string> _availableElements;
 	int _selectedElement;
 	int _elementOffset;
 	gui::ComponentModel<GUIModelItem> _model;

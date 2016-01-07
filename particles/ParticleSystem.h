@@ -9,6 +9,7 @@
 #include "ParticleEmitter.h"
 #include "..\utils\Profiler.h"
 #include "ParticleSystemFactory.h"
+#include "..\lib\collection_types.h"
 
 namespace ds {
 
@@ -78,8 +79,8 @@ public:
 	const GeneratorInstance& getGeneratorInstance(int id) const {
 		return _generator_instances[id];
 	}
-	void getModifierNames(std::vector<std::string>& names);
-	void getGeneratorNames(std::vector<std::string>& names);
+	void getModifierNames(Array<std::string>& names);
+	void getGeneratorNames(Array<std::string>& names);
 	ParticleModifierData* getData(const char* modifierName);
 	ParticleGeneratorData* getGeneratorData(const char* generatorName);
 	ParticleModifier* getModifier(ParticleModifierType type);

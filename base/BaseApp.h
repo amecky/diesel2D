@@ -1,6 +1,5 @@
 #pragma once
 #include "..\dxstdafx.h"
-#include <vector>
 #include "..\utils\mtrand.h"
 #include "..\dialogs\DialogManager.h"
 #include "..\audio\AudioManager.h"

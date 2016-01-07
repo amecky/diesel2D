@@ -26,7 +26,7 @@ namespace ds {
 		Dialogs::iterator it = m_Dialogs.begin();
 		while ( it != m_Dialogs.end()) {
 			delete it->dialog;
-			it = m_Dialogs.erase(it);
+			it = m_Dialogs.remove(it);
 		}
 	}
 
@@ -182,7 +182,7 @@ namespace ds {
 		while (it != m_Dialogs.end()) {
 			if (it->hash == hashName) {
 				delete it->dialog;
-				it = m_Dialogs.erase(it);
+				it = m_Dialogs.remove(it);
 				return true;
 			}
 			else {

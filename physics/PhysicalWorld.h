@@ -4,6 +4,7 @@
 #include <map>
 #include "..\sprites\SpriteBatch.h"
 #include "..\math\Bitset.h"
+#include "..\lib\collection_types.h"
 
 namespace ds {
 
@@ -25,7 +26,7 @@ namespace ds {
 		}
 	};
 
-	typedef std::vector<IgnoredCollision> IgnoredCollisions;
+	typedef Array<IgnoredCollision> IgnoredCollisions;
 	
 	public:
 		PhysicalWorld();

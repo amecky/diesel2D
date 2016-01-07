@@ -147,7 +147,7 @@ namespace ds {
 		}
 		else if (gui::Button("Remove")) {
 			_system->removeModifierByName(_modifier_names[_modifier_selection].c_str());
-			_modifier_names.erase(_modifier_names.begin() + _modifier_selection);
+			_modifier_names.remove(_modifier_names.begin() + _modifier_selection);
 		}
 		gui::endGroup();
 		if (_show_add_modifier) {

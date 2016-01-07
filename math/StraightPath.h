@@ -1,6 +1,6 @@
 #pragma once
 #include <Vector.h>
-#include <vector>
+#include "..\lib\collection_types.h"
 #include "CubicBezierPath.h"
 
 namespace ds {
@@ -11,7 +11,7 @@ namespace ds {
 		Vector2f end;
 	};
 
-	typedef std::vector<LineSegment> LineElements;
+	typedef Array<LineSegment> LineElements;
 
 	class StraightPath {
 
