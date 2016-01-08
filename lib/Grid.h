@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "..\lib\collection_types.h"
 
 namespace ds {
 
@@ -54,7 +54,7 @@ public:
 	T& get(int x,int y);
     void set(int x,int y,const T& t);
     bool remove(int x,int y);    
-    void remove(const std::vector<GridPoint>& points);  
+    void remove(const Array<GridPoint>& points);  
     const int width() const {
         return m_Width;
     }
@@ -67,8 +67,8 @@ public:
 		}
 		return false;
 	}
-    void findMatchingNeighbours(int x,int y,std::vector<GridPoint>& entries);    
-	void findMatchingNeighbours(int x,int y,const T& node,std::vector<GridPoint>& entries);    
+	void findMatchingNeighbours(int x, int y, Array<GridPoint>& entries);
+	void findMatchingNeighbours(int x, int y, const T& node, Array<GridPoint>& entries);
     void fillRow(int row,const T& t);
     void fillColumn(int column,const T& t);
     void copyRow(int oldRow,int newRow);
@@ -80,13 +80,13 @@ public:
 	bool isColumnEmpty(int col);
     void dropRow(int x);
     void dropCell(int x,int y);
-	void dropCells(std::vector<DroppedCell>& droppedCells);
+	void dropCells(Array<DroppedCell>& droppedCells);
 protected:
     virtual bool isMatch(const T& first,const T& right) = 0;
 private:
     const int getIndex(int x,int y) const;
-    void findMatching(int x,int y,GridNode* providedNode,std::vector<GridNode*>& gridNodes);
-	void simpleFindMatching(int x,int y,GridNode* providedNode,std::vector<GridNode*>& gridNodes);
+	void findMatching(int x, int y, GridNode* providedNode, Array<GridNode*>& gridNodes);
+	void simpleFindMatching(int x, int y, GridNode* providedNode, Array<GridNode*>& gridNodes);
     int m_Width;
     int m_Height;
     int m_Size;
@@ -214,9 +214,9 @@ inline const int Grid<T>::getIndex(int x, int y) const {
 // findMatchingNeighbours
 // ------------------------------------------------
 template<class T>
-inline void Grid<T>::findMatchingNeighbours(int x, int y,std::vector<GridPoint>& entries) {
+inline void Grid<T>::findMatchingNeighbours(int x, int y, Array<GridPoint>& entries) {
     int idx = getIndex(x,y);
-    std::vector<GridNode*> gridNodes;
+	Array<GridNode*> gridNodes;
     if ( idx != -1 ) {    
         GridNode* provided = &m_Data[idx];
         if ( provided->used) {
@@ -235,8 +235,8 @@ inline void Grid<T>::findMatchingNeighbours(int x, int y,std::vector<GridPoint>&
 }
 
 template<class T>
-inline void Grid<T>::findMatchingNeighbours(int x,int y,const T& node,std::vector<GridPoint>& entries) {
-	std::vector<GridNode*> gridNodes;
+inline void Grid<T>::findMatchingNeighbours(int x, int y, const T& node, Array<GridPoint>& entries) {
+	Array<GridNode*> gridNodes;
 	if ( !isFree(x,y)) {
 		GridNode tmp;
 		tmp.x = x;
@@ -260,7 +260,7 @@ inline void Grid<T>::findMatchingNeighbours(int x,int y,const T& node,std::vecto
 // internal findMatching
 // ------------------------------------------------
 template<class T>
-inline void Grid<T>::simpleFindMatching(int x,int y,GridNode* providedNode,std::vector<GridNode*>& gridNodes) {
+inline void Grid<T>::simpleFindMatching(int x, int y, GridNode* providedNode, Array<GridNode*>& gridNodes) {
 	if ( !isFree(x-1,y)) {
 		findMatching(x-1,y,providedNode,gridNodes);
 	}
@@ -279,7 +279,7 @@ inline void Grid<T>::simpleFindMatching(int x,int y,GridNode* providedNode,std::
 // internal findMatching
 // ------------------------------------------------
 template<class T>
-inline void Grid<T>::findMatching(int x, int y, GridNode* providedNode,std::vector<GridNode*>& gridNodes) {
+inline void Grid<T>::findMatching(int x, int y, GridNode* providedNode, Array<GridNode*>& gridNodes) {
     int idx = getIndex(x,y);
     if ( idx != -1 ) {
         GridNode* currentNode = &m_Data[idx];        
@@ -437,7 +437,7 @@ inline void Grid<T>::dropCell(int x, int y) {
 // Drop cells - remove empty cells in between
 // -------------------------------------------------------
 template<class T>
-inline void Grid<T>::dropCells(std::vector<DroppedCell>& droppedCells) {
+inline void Grid<T>::dropCells(Array<DroppedCell>& droppedCells) {
 	for ( int x = 0; x < m_Width; ++x ) {
 		for ( int y = 0 ; y < m_Height -1; ++y ) {
 			if ( isFree(x,y) ) {
@@ -476,7 +476,7 @@ bool Grid<T>::isColumnEmpty(int col) {
 // Remove grid points
 // ------------------------------------------------
 template<class T>
-inline void Grid<T>::remove(const std::vector<GridPoint>& points) {
+inline void Grid<T>::remove(const Array<GridPoint>& points) {
     for ( std::size_t i = 0; i < points.size(); ++i ) {
         GridPoint gp = points[i];
         remove(gp.x,gp.y);

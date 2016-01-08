@@ -14,7 +14,7 @@ DataContainer::~DataContainer() {
 	Channels::iterator it = m_DataChannels.begin();
 	while (it != m_DataChannels.end()) {
 		delete (*it);
-		it = m_DataChannels.erase(it);
+		it = m_DataChannels.remove(it);
 	}
 	if ( m_Initialized ) {
 		delete[] m_Buffer;

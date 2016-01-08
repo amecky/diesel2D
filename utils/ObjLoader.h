@@ -2,7 +2,7 @@
 
 #include <string>
 #include <map>
-#include <vector>
+#include "..\lib\collection_types.h"
 #include <Vector.h>
 #include "..\renderer\render_types.h"
 
@@ -29,9 +29,9 @@ namespace ds {
 		};
 
 		typedef std::map<std::string, Material> Materials;
-		typedef std::vector<Vector3f> VectorCache;
-		typedef std::vector<VertexDefinition> Faces;
-		typedef std::vector<Vector2f> UVCache;
+		typedef Array<Vector3f> VectorCache;
+		typedef Array<VertexDefinition> Faces;
+		typedef Array<Vector2f> UVCache;
 
 	public:
 		ObjLoader();		

@@ -12,7 +12,7 @@ namespace ds {
 	}
 
 	void BitmapFontsDialog::init() {
-		std::vector<BitmapFont*> list = renderer::getBitmapFontList();
+		const Array<BitmapFont*>& list = renderer::getBitmapFontList();
 		for (size_t i = 0; i < list.size(); ++i) {
 			_fontNames.add(list[i]->name, list[i]->name);
 		}

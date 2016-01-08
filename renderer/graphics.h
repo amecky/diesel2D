@@ -431,7 +431,7 @@ namespace ds {
 
 		// bitmap fonts
 
-		std::vector<BitmapFont*>& getBitmapFontList();
+		Array<BitmapFont*>& getBitmapFontList();
 
 		BitmapFont* getBitmapFont(const char* name);
 

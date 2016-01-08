@@ -59,7 +59,7 @@ namespace ds {
 		DescriptorData descriptorData;
 		int defaultDescriptor;
 		int currentDescriptor;
-		std::vector<BitmapFont*> bitmapFonts;
+		Array<BitmapFont*> bitmapFonts;
 		int currentTextures[5];
 		dVector<RenderTarget> renderTargets;
 		int usedRenderTargets;
@@ -994,7 +994,7 @@ namespace ds {
 		// -------------------------------------------------------
 		// get bitmap font list
 		// -------------------------------------------------------
-		std::vector<BitmapFont*>& getBitmapFontList() {
+		Array<BitmapFont*>& getBitmapFontList() {
 			return renderContext->bitmapFonts;
 		}
 

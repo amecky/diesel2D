@@ -2,6 +2,7 @@
 #include "DataArray.h"
 #include "..\renderer\render_types.h"
 #include "..\utils\Color.h"
+#include "..\lib\collection_types.h"
 
 namespace ds {
 
@@ -150,7 +151,7 @@ protected:
 
 class DataContainer {
 
-	typedef std::vector<DataChannel*> Channels;
+	typedef Array<DataChannel*> Channels;
 
 public:
 	DataContainer();
