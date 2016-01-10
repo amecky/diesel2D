@@ -1,6 +1,8 @@
 #include "SpriteTemplates.h"
 #include "..\DialogResources.h"
 #include "..\utils\JSONWriter.h"
+#include "..\utils\SimpleJSONReader.h"
+#include "..\utils\Profiler.h"
 
 namespace ds {
 
@@ -101,6 +103,47 @@ namespace ds {
 		return true;
 	}
 
+	bool SpriteTemplates::saveData(SimpleJSONWriter& writer) {
+		for (size_t i = 0; i < _map.size(); ++i) {
+			const MappingEntry& entry = _map[i];
+			writer.startCategory("sprite");
+			writer.write("name", entry.name);
+			writer.write("texture_id", entry.sprite.texture.textureID);
+			writer.write("position", entry.sprite.position);
+			writer.write("rect", entry.sprite.texture.rect);
+			writer.write("scale", entry.sprite.scale);
+			writer.write("rotation", entry.sprite.rotation);
+			writer.write("color", entry.sprite.color);
+			writer.write("type", entry.sprite.type);
+			writer.endCategory();
+		}
+		return true;
+	}
+
+	bool SpriteTemplates::loadData(SimpleJSONReader& loader) {
+		int cats[256];
+		int num = loader.get_categories(cats, 256);
+		for (int i = 0; i < num; ++i) {
+			MappingEntry entry;
+			Rect rect;
+			const char* name = loader.get_string(cats[i], "name");
+			sprintf_s(entry.name, 32, "%s", name);
+			//LOG << "name: " << name;
+			loader.get_int(cats[i], "texture_id", &entry.sprite.texture.textureID);
+			loader.get_vec2(cats[i], "position", &entry.sprite.position);
+			loader.get_rect(cats[i], "rect", &rect);
+			loader.get_vec2(cats[i], "scale", &entry.sprite.scale);
+			loader.get_float(cats[i], "rotation", &entry.sprite.rotation);
+			loader.get_color(cats[i], "color", &entry.sprite.color);
+			loader.get_int(cats[i], "type", &entry.sprite.type);
+			entry.sprite.texture = math::buildTexture(rect);
+			entry.sprite.id = _currentID++;
+			_map.push_back(entry);
+
+		}
+		return true;
+	}
+
 	bool SpriteTemplates::loadData(JSONReader& reader) {
 		_map.clear();
 		_currentID = 0;
@@ -111,7 +154,7 @@ namespace ds {
 				MappingEntry entry;
 				Rect r;
 				std::string name = c->getProperty("name");
-				LOG << "name: " << name;
+				//LOG << "name: " << name;
 				strcpy(entry.name, name.c_str());
 				entry.hash = string::murmur_hash(entry.name);
 				c->getInt("texture_id", &entry.sprite.texture.textureID);

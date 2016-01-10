@@ -14,6 +14,53 @@ namespace ds {
 		((TYPE*)dest)->~TYPE();
 	}
 
+	struct CharBuffer {
+
+		char* data;
+		int size;
+		int capacity;
+		int num;
+		Allocator* _allocator;
+
+		CharBuffer(Allocator* allocator = gDefaultMemory) : data(0), size(0), capacity(0), num(0) , _allocator(allocator) {}
+
+		~CharBuffer() {
+			if (data != 0) {
+				//delete[] data;
+				_allocator->deallocate(data);
+			}
+		}
+
+		void* alloc(int sz) {
+			if (size + sz > capacity) {
+				resize(capacity * 2 + 8);
+			}
+			auto res = data + size;
+			size += sz;
+			int d = sz / 4;
+			if (d == 0) {
+				d = 1;
+			}
+			num += d;
+			return res;
+		}
+
+		void resize(int newCap) {
+			if (newCap > capacity) {
+				//char* tmp = new char[newCap];
+				char* tmp = (char*)_allocator->allocate(newCap);
+				if (data != 0) {
+					memcpy(tmp, data, size);
+					//delete[] data;
+					_allocator->deallocate(data);
+				}
+				capacity = newCap;
+				data = tmp;
+			}
+		}
+	};
+
+
 	template<class T>
 	class Array {
 
@@ -310,6 +357,92 @@ namespace ds {
 			uchar* _data;
 			T* _items;
 		};
+	};
+
+	template<class T>
+	class Stack {
+
+	public:
+		Stack(Allocator* allocator = gDefaultMemory) : _allocator(allocator) , _size(0) , _capacity(0) , _data(0) {
+			_typeSize = sizeof(T);
+			_constructor = !__has_trivial_constructor(T);
+			_destructor = !__has_trivial_destructor(T);
+		}
+
+		~Stack() {
+			if (_data != 0) {
+				clear();
+				_allocator->deallocate(_data);
+			}
+		}
+
+		void push(const T& t) {
+			if (_size + 1 > _capacity) {
+				grow(_capacity * 2 + 8);
+			}
+			_items[_size++] = t;
+		}
+
+		void pop() {
+			if (_size > 0) {
+				uchar* ptr = _data + (_size - 1) * _typeSize;
+				Destruct<T>(ptr);
+				--_size;
+			}
+		}
+
+		const T& top() const {
+			return _items[_size - 1];
+		}
+
+		T& top() {
+			return _items[_size - 1];
+		}
+
+		uint32 size() {
+			return _size;
+		}
+
+		bool empty() {
+			return _size == 0;
+		}
+
+		void clear() {
+			if (_destructor) {
+				uchar* ptr = _data;
+				for (uint32 i = 0; i < _size; ++i) {
+					Destruct<T>(ptr);
+					ptr += _typeSize;
+				}
+			}
+			_size = 0;
+		}
+	private:
+		void grow(uint32 newCapacity) {
+			if (newCapacity > _capacity) {
+				uchar* newItems = (uchar*)_allocator->allocate(newCapacity * _typeSize);
+				if (_data != 0) {
+					memcpy(newItems, _data, _size * _typeSize);
+				}
+				uchar* ptr = newItems + _size * _typeSize;
+				if (_data != 0) {
+					_allocator->deallocate(_data);
+				}
+				_data = newItems;
+				_capacity = newCapacity;
+			}
+		}
+		Allocator* _allocator;
+		uint32 _size;
+		uint32 _capacity;
+		bool _constructor;
+		bool _destructor;
+		uint32 _typeSize;
+		union {
+			uchar* _data;
+			T* _items;
+		};
+
 	};
 
 }

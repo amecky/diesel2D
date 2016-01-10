@@ -197,8 +197,10 @@ void BaseApp::loadSettings(const Category* root) {
 // -------------------------------------------------------
 // Init
 // -------------------------------------------------------
-void BaseApp::prepare() {
+void BaseApp::prepare() {	
 	assert(!_prepared);
+	StopWatch s;
+	s.start();
 	LOG << "---> Init <---";
 	LOG << "---- Loading settings ----";
 	Category root("root");
@@ -242,6 +244,8 @@ void BaseApp::prepare() {
 	_perfHUDPos = dp;
 	m_Running = true;
 	_prepared = true;
+	s.end();
+	LOG << "Total time to initialize: " << s.elapsed();
 }
 
 void BaseApp::logKeyBindings() {

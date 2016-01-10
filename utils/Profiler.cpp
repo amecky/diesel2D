@@ -1,9 +1,33 @@
 #include "Profiler.h"
-#include <windows.h>
+
 #include "Log.h"
 #include "StringUtils.h"
 #include "..\ui\IMGUI.h"
 #include "..\DialogResources.h"
+
+StopWatch::StopWatch() {
+	QueryPerformanceFrequency(&_frequency);
+}
+
+void StopWatch::start() {
+	QueryPerformanceCounter(&startingTime);
+}
+
+double StopWatch::LIToSecs(LARGE_INTEGER & L) {
+	return ((double)L.QuadPart * 1000.0 / (double)_frequency.QuadPart);
+}
+
+void StopWatch::end() {
+	LARGE_INTEGER EndingTime;
+	QueryPerformanceCounter(&EndingTime);
+	LARGE_INTEGER time;
+	time.QuadPart = EndingTime.QuadPart - startingTime.QuadPart;
+	_elapsed = LIToSecs(time);
+}
+
+float StopWatch::elapsed() {
+	return _elapsed;
+}
 
 namespace profiler {
 

@@ -296,6 +296,10 @@ namespace ds {
 			return ((c >= '0' && c <= '9') || c == '-' || c == '+' || c == '.');
 		}
 
+		bool isNumeric(const char c) {
+			return ((c >= '0' && c <= '9'));
+		}
+
 		bool isWhitespace(const char c) {
 			if (c == ' ' || c == '\t' || c == '\r' || c == '\n') {
 				return true;
@@ -316,7 +320,7 @@ namespace ds {
 				++p;
 			}
 			float value = 0.0f;
-			while (isDigit(*p)) {
+			while (isNumeric(*p)) {
 				value *= 10.0f;
 				value = value + (*p - '0');
 				++p;
@@ -325,7 +329,7 @@ namespace ds {
 				++p;
 				float dec = 1.0f;
 				float frac = 0.0f;
-				while (isDigit(*p)) {
+				while (isNumeric(*p)) {
 					frac *= 10.0f;
 					frac = frac + (*p - '0');
 					dec *= 10.0f;

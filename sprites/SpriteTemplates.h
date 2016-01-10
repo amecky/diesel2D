@@ -24,6 +24,7 @@ public:
 	Sprite& get(int index);
 	const Sprite& get(int index) const;
 	bool saveData(JSONWriter& writer);
+	bool saveData(SimpleJSONWriter& writer);
 	bool loadData(JSONReader& reader);
 	const char* getFileName() const {
 		return "resources\\sprite_templates.json";
@@ -31,6 +32,10 @@ public:
 	int createEmptyTemplate(const char* name);
 	const TemplateMap& getTemplates() const {
 		return _map;
+	}
+	virtual bool loadData(SimpleJSONReader& loader);
+	virtual bool useSimplified() {
+		return true;
 	}
 private:
 	const int getIndex(int id) const;

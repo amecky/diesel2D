@@ -1,7 +1,22 @@
 #pragma once
 #define PROFILING TRUE
 #include <Vector.h>
+#include <windows.h>
 
+class StopWatch {
+
+public:
+	StopWatch();
+	~StopWatch() {}
+	void start();
+	void end();
+	float elapsed();
+private:
+	double LIToSecs(LARGE_INTEGER & L);
+	float _elapsed;
+	LARGE_INTEGER startingTime;
+	LARGE_INTEGER _frequency;
+};
 // -------------------------------------------------------
 // Profile data
 // -------------------------------------------------------
