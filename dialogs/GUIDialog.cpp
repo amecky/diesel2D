@@ -905,6 +905,75 @@ namespace ds {
 		return true;
 	}
 
+	bool GUIDialog::loadData(SimpleJSONReader& reader) {
+		clear();
+		_model.clear();
+		int cats[256];
+		int num = reader.get_categories(cats, 256);
+		for (int i = 0; i < num; ++i) {
+			if (reader.matches(cats[i],"image")) {
+				GUIItem item;
+				int id = loadItem(cats[i], reader, &item);
+				Rect r;
+				reader.get_rect(cats[i], "rect", &r);
+				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
+				addToModel(gid.id, GIT_IMAGE, "Image");
+			}
+			else if (reader.matches(cats[i], "button")) {
+				GUIItem item;
+				int id = loadItem(cats[i], reader, &item);
+				Rect r;
+				reader.get_rect(cats[i], "rect", &r);
+				const char* label = reader.get_string(cats[i], "text");
+				GUID gid = addButton(id, item.pos.x, item.pos.y, label, r, item.color, item.scale, item.centered);
+				addToModel(gid.id, GIT_BUTTON, "Button");
+			}
+			else if (reader.matches(cats[i], "image_button")) {
+				GUIItem item;
+				int id = loadItem(cats[i], reader, &item);
+				Rect r;
+				reader.get_rect(cats[i], "rect", &r);
+				const char* label = reader.get_string(cats[i], "text");
+				GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
+				addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
+			}
+			else if (reader.matches(cats[i], "text")) {
+				GUIItem item;
+				int id = loadItem(cats[i], reader, &item);
+				const char* label = reader.get_string(cats[i], "text");
+				GUID gid = addText(id, item.pos.x, item.pos.y, label, item.color, item.scale, item.centered);
+				addToModel(gid.id, GIT_TEXT, "Text");
+			}
+			else if (reader.matches(cats[i], "numbers")) {
+				GUIItem item;
+				int id = loadItem(cats[i], reader, &item);
+				int value = 0;
+				reader.get_int(cats[i],"value", &value);
+				int length = 0;
+				reader.get_int(cats[i], "length", &length);
+				GUID gid = addNumber(id, item.pos, value, length, item.scale, item.color, item.centered);
+				addToModel(gid.id, GIT_NUMBERS, "Number");
+			}
+			else if (reader.matches(cats[i], "timer")) {
+				GUIItem item;
+				int id = loadItem(cats[i], reader, &item);
+				GUID gid = addTimer(id, item.pos.x, item.pos.y, item.scale, item.color, item.centered);
+				addToModel(gid.id, GIT_TIMER, "Timer");
+			}
+		}
+		return true;
+	}
+
+	int GUIDialog::loadItem(int category, SimpleJSONReader& reader, GUIItem* item) {
+		int id = 0;
+		reader.get_int(category,"id", &id);
+		reader.get_vec2(category, "pos", &item->pos);
+		reader.get_color(category, "color", &item->color);
+		reader.get_bool(category, "centered", &item->centered);
+		reader.get_float(category, "scale", &item->scale);
+		return id;
+	}
+
 	int GUIDialog::loadItem(Category* category, GUIItem* item) {
 		int id = 0;
 		category->getInt("id", &id);

@@ -66,6 +66,9 @@ int tokenize(const char* text, Token* tokens, int maxTokens) {
 				++p;
 				while (*p != '\n') {
 					++p;
+					if (*p == 0) {
+						break;
+					}
 				}
 			}
 		}
@@ -98,6 +101,12 @@ SimpleJSONReader::SimpleJSONReader() : _text(0) {
 
 
 SimpleJSONReader::~SimpleJSONReader() {
+	if (_category_buffer.data != 0) {
+		gDefaultMemory->deallocate(_category_buffer.data);
+	}
+	if (_data_buffer.data != 0) {
+		gDefaultMemory->deallocate(_data_buffer.data);
+	}
 	if (_text != 0) {
 		delete[] _text;
 	}
@@ -266,7 +275,6 @@ bool SimpleJSONReader::parse(const char* fileName) {
 				if (!cat_stack.empty()) {
 					parent = cat_stack.top();
 				}
-				//LOG << "--> category: " << name;
 				cat = add_category(name, parent);
 				cat_stack.push(cat);
 				++n;
@@ -285,14 +293,18 @@ bool SimpleJSONReader::parse(const char* fileName) {
 				if (v.type == Token::STRING) {
 					int start = v.index;
 					int end = v.index + v.size;
-					// alloc v.size align 4
 					add(p, _text + start, v.size);
-					/*
-					for (int i = start; i < end; ++i) {
-						_value_buffer.add(p, _text[i]);
+					++n;
+				}
+				else if (v.type == Token::NAME) {
+					strncpy(name, _text + v.index, v.size);
+					name[v.size] = '\0';
+					if (strcmp(name, "true") == 0) {
+						add(p, 1.0f);
 					}
-					_value_buffer.add(p, '\0');
-					*/
+					else {
+						add(p, 0.0f);
+					}
 					++n;
 				}
 				else {
@@ -337,10 +349,19 @@ int SimpleJSONReader::get_categories(int* result, int max, int parent) {
 	return cnt;
 }
 
+int SimpleJSONReader::find_category(const char* name, int parent) {
+	unsigned int hash = string::murmur_hash(name);
+	for (int i = 0; i < _category_buffer.size; ++i) {
+		if (_category_buffer.parents[i] == parent && _category_buffer.hashes[i] == hash) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 const char* SimpleJSONReader::get_category_name(int category_id) {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
 		int index = _category_buffer.indices[category_id];
-		//return _category_buffer.names + index;
 		return _name_buffer.data + index;
 	}
 	return '\0';
@@ -356,86 +377,98 @@ bool SimpleJSONReader::matches(int category_id, const char* name) {
 	return false;
 }
 
-bool SimpleJSONReader::get_int(int category_id, const char* name, int* ret) {
-	if (category_id >= 0 && category_id < _category_buffer.size) {
-		unsigned int key = string::murmur_hash(name);
-		for (int i = 0; i < _data_buffer.size; ++i) {
-			if (_data_buffer.categories[i] == category_id && _data_buffer.keys[i] == key) {
-				*ret = static_cast<int>(get(_data_buffer.indices[i]));
-				return true;
-			}
+bool SimpleJSONReader::get_bool(int category_id, const char* name, bool* ret) {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		int v = static_cast<int>(get(_data_buffer.indices[idx]));
+		if (v == 1) {
+			*ret = true;
 		}
+		else {
+			*ret = false;
+		}
+		return true;		
+	}
+	return false;
+}
+
+bool SimpleJSONReader::get_int(int category_id, const char* name, int* ret) {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		*ret = static_cast<int>(get(_data_buffer.indices[idx]));
+		return true;		
+	}
+	return false;
+}
+
+bool SimpleJSONReader::get_uint(int category_id, const char* name, uint32* ret) {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		*ret = static_cast<uint32>(get(_data_buffer.indices[idx]));
+		return true;
 	}
 	return false;
 }
 
 bool SimpleJSONReader::get_float(int category_id, const char* name, float* ret) {
-	if (category_id >= 0 && category_id < _category_buffer.size) {
-		unsigned int key = string::murmur_hash(name);
-		for (int i = 0; i < _data_buffer.size; ++i) {
-			if (_data_buffer.categories[i] == category_id && _data_buffer.keys[i] == key) {
-				*ret = get(_data_buffer.indices[i]);
-				return true;
-			}
-		}
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		*ret = get(_data_buffer.indices[idx]);
+		return true;		
 	}
 	return false;
 }
 
 bool SimpleJSONReader::get_vec2(int category_id, const char* name, v2* ret) {
-	if (category_id >= 0 && category_id < _category_buffer.size) {
-		unsigned int key = string::murmur_hash(name);
-		for (int i = 0; i < _data_buffer.size; ++i) {
-			if (_data_buffer.categories[i] == category_id && _data_buffer.keys[i] == key) {
-				ret->x = get(_data_buffer.indices[i]);
-				ret->y = get(_data_buffer.indices[i] + 1);
-				return true;
-			}
-		}
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		ret->x = get(_data_buffer.indices[idx]);
+		ret->y = get(_data_buffer.indices[idx] + 1);
+		return true;	
 	}
 	return false;
 }
 
-bool SimpleJSONReader::get_color(int category_id, const char* name, Color* ret) {
+int SimpleJSONReader::get_index(int category_id, const char* name) {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
 		unsigned int key = string::murmur_hash(name);
 		for (int i = 0; i < _data_buffer.size; ++i) {
 			if (_data_buffer.categories[i] == category_id && _data_buffer.keys[i] == key) {
-				ret->r = get(_data_buffer.indices[i]) / 255.0f;
-				ret->g = get(_data_buffer.indices[i] + 1) / 255.0f;
-				ret->b = get(_data_buffer.indices[i] + 2) / 255.0f;
-				ret->a = get(_data_buffer.indices[i] + 3) / 255.0f;
-				return true;
+				return i;
 			}
 		}
+	}
+	return -1;
+}
+
+bool SimpleJSONReader::get_color(int category_id, const char* name, Color* ret) {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		ret->r = get(_data_buffer.indices[idx]) / 255.0f;
+		ret->g = get(_data_buffer.indices[idx] + 1) / 255.0f;
+		ret->b = get(_data_buffer.indices[idx] + 2) / 255.0f;
+		ret->a = get(_data_buffer.indices[idx] + 3) / 255.0f;
+		return true;
 	}
 	return false;
 }
 
 bool SimpleJSONReader::get_rect(int category_id, const char* name, Rect* ret) {
-	if (category_id >= 0 && category_id < _category_buffer.size) {
-		unsigned int key = string::murmur_hash(name);
-		for (int i = 0; i < _data_buffer.size; ++i) {
-			if (_data_buffer.categories[i] == category_id && _data_buffer.keys[i] == key) {
-				ret->top = get(_data_buffer.indices[i]);
-				ret->left = get(_data_buffer.indices[i] + 1);
-				ret->right = ret->left + get(_data_buffer.indices[i] + 2);
-				ret->bottom = ret->top + get(_data_buffer.indices[i] + 3);
-				return true;
-			}
-		}
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		ret->top = get(_data_buffer.indices[idx]);
+		ret->left = get(_data_buffer.indices[idx] + 1);
+		ret->right = ret->left + get(_data_buffer.indices[idx] + 2);
+		ret->bottom = ret->top + get(_data_buffer.indices[idx] + 3);
+		return true;
 	}
 	return false;
 }
 
 const char* SimpleJSONReader::get_string(int category_id, const char* name) {
-	if (category_id >= 0 && category_id < _category_buffer.size) {
-		unsigned int key = string::murmur_hash(name);
-		for (int i = 0; i < _data_buffer.size; ++i) {
-			if (_data_buffer.categories[i] == category_id && _data_buffer.keys[i] == key) {
-				return get_char(_data_buffer.indices[i]);
-			}
-		}
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		return get_char(_data_buffer.indices[idx]);
 	}
 	return '\0';
 }

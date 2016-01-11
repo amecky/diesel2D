@@ -37,6 +37,10 @@ public:
 	const ParticleSystemFactory& getFactory() const {
 		return _factory;
 	}
+	virtual bool loadData(SimpleJSONReader& loader);
+	virtual bool useSimplified() {
+		return true;
+	}
 private:
 	void end();
 	void flush();

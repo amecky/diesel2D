@@ -109,6 +109,10 @@ public:
 	ParticleEmitterData& getEmitterData() {
 		return _emitter_data;
 	}
+	virtual bool loadData(SimpleJSONReader& loader);
+	virtual bool useSimplified() {
+		return true;
+	}
 private:
 	void tickEmitters(float dt);
 	void initEmitterData();

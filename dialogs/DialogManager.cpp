@@ -236,5 +236,32 @@ namespace ds {
 		}
 		return true;
 	}
+
+	bool DialogManager::loadData(SimpleJSONReader& reader) {
+		clear();
+		_index = 1;
+		int cats[32];
+		int num = reader.get_categories(cats, 32);
+		//const Array<Category*>& categories = reader.getCategories();
+		//for (size_t i = 0; i < categories.size(); ++i) {
+		for (int i = 0; i < num; ++i ) {
+			//Category* c = categories[i];
+			//if (c->getName() != "gui") {
+			int id = 0;
+			reader.get_int(cats[i],"id",&id);
+			const char* name = reader.get_string(cats[i], "file");
+				//std::string name = c->getProperty("file");
+			GUIDialog* dialog = new GUIDialog();
+			LOG << "Creating new dialog: " << name;
+			DialogDefinition def;
+			sprintf_s(def.name, 32, "%s", name);
+			def.hash = string::murmur_hash(name);
+			def.dialog = dialog;
+			dialog->init(def.name, id, m_Font);
+			m_Dialogs.push_back(def);
+			//}
+		}
+		return true;
+	}
 	
 }

@@ -51,8 +51,11 @@ namespace ds {
 		void save_binary(const char* fileName);
 		bool load_binary(const char* fileName);
 		int get_categories(int* result, int max, int parent = -1);
+		int find_category(const char* name, int parent = -1);
 		bool matches(int category_id, const char* name);
 		bool get_int(int category_id, const char* name, int* ret);
+		bool get_bool(int category_id, const char* name, bool* ret);
+		bool get_uint(int category_id, const char* name, uint32* ret);
 		bool get_float(int category_id, const char* name, float* ret);
 		bool get_vec2(int category_id, const char* name, v2* ret);
 		bool get_color(int category_id, const char* name, Color* ret);
@@ -60,6 +63,7 @@ namespace ds {
 		const char* get_string(int category_id, const char* name);
 		const char* get_category_name(int category_id);
 	private:
+		int get_index(int category_id, const char* name);
 		void allocCategoryBuffer(int size);
 		int add_category(const char* name, int parent);
 		void alloc(int elements);

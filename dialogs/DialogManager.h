@@ -38,6 +38,10 @@ public:
 	}
 	bool remove(const char* name);
 	bool contains(const char* name) const;
+	virtual bool loadData(SimpleJSONReader& loader);
+	virtual bool useSimplified() {
+		return true;
+	}
 private:		
 	void clear();
 	void setActiveFlag(const char* name,bool active);	

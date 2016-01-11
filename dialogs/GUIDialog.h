@@ -173,12 +173,17 @@ public:
 	const char* getName() const {
 		return _name;
 	}
+	virtual bool loadData(SimpleJSONReader& loader);
+	virtual bool useSimplified() {
+		return true;
+	}
 private:
 	GUIDialog(const GUIDialog& other) {}
 	//void saveItem(BinaryWriter& writer, int id, const GUIItem& item);
 	void saveItem(JSONWriter& writer, int id, const GUIItem& item);
 	//int loadItem(BinaryLoader& loader, GUIItem* item);
 	int loadItem(Category* category, GUIItem* item);
+	int loadItem(int category,SimpleJSONReader& reader, GUIItem* item);
 	void addToModel(int id, GUIItemType type,const char* prefix);
 	void showAddDialog();
 	GUIItem* findByID(int id);

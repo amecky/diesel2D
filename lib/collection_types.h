@@ -33,7 +33,11 @@ namespace ds {
 
 		void* alloc(int sz) {
 			if (size + sz > capacity) {
-				resize(capacity * 2 + 8);
+				int d = capacity * 2 + 8;
+				if (d < sz) {
+					d = sz * 2 + 8;
+				}
+				resize(d);
 			}
 			auto res = data + size;
 			size += sz;

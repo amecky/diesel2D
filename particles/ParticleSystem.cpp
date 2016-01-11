@@ -279,6 +279,66 @@ namespace ds {
 		return true;
 	}
 
+	bool NewParticleSystem::loadData(SimpleJSONReader& reader) {
+		LOG << "importing data";
+		clear();
+		int cid = reader.find_category("particlesystem");
+		if ( cid != -1 ) {
+			reader.get_uint(cid, "texture_id", &_system_data.textureID);
+			Rect r;
+			reader.get_rect(cid,"texture_rect", &r);
+			_system_data.texture = math::buildTexture(r);
+			// read modifiers
+			int children[32];
+			int mod_id = reader.find_category("modifiers", cid);
+			if (mod_id != -1) {
+				int num = reader.get_categories(children, 32, mod_id);
+				for (int i = 0; i < num; ++i ) {
+					const char* mod_name = reader.get_category_name(children[i]);
+					if (_factory->addModifier(this,mod_name)) {
+						ParticleModifierData* data = getData(mod_name);
+						if (data != 0) {
+							//data->read(c);
+						}
+					}
+					else {
+						LOGE << "cannot find modifier: " << mod_name;
+					}
+				}
+			}
+			int gen_id = reader.find_category("generators", cid);
+			if (gen_id != -1) {
+				int num = reader.get_categories(children, 32, gen_id);
+				for (int i = 0; i < num; ++i) {
+					const char* gen_name = reader.get_category_name(children[i]);
+					if (_factory->addGenerator(this, gen_name)) {
+						ParticleGeneratorData* data = getGeneratorData(gen_name);
+						//if (data != 0) {
+							//data->read(c);
+						//}
+					}
+					else {
+						LOGE << "cannot find generators: " << gen_name;
+					}
+				}
+			}
+			// emitter
+			int em_id = reader.find_category("emitter", cid);
+			if ( em_id != -1 ) {
+				reader.get_uint(em_id, "count", &_emitter_data.count);
+				reader.get_uint(em_id, "ejection_period", &_emitter_data.ejectionPeriod);
+				reader.get_uint(em_id, "ejection_variance", &_emitter_data.ejectionVariance);
+				reader.get_uint(em_id, "ejection_counter", &_emitter_data.ejectionCounter);
+				reader.get_float(em_id, "duration", &_emitter_data.duration);
+				initEmitterData();
+			}
+			else {
+				LOGE << "cannot find emitter data";
+			}
+		}
+		return true;
+	}
+
 	void NewParticleSystem::prepareVertices() {
 		for (int i = 0; i < MAX_PARTICLES; ++i) {
 			m_Array.vertices[i * 4].uv.x = _system_data.texture.uv.x;

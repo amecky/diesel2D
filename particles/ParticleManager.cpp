@@ -115,6 +115,25 @@ namespace ds {
 		return true;
 	}
 
+	bool ParticleManager::loadData(SimpleJSONReader& reader) {
+		LOG << "importing data";
+		int cats[256];
+		int num = reader.get_categories(cats, 256);
+		for (int i = 0; i < num; ++i) {
+			LOG << "name: " << reader.get_category_name(cats[i]);
+			const char* name = reader.get_string(cats[i],"file");
+			int id = -1;
+			reader.get_int(cats[i],"id", &id);
+			if (id != -1) {
+				NewParticleSystem* system = create(id, name);
+				LOG << "id: " << id << " name: " << name;
+				system->load();
+				_systems[id] = system;
+			}
+		}
+		return true;
+	}
+
 	void  ParticleManager::removeSystem(int id) {
 		assert(_systems[id] != 0);
 		NewParticleSystem* system = _systems[id];
