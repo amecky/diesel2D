@@ -47,19 +47,28 @@ namespace ds {
 
 		void resize(int newCap) {
 			if (newCap > capacity) {
-				//char* tmp = new char[newCap];
 				char* tmp = (char*)_allocator->allocate(newCap);
 				if (data != 0) {
-					memcpy(tmp, data, size);
-					//delete[] data;
+					memcpy(tmp, data, capacity);
 					_allocator->deallocate(data);
 				}
 				capacity = newCap;
 				data = tmp;
 			}
 		}
-	};
 
+		void append(const char* s, int len) {
+			if (size + len + 1 > capacity) {
+				resize(capacity + len + 1 + 8);
+			}
+			const char* t = s;
+			for (int i = 0; i < len; ++i) {
+				data[size++] = *t;
+				++t;
+			}
+			data[size++] = '\0';
+		}
+	};
 
 	template<class T>
 	class Array {
