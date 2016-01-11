@@ -361,8 +361,7 @@ bool SimpleJSONReader::get_int(int category_id, const char* name, int* ret) {
 		unsigned int key = string::murmur_hash(name);
 		for (int i = 0; i < _data_buffer.size; ++i) {
 			if (_data_buffer.categories[i] == category_id && _data_buffer.keys[i] == key) {
-				float* v = (float*)(_values.data + _data_buffer.indices[i]);
-				*ret = static_cast<int>(*v);
+				*ret = static_cast<int>(get(_data_buffer.indices[i]));
 				return true;
 			}
 		}
