@@ -31,9 +31,42 @@ namespace ds {
 		definitions.append(cd);
 	}
 
+	bool BitmapFont::saveData(JSONWriter& writer) {
+		return true;
+	}
+
+	bool BitmapFont::saveData(SimpleJSONWriter& writer) {
+		return true;
+	}
+
+	bool BitmapFont::loadData(JSONReader& reader) {
+		return true;
+	}
+
+	bool BitmapFont::loadData(SimpleJSONReader& loader) {
+		int cats[32];
+		int num = loader.get_categories(cats, 32);
+		for (int i = 0; i < num; ++i) {
+			if (strcmp(loader.get_category_name(cats[i]),"font") == 0 ) {
+				loader.get_int(cats[i], "start_char", &startChar);
+				loader.get_int(cats[i], "end_char", &endChar);
+				loader.get_int(cats[i], "char_height", &charHeight);
+				loader.get_int(cats[i], "grid_height", &gridHeight);
+				loader.get_int(cats[i], "start_x", &startX);
+				loader.get_int(cats[i], "start_y", &startY);
+				loader.get_int(cats[i], "width", &width);
+				loader.get_int(cats[i], "height", &height);
+				loader.get_int(cats[i], "padding", &padding);
+				loader.get_int(cats[i], "texture_size", &textureSize);
+			}
+		}
+		return true;
+	}
+
 	// -------------------------------------------------------
 	// export json
 	// -------------------------------------------------------
+	/*
 	void BitmapFont::exportJSON() {
 		char buffer[64];
 		sprintf(buffer, "content\\resources\\%s.json",name);
@@ -53,10 +86,11 @@ namespace ds {
 		jw.write("texture_size",textureSize);
 		jw.endCategory();
 	}
-
+	*/
 	// -------------------------------------------------------
 	// import json
 	// -------------------------------------------------------
+	/*
 	void BitmapFont::importJSON() {
 		char buffer[64];
 		sprintf(buffer, "content\\resources\\%s.json", name);
@@ -81,7 +115,7 @@ namespace ds {
 			LOG << "Cannot parse json file";
 		}
 	}
-
+	*/
 	const bool BitmapFont::contains(char c) const {
 		int idx = (int)c - startChar;
 		return idx >= 0 && idx < definitions.size();

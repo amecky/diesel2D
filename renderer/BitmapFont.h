@@ -1,6 +1,7 @@
 #pragma once
 #include "..\utils\StringUtils.h"
-#include "..\lib\container\List.h"
+//#include "..\lib\container\List.h"
+#include "..\compiler\DataFile.h"
 #include "render_types.h"
 
 namespace ds {
@@ -32,9 +33,10 @@ struct CharDef {
 	Rect texureRect;
 };
 
-struct BitmapFont {
+struct BitmapFont : public DataFile {
 
 	char name[32];
+	char jsonName[64];
 	IdString hashName;
 	int startChar;
 	int endChar;
@@ -51,6 +53,7 @@ struct BitmapFont {
 
 	BitmapFont(const char* fontName,int texID) {
 		sprintf_s(name, 32, "%s", fontName);
+		sprintf_s(jsonName, 64, "resources\\%s.json", fontName);
 		hashName = string::murmur_hash(fontName);
 		textureID = texID;
 	}
@@ -65,13 +68,24 @@ struct BitmapFont {
 
 	//void save();
 
-	void importJSON();
+	//void importJSON();
 
-	void exportJSON();
+	//void exportJSON();
 
 	const bool contains(char c) const;
 
 	const CharDef& getCharDef(char c) const;
+
+	bool saveData(JSONWriter& writer);
+	bool saveData(SimpleJSONWriter& writer);
+	bool loadData(JSONReader& reader);
+	const char* getFileName() const {
+		return jsonName;
+	}
+	virtual bool loadData(SimpleJSONReader& loader);
+	virtual bool useSimplified() {
+		return true;
+	}
 	
 };
 

@@ -80,7 +80,7 @@ namespace ds {
 	// import JSON
 	// -----------------------------------------------
 	bool DataFile::load_simplified() {
-		bool BINARY = true;
+		bool BINARY = false;
 		bool ret = false;
 		char buffer[64];
 		// check length
@@ -101,6 +101,7 @@ namespace ds {
 			}
 			if (ret) {
 				sprintf_s(buffer, 64, "assets\\%u", string::murmur_hash(getFileName()));
+				LOG << "saving binary file: " << buffer;
 				reader.save_binary(buffer);
 			}
 		}

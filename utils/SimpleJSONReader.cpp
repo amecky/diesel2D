@@ -106,7 +106,6 @@ SimpleJSONReader::~SimpleJSONReader() {
 void save_buffer(CharBuffer* buffer, FILE* fp) {
 	fwrite(&buffer->size, sizeof(int), 1, fp);
 	fwrite(&buffer->capacity, sizeof(int), 1, fp);
-	LOG << "#### >>>> size: " << buffer->size << " capacity: " << buffer->capacity;
 	for (int i = 0; i < buffer->capacity; ++i) {
 		fwrite(&buffer->data[i], sizeof(char), 1, fp);
 	}
@@ -117,7 +116,6 @@ void load_buffer(CharBuffer* buffer, FILE* fp) {
 	int capacity = 0;
 	fread(&size, sizeof(int), 1, fp);
 	fread(&capacity, sizeof(int), 1, fp);
-	LOG << "#### <<<< size: " << size << " capacity: " << capacity;
 	buffer->resize(capacity);
 	for (int i = 0; i < capacity; ++i) {
 		fread(&buffer->data[i], sizeof(char), 1, fp);
