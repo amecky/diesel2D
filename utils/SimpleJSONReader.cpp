@@ -261,7 +261,6 @@ bool SimpleJSONReader::parse(const char* fileName) {
 	int n = 0;
 	int category_index = 0;
 	int cat = -1;
-	//std::stack<int> cat_stack;
 	Stack<int> cat_stack;
 	while (n < cnt) {
 		Token t = tokens[n];
@@ -329,6 +328,9 @@ bool SimpleJSONReader::parse(const char* fileName) {
 				cat_stack.pop();
 			}
 			--category_index;
+			++n;
+		}
+		else {
 			++n;
 		}
 		t = tokens[n];		
@@ -441,6 +443,10 @@ int SimpleJSONReader::get_index(int category_id, const char* name) {
 	return -1;
 }
 
+bool SimpleJSONReader::contains_property(int category_id, const char* name) {
+	return get_index(category_id, name) != -1;
+}
+
 bool SimpleJSONReader::get_color(int category_id, const char* name, Color* ret) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
@@ -472,6 +478,65 @@ const char* SimpleJSONReader::get_string(int category_id, const char* name) {
 	}
 	return '\0';
 }
+
+bool SimpleJSONReader::get_color_path(int category_id, const char* name, ds::ColorPath* path) {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		int entries = _data_buffer.sizes[idx];
+		int steps = entries / 5;
+		if ((entries % 5) == 0) {
+			LOG << "entries: " << entries << " steps: " << steps;
+			int current = 0;
+			for (int i = 0; i < steps; ++i) {
+				float step = get(_data_buffer.indices[idx] + current);
+				++current;
+				LOG << "step: " << step;
+				Color c;
+				c.r = get(_data_buffer.indices[idx] + current) / 255.0f;
+				++current;
+				c.g = get(_data_buffer.indices[idx] + current) / 255.0f;
+				++current;
+				c.b = get(_data_buffer.indices[idx] + current) / 255.0f;
+				++current;
+				c.a = get(_data_buffer.indices[idx] + current) / 255.0f;
+				++current;
+				path->add(step, c);
+			}
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool SimpleJSONReader::get_vec2_path(int category_id, const char* name, ds::Vector2fPath* path) {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		int entries = _data_buffer.sizes[idx];
+		int steps = entries / 3;
+		if ((entries % 3) == 0) {
+			LOG << "entries: " << entries << " steps: " << steps;
+			int current = 0;
+			for (int i = 0; i < steps; ++i) {
+				float step = get(_data_buffer.indices[idx] + current);
+				++current;
+				LOG << "step: " << step;
+				v2 c;
+				c.x = get(_data_buffer.indices[idx] + current);
+				++current;
+				c.y = get(_data_buffer.indices[idx] + current);
+				++current;
+				path->add(step, c);
+			}
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
+}
+
 
 void SimpleJSONReader::alloc(int elements) {
 	int sz = elements * (sizeof(unsigned int) + sizeof(int) + sizeof(int) + sizeof(int));
