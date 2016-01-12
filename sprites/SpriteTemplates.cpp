@@ -129,9 +129,11 @@ namespace ds {
 			const char* name = loader.get_string(cats[i], "name");
 			sprintf_s(entry.name, 32, "%s", name);
 			//LOG << "name: " << name;
+			entry.hash = string::murmur_hash(entry.name);
 			loader.get_int(cats[i], "texture_id", &entry.sprite.texture.textureID);
 			loader.get_vec2(cats[i], "position", &entry.sprite.position);
 			loader.get_rect(cats[i], "rect", &rect);
+			entry.sprite.texture = math::buildTexture(rect);
 			loader.get_vec2(cats[i], "scale", &entry.sprite.scale);
 			loader.get_float(cats[i], "rotation", &entry.sprite.rotation);
 			loader.get_color(cats[i], "color", &entry.sprite.color);
