@@ -1,13 +1,14 @@
 #include "BlockArray.h"
 #include <string.h>
+#include "..\memory\DefaultAllocator.h"
 
-BlockArray::BlockArray() : _size(0), _capacity(0), _data(0) {
+BlockArray::BlockArray() : size(0), capacity(0), data(0) , total_capacity(0) {
 }
 
 
 BlockArray::~BlockArray() {
-	if (_data != 0) {
-		delete[] _data;
+	if (data != 0) {
+		ds::gDefaultMemory->deallocate(data);
 	}
 }
 
@@ -19,32 +20,35 @@ void BlockArray::init(int* sizes, int num) {
 }
 
 bool BlockArray::resize(int new_size) {
-	if (new_size > _capacity) {
+	if (new_size > capacity) {
 		int total = 0;
 		for (int i = 0; i < _num_blocks; ++i) {
 			total += _sizes[i];
 		}
 		
 		int sz = new_size * total;
-		char* data = new char[sz];
-		if (_data != 0) {
-			char* p = data;
-			for (int i = 1; i < _num_blocks; ++i) {
-				memcpy(p, _data + i * _capacity, _size * _sizes[i]);
+		char* t = (char*)ds::gDefaultMemory->allocate(sz);
+		if (data != 0) {
+			int offset = 0;
+			int old_offset = 0;
+			for (int i = 0; i < _num_blocks; ++i) {
+				memcpy(t + offset, data + old_offset, size * _sizes[i]);
+				offset += new_size * _sizes[i];
+				old_offset += capacity * _sizes[i];
 			}
-			delete[] _data;
+			ds::gDefaultMemory->deallocate(data);
 		}
-		_capacity = new_size;
+		capacity = new_size;
 		_indices[0] = 0;
 		for (int i = 1; i < _num_blocks; ++i) {
-			_indices[i] = _indices[i - 1] + _sizes[i] * _capacity;
+			_indices[i] = _indices[i - 1] + _sizes[i] * capacity;
 		}
-		_data = data;
+		data = t;
 		return true;
 	}
 	return false;
 }
 
 void* BlockArray::get_ptr(int index) {
-	return _data + _indices[index];
+	return data + _indices[index];
 }

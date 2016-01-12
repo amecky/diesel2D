@@ -97,6 +97,10 @@ int tokenize(const char* text, Token* tokens, int maxTokens) {
 
 
 SimpleJSONReader::SimpleJSONReader() : _text(0) {
+	int sizes[] = { sizeof(unsigned int), sizeof(int), sizeof(int) };
+	_category_buffer.init(sizes, 3);
+	int data_sizes[] = { sizeof(unsigned int), sizeof(int), sizeof(int), sizeof(int) };
+	_data_buffer.init(data_sizes, 4);
 }
 
 
@@ -133,32 +137,20 @@ void load_buffer(CharBuffer* buffer, FILE* fp) {
 }
 
 void SimpleJSONReader::allocCategoryBuffer(int size) {
-	int sz = size * (sizeof(unsigned int) + sizeof(int) + sizeof(int));
-	CategoryDataBuffer db;
-	db.data = (char*)gDefaultMemory->allocate(sz);
-	db.capacity = size;
-	db.size = 0;
-	db.totalSize = sz;
-	db.hashes = (unsigned int*)(db.data);
-	db.parents = (int*)(db.hashes + size);
-	db.indices = (int*)(db.parents + size);
-	if (_category_buffer.data != 0) {
-		memcpy(db.hashes, _category_buffer.hashes, _category_buffer.size * sizeof(unsigned int));
-		memcpy(db.parents, _category_buffer.parents, _category_buffer.size * sizeof(int));
-		memcpy(db.indices, _category_buffer.indices, _category_buffer.size * sizeof(int));
-		db.size = _category_buffer.size;
-		gDefaultMemory->deallocate(_category_buffer.data);
+	if (_category_buffer.resize(size)) {
+		_hashes = (unsigned int*)_category_buffer.get_ptr(0);
+		_parents = (int*)_category_buffer.get_ptr(1);
+		_indices = (int*)_category_buffer.get_ptr(2);
 	}
-	_category_buffer = db;
 }
 
 int SimpleJSONReader::add_category(const char* name, int parent) {
 	if (_category_buffer.size + 1 > _category_buffer.capacity) {
 		allocCategoryBuffer(_category_buffer.size * 2 + 8);
 	}
-	_category_buffer.hashes[_category_buffer.size] = string::murmur_hash(name);
-	_category_buffer.parents[_category_buffer.size] = parent;
-	_category_buffer.indices[_category_buffer.size] = _name_buffer.size;
+	_hashes[_category_buffer.size] = string::murmur_hash(name);
+	_parents[_category_buffer.size] = parent;
+	_indices[_category_buffer.size] = _name_buffer.size;
 	++_category_buffer.size;
 	int l = strlen(name);
 	if (_name_buffer.size + l > _name_buffer.capacity) {
@@ -173,31 +165,30 @@ void SimpleJSONReader::save_binary(const char* fileName) {
 	FILE* fp = fopen(fileName, "wb");
 	if (fp) {
 		// buffer
-
 		fwrite(&_category_buffer.size, sizeof(int), 1, fp);
 		for (int i = 0; i < _category_buffer.size; ++i) {
-			fwrite(&_category_buffer.hashes[i], sizeof(unsigned int), 1, fp);
+			fwrite(&_hashes[i], sizeof(unsigned int), 1, fp);
 		}
 		for (int i = 0; i < _category_buffer.size; ++i) {
-			fwrite(&_category_buffer.parents[i], sizeof(int), 1, fp);
+			fwrite(&_parents[i], sizeof(int), 1, fp);
 		}
 		for (int i = 0; i < _category_buffer.size; ++i) {
-			fwrite(&_category_buffer.indices[i], sizeof(int), 1, fp);
+			fwrite(&_indices[i], sizeof(int), 1, fp);
 		}
 		save_buffer(&_name_buffer, fp);
 
 		fwrite(&_data_buffer.size, sizeof(int), 1, fp);
 		for (int i = 0; i < _values.size; ++i) {
-			fwrite(&_data_buffer.keys[i], sizeof(unsigned int), 1, fp);
+			fwrite(&_data_keys[i], sizeof(unsigned int), 1, fp);
 		}
 		for (int i = 0; i < _data_buffer.size; ++i) {
-			fwrite(&_data_buffer.categories[i], sizeof(int), 1, fp);
+			fwrite(&_data_categories[i], sizeof(int), 1, fp);
 		}
 		for (int i = 0; i < _data_buffer.size; ++i) {
-			fwrite(&_data_buffer.indices[i], sizeof(int), 1, fp);
+			fwrite(&_data_indices[i], sizeof(int), 1, fp);
 		}
 		for (int i = 0; i < _data_buffer.size; ++i) {
-			fwrite(&_data_buffer.sizes[i], sizeof(int), 1, fp);
+			fwrite(&_data_sizes[i], sizeof(int), 1, fp);
 		}
 	
 		save_buffer(&_values, fp);
@@ -212,13 +203,13 @@ bool SimpleJSONReader::load_binary(const char* fileName) {
 		fread(&size, sizeof(int), 1, fp);
 		allocCategoryBuffer(size);
 		for (int i = 0; i < size; ++i) {
-			fread(&_category_buffer.hashes[i], sizeof(unsigned int), 1, fp);
+			fread(&_hashes[i], sizeof(unsigned int), 1, fp);
 		}
 		for (int i = 0; i < size; ++i) {
-			fread(&_category_buffer.parents[i], sizeof(int), 1, fp);
+			fread(&_parents[i], sizeof(int), 1, fp);
 		}
 		for (int i = 0; i < size; ++i) {
-			fread(&_category_buffer.indices[i], sizeof(int), 1, fp);
+			fread(&_indices[i], sizeof(int), 1, fp);
 		}
 		_category_buffer.size = size;
 
@@ -227,16 +218,16 @@ bool SimpleJSONReader::load_binary(const char* fileName) {
 		fread(&size, sizeof(int), 1, fp);
 		alloc(size);
 		for (int i = 0; i < size; ++i) {
-			fread(&_data_buffer.keys[i], sizeof(unsigned int), 1, fp);
+			fread(&_data_keys[i], sizeof(unsigned int), 1, fp);
 		}
 		for (int i = 0; i < size; ++i) {
-			fread(&_data_buffer.categories[i], sizeof(int), 1, fp);
+			fread(&_data_categories[i], sizeof(int), 1, fp);
 		}
 		for (int i = 0; i < size; ++i) {
-			fread(&_data_buffer.indices[i], sizeof(int), 1, fp);
+			fread(&_data_indices[i], sizeof(int), 1, fp);
 		}
 		for (int i = 0; i < size; ++i) {
-			fread(&_data_buffer.sizes[i], sizeof(int), 1, fp);
+			fread(&_data_sizes[i], sizeof(int), 1, fp);
 		}
 		_data_buffer.size = size;
 		load_buffer(&_values, fp);
@@ -344,7 +335,7 @@ bool SimpleJSONReader::parse(const char* fileName) {
 int SimpleJSONReader::get_categories(int* result, int max, int parent) {
 	int cnt = 0;
 	for (int i = 0; i < _category_buffer.size; ++i) {
-		if (_category_buffer.parents[i] == parent && cnt < max) {
+		if (_parents[i] == parent && cnt < max) {
 			result[cnt++] = i;
 		}
 	}
@@ -354,7 +345,7 @@ int SimpleJSONReader::get_categories(int* result, int max, int parent) {
 int SimpleJSONReader::find_category(const char* name, int parent) {
 	unsigned int hash = string::murmur_hash(name);
 	for (int i = 0; i < _category_buffer.size; ++i) {
-		if (_category_buffer.parents[i] == parent && _category_buffer.hashes[i] == hash) {
+		if (_parents[i] == parent && _hashes[i] == hash) {
 			return i;
 		}
 	}
@@ -363,7 +354,7 @@ int SimpleJSONReader::find_category(const char* name, int parent) {
 
 const char* SimpleJSONReader::get_category_name(int category_id) {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
-		int index = _category_buffer.indices[category_id];
+		int index = _indices[category_id];
 		return _name_buffer.data + index;
 	}
 	return '\0';
@@ -372,7 +363,7 @@ const char* SimpleJSONReader::get_category_name(int category_id) {
 bool SimpleJSONReader::matches(int category_id, const char* name) {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
 		unsigned int hash = string::murmur_hash(name);
-		if (_category_buffer.hashes[category_id] == hash) {
+		if (_hashes[category_id] == hash) {
 			return true;
 		}
 	}
@@ -382,7 +373,7 @@ bool SimpleJSONReader::matches(int category_id, const char* name) {
 bool SimpleJSONReader::get_bool(int category_id, const char* name, bool* ret) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		int v = static_cast<int>(get(_data_buffer.indices[idx]));
+		int v = static_cast<int>(get(_data_indices[idx]));
 		if (v == 1) {
 			*ret = true;
 		}
@@ -397,7 +388,7 @@ bool SimpleJSONReader::get_bool(int category_id, const char* name, bool* ret) {
 bool SimpleJSONReader::get_int(int category_id, const char* name, int* ret) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		*ret = static_cast<int>(get(_data_buffer.indices[idx]));
+		*ret = static_cast<int>(get(_data_indices[idx]));
 		return true;		
 	}
 	return false;
@@ -406,7 +397,7 @@ bool SimpleJSONReader::get_int(int category_id, const char* name, int* ret) {
 bool SimpleJSONReader::get_uint(int category_id, const char* name, uint32* ret) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		*ret = static_cast<uint32>(get(_data_buffer.indices[idx]));
+		*ret = static_cast<uint32>(get(_data_indices[idx]));
 		return true;
 	}
 	return false;
@@ -415,7 +406,7 @@ bool SimpleJSONReader::get_uint(int category_id, const char* name, uint32* ret) 
 bool SimpleJSONReader::get_float(int category_id, const char* name, float* ret) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		*ret = get(_data_buffer.indices[idx]);
+		*ret = get(_data_indices[idx]);
 		return true;		
 	}
 	return false;
@@ -424,8 +415,8 @@ bool SimpleJSONReader::get_float(int category_id, const char* name, float* ret) 
 bool SimpleJSONReader::get_vec2(int category_id, const char* name, v2* ret) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		ret->x = get(_data_buffer.indices[idx]);
-		ret->y = get(_data_buffer.indices[idx] + 1);
+		ret->x = get(_data_indices[idx]);
+		ret->y = get(_data_indices[idx] + 1);
 		return true;	
 	}
 	return false;
@@ -434,9 +425,9 @@ bool SimpleJSONReader::get_vec2(int category_id, const char* name, v2* ret) {
 bool SimpleJSONReader::get_vec3(int category_id, const char* name, v3* ret) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		ret->x = get(_data_buffer.indices[idx]);
-		ret->y = get(_data_buffer.indices[idx] + 1);
-		ret->z = get(_data_buffer.indices[idx] + 2);
+		ret->x = get(_data_indices[idx]);
+		ret->y = get(_data_indices[idx] + 1);
+		ret->z = get(_data_indices[idx] + 2);
 		return true;
 	}
 	return false;
@@ -446,7 +437,7 @@ int SimpleJSONReader::get_index(int category_id, const char* name) {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
 		unsigned int key = string::murmur_hash(name);
 		for (int i = 0; i < _data_buffer.size; ++i) {
-			if (_data_buffer.categories[i] == category_id && _data_buffer.keys[i] == key) {
+			if (_data_categories[i] == category_id && _data_keys[i] == key) {
 				return i;
 			}
 		}
@@ -461,10 +452,10 @@ bool SimpleJSONReader::contains_property(int category_id, const char* name) {
 bool SimpleJSONReader::get_color(int category_id, const char* name, Color* ret) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		ret->r = get(_data_buffer.indices[idx]) / 255.0f;
-		ret->g = get(_data_buffer.indices[idx] + 1) / 255.0f;
-		ret->b = get(_data_buffer.indices[idx] + 2) / 255.0f;
-		ret->a = get(_data_buffer.indices[idx] + 3) / 255.0f;
+		ret->r = get(_data_indices[idx]) / 255.0f;
+		ret->g = get(_data_indices[idx] + 1) / 255.0f;
+		ret->b = get(_data_indices[idx] + 2) / 255.0f;
+		ret->a = get(_data_indices[idx] + 3) / 255.0f;
 		return true;
 	}
 	return false;
@@ -473,10 +464,10 @@ bool SimpleJSONReader::get_color(int category_id, const char* name, Color* ret) 
 bool SimpleJSONReader::get_rect(int category_id, const char* name, Rect* ret) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		ret->top = get(_data_buffer.indices[idx]);
-		ret->left = get(_data_buffer.indices[idx] + 1);
-		ret->right = ret->left + get(_data_buffer.indices[idx] + 2);
-		ret->bottom = ret->top + get(_data_buffer.indices[idx] + 3);
+		ret->top = get(_data_indices[idx]);
+		ret->left = get(_data_indices[idx] + 1);
+		ret->right = ret->left + get(_data_indices[idx] + 2);
+		ret->bottom = ret->top + get(_data_indices[idx] + 3);
 		return true;
 	}
 	return false;
@@ -485,7 +476,7 @@ bool SimpleJSONReader::get_rect(int category_id, const char* name, Rect* ret) {
 const char* SimpleJSONReader::get_string(int category_id, const char* name) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		return get_char(_data_buffer.indices[idx]);
+		return get_char(_data_indices[idx]);
 	}
 	return '\0';
 }
@@ -493,21 +484,21 @@ const char* SimpleJSONReader::get_string(int category_id, const char* name) {
 bool SimpleJSONReader::get_color_path(int category_id, const char* name, ds::ColorPath* path) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		int entries = _data_buffer.sizes[idx];
+		int entries = _data_sizes[idx];
 		int steps = entries / 5;
 		if ((entries % 5) == 0) {
 			int current = 0;
 			for (int i = 0; i < steps; ++i) {
-				float step = get(_data_buffer.indices[idx] + current);
+				float step = get(_data_indices[idx] + current);
 				++current;
 				Color c;
-				c.r = get(_data_buffer.indices[idx] + current) / 255.0f;
+				c.r = get(_data_indices[idx] + current) / 255.0f;
 				++current;
-				c.g = get(_data_buffer.indices[idx] + current) / 255.0f;
+				c.g = get(_data_indices[idx] + current) / 255.0f;
 				++current;
-				c.b = get(_data_buffer.indices[idx] + current) / 255.0f;
+				c.b = get(_data_indices[idx] + current) / 255.0f;
 				++current;
-				c.a = get(_data_buffer.indices[idx] + current) / 255.0f;
+				c.a = get(_data_indices[idx] + current) / 255.0f;
 				++current;
 				path->add(step, c);
 			}
@@ -522,17 +513,17 @@ bool SimpleJSONReader::get_color_path(int category_id, const char* name, ds::Col
 bool SimpleJSONReader::get_vec2_path(int category_id, const char* name, ds::Vector2fPath* path) {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
-		int entries = _data_buffer.sizes[idx];
+		int entries = _data_sizes[idx];
 		int steps = entries / 3;
 		if ((entries % 3) == 0) {
 			int current = 0;
 			for (int i = 0; i < steps; ++i) {
-				float step = get(_data_buffer.indices[idx] + current);
+				float step = get(_data_indices[idx] + current);
 				++current;
 				v2 c;
-				c.x = get(_data_buffer.indices[idx] + current);
+				c.x = get(_data_indices[idx] + current);
 				++current;
-				c.y = get(_data_buffer.indices[idx] + current);
+				c.y = get(_data_indices[idx] + current);
 				++current;
 				path->add(step, c);
 			}
@@ -546,35 +537,22 @@ bool SimpleJSONReader::get_vec2_path(int category_id, const char* name, ds::Vect
 
 
 void SimpleJSONReader::alloc(int elements) {
-	int sz = elements * (sizeof(unsigned int) + sizeof(int) + sizeof(int) + sizeof(int));
-	DataBuffer db;
-	db.data = (char*)gDefaultMemory->allocate(sz);
-	db.capacity = elements;
-	db.size = 0;
-	db.totalSize = sz;
-	db.keys = (unsigned int*)(db.data);
-	db.categories = (int*)(db.keys + elements);
-	db.indices = (int*)(db.categories + elements);
-	db.sizes = (int*)(db.indices + elements);
-	if (_data_buffer.data != 0) {
-		memcpy(db.keys, _data_buffer.keys, _data_buffer.size * sizeof(unsigned int));
-		memcpy(db.categories, _data_buffer.categories, _data_buffer.size * sizeof(int));
-		memcpy(db.indices, _data_buffer.indices, _data_buffer.size * sizeof(int));
-		memcpy(db.sizes, _data_buffer.sizes, _data_buffer.size * sizeof(int));
-		db.size = _data_buffer.size;
-		gDefaultMemory->deallocate(_data_buffer.data);
+	if (_data_buffer.resize(elements)) {
+		_data_keys = (unsigned int*)_data_buffer.get_ptr(0);
+		_data_categories = (int*)_data_buffer.get_ptr(1);
+		_data_indices = (int*)_data_buffer.get_ptr(2);
+		_data_sizes = (int*)_data_buffer.get_ptr(3);
 	}
-	_data_buffer = db;
 }
 
 int SimpleJSONReader::create_property(const char* name, int category) {
 	if (_data_buffer.size + 1 > _data_buffer.capacity) {
 		alloc(_data_buffer.size * 2 + 8);
 	}
-	_data_buffer.keys[_data_buffer.size] = string::murmur_hash(name);
-	_data_buffer.categories[_data_buffer.size] = category;
-	_data_buffer.indices[_data_buffer.size] = _values.num;
-	_data_buffer.sizes[_data_buffer.size] = 0;
+	_data_keys[_data_buffer.size] = string::murmur_hash(name);
+	_data_categories[_data_buffer.size] = category;
+	_data_indices[_data_buffer.size] = _values.num;
+	_data_sizes[_data_buffer.size] = 0;
 	++_data_buffer.size;
 	return _data_buffer.size - 1;
 }
@@ -582,7 +560,7 @@ int SimpleJSONReader::create_property(const char* name, int category) {
 void SimpleJSONReader::add(int pIndex, float value) {
 	float* v = (float*)_values.alloc(sizeof(float));
 	*v = value;
-	++_data_buffer.sizes[pIndex];
+	++_data_sizes[pIndex];
 }
 
 void SimpleJSONReader::add(int pIndex, const char* c, int len) {
@@ -593,13 +571,13 @@ void SimpleJSONReader::add(int pIndex, const char* c, int len) {
 		++v;
 	}
 	*v = '\0';
-	_data_buffer.sizes[pIndex] = sz / 4;
+	_data_sizes[pIndex] = sz / 4;
 }
 
 void SimpleJSONReader::add(int pIndex, char c) {
 	char* v = (char*)_values.alloc(sizeof(char));
 	*v = c;
-	++_data_buffer.sizes[pIndex];
+	++_data_sizes[pIndex];
 }
 
 float SimpleJSONReader::get(int index) {

@@ -4,39 +4,12 @@
 #include "Color.h"
 #include "..\memory\DefaultAllocator.h"
 #include "..\math\FloatArray.h"
+#include "..\lib\BlockArray.h"
 
 namespace ds {
 
 	class SimpleJSONReader {
 
-		struct DataBuffer {
-			unsigned int* keys;
-			int* categories;
-			int* indices;
-			int* sizes;
-			char* data;
-			int size;
-			int capacity;
-			int totalSize;
-
-			DataBuffer() : data(0), size(0), capacity(0), totalSize(0) {}
-			
-		};
-
-		struct CategoryDataBuffer {
-
-			unsigned int* hashes;
-			int* parents;
-			int* indices;
-			char* data;
-			int size;
-			int capacity;
-			int totalSize;
-
-			CategoryDataBuffer() : data(0), size(0), capacity(0) , totalSize(0) {}
-
-		};
-		
 	public:
 		SimpleJSONReader();
 		~SimpleJSONReader();
@@ -71,9 +44,19 @@ namespace ds {
 		float get(int index);
 		const char* get_char(int index);
 		char* _text;
-		CategoryDataBuffer _category_buffer;
+
+		BlockArray _category_buffer;
+		unsigned int* _hashes;
+		int* _parents;
+		int* _indices;
+
+		BlockArray _data_buffer;
+		unsigned int* _data_keys;
+		int* _data_categories;
+		int* _data_indices;
+		int* _data_sizes;
+
 		CharBuffer _name_buffer;
-		DataBuffer _data_buffer;
 		CharBuffer _values;
 
 	};
