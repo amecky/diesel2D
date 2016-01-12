@@ -20,7 +20,7 @@ struct ParticleEmitterData {
 	bool endless;
 	float frequency;
 
-	ParticleEmitterData() : ejectionPeriod(0), ejectionVariance(0), ejectionCounter(0), count(1) {}
+	ParticleEmitterData() : ejectionPeriod(0), ejectionVariance(0), ejectionCounter(0), count(1) , duration(0.0f) {}
 	/*
 	void load(BinaryLoader* loader) {
 		loader->read(&count);

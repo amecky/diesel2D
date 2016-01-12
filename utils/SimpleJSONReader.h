@@ -52,6 +52,7 @@ namespace ds {
 		bool get_uint(int category_id, const char* name, uint32* ret);
 		bool get_float(int category_id, const char* name, float* ret);
 		bool get_vec2(int category_id, const char* name, v2* ret);
+		bool get_vec3(int category_id, const char* name, v3* ret);
 		bool get_color(int category_id, const char* name, Color* ret);
 		bool get_rect(int category_id, const char* name, Rect* ret);
 		bool get_color_path(int category_id, const char* name, ds::ColorPath* path);

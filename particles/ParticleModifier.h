@@ -4,6 +4,7 @@
 #include "..\utils\JSONWriter.h"
 #include "..\utils\Profiler.h"
 #include "ParticleSystemData.h"
+#include "..\utils\SimpleJSONReader.h"
 
 namespace ds {
 
@@ -26,6 +27,7 @@ enum ParticleModifierType {
 struct ParticleModifierData {
 
 	virtual void read(Category* category) = 0;
+	virtual void read(SimpleJSONReader& reader,int category) = 0;
 	virtual void save(JSONWriter& writer) = 0;
 
 };
@@ -121,6 +123,11 @@ struct LinearColorModifierData : ParticleModifierData {
 		writer.write("start_color", startColor);
 		writer.write("end_color", endColor);
 	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_color(category, "start_color", &startColor);
+		reader.get_color(category, "end_color", &endColor);
+	}
 };
 
 class LinearColorModifier : public ParticleModifier {
@@ -171,6 +178,11 @@ struct LinearAlphaModifierData : ParticleModifierData {
 		writer.write("start_alpha", startAlpha);
 		writer.write("end_alpha", endAlpha);
 	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_float(category, "start_alpha", &startAlpha);
+		reader.get_float(category, "end_alpha", &endAlpha);
+	}
 };
 
 class LinearAlphaModifier : public ParticleModifier {
@@ -220,6 +232,11 @@ struct LinearSizeModifierData : ParticleModifierData {
 		writer.write("min_scale", minScale);
 		writer.write("max_scale", maxScale);
 	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_vec2(category, "min_scale", &minScale);
+		reader.get_vec2(category, "max_scale", &maxScale);
+	}
 };
 
 class LinearSizeModifier : public ParticleModifier {
@@ -266,6 +283,10 @@ struct PerpendicularMoveModifierData : ParticleModifierData {
 
 	void read(Category* category) {
 	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		
+	}
 };
 
 class PerpendicularMoveModifier : public ParticleModifier {
@@ -308,6 +329,10 @@ struct ColorPathModifierData : ParticleModifierData {
 
 	void save(JSONWriter& writer) {
 		writer.write(path);
+	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_color_path(category, "path", &path);
 	}
 };
 
@@ -400,6 +425,10 @@ struct DampingVelocityModifierData : ParticleModifierData {
 		writer.write("damping", damping);
 	}
 
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_float(category, "damping", &damping);
+	}
+
 };
 
 class DampingVelocityModifier : public ParticleModifier {
@@ -438,6 +467,10 @@ struct SizePathModifierData : ParticleModifierData{
 
 	void save(JSONWriter& writer) {
 		writer.write(path);
+	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_vec2_path(category, "path", &path);
 	}
 
 };

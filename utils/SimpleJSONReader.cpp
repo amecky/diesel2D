@@ -431,6 +431,17 @@ bool SimpleJSONReader::get_vec2(int category_id, const char* name, v2* ret) {
 	return false;
 }
 
+bool SimpleJSONReader::get_vec3(int category_id, const char* name, v3* ret) {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		ret->x = get(_data_buffer.indices[idx]);
+		ret->y = get(_data_buffer.indices[idx] + 1);
+		ret->z = get(_data_buffer.indices[idx] + 2);
+		return true;
+	}
+	return false;
+}
+
 int SimpleJSONReader::get_index(int category_id, const char* name) {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
 		unsigned int key = string::murmur_hash(name);
@@ -485,12 +496,10 @@ bool SimpleJSONReader::get_color_path(int category_id, const char* name, ds::Col
 		int entries = _data_buffer.sizes[idx];
 		int steps = entries / 5;
 		if ((entries % 5) == 0) {
-			LOG << "entries: " << entries << " steps: " << steps;
 			int current = 0;
 			for (int i = 0; i < steps; ++i) {
 				float step = get(_data_buffer.indices[idx] + current);
 				++current;
-				LOG << "step: " << step;
 				Color c;
 				c.r = get(_data_buffer.indices[idx] + current) / 255.0f;
 				++current;
@@ -516,12 +525,10 @@ bool SimpleJSONReader::get_vec2_path(int category_id, const char* name, ds::Vect
 		int entries = _data_buffer.sizes[idx];
 		int steps = entries / 3;
 		if ((entries % 3) == 0) {
-			LOG << "entries: " << entries << " steps: " << steps;
 			int current = 0;
 			for (int i = 0; i < steps; ++i) {
 				float step = get(_data_buffer.indices[idx] + current);
 				++current;
-				LOG << "step: " << step;
 				v2 c;
 				c.x = get(_data_buffer.indices[idx] + current);
 				++current;

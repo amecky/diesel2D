@@ -298,7 +298,7 @@ namespace ds {
 					if (_factory->addModifier(this,mod_name)) {
 						ParticleModifierData* data = getData(mod_name);
 						if (data != 0) {
-							//data->read(c);
+							data->read(reader,children[i]);
 						}
 					}
 					else {
@@ -313,9 +313,9 @@ namespace ds {
 					const char* gen_name = reader.get_category_name(children[i]);
 					if (_factory->addGenerator(this, gen_name)) {
 						ParticleGeneratorData* data = getGeneratorData(gen_name);
-						//if (data != 0) {
-							//data->read(c);
-						//}
+						if (data != 0) {
+							data->read(reader,children[i]);
+						}
 					}
 					else {
 						LOGE << "cannot find generators: " << gen_name;

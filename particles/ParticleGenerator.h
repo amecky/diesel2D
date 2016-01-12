@@ -1,6 +1,7 @@
 #pragma once
 #include "..\utils\PlainTextReader.h"
 #include "Particle.h"
+#include "..\utils\SimpleJSONReader.h"
 
 namespace ds {
 
@@ -8,6 +9,7 @@ namespace ds {
 
 		virtual void read(Category* category) = 0;
 		virtual void save(JSONWriter& writer) = 0;
+		virtual void read(SimpleJSONReader& reader, int category) = 0;
 
 	};
 
@@ -64,6 +66,13 @@ struct RingGeneratorData : ParticleGeneratorData {
 		writer.write("variance", variance);
 		writer.write("angle_variance", angleVariance);
 		writer.write("step", step);
+	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_float(category, "radius", &radius);
+		reader.get_float(category, "variance", &variance);
+		reader.get_float(category, "angle_variance", &angleVariance);
+		reader.get_float(category, "step", &step);
 	}
 };
 
@@ -347,6 +356,11 @@ struct RadialVelocityGeneratorData : ParticleGeneratorData {
 		writer.write("velocity", velocity);
 		writer.write("variance", variance);
 	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_float(category, "velocity", &velocity);
+		reader.get_float(category, "variance", &variance);
+	}
 };
 
 class RadialVelocityGenerator : public ParticleGenerator {
@@ -430,6 +444,11 @@ struct LifetimeGeneratorData : ParticleGeneratorData {
 		writer.write("ttl", ttl);
 		writer.write("variance", variance);
 	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_float(category, "ttl", &ttl);
+		reader.get_float(category, "variance", &variance);
+	}
 };
 
 class LifetimeGenerator : public ParticleGenerator {
@@ -470,6 +489,10 @@ struct ColorGeneratorData : ParticleGeneratorData {
 
 	void save(JSONWriter& writer) {
 		writer.write("color", color);
+	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_color(category, "color", &color);
 	}
 
 };
@@ -523,6 +546,14 @@ struct HSVColorGeneratorData : ParticleGeneratorData {
 		writer.write("hue_variance", hueVariance);
 		writer.write("saturation_variance", saturationVariance);
 		writer.write("value_variance", valueVariance);
+	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_vec3(category, "hsv", &hsv);
+		reader.get_float(category, "alpha", &alpha);
+		reader.get_float(category, "hue_variance", &hueVariance);
+		reader.get_float(category, "saturation_variance", &saturationVariance);
+		reader.get_float(category, "value_variance", &valueVariance);
 	}
 };
 
@@ -583,6 +614,11 @@ struct SizeGeneratorData : ParticleGeneratorData {
 		writer.write("scale", scale);
 		writer.write("variance", variance);
 	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_vec2(category, "scale", &scale);
+		reader.get_vec2(category, "variance", &variance);
+	}
 };
 
 class SizeGenerator : public ParticleGenerator {
@@ -629,6 +665,13 @@ struct RotationVelocityGeneratorData : ParticleGeneratorData {
 	void save(JSONWriter& writer) {
 		writer.write("velocity", RADTODEG(velocity));
 		writer.write("variance", RADTODEG(variance));
+	}
+
+	void read(SimpleJSONReader& reader, int category) {
+		reader.get_float(category, "velocity", &velocity);
+		reader.get_float(category, "variance", &variance);
+		velocity = DEGTORAD(velocity);
+		variance = DEGTORAD(variance);
 	}
 };
 
