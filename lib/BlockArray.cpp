@@ -62,12 +62,12 @@ namespace ds {
 
 	ChannelArray::~ChannelArray() {
 		if (_data_indices != 0) {
-			//gDefaultMemory->deallocate(_data_indices);
-			delete _data_indices;
+			gDefaultMemory->deallocate(_data_indices);
+			//delete _data_indices;
 		}
 		if (data != 0) {
-			//gDefaultMemory->deallocate(data);
-			delete[] data;
+			gDefaultMemory->deallocate(data);
+			//delete[] data;
 		}
 	}
 
@@ -96,8 +96,8 @@ namespace ds {
 				total += _sizes[i];
 			}
 			if (_data_indices == 0) {
-				//_data_indices = (Index*)gDefaultMemory->allocate(new_size * sizeof(Index));
-				_data_indices = new Index[new_size];// *sizeof(Index));
+				_data_indices = (Index*)gDefaultMemory->allocate(new_size * sizeof(Index));
+				//_data_indices = new Index[new_size];// *sizeof(Index));
 				for (unsigned short i = 0; i < new_size; ++i) {
 					_data_indices[i].id = i;
 					_data_indices[i].next = i + 1;
@@ -106,33 +106,31 @@ namespace ds {
 				_free_enqueue = new_size - 1;
 			}
 			else {
-				//Index* tmp = (Index*)gDefaultMemory->allocate(new_size * sizeof(Index));
-				Index* tmp = new Index[new_size];// *)gDefaultMemory->allocate(new_size * sizeof(Index));
+				Index* tmp = (Index*)gDefaultMemory->allocate(new_size * sizeof(Index));
+				//Index* tmp = new Index[new_size];// *)gDefaultMemory->allocate(new_size * sizeof(Index));
 				memcpy(tmp, _data_indices, size * sizeof(Index));
 				for (unsigned short i = size; i < new_size; ++i) {
-					_data_indices[i].id = i;
-					_data_indices[i].next = i + 1;
+					tmp[i].id = i;
+					tmp[i].next = i + 1;
 				}
-				//gDefaultMemory->deallocate(_data_indices);
-				delete[] _data_indices;
+				gDefaultMemory->deallocate(_data_indices);
+				//delete[] _data_indices;
 				_data_indices = tmp;
 				_free_enqueue = new_size - 1;
 			}
 			int sz = new_size * total;
-			//char* t = (char*)gDefaultMemory->allocate(sz);
-			char* t = new char[sz];
+			char* t = (char*)gDefaultMemory->allocate(sz);
+			//char* t = new char[sz];
 			if (data != 0) {
 				int offset = 0;
 				int old_offset = 0;
-				char* tmp = t;
-				char* src = data;
 				for (int i = 0; i < _num_blocks; ++i) {
 					memcpy(t + offset, data + old_offset, size * _sizes[i]);
 					offset += new_size * _sizes[i];
 					old_offset += capacity * _sizes[i];
 				}
-				//gDefaultMemory->deallocate(data);
-				delete[] data;
+				gDefaultMemory->deallocate(data);
+				//delete[] data;
 			}
 			capacity = new_size;
 			_indices[0] = 0;
