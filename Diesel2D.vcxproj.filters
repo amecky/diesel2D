@@ -10,9 +10,6 @@
     <ClCompile Include="utils\mtrand.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="utils\PlainTextReader.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="utils\Profiler.cpp">
       <Filter>utils</Filter>
     </ClCompile>
@@ -217,9 +214,6 @@
     <ClCompile Include="sprites\SpriteGroup.cpp">
       <Filter>sprites</Filter>
     </ClCompile>
-    <ClCompile Include="utils\JSONWriter.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="data\DynamicSettings.cpp">
       <Filter>data</Filter>
     </ClCompile>
@@ -262,6 +256,18 @@
     <ClCompile Include="editor\DialogEditorState.cpp">
       <Filter>editor</Filter>
     </ClCompile>
+    <ClCompile Include="memory\DefaultAllocator.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\BlockArray.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="io\json.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="io\DataFile.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dxstdafx.h" />
@@ -273,9 +279,6 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="utils\mtrand.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\PlainTextReader.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="utils\Profiler.h">
@@ -576,14 +579,8 @@
     <ClInclude Include="sprites\SpriteGroup.h">
       <Filter>sprites</Filter>
     </ClInclude>
-    <ClInclude Include="utils\JSONWriter.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="editor\BitmapFontsDialog.h">
       <Filter>editor</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\DataFile.h">
-      <Filter>compiler</Filter>
     </ClInclude>
     <ClInclude Include="editor\SpriteTemplatesEditor.h">
       <Filter>editor</Filter>
@@ -620,6 +617,21 @@
     </ClInclude>
     <ClInclude Include="editor\DialogEditorState.h">
       <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\collection_types.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\DefaultAllocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\BlockArray.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="io\json.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="io\DataFile.h">
+      <Filter>io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

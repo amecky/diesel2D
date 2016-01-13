@@ -2,7 +2,7 @@
 #include "Sprite.h"
 #include "..\lib\collection_types.h"
 #include "..\ui\IMGUI.h"
-#include "..\compiler\DataFile.h"
+#include "..\io\DataFile.h"
 
 namespace ds {
 
@@ -24,8 +24,6 @@ public:
 	Sprite& get(int index);
 	const Sprite& get(int index) const;
 	bool saveData(JSONWriter& writer);
-	bool saveData(SimpleJSONWriter& writer);
-	bool loadData(JSONReader& reader);
 	const char* getFileName() const {
 		return "resources\\sprite_templates.json";
 	}
@@ -33,10 +31,7 @@ public:
 	const TemplateMap& getTemplates() const {
 		return _map;
 	}
-	virtual bool loadData(SimpleJSONReader& loader);
-	virtual bool useSimplified() {
-		return true;
-	}
+	virtual bool loadData(JSONReader& loader);
 private:
 	const int getIndex(int id) const;
 	const int getIndex(IdString hash) const;

@@ -27,7 +27,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// dynamic settings
 	// -------------------------------------------------------
-	struct DynamicGameSettings {
+	struct DynamicGameSettings : public DataFile {
 
 		DynamicGameSettings();
 		~DynamicGameSettings();
@@ -41,15 +41,19 @@ namespace ds {
 		void addRect(const char* name, Rect* value, const Rect& defaultValue);
 		bool setRect(const char* name, const Rect& value);
 
-		void load();
+		//void load();
 
-		void save();
+		//void save();
 
 		void showDialog(v2* pos);
 
 		void showCompleteDialog(v2* pos);
 
-		virtual const char* getName() const = 0;
+		//virtual const char* getName() const = 0;
+
+		bool saveData(JSONWriter& writer);
+		bool loadData(JSONReader& loader);
+		virtual const char* getFileName() const = 0;
 
 		int _state;
 		int _offset;

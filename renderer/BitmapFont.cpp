@@ -1,6 +1,5 @@
 #include "BitmapFont.h"
-#include "..\utils\JSONWriter.h"
-#include "..\utils\PlainTextReader.h"
+#include "..\io\json.h"
 
 namespace ds {
 
@@ -35,15 +34,7 @@ namespace ds {
 		return true;
 	}
 
-	bool BitmapFont::saveData(SimpleJSONWriter& writer) {
-		return true;
-	}
-
-	bool BitmapFont::loadData(JSONReader& reader) {
-		return true;
-	}
-
-	bool BitmapFont::loadData(SimpleJSONReader& loader) {
+	bool BitmapFont::loadData(JSONReader& loader) {
 		int cats[32];
 		int num = loader.get_categories(cats, 32);
 		for (int i = 0; i < num; ++i) {
@@ -62,60 +53,7 @@ namespace ds {
 		}
 		return true;
 	}
-
-	// -------------------------------------------------------
-	// export json
-	// -------------------------------------------------------
-	/*
-	void BitmapFont::exportJSON() {
-		char buffer[64];
-		sprintf(buffer, "content\\resources\\%s.json",name);
-		LOG << "exporting to: << " << buffer;
-		JSONWriter jw;
-		jw.open(buffer);
-		jw.startCategory("font");
-		jw.write("start_char",startChar);
-		jw.write("end_char",endChar);
-		jw.write("char_height",charHeight);
-		jw.write("grid_height",gridHeight);
-		jw.write("start_x",startX);
-		jw.write("start_y",startY);
-		jw.write("width",width);
-		jw.write("height",height);
-		jw.write("padding",padding);
-		jw.write("texture_size",textureSize);
-		jw.endCategory();
-	}
-	*/
-	// -------------------------------------------------------
-	// import json
-	// -------------------------------------------------------
-	/*
-	void BitmapFont::importJSON() {
-		char buffer[64];
-		sprintf(buffer, "content\\resources\\%s.json", name);
-		LOG << "importing file: " << buffer;
-		JSONReader reader;
-		if (reader.parse(buffer)) {
-			Category* c = reader.getCategory("font");
-			if (c != 0) {
-				c->getInt("start_char", &startChar);
-				c->getInt("end_char", &endChar);
-				c->getInt("char_height", &charHeight);
-				c->getInt("grid_height", &gridHeight);
-				c->getInt("start_x", &startX);
-				c->getInt("start_y", &startY);
-				c->getInt("width", &width);
-				c->getInt("height", &height);
-				c->getInt("padding", &padding);
-				c->getInt("texture_size", &textureSize);
-			}
-		}
-		else {
-			LOG << "Cannot parse json file";
-		}
-	}
-	*/
+	
 	const bool BitmapFont::contains(char c) const {
 		int idx = (int)c - startChar;
 		return idx >= 0 && idx < definitions.size();

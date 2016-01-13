@@ -1,7 +1,7 @@
 #pragma once
 #include "..\utils\StringUtils.h"
 //#include "..\lib\container\List.h"
-#include "..\compiler\DataFile.h"
+#include "..\io\DataFile.h"
 #include "render_types.h"
 
 namespace ds {
@@ -61,32 +61,14 @@ struct BitmapFont : public DataFile {
 	~BitmapFont() {}
 
 	void intialize(const FontDefinition& definition);
-
 	void addChar(uint32 ascii, int startX, int startY, int width);
-
-	//bool load();
-
-	//void save();
-
-	//void importJSON();
-
-	//void exportJSON();
-
 	const bool contains(char c) const;
-
 	const CharDef& getCharDef(char c) const;
-
 	bool saveData(JSONWriter& writer);
-	bool saveData(SimpleJSONWriter& writer);
-	bool loadData(JSONReader& reader);
 	const char* getFileName() const {
 		return jsonName;
 	}
-	virtual bool loadData(SimpleJSONReader& loader);
-	virtual bool useSimplified() {
-		return true;
-	}
-	
+	virtual bool loadData(JSONReader& loader);
 };
 
 }

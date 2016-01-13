@@ -1,5 +1,4 @@
 #pragma once
-#include "..\utils\PlainTextReader.h"
 #include "Particle.h"
 #include "ParticleGenerator.h"
 
@@ -21,15 +20,7 @@ struct ParticleEmitterData {
 	float frequency;
 
 	ParticleEmitterData() : ejectionPeriod(0), ejectionVariance(0), ejectionCounter(0), count(1) , duration(0.0f) {}
-	/*
-	void load(BinaryLoader* loader) {
-		loader->read(&count);
-		loader->read(&ejectionPeriod);
-		loader->read(&ejectionVariance);
-		loader->read(&ejectionCounter);
-		loader->read(&duration);
-	}
-	*/
+
 };
 
 struct ParticleEmitterInstance {

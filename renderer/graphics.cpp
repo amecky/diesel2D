@@ -1263,6 +1263,7 @@ namespace ds {
 			LOG << "Trying to load texture " << fileName;
 			int fileSize = -1;			
 			char* data = repository::load(fileName,&fileSize, repository::FT_BINARY);
+			assert(fileSize != -1);
 			HR(D3DXCreateTextureFromFileInMemoryEx(renderContext->device, data, fileSize, D3DX_DEFAULT, D3DX_DEFAULT, 1, 0, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
 			delete[] data;
 			assert(tr->texture != 0);

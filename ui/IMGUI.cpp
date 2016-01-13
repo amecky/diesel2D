@@ -4,6 +4,7 @@
 #include "..\utils\font.h"
 #include "..\utils\Profiler.h"
 #include "..\DialogResources.h"
+#include "..\utils\Log.h"
 
 namespace gui {
 

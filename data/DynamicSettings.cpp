@@ -1,7 +1,5 @@
 #pragma once
 #include "DynamicSettings.h"
-#include "..\utils\JSONWriter.h"
-#include "..\utils\PlainTextReader.h"
 #include "..\DialogResources.h"
 
 namespace ds {
@@ -91,50 +89,43 @@ namespace ds {
 	// -------------------------------------------------------
 	// export json
 	// -------------------------------------------------------
-	void DynamicGameSettings::save() {
-		char buffer[64];
-		sprintf_s(buffer, 64, "content\\%s.json", getName());
-		JSONWriter jw;
-		jw.open(buffer);
-		jw.startCategory("settings");
+	bool DynamicGameSettings::saveData(JSONWriter& writer) {
+		writer.startCategory("settings");
 		for (int i = 0; i < _items.size(); ++i) {
 			const SettingsItem& item = _items[i];
 			if (item.type == ST_FLOAT) {
-				jw.write(item.name, *_floats[item.index]);
+				writer.write(item.name, *_floats[item.index]);
 			}
 			else if (item.type == ST_RECT) {
-				jw.write(item.name, *_rects[item.index]);
+				writer.write(item.name, *_rects[item.index]);
 			}
 		}
-		jw.endCategory();
+		writer.endCategory();
+		return true;
 	}
 
 	// -------------------------------------------------------
 	// import json
 	// -------------------------------------------------------
-	void DynamicGameSettings::load() {
-		char buffer[64];
-		sprintf_s(buffer, 64, "content\\%s.json",getName());
-		JSONReader reader;
-		if (reader.parse(buffer)) {
-			Category* c = reader.getCategory("settings");
-			if (c != 0) {
-				for (int i = 0; i < _items.size(); ++i) {
-					const SettingsItem& item = _items[i];
-					if (c->hasProperty(item.name)) {
-						if (item.type == ST_FLOAT) {
-							c->getFloat(item.name, _floats[item.index]);
-						}
-						else if (item.type == ST_INT) {
-							c->getInt(item.name, _ints[item.index]);
-						}
-						else if (item.type == ST_RECT) {
-							c->getRect(item.name, _rects[item.index]);
-						}
+	bool DynamicGameSettings::loadData(JSONReader& loader) {
+		int c = loader.find_category("settings");
+		if (c != -1) {
+			for (int i = 0; i < _items.size(); ++i) {
+				const SettingsItem& item = _items[i];
+				if (loader.contains_property(c,item.name)) {
+					if (item.type == ST_FLOAT) {
+						loader.get_float(c,item.name, _floats[item.index]);
+					}
+					else if (item.type == ST_INT) {
+						loader.get_int(c,item.name, _ints[item.index]);
+					}
+					else if (item.type == ST_RECT) {
+						loader.get_rect(c,item.name, _rects[item.index]);
 					}
 				}
 			}
 		}
+		return true;
 	}
 
 	// -------------------------------------------------------

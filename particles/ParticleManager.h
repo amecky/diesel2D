@@ -30,17 +30,13 @@ public:
 	void debug();
 	void fillModel(gui::ComponentModel<int>* model);
 	bool saveData(JSONWriter& writer);
-	bool loadData(JSONReader& reader);
 	const char* getFileName() const {
 		return "particles\\particlesystems.json";
 	}
 	const ParticleSystemFactory& getFactory() const {
 		return _factory;
 	}
-	virtual bool loadData(SimpleJSONReader& loader);
-	virtual bool useSimplified() {
-		return true;
-	}
+	virtual bool loadData(JSONReader& loader);
 private:
 	void end();
 	void flush();

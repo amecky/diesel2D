@@ -1,10 +1,8 @@
 #pragma once
 #include "Particle.h"
-#include "..\utils\PlainTextReader.h"
-#include "..\utils\JSONWriter.h"
 #include "..\utils\Profiler.h"
 #include "ParticleSystemData.h"
-#include "..\utils\SimpleJSONReader.h"
+#include "..\io\json.h"
 
 namespace ds {
 
@@ -26,8 +24,7 @@ enum ParticleModifierType {
 
 struct ParticleModifierData {
 
-	virtual void read(Category* category) = 0;
-	virtual void read(SimpleJSONReader& reader,int category) = 0;
+	virtual void read(JSONReader& reader,int category) = 0;
 	virtual void save(JSONWriter& writer) = 0;
 
 };
@@ -114,17 +111,12 @@ struct LinearColorModifierData : ParticleModifierData {
 
 	LinearColorModifierData() : startColor(255,255,255,255) , endColor(0,0,0,0) {}
 
-	void read(Category* category) {
-		category->getColor("start_color", &startColor);
-		category->getColor("end_color", &endColor);
-	}
-
 	void save(JSONWriter& writer) {
 		writer.write("start_color", startColor);
 		writer.write("end_color", endColor);
 	}
 
-	void read(SimpleJSONReader& reader, int category) {
+	void read(JSONReader& reader, int category) {
 		reader.get_color(category, "start_color", &startColor);
 		reader.get_color(category, "end_color", &endColor);
 	}
@@ -169,17 +161,12 @@ struct LinearAlphaModifierData : ParticleModifierData {
 
 	LinearAlphaModifierData() : startAlpha(1.0f), endAlpha(0.0f) {}
 
-	void read(Category* category) {
-		category->getFloat("start_alpha", &startAlpha);
-		category->getFloat("end_alpha", &endAlpha);
-	}
-
 	void save(JSONWriter& writer) {
 		writer.write("start_alpha", startAlpha);
 		writer.write("end_alpha", endAlpha);
 	}
 
-	void read(SimpleJSONReader& reader, int category) {
+	void read(JSONReader& reader, int category) {
 		reader.get_float(category, "start_alpha", &startAlpha);
 		reader.get_float(category, "end_alpha", &endAlpha);
 	}
@@ -223,17 +210,12 @@ struct LinearSizeModifierData : ParticleModifierData {
 
 	LinearSizeModifierData() : minScale(0,0) , maxScale(1,1) {}
 
-	void read(Category* category) {
-		category->getVector2f("min_scale", &minScale);
-		category->getVector2f("max_scale", &maxScale);
-	}
-
 	void save(JSONWriter& writer) {
 		writer.write("min_scale", minScale);
 		writer.write("max_scale", maxScale);
 	}
 
-	void read(SimpleJSONReader& reader, int category) {
+	void read(JSONReader& reader, int category) {
 		reader.get_vec2(category, "min_scale", &minScale);
 		reader.get_vec2(category, "max_scale", &maxScale);
 	}
@@ -281,10 +263,7 @@ struct PerpendicularMoveModifierData : ParticleModifierData {
 
 	PerpendicularMoveModifierData() : radius(10.0f) , amplitude(1.0f) {}
 
-	void read(Category* category) {
-	}
-
-	void read(SimpleJSONReader& reader, int category) {
+	void read(JSONReader& reader, int category) {
 		
 	}
 };
@@ -323,15 +302,11 @@ struct ColorPathModifierData : ParticleModifierData {
 
 	ColorPath path;
 
-	void read(Category* category) {
-		category->getColorPath(&path);
-	}
-
 	void save(JSONWriter& writer) {
 		writer.write(path);
 	}
 
-	void read(SimpleJSONReader& reader, int category) {
+	void read(JSONReader& reader, int category) {
 		reader.get_color_path(category, "path", &path);
 	}
 };
@@ -370,9 +345,6 @@ public:
 struct AlphaPathModifierData : ParticleModifierData{
 
 	FloatArray path;
-
-	void read(Category* category) {
-	}
 
 	void save(JSONWriter& writer) {
 		writer.write(path);
@@ -417,15 +389,11 @@ struct DampingVelocityModifierData : ParticleModifierData {
 
 	DampingVelocityModifierData() : damping(0.0f) {}
 
-	void read(Category* category) {
-		damping = category->getFloat("damping", 0.0f);
-	}
-
 	void save(JSONWriter& writer) {
 		writer.write("damping", damping);
 	}
 
-	void read(SimpleJSONReader& reader, int category) {
+	void read(JSONReader& reader, int category) {
 		reader.get_float(category, "damping", &damping);
 	}
 
@@ -462,14 +430,11 @@ struct SizePathModifierData : ParticleModifierData{
 
 	Vector2fPath path;
 
-	void read(Category* category) {
-	}
-
 	void save(JSONWriter& writer) {
 		writer.write(path);
 	}
 
-	void read(SimpleJSONReader& reader, int category) {
+	void read(JSONReader& reader, int category) {
 		reader.get_vec2_path(category, "path", &path);
 	}
 

@@ -1,5 +1,6 @@
 #include "VertexDeclaration.h"
 #include "..\renderer\graphics.h"
+#include "..\utils\Log.h"
 
 namespace ds {
 

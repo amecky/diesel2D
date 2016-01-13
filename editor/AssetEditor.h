@@ -1,5 +1,5 @@
 #pragma once
-#include "..\compiler\DataFile.h"
+#include "..\io\DataFile.h"
 #include "..\ui\IMGUI.h"
 
 namespace ds {

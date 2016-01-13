@@ -1,7 +1,6 @@
 #include "SpriteTemplates.h"
 #include "..\DialogResources.h"
-#include "..\utils\JSONWriter.h"
-#include "..\utils\SimpleJSONReader.h"
+#include "..\io\json.h"
 #include "..\utils\Profiler.h"
 
 namespace ds {
@@ -85,7 +84,24 @@ namespace ds {
 		return true;
 
 	}
-	
+	/*
+	bool SpriteTemplates::saveData(JSONWriter& writer) {
+		for (size_t i = 0; i < _map.size(); ++i) {
+			const MappingEntry& entry = _map[i];
+			writer.startCategory("sprite");
+			writer.write("name", entry.name);
+			writer.write("texture_id", entry.sprite.texture.textureID);
+			writer.write("position", entry.sprite.position);
+			writer.write("rect", entry.sprite.texture.rect);
+			writer.write("scale", entry.sprite.scale);
+			writer.write("rotation", entry.sprite.rotation);
+			writer.write("color", entry.sprite.color);
+			writer.write("type", entry.sprite.type);
+			writer.endCategory();
+		}
+		return true;
+	}
+	*/
 	bool SpriteTemplates::saveData(JSONWriter& writer) {
 		for (size_t i = 0; i < _map.size(); ++i) {
 			const MappingEntry& entry = _map[i];
@@ -103,24 +119,7 @@ namespace ds {
 		return true;
 	}
 
-	bool SpriteTemplates::saveData(SimpleJSONWriter& writer) {
-		for (size_t i = 0; i < _map.size(); ++i) {
-			const MappingEntry& entry = _map[i];
-			writer.startCategory("sprite");
-			writer.write("name", entry.name);
-			writer.write("texture_id", entry.sprite.texture.textureID);
-			writer.write("position", entry.sprite.position);
-			writer.write("rect", entry.sprite.texture.rect);
-			writer.write("scale", entry.sprite.scale);
-			writer.write("rotation", entry.sprite.rotation);
-			writer.write("color", entry.sprite.color);
-			writer.write("type", entry.sprite.type);
-			writer.endCategory();
-		}
-		return true;
-	}
-
-	bool SpriteTemplates::loadData(SimpleJSONReader& loader) {
+	bool SpriteTemplates::loadData(JSONReader& loader) {
 		int cats[256];
 		int num = loader.get_categories(cats, 256);
 		for (int i = 0; i < num; ++i) {
@@ -142,34 +141,6 @@ namespace ds {
 			entry.sprite.id = _currentID++;
 			_map.push_back(entry);
 
-		}
-		return true;
-	}
-
-	bool SpriteTemplates::loadData(JSONReader& reader) {
-		_map.clear();
-		_currentID = 0;
-		const Array<Category*>& categories = reader.getCategories();
-		for (size_t i = 0; i < categories.size(); ++i) {
-			Category* c = categories[i];			
-			if (c->getName() == "sprite") {
-				MappingEntry entry;
-				Rect r;
-				std::string name = c->getProperty("name");
-				//LOG << "name: " << name;
-				strcpy(entry.name, name.c_str());
-				entry.hash = string::murmur_hash(entry.name);
-				c->getInt("texture_id", &entry.sprite.texture.textureID);
-				c->getVector2f("position", &entry.sprite.position);
-				c->getRect("rect", &r);
-				entry.sprite.texture = math::buildTexture(r);
-				c->getVector2f("scale", &entry.sprite.scale);
-				c->getFloat("rotation", &entry.sprite.rotation);
-				c->getColor("color", &entry.sprite.color);
-				c->getInt("type", &entry.sprite.type);
-				entry.sprite.id = _currentID++;
-				_map.push_back(entry);
-			}
 		}
 		return true;
 	}

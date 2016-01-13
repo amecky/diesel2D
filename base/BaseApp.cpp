@@ -2,9 +2,7 @@
 #include "..\utils\Log.h"
 #include <windows.h>
 #include "..\utils\Profiler.h"
-#include "..\utils\PlainTextReader.h"
 #include "..\memory\DataBlockAllocator.h"
-//#include "..\io\FileWatcher.h"
 #include "..\utils\FileUtils.h"
 #include "..\particles\ParticleSystem.h"
 #include "..\sprites\SpriteBatch.h"
@@ -62,19 +60,15 @@ BaseApp::BaseApp() {
 	_templatesEditor = 0;
 	_perfHUDPos = v2(750, 710);
 	_prepared = false;
-	Category root("root");
-	bool loaded = json::read_simplified_json("content\\engine_settings.json", &root);
-	//settings.mode = 1;		
-	if (loaded) {
-		Category* basic = root.getChild("basic_settings");
-		if (basic != 0) {
-			//full_screen = false
-			//synched = true
-			basic->getInt("screen_width", &_settings.screenWidth);
-			basic->getInt("screen_height", &_settings.screenHeight);
-			basic->getColor("clear_color", &_settings.clearColor);
-		}
-	}
+	JSONReader reader;
+	bool ret = reader.parse("content\\engine_settings.json");
+	assert(ret);
+	int c = reader.find_category("basic_settings");
+	assert(c != -1);
+	reader.get_int(c, "screen_width", &_settings.screenWidth);
+	reader.get_int(c, "screen_height", &_settings.screenHeight);
+	reader.get_color(c, "clear_color", &_settings.clearColor);
+	
 }
 
 // -------------------------------------------------------
@@ -98,100 +92,113 @@ BaseApp::~BaseApp() {
 	delete gDefaultMemory;
 }
 
-void BaseApp::loadSettings(const Category* root) {
+void BaseApp::loadSettings() {
 	LOG << "---- Loading settings ----";
-	Category* init = root->getChild("init_actions");
-	if (init != 0) {
-		// load textures
-		if (init->hasProperty("textures")) {
-			const char* textureNames = init->getProperty("textures");
-			if (strchr(textureNames,',') == 0) {
-				int texture = ds::renderer::loadTexture(textureNames);
+	JSONReader reader;
+	bool ret = reader.parse("content\\engine_settings.json");
+	assert(ret);
+	int root = reader.find_category("init_actions");
+	assert(root != -1);
+
+	// load textures
+	if (reader.contains_property(root,"textures")) {
+		const char* textureNames = reader.get_string(root,"textures");
+		if (strchr(textureNames,',') == 0) {
+			int texture = ds::renderer::loadTexture(textureNames);
+			assert(texture != -1);
+		}
+		else {
+			Array<std::string> values;
+			string::split(textureNames,values);
+			for (size_t i = 0; i < values.size(); ++i) {
+				int texture = ds::renderer::loadTexture(values[i].c_str());
 				assert(texture != -1);
 			}
-			else {
-				Array<std::string> values;
-				string::split(textureNames,values);
-				for (size_t i = 0; i < values.size(); ++i) {
-					int texture = ds::renderer::loadTexture(values[i].c_str());
-					assert(texture != -1);
-				}
-			}
 		}
-		else {
-			LOG << "No textures defined";
+	}
+	else {
+		LOG << "No textures defined";
+	}
+	// load fonts
+	int children[32];
+	int fonts_id = reader.find_category("fonts", root);
+	if ( fonts_id != -1 ) {
+		int num = reader.get_categories(children, 32, fonts_id);
+		for (int i = 0; i < num; ++i) {
+			const char* texName = reader.get_string(children[i],"texture");
+			int texture = renderer::getTextureId(texName);
+			assert(texture != -1);
+			const char* file = reader.get_string(children[i],"file");
+			BitmapFont* font = renderer::loadBitmapFont(file, texture);
 		}
-		// load fonts
-		Category* fonts = init->getChild("fonts");
-		if (fonts != 0) {
-			const Array<Category*>& entries = fonts->getChildren();
-			for (size_t i = 0; i < entries.size(); ++i) {
-				std::string texName = entries[i]->getProperty("texture");
-				int texture = renderer::getTextureId(texName.c_str());
-				assert(texture != -1);
-				std::string file = entries[i]->getProperty("file");
-				BitmapFont* font = renderer::loadBitmapFont(file.c_str(), texture);
-			}
-		}
-		else {
-			LOG << "No fonts defined";
-		}
-		// initialize text system
-		Category* textSystem = init->getChild("text_system");
-		if (textSystem != 0) {
-			std::string fontName = textSystem->getProperty("font");
-			BitmapFont* font = renderer::getBitmapFont(fontName.c_str());
-			assert(font != 0);
-			sprites::initializeTextSystem(font);
-		}
-		else {
-			LOG << "No textsystem defined";
-		}
-		// initialize IMGUI
-		Category* imgui = init->getChild("initialize_imgui");
-		if (imgui != 0) {
-			std::string fontName = imgui->getProperty("font");
-			BitmapFont* font = renderer::getBitmapFont(fontName.c_str());
-			assert(font != 0);
-			initializeGUI(font);
-		}
-		else {
-			LOG << "Not initializing IMGUI";
-		}
-		// load particles
-		if (init->getBool("load_particles", false)) {
-			LOG << "loading particle systems";
-			// prepare particle system
-			Descriptor desc;
-			desc.shader = shader::createParticleShader();
-			assert(desc.shader != 0);
-			desc.texture = 0;
-			desc.blendState = renderer::getDefaultBlendState();
-			particles->init(desc);
-			particles->load();
-		}
-		// load dialogs
-		if (init->getBool("load_dialogs", false)) {
-			gui::initialize();
-		}
-		// load sprite templates
-		if (init->getBool("load_sprite_templates", false)) {
-			//assets::loadSpriteTemplates();
-			renderer::loadSpriteTemplates();
-		}
-		else {
-			LOG << "Not loading sprite templates";
-		}
-		// initialize editor
-		if (init->getBool("initialize_editor", false)) {
-			_bmfDialog = new BitmapFontsDialog;
-			_bmfDialog->init();
-			_templatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
-			_templatesEditor->init();
-			_stateMachine->add(new SpriteTemplatesState());
-			_stateMachine->add(new ParticlesEditState(particles));
-			_stateMachine->add(new DialogEditorState(gui));
-		}
+	}
+	else {
+		LOG << "No fonts defined";
+	}
+	// initialize text system
+	int text_id = reader.find_category("use_text_system",root);
+	//Category* textSystem = init->getChild("text_system");
+	//if (textSystem != 0) {
+	if ( text_id != -1 ) {
+		const char* fontName = reader.get_string(text_id,"font");
+		BitmapFont* font = renderer::getBitmapFont(fontName);
+		assert(font != 0);
+		sprites::initializeTextSystem(font);
+	}
+	else {
+		LOG << "No textsystem defined";
+	}
+	int imgui_id = reader.find_category("initialize_imgui", root);
+	if (imgui_id != -1) {
+		const char* fontName = reader.get_string(imgui_id,"font");
+		BitmapFont* font = renderer::getBitmapFont(fontName);
+		assert(font != 0);
+		initializeGUI(font);
+	}
+	else {
+		LOG << "Not initializing IMGUI";
+	}
+	// load particles
+	bool load_particles = false;
+	reader.get_bool(root, "load_particles", &load_particles);
+	//int particles_id = reader.find_category("")
+	//if (init->getBool("load_particles", false)) {
+	if ( load_particles) {
+		LOG << "loading particle systems";
+		// prepare particle system
+		Descriptor desc;
+		desc.shader = shader::createParticleShader();
+		assert(desc.shader != 0);
+		desc.texture = 0;
+		desc.blendState = renderer::getDefaultBlendState();
+		particles->init(desc);
+		particles->load();
+	}
+	// load dialogs
+	bool load_dialogs = false;
+	reader.get_bool(root, "load_dialogs", &load_dialogs);
+	if ( load_dialogs) {
+		gui::initialize();
+	}
+	// load sprite templates
+	bool load_templates = false;
+	reader.get_bool(root, "load_sprite_templates", &load_templates);
+	if (load_templates) {
+		renderer::loadSpriteTemplates();
+	}
+	else {
+		LOG << "Not loading sprite templates";
+	}
+	bool initialize_editor = false;
+	reader.get_bool(root, "initialize_editor", &initialize_editor);
+	if (initialize_editor) {
+		_bmfDialog = new BitmapFontsDialog;
+		_bmfDialog->init();
+		_templatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
+		_templatesEditor->init();
+		_stateMachine->add(new SpriteTemplatesState());
+		_stateMachine->add(new ParticlesEditState(particles));
+		_stateMachine->add(new DialogEditorState(gui));
 	}
 }
 // -------------------------------------------------------
@@ -203,8 +210,8 @@ void BaseApp::prepare() {
 	s.start();
 	LOG << "---> Init <---";
 	LOG << "---- Loading settings ----";
-	Category root("root");
-	bool loaded = json::read_simplified_json("content\\engine_settings.json", &root);
+	//Category root("root");
+	//bool loaded = json::read_simplified_json("content\\engine_settings.json", &root);
 	/*
 	//settings.mode = 1;		
 	if (loaded) {
@@ -223,12 +230,7 @@ void BaseApp::prepare() {
 
 	profiler::init();
 	sprites::init();
-	if (loaded) {
-		loadSettings(&root);
-	}
-	else {
-		LOG << "No engine settings provided";
-	}
+	loadSettings();
 	LOG << "---> Start loading content <---";
 	loadContent();	
 	LOG << "---> End loading content   <---";

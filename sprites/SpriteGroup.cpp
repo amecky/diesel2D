@@ -2,6 +2,7 @@
 #include "SpriteBatch.h"
 #include "..\ui\IMGUI.h"
 #include "..\DialogResources.h"
+#include "..\utils\Log.h"
 
 namespace ds {
 

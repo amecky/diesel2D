@@ -1,7 +1,7 @@
 #pragma once
 #include "ParticleSystem.h"
 #include "..\lib\container\List.h"
-#include "..\compiler\DataFile.h"
+#include "..\io\DataFile.h"
 #include <IPath.h>
 #include "Particle.h"
 #include "..\renderer\Camera2D.h"
@@ -102,17 +102,13 @@ public:
 	void removeModifierByName(const char* name);
 
 	bool saveData(JSONWriter& writer);
-	bool loadData(JSONReader& reader);
 	const char* getFileName() const {
 		return _json_name;
 	}
 	ParticleEmitterData& getEmitterData() {
 		return _emitter_data;
 	}
-	virtual bool loadData(SimpleJSONReader& loader);
-	virtual bool useSimplified() {
-		return true;
-	}
+	virtual bool loadData(JSONReader& loader);
 private:
 	void tickEmitters(float dt);
 	void initEmitterData();

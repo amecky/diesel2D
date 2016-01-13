@@ -1,7 +1,6 @@
 #include "DialogManager.h"
 #include "..\utils\StringUtils.h"
 #include "..\utils\font.h"
-#include "..\utils\PlainTextReader.h"
 #include "..\utils\FileUtils.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\renderer\graphics.h"
@@ -212,45 +211,15 @@ namespace ds {
 		return true;
 	}
 
-	// -------------------------------------------------------
-	// import json
-	// -------------------------------------------------------
 	bool DialogManager::loadData(JSONReader& reader) {
-		clear();
-		_index = 1;
-		const Array<Category*>& categories = reader.getCategories();
-		for (size_t i = 0; i < categories.size(); ++i) {
-			Category* c = categories[i];
-			if (c->getName() != "gui") {
-				int id = c->getInt("id", -1);
-				std::string name = c->getProperty("file");
-				GUIDialog* dialog = new GUIDialog();
-				LOG << "Creating new dialog: " << name;
-				DialogDefinition def;
-				sprintf_s(def.name, 32, "%s", name.c_str());
-				def.hash = string::murmur_hash(name.c_str());
-				def.dialog = dialog;
-				dialog->init(def.name, id, m_Font);
-				m_Dialogs.push_back(def);
-			}
-		}
-		return true;
-	}
-
-	bool DialogManager::loadData(SimpleJSONReader& reader) {
 		clear();
 		_index = 1;
 		int cats[32];
 		int num = reader.get_categories(cats, 32);
-		//const Array<Category*>& categories = reader.getCategories();
-		//for (size_t i = 0; i < categories.size(); ++i) {
 		for (int i = 0; i < num; ++i ) {
-			//Category* c = categories[i];
-			//if (c->getName() != "gui") {
 			int id = 0;
 			reader.get_int(cats[i],"id",&id);
 			const char* name = reader.get_string(cats[i], "file");
-				//std::string name = c->getProperty("file");
 			GUIDialog* dialog = new GUIDialog();
 			LOG << "Creating new dialog: " << name;
 			DialogDefinition def;
@@ -259,7 +228,6 @@ namespace ds {
 			def.dialog = dialog;
 			dialog->init(def.name, id, m_Font);
 			m_Dialogs.push_back(def);
-			//}
 		}
 		return true;
 	}

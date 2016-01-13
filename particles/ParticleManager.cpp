@@ -4,6 +4,7 @@
 #include "..\math\matrix.h"
 #include "..\renderer\graphics.h"
 #include "..\sprites\SpriteBatch.h"
+#include "..\utils\Log.h"
 
 namespace ds {
 
@@ -97,25 +98,6 @@ namespace ds {
 	}
 
 	bool ParticleManager::loadData(JSONReader& reader) {
-		LOG << "importing data";
-		const Array<Category*>& categories = reader.getCategories();
-		for (size_t i = 0; i < categories.size(); ++i) {
-			Category* c = categories[i];
-			LOG << "name: " << c->getName();
-			std::string name = c->getProperty("file");
-			int id = -1;
-			c->getInt("id", &id);
-			if (id != -1) {
-				NewParticleSystem* system = create(id, name.c_str());
-				LOG << "id: " << id << " name: " << name;
-				system->load();
-				_systems[id] = system;
-			}
-		}
-		return true;
-	}
-
-	bool ParticleManager::loadData(SimpleJSONReader& reader) {
 		LOG << "importing data";
 		int cats[256];
 		int num = reader.get_categories(cats, 256);

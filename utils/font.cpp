@@ -1,6 +1,5 @@
 #include "font.h"
 #include "..\utils\Log.h"
-#include "PlainTextReader.h"
 
 namespace ds {
 

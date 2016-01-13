@@ -2,7 +2,6 @@
 #include "..\utils\Log.h"
 #include "..\utils\StringUtils.h"
 #include "..\utils\font.h"
-#include "..\utils\PlainTextReader.h"
 #include "..\renderer\graphics.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\DialogResources.h"
@@ -844,68 +843,7 @@ namespace ds {
 		return true;
 	}
 
-	
 	bool GUIDialog::loadData(JSONReader& reader) {
-		clear();
-		_model.clear();		
-		const Array<Category*>& categories = reader.getCategories();
-		for (size_t i = 0; i < categories.size(); ++i) {
-			Category* c = categories[i];
-			//LOG << "name: " << c->getName();
-			if (c->getName() == "image" ) {
-				GUIItem item;
-				int id = loadItem(c, &item);
-				Rect r;
-				c->getRect("rect", &r);
-				GUID gid = addImage(id, item.pos.x, item.pos.y, r, item.scale, item.centered);
-				addToModel(gid.id, GIT_IMAGE, "Image");
-			}
-			else if (c->getName() == "button") {
-				GUIItem item;
-				int id = loadItem(c, &item);
-				Rect r;
-				c->getRect("rect", &r);
-				const char* label = c->getProperty("text");
-				GUID gid = addButton(id, item.pos.x, item.pos.y, label, r, item.color, item.scale, item.centered);
-				addToModel(gid.id, GIT_BUTTON, "Button");
-			}
-			else if (c->getName() == "image_button") {
-				GUIItem item;
-				int id = loadItem(c, &item);
-				Rect r;
-				c->getRect("rect", &r);
-				const char* label = c->getProperty("text");
-				GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
-				addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
-			}
-			else if (c->getName() == "text") {
-				GUIItem item;
-				int id = loadItem(c, &item);
-				const char* label = c->getProperty("text");
-				GUID gid = addText(id, item.pos.x, item.pos.y, label, item.color, item.scale, item.centered);
-				addToModel(gid.id, GIT_TEXT, "Text");
-			}
-			else if (c->getName() == "numbers") {
-				GUIItem item;
-				int id = loadItem(c, &item);
-				int value = 0;
-				c->getInt("value",&value);
-				int length = 0;
-				c->getInt("length",&length);
-				GUID gid = addNumber(id, item.pos, value, length, item.scale, item.color, item.centered);
-				addToModel(gid.id, GIT_NUMBERS, "Number");
-			}
-			else if (c->getName() == "timer") {
-				GUIItem item;
-				int id = loadItem(c, &item);
-				GUID gid = addTimer(id, item.pos.x, item.pos.y, item.scale, item.color, item.centered);
-				addToModel(gid.id, GIT_TIMER, "Timer");
-			}
-		}
-		return true;
-	}
-
-	bool GUIDialog::loadData(SimpleJSONReader& reader) {
 		clear();
 		_model.clear();
 		int cats[256];
@@ -964,7 +902,7 @@ namespace ds {
 		return true;
 	}
 
-	int GUIDialog::loadItem(int category, SimpleJSONReader& reader, GUIItem* item) {
+	int GUIDialog::loadItem(int category, JSONReader& reader, GUIItem* item) {
 		int id = 0;
 		reader.get_int(category,"id", &id);
 		reader.get_vec2(category, "pos", &item->pos);
@@ -973,30 +911,4 @@ namespace ds {
 		reader.get_float(category, "scale", &item->scale);
 		return id;
 	}
-
-	int GUIDialog::loadItem(Category* category, GUIItem* item) {
-		int id = 0;
-		category->getInt("id", &id);
-		category->getVector2f("pos", &item->pos);
-		category->getColor("color", &item->color);
-		category->getBool("centered", &item->centered);
-		category->getFloat("scale", &item->scale);
-		return id;
-	}
-	/*
-	int GUIDialog::loadItem(BinaryLoader& loader, GUIItem* item) {
-		int id = 0;
-		loader.read(&id);
-		loader.read(&item->pos);
-		loader.read(&item->color);
-		int cnt = 0;
-		loader.read(&cnt);
-		item->centered = false;
-		if (cnt == 1) {
-			item->centered = true;
-		}
-		loader.read(&item->scale);
-		return id;
-	}
-	*/
 }

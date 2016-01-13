@@ -17,6 +17,7 @@
 #include "actions\RemoveAfterAction.h"
 #include "..\physics\ColliderArray.h"
 #include "..\utils\Profiler.h"
+#include "..\utils\Log.h"
 
 namespace ds {
 

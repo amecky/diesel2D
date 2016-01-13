@@ -139,7 +139,7 @@ protected:
 	float _totalTime;
 	Settings _settings;
 private:
-	void loadSettings(const Category* root);
+	void loadSettings();
 	void showProfilerSnapshot(v2* position);
 	void showEditor();
 	Vector2f m_MousePos;

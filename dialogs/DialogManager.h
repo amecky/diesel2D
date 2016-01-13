@@ -1,7 +1,7 @@
 #pragma once
 #include "..\dxstdafx.h"
 #include "GUIDialog.h"
-#include "..\compiler\DataFile.h"
+#include "..\io\DataFile.h"
 #include "..\ui\IMGUI.h"
 
 namespace ds {
@@ -29,7 +29,6 @@ public:
 	GUIDialog* create(const char* dialogName);
 	void tick(float dt);
 	bool saveData(JSONWriter& writer);
-	bool loadData(JSONReader& reader);
 	const char* getFileName() const {
 		return "resources\\gui.json";
 	}
@@ -38,10 +37,7 @@ public:
 	}
 	bool remove(const char* name);
 	bool contains(const char* name) const;
-	virtual bool loadData(SimpleJSONReader& loader);
-	virtual bool useSimplified() {
-		return true;
-	}
+	virtual bool loadData(JSONReader& loader);
 private:		
 	void clear();
 	void setActiveFlag(const char* name,bool active);	

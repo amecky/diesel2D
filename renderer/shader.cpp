@@ -1,6 +1,7 @@
 #include "shader.h"
 #include "..\utils\StringUtils.h"
 #include "graphics.h"
+#include "..\utils\Log.h"
 
 #ifdef DEBUG
 DWORD SHADER_FLAGS = D3DXFX_NOT_CLONEABLE | D3DXSHADER_DEBUG;

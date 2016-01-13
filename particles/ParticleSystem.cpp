@@ -2,8 +2,7 @@
 #include "..\utils\Profiler.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\renderer\graphics.h"
-//#include <stdarg.h>
-
+#include "..\utils\Log.h"
 
 namespace ds {
 
@@ -225,61 +224,6 @@ namespace ds {
 	}
 
 	bool NewParticleSystem::loadData(JSONReader& reader) {
-		LOG << "importing data";
-		clear();
-		Category* root = reader.getCategory("particlesystem");
-		if (root != 0) {
-			_system_data.textureID = root->getUInt32("texture_id", 0);
-			Rect r = root->getRect("texture_rect");
-			_system_data.texture = math::buildTexture(r);
-			// read modifiers
-			Category* modifiers = root->getChild("modifiers");
-			if (modifiers != 0) {
-				const Array<Category*>& categories = modifiers->getChildren();
-				for (size_t i = 0; i < categories.size(); ++i) {
-					Category* c = categories[i];
-					if (_factory->addModifier(this, c->getName().c_str())) {
-						ParticleModifierData* data = getData(c->getName().c_str());
-						if (data != 0) {
-							data->read(c);
-						}
-					}
-					else {
-						LOGE << "cannot find modifier: " << c->getName();
-					}
-				}
-			}
-			Category* generators = root->getChild("generators");
-			if (generators != 0) {
-				const Array<Category*>& categories = generators->getChildren();
-				for (size_t i = 0; i < categories.size(); ++i) {
-					Category* c = categories[i];
-					if (_factory->addGenerator(this, c->getName().c_str())) {
-						ParticleGeneratorData* data = getGeneratorData(c->getName().c_str());
-						if (data != 0) {
-							data->read(c);
-						}
-					}
-					else {
-						LOGE << "cannot find generators: " << c->getName();
-					}
-				}
-			}
-			// emitter
-			Category* emitter = root->getChild("emitter");
-			if (emitter != 0) {
-				_emitter_data.count = emitter->getUInt32("count", 10);
-				_emitter_data.ejectionPeriod = emitter->getUInt32("ejection_period", 0);
-				_emitter_data.ejectionVariance = emitter->getUInt32("ejection_variance", 0);
-				_emitter_data.ejectionCounter = emitter->getUInt32("ejection_counter", 0);
-				_emitter_data.duration = emitter->getFloat("duration", 0.0f);
-				initEmitterData();
-			}
-		}
-		return true;
-	}
-
-	bool NewParticleSystem::loadData(SimpleJSONReader& reader) {
 		LOG << "importing data";
 		clear();
 		int cid = reader.find_category("particlesystem");
