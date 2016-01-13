@@ -223,7 +223,7 @@ namespace ds {
 		return true;
 	}
 
-	bool NewParticleSystem::loadData(JSONReader& reader) {
+	bool NewParticleSystem::loadData(const JSONReader& reader) {
 		LOG << "importing data";
 		clear();
 		int cid = reader.find_category("particlesystem");

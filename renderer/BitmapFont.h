@@ -68,7 +68,7 @@ struct BitmapFont : public DataFile {
 	const char* getFileName() const {
 		return jsonName;
 	}
-	virtual bool loadData(JSONReader& loader);
+	virtual bool loadData(const JSONReader& loader);
 };
 
 }

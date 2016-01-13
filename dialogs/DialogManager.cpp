@@ -211,7 +211,7 @@ namespace ds {
 		return true;
 	}
 
-	bool DialogManager::loadData(JSONReader& reader) {
+	bool DialogManager::loadData(const JSONReader& reader) {
 		clear();
 		_index = 1;
 		int cats[32];

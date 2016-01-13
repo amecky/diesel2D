@@ -52,7 +52,7 @@ namespace ds {
 		//virtual const char* getName() const = 0;
 
 		bool saveData(JSONWriter& writer);
-		bool loadData(JSONReader& loader);
+		bool loadData(const JSONReader& loader);
 		virtual const char* getFileName() const = 0;
 
 		int _state;

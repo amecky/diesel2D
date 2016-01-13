@@ -119,7 +119,7 @@ namespace ds {
 		return true;
 	}
 
-	bool SpriteTemplates::loadData(JSONReader& loader) {
+	bool SpriteTemplates::loadData(const JSONReader& loader) {
 		int cats[256];
 		int num = loader.get_categories(cats, 256);
 		for (int i = 0; i < num; ++i) {

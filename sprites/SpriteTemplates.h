@@ -31,7 +31,7 @@ public:
 	const TemplateMap& getTemplates() const {
 		return _map;
 	}
-	virtual bool loadData(JSONReader& loader);
+	virtual bool loadData(const JSONReader& loader);
 private:
 	const int getIndex(int id) const;
 	const int getIndex(IdString hash) const;

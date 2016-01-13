@@ -107,7 +107,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// import json
 	// -------------------------------------------------------
-	bool DynamicGameSettings::loadData(JSONReader& loader) {
+	bool DynamicGameSettings::loadData(const JSONReader& loader) {
 		int c = loader.find_category("settings");
 		if (c != -1) {
 			for (int i = 0; i < _items.size(); ++i) {

@@ -166,7 +166,7 @@ public:
 	void setTransition(int id, int type, float ttl);
 
 	bool saveData(JSONWriter& writer);
-	bool loadData(JSONReader& reader);
+	bool loadData(const JSONReader& reader);
 	const char* getFileName() const {
 		return _jsonName;
 	}
@@ -178,7 +178,7 @@ private:
 	//void saveItem(BinaryWriter& writer, int id, const GUIItem& item);
 	void saveItem(JSONWriter& writer, int id, const GUIItem& item);
 	//int loadItem(BinaryLoader& loader, GUIItem* item);
-	int loadItem(int category,JSONReader& reader, GUIItem* item);
+	int loadItem(int category, const JSONReader& reader, GUIItem* item);
 	void addToModel(int id, GUIItemType type,const char* prefix);
 	void showAddDialog();
 	GUIItem* findByID(int id);

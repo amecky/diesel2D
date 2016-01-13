@@ -7,7 +7,7 @@ namespace ds {
 	struct ParticleGeneratorData {
 
 		virtual void save(JSONWriter& writer) = 0;
-		virtual void read(JSONReader& reader, int category) = 0;
+		virtual void read(const JSONReader& reader, int category) = 0;
 
 	};
 
@@ -59,7 +59,7 @@ struct RingGeneratorData : ParticleGeneratorData {
 		writer.write("step", step);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_float(category, "radius", &radius);
 		reader.get_float(category, "variance", &variance);
 		reader.get_float(category, "angle_variance", &angleVariance);
@@ -343,7 +343,7 @@ struct RadialVelocityGeneratorData : ParticleGeneratorData {
 		writer.write("variance", variance);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_float(category, "velocity", &velocity);
 		reader.get_float(category, "variance", &variance);
 	}
@@ -426,7 +426,7 @@ struct LifetimeGeneratorData : ParticleGeneratorData {
 		writer.write("variance", variance);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_float(category, "ttl", &ttl);
 		reader.get_float(category, "variance", &variance);
 	}
@@ -468,7 +468,7 @@ struct ColorGeneratorData : ParticleGeneratorData {
 		writer.write("color", color);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_color(category, "color", &color);
 	}
 
@@ -517,7 +517,7 @@ struct HSVColorGeneratorData : ParticleGeneratorData {
 		writer.write("value_variance", valueVariance);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_vec3(category, "hsv", &hsv);
 		reader.get_float(category, "alpha", &alpha);
 		reader.get_float(category, "hue_variance", &hueVariance);
@@ -579,7 +579,7 @@ struct SizeGeneratorData : ParticleGeneratorData {
 		writer.write("variance", variance);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_vec2(category, "scale", &scale);
 		reader.get_vec2(category, "variance", &variance);
 	}
@@ -626,7 +626,7 @@ struct RotationVelocityGeneratorData : ParticleGeneratorData {
 		writer.write("variance", RADTODEG(variance));
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_float(category, "velocity", &velocity);
 		reader.get_float(category, "variance", &variance);
 		velocity = DEGTORAD(velocity);

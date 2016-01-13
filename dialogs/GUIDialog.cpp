@@ -843,7 +843,7 @@ namespace ds {
 		return true;
 	}
 
-	bool GUIDialog::loadData(JSONReader& reader) {
+	bool GUIDialog::loadData(const JSONReader& reader) {
 		clear();
 		_model.clear();
 		int cats[256];
@@ -902,7 +902,7 @@ namespace ds {
 		return true;
 	}
 
-	int GUIDialog::loadItem(int category, JSONReader& reader, GUIItem* item) {
+	int GUIDialog::loadItem(int category, const JSONReader& reader, GUIItem* item) {
 		int id = 0;
 		reader.get_int(category,"id", &id);
 		reader.get_vec2(category, "pos", &item->pos);

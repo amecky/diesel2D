@@ -347,7 +347,7 @@ bool JSONReader::parse(const char* fileName) {
 // -------------------------------------------
 // get categories
 // -------------------------------------------
-int JSONReader::get_categories(int* result, int max, int parent) {
+int JSONReader::get_categories(int* result, int max, int parent) const {
 	int cnt = 0;
 	for (int i = 0; i < _category_buffer.size; ++i) {
 		if (_parents[i] == parent && cnt < max) {
@@ -360,7 +360,7 @@ int JSONReader::get_categories(int* result, int max, int parent) {
 // -------------------------------------------
 // find category
 // -------------------------------------------
-int JSONReader::find_category(const char* name, int parent) {
+int JSONReader::find_category(const char* name, int parent) const {
 	unsigned int hash = string::murmur_hash(name);
 	for (int i = 0; i < _category_buffer.size; ++i) {
 		if (_parents[i] == parent && _hashes[i] == hash) {
@@ -373,7 +373,7 @@ int JSONReader::find_category(const char* name, int parent) {
 // -------------------------------------------
 // get category name
 // -------------------------------------------
-const char* JSONReader::get_category_name(int category_id) {
+const char* JSONReader::get_category_name(int category_id) const {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
 		int index = _indices[category_id];
 		return _name_buffer.data + index;
@@ -384,7 +384,7 @@ const char* JSONReader::get_category_name(int category_id) {
 // -------------------------------------------
 // matches
 // -------------------------------------------
-bool JSONReader::matches(int category_id, const char* name) {
+bool JSONReader::matches(int category_id, const char* name) const {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
 		unsigned int hash = string::murmur_hash(name);
 		if (_hashes[category_id] == hash) {
@@ -397,7 +397,7 @@ bool JSONReader::matches(int category_id, const char* name) {
 // -------------------------------------------
 // get bool
 // ------------------------------------------- 
-bool JSONReader::get_bool(int category_id, const char* name, bool* ret) {
+bool JSONReader::get_bool(int category_id, const char* name, bool* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		int v = static_cast<int>(get(_data_indices[idx]));
@@ -415,7 +415,7 @@ bool JSONReader::get_bool(int category_id, const char* name, bool* ret) {
 // -------------------------------------------
 // get int
 // -------------------------------------------
-bool JSONReader::get_int(int category_id, const char* name, int* ret) {
+bool JSONReader::get_int(int category_id, const char* name, int* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		*ret = static_cast<int>(get(_data_indices[idx]));
@@ -427,7 +427,7 @@ bool JSONReader::get_int(int category_id, const char* name, int* ret) {
 // -------------------------------------------
 // get uint
 // -------------------------------------------
-bool JSONReader::get_uint(int category_id, const char* name, uint32* ret) {
+bool JSONReader::get_uint(int category_id, const char* name, uint32* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		*ret = static_cast<uint32>(get(_data_indices[idx]));
@@ -439,7 +439,7 @@ bool JSONReader::get_uint(int category_id, const char* name, uint32* ret) {
 // -------------------------------------------
 // get float
 // -------------------------------------------
-bool JSONReader::get_float(int category_id, const char* name, float* ret) {
+bool JSONReader::get_float(int category_id, const char* name, float* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		*ret = get(_data_indices[idx]);
@@ -451,7 +451,7 @@ bool JSONReader::get_float(int category_id, const char* name, float* ret) {
 // -------------------------------------------
 // get v2
 // -------------------------------------------
-bool JSONReader::get_vec2(int category_id, const char* name, v2* ret) {
+bool JSONReader::get_vec2(int category_id, const char* name, v2* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		ret->x = get(_data_indices[idx]);
@@ -464,7 +464,7 @@ bool JSONReader::get_vec2(int category_id, const char* name, v2* ret) {
 // -------------------------------------------
 // get v3
 // -------------------------------------------
-bool JSONReader::get_vec3(int category_id, const char* name, v3* ret) {
+bool JSONReader::get_vec3(int category_id, const char* name, v3* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		ret->x = get(_data_indices[idx]);
@@ -478,7 +478,7 @@ bool JSONReader::get_vec3(int category_id, const char* name, v3* ret) {
 // -------------------------------------------
 // get index
 // -------------------------------------------
-int JSONReader::get_index(int category_id, const char* name) {
+int JSONReader::get_index(int category_id, const char* name) const {
 	if (category_id >= 0 && category_id < _category_buffer.size) {
 		unsigned int key = string::murmur_hash(name);
 		for (int i = 0; i < _data_buffer.size; ++i) {
@@ -493,14 +493,14 @@ int JSONReader::get_index(int category_id, const char* name) {
 // -------------------------------------------
 // contains property
 // -------------------------------------------
-bool JSONReader::contains_property(int category_id, const char* name) {
+bool JSONReader::contains_property(int category_id, const char* name) const {
 	return get_index(category_id, name) != -1;
 }
 
 // -------------------------------------------
 // get color
 // -------------------------------------------
-bool JSONReader::get_color(int category_id, const char* name, Color* ret) {
+bool JSONReader::get_color(int category_id, const char* name, Color* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		ret->r = get(_data_indices[idx]) / 255.0f;
@@ -515,7 +515,7 @@ bool JSONReader::get_color(int category_id, const char* name, Color* ret) {
 // -------------------------------------------
 // get rect
 // -------------------------------------------
-bool JSONReader::get_rect(int category_id, const char* name, Rect* ret) {
+bool JSONReader::get_rect(int category_id, const char* name, Rect* ret) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		ret->top = get(_data_indices[idx]);
@@ -530,7 +530,7 @@ bool JSONReader::get_rect(int category_id, const char* name, Rect* ret) {
 // -------------------------------------------
 // get string
 // ------------------------------------------- 
-const char* JSONReader::get_string(int category_id, const char* name) {
+const char* JSONReader::get_string(int category_id, const char* name) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		return get_char(_data_indices[idx]);
@@ -541,7 +541,7 @@ const char* JSONReader::get_string(int category_id, const char* name) {
 // -------------------------------------------
 // get color path
 // -------------------------------------------
-bool JSONReader::get_color_path(int category_id, const char* name, ds::ColorPath* path) {
+bool JSONReader::get_color_path(int category_id, const char* name, ds::ColorPath* path) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		int entries = _data_sizes[idx];
@@ -573,7 +573,7 @@ bool JSONReader::get_color_path(int category_id, const char* name, ds::ColorPath
 // -------------------------------------------
 // get v2 path
 // -------------------------------------------
-bool JSONReader::get_vec2_path(int category_id, const char* name, ds::Vector2fPath* path) {
+bool JSONReader::get_vec2_path(int category_id, const char* name, ds::Vector2fPath* path) const {
 	int idx = get_index(category_id, name);
 	if (idx != -1) {
 		int entries = _data_sizes[idx];
@@ -660,7 +660,7 @@ void JSONReader::add(int pIndex, char c) {
 // -------------------------------------------
 // get float value
 // -------------------------------------------
-float JSONReader::get(int index) {
+float JSONReader::get(int index) const {
 	char* p = _values.data + index * sizeof(float);
 	float* v = (float*)(p);
 	return *v;
@@ -669,7 +669,7 @@ float JSONReader::get(int index) {
 // -------------------------------------------
 // get string from property
 // -------------------------------------------
-const char* JSONReader::get_char(int index) {
+const char* JSONReader::get_char(int index) const {
 	return _values.data + index * sizeof(float);
 }
 

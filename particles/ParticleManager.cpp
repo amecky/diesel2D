@@ -97,7 +97,7 @@ namespace ds {
 		return true;
 	}
 
-	bool ParticleManager::loadData(JSONReader& reader) {
+	bool ParticleManager::loadData(const JSONReader& reader) {
 		LOG << "importing data";
 		int cats[256];
 		int num = reader.get_categories(cats, 256);

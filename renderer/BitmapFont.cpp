@@ -34,7 +34,7 @@ namespace ds {
 		return true;
 	}
 
-	bool BitmapFont::loadData(JSONReader& loader) {
+	bool BitmapFont::loadData(const JSONReader& loader) {
 		int cats[32];
 		int num = loader.get_categories(cats, 32);
 		for (int i = 0; i < num; ++i) {

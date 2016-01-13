@@ -36,7 +36,7 @@ public:
 	const ParticleSystemFactory& getFactory() const {
 		return _factory;
 	}
-	virtual bool loadData(JSONReader& loader);
+	virtual bool loadData(const JSONReader& loader);
 private:
 	void end();
 	void flush();

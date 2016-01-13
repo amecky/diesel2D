@@ -33,9 +33,9 @@ namespace ds {
 	}
 
 	void MoveSystem::tick(DataContainer& data, float dt, FlowEvents& events) {
-		PRS("MS::tick")
+		PRS("MS::tick");
 		SystemBits* connections = data.getConnections();		
-		PRS("MS::tick::move")
+		PRS("MS::tick::move");
 		int* pos = m_Pos;
 		int* vel = m_Vel;
 		for (int i = 0; i < data.size(); ++i) {
@@ -45,8 +45,8 @@ namespace ds {
 			++pos;
 			++vel;
 		}
-		PRE("MS::tick::move")
-			PRE("MS::tick")
+		PRE("MS::tick::move");
+		PRE("MS::tick");
 	}
 
 }

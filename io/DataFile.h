@@ -10,7 +10,7 @@ namespace ds {
 		DataFile() {}
 		virtual ~DataFile() {}
 		virtual bool saveData(JSONWriter& writer) = 0;
-		virtual bool loadData(JSONReader& loader) = 0;
+		virtual bool loadData(const JSONReader& loader) = 0;
 		virtual const char* getFileName() const = 0;
 		bool save();		
 		bool load();

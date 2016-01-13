@@ -42,12 +42,12 @@ namespace ds {
 	}
 
 	void FlowManager::tick(float dt) {
-		PRS("World::tick")
+		PRS("World::tick");
 		m_Events.size = 0;
 		for (int i = 0; i < m_Systems.size(); ++i) {
 			m_Systems[i]->tick(m_Container, dt,m_Events);
 		}
-		PRE("World::tick")
+		PRE("World::tick");
 	}
 
 	ID FlowManager::create() {

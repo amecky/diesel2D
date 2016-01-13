@@ -37,7 +37,7 @@ public:
 	}
 	bool remove(const char* name);
 	bool contains(const char* name) const;
-	virtual bool loadData(JSONReader& loader);
+	virtual bool loadData(const JSONReader& loader);
 private:		
 	void clear();
 	void setActiveFlag(const char* name,bool active);	

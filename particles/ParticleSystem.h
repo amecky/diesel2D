@@ -108,7 +108,7 @@ public:
 	ParticleEmitterData& getEmitterData() {
 		return _emitter_data;
 	}
-	virtual bool loadData(JSONReader& loader);
+	virtual bool loadData(const JSONReader& loader);
 private:
 	void tickEmitters(float dt);
 	void initEmitterData();

@@ -24,7 +24,7 @@ enum ParticleModifierType {
 
 struct ParticleModifierData {
 
-	virtual void read(JSONReader& reader,int category) = 0;
+	virtual void read(const JSONReader& reader, int category) = 0;
 	virtual void save(JSONWriter& writer) = 0;
 
 };
@@ -116,7 +116,7 @@ struct LinearColorModifierData : ParticleModifierData {
 		writer.write("end_color", endColor);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_color(category, "start_color", &startColor);
 		reader.get_color(category, "end_color", &endColor);
 	}
@@ -166,7 +166,7 @@ struct LinearAlphaModifierData : ParticleModifierData {
 		writer.write("end_alpha", endAlpha);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_float(category, "start_alpha", &startAlpha);
 		reader.get_float(category, "end_alpha", &endAlpha);
 	}
@@ -215,7 +215,7 @@ struct LinearSizeModifierData : ParticleModifierData {
 		writer.write("max_scale", maxScale);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_vec2(category, "min_scale", &minScale);
 		reader.get_vec2(category, "max_scale", &maxScale);
 	}
@@ -306,7 +306,7 @@ struct ColorPathModifierData : ParticleModifierData {
 		writer.write(path);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_color_path(category, "path", &path);
 	}
 };
@@ -393,7 +393,7 @@ struct DampingVelocityModifierData : ParticleModifierData {
 		writer.write("damping", damping);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_float(category, "damping", &damping);
 	}
 
@@ -434,7 +434,7 @@ struct SizePathModifierData : ParticleModifierData{
 		writer.write(path);
 	}
 
-	void read(JSONReader& reader, int category) {
+	void read(const JSONReader& reader, int category) {
 		reader.get_vec2_path(category, "path", &path);
 	}
 
