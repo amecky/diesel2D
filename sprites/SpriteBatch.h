@@ -1,7 +1,6 @@
 #pragma once
 #include "..\renderer\render_types.h"
 #include "..\particles\Particle.h"
-#include "..\lib\DataContainer.h"
 #include "Sprite.h"
 #include "..\renderer\shader.h"
 
@@ -29,12 +28,6 @@ namespace sprites {
 	void draw(const BasicSprite& sprite);
 
 	void draw(const Shape& shape,const Texture& tex);
-
-	void draw(const DataContainer& container,const Texture& texture,int posIdx);
-
-	void draw(const DataContainer& container,const Texture& texture,int posIdx,int angleIdx);
-
-	void draw(const DataContainer& container,const Texture& texture,int posIdx,int angleIdx,int scaleIdx);
 
 	void draw(const Texture& texture,const ParticleArray& array);
 

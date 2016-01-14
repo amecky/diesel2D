@@ -1,23 +1,15 @@
 #pragma once
-#include "..\..\lib\DataContainer.h"
 #include "..\..\renderer\render_types.h"
 #include "..\..\math\tweening.h"
 #include <map>
 #include "..\World.h"
 #include "..\..\math\tweening.h"
 #include "AbstractAction.h"
+#include "..\..\lib\BlockArray.h"
 
 namespace ds {
 
 	class WaitAction : public AbstractAction {
-
-		struct WaitActionData : public BasicData {
-
-			float* timers;
-			float* ttl;
-
-			WaitActionData() : BasicData() {}
-		};
 
 	public:
 		WaitAction();
@@ -27,14 +19,15 @@ namespace ds {
 		void clear();
 		void debug();
 		void debug(SID sid);
-		void removeByID(SID id) {
-			remove(id, m_Data);
-		}
+		void removeByID(SID id);
 	protected:
 		SID swap(int i);
 	private:
 		void allocate(int sz);
-		WaitActionData m_Data;
+		BlockArray _buffer;
+		SID* _ids;
+		float* _timers;
+		float* _ttl;
 	};
 
 }

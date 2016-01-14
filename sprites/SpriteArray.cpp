@@ -152,5 +152,47 @@ namespace ds {
 			LOG << "layer   : " << array.layers[in.index];
 		}
 
+		bool allocate(SpriteArray& array,int size) {
+			if (size > array.total) {
+				SpriteArray sad;
+				int sz = size * (sizeof(SpriteArrayIndex) + sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(float) + sizeof(Texture) + sizeof(Color) + sizeof(float) + sizeof(int) + sizeof(int));
+				sad.buffer = new char[sz];
+				sad.total = size;
+				sad.num = 0;
+				sad.indices = (SpriteArrayIndex*)(sad.buffer);
+				sad.ids = (SID*)(sad.indices + size);
+				sad.positions = (Vector2f*)(sad.ids + size);
+				sad.scales = (Vector2f*)(sad.positions + size);
+				sad.rotations = (float*)(sad.scales + size);
+				sad.textures = (ds::Texture*)(sad.rotations + size);
+				sad.colors = (ds::Color*)(sad.textures + size);
+				sad.timers = (float*)(sad.colors + size);
+				sad.types = (int*)(sad.timers + size);
+				sad.layers = (int*)(sad.types + size);
+				if (array.buffer != 0) {
+					memcpy(sad.indices, array.indices, array.num * sizeof(SpriteArrayIndex));
+					memcpy(sad.ids, array.ids, array.num * sizeof(SID));
+					memcpy(sad.positions, array.positions, array.num * sizeof(Vector2f));
+					memcpy(sad.scales, array.scales, array.num * sizeof(Vector2f));
+					memcpy(sad.rotations, array.rotations, array.num * sizeof(float));
+					memcpy(sad.textures, array.textures, array.num * sizeof(Texture));
+					memcpy(sad.colors, array.colors, array.num * sizeof(Color));
+					memcpy(sad.timers, array.timers, array.num * sizeof(float));
+					memcpy(sad.types, array.types, array.num * sizeof(int));
+					memcpy(sad.layers, array.layers, array.num * sizeof(int));
+					sad.free_dequeue = array.free_dequeue;
+					sad.free_enqueue = array.free_enqueue;
+					sad.num = array.num;
+					delete[] array.buffer;
+				}
+				else {
+					clear(sad);
+				}
+				array = sad;
+				return true;
+			}
+			return false;
+		}
+
 	}
 }

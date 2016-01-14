@@ -3,7 +3,6 @@
 #include "..\utils\Color.h"
 #include "..\renderer\render_types.h"
 #include "Sprite.h"
-#include "..\lib\DataContainer.h"
 
 namespace ds {
 
@@ -102,6 +101,8 @@ namespace ds {
 		void debug(SpriteArray& array);
 
 		void debug(SpriteArray& array,SID sid);
+
+		bool allocate(SpriteArray& array, int size);
 		
 	}
 

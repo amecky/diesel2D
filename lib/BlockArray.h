@@ -22,6 +22,8 @@ struct BlockArray {
 	void* get_ptr(int index);
 
 	bool resize(int new_size);
+
+	void remove(int index);
 	
 };
 

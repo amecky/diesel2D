@@ -1,7 +1,6 @@
 #pragma once
 #include <Vector.h>
 #include "..\renderer\render_types.h"
-#include "..\lib\DataContainer.h"
 #include "..\sprites\Sprite.h"
 
 namespace ds {

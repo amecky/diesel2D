@@ -67,42 +67,7 @@ namespace ds {
 	}
 
 	void World::allocate(int size) {
-		if ( size > m_Data.total ) {
-			SpriteArray sad;
-			int sz = size * (sizeof(SpriteArrayIndex) + sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(float) + sizeof(Texture) + sizeof(Color) + sizeof(float) + sizeof(int) + sizeof(int));
-			sad.buffer = new char[sz];
-			sad.total = size;
-			sad.num = 0;
-			sad.indices = (SpriteArrayIndex*)(sad.buffer);
-			sad.ids = (SID*)(sad.indices + size);
-			sad.positions = (Vector2f*)(sad.ids + size);
-			sad.scales = (Vector2f*)(sad.positions + size);
-			sad.rotations = (float*)(sad.scales + size);
-			sad.textures = (ds::Texture*)(sad.rotations + size);
-			sad.colors = (ds::Color*)(sad.textures + size);
-			sad.timers = (float*)(sad.colors + size);
-			sad.types = (int*)(sad.timers + size);
-			sad.layers = (int*)(sad.types + size);
-			if ( m_Data.buffer != 0 ) {
-				memcpy(sad.indices, m_Data.indices, m_Data.num * sizeof(SpriteArrayIndex));
-				memcpy(sad.ids, m_Data.ids, m_Data.num * sizeof(SID));
-				memcpy(sad.positions, m_Data.positions, m_Data.num * sizeof(Vector2f));
-				memcpy(sad.scales, m_Data.scales, m_Data.num * sizeof(Vector2f));
-				memcpy(sad.rotations, m_Data.rotations, m_Data.num * sizeof(float));
-				memcpy(sad.textures, m_Data.textures, m_Data.num * sizeof(Texture));
-				memcpy(sad.colors, m_Data.colors, m_Data.num * sizeof(Color));
-				memcpy(sad.timers, m_Data.timers, m_Data.num * sizeof(float));
-				memcpy(sad.types, m_Data.types, m_Data.num * sizeof(int));
-				memcpy(sad.layers, m_Data.layers, m_Data.num * sizeof(int));
-				sad.free_dequeue = m_Data.free_dequeue;
-				sad.free_enqueue = m_Data.free_enqueue;
-				sad.num = m_Data.num;
-				delete[] m_Data.buffer;
-			}
-			else {
-				sar::clear(sad);
-			}
-			m_Data = sad;
+		if (sar::allocate(m_Data, size)) {
 			m_Physics.setDataPtr(&m_Data);
 		}
 	}
@@ -182,7 +147,7 @@ namespace ds {
 			m_Actions[i]->update(m_Data, dt, m_Buffer);
 		}
 		// FIXME: handle AT_KILL
-		for (int i = 0; i < m_Buffer.num; ++i) {
+		for (int i = 0; i < m_Buffer.events.size(); ++i) {
 			const ActionEvent& e = m_Buffer.events[i];
 			if (e.type == AT_KILL) {
 				remove(e.sid);

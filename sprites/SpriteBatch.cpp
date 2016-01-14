@@ -271,36 +271,6 @@ namespace sprites {
 		draw(sprite.position, sprite.texture, sprite.rotation, sprite.scale.x, sprite.scale.y, sprite.color);
 	}
 
-	void draw(const DataContainer& container,const Texture& texture,int posIdx) {
-		const Vector2f* p = container.getChannel<Vector2f>(posIdx);
-		for ( int i = 0; i < container.size(); ++i ) {
-			draw(*p,texture);
-			++p;
-		}
-	}
-
-	void draw(const DataContainer& container,const Texture& texture,int posIdx,int angleIdx) {
-		const Vector2f* p = container.getChannel<Vector2f>(posIdx);
-		const float* a = container.getChannel<float>(angleIdx);
-		for ( int i = 0; i < container.size(); ++i ) {
-			draw(*p,texture,*a);
-			++p;
-			++a;
-		}
-	}
-
-	void draw(const DataContainer& container,const Texture& texture,int posIdx,int angleIdx,int scaleIdx) {
-		const Vector2f* p = container.getChannel<Vector2f>(posIdx);
-		const float* a = container.getChannel<float>(angleIdx);
-		const Vector2f* s = container.getChannel<Vector2f>(scaleIdx);
-		for ( int i = 0; i < container.size(); ++i ) {
-			draw(*p,texture,*a,s->x,s->y);
-			++p;
-			++a;
-			++s;
-		}
-	}
-
 	void drawTiledXY(const v2& position, const v2& size, const Texture& texture, float cornersize, const Color& color) {
 		v2 center = position;
 		center.x += size.x * 0.5f;

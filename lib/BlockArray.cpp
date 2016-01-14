@@ -42,7 +42,7 @@ bool BlockArray::resize(int new_size) {
 		capacity = new_size;
 		_indices[0] = 0;
 		for (int i = 1; i < _num_blocks; ++i) {
-			_indices[i] = _indices[i - 1] + _sizes[i] * capacity;
+			_indices[i] = _indices[i - 1] + _sizes[i- 1] * capacity;
 		}
 		data = t;
 		return true;
@@ -52,6 +52,16 @@ bool BlockArray::resize(int new_size) {
 
 void* BlockArray::get_ptr(int index) {
 	return data + _indices[index];
+}
+
+void BlockArray::remove(int index) {
+	int last = size - 1;
+	for (int i = 0; i < _num_blocks; ++i) {
+		char* dest = data + _indices[i] + index * _sizes[i];
+		char* src = data + _indices[i] + last * _sizes[i];
+		memcpy(dest, src, _sizes[i]);
+	}
+	--size;
 }
 
 namespace ds {

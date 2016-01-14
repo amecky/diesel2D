@@ -60,19 +60,18 @@ namespace ds {
 
 	struct ActionEventBuffer {
 
-
-		ActionEvent events[256];
-		int num;
+		Array<ActionEvent> events;
 
 		void reset() {
-			num = 0;
+			events.clear();
 		}
 
 		void add(SID sid,ActionType type,int spriteType) {
-			ActionEvent& ae = events[num++];
-			ae.sid = sid;
-			ae.type = type;
-			ae.spriteType = spriteType;
+			ActionEvent e;
+			e.sid = sid;
+			e.type = type;
+			e.spriteType = spriteType;
+			events.push_back(e);
 		}
 	};
 

@@ -34,4 +34,13 @@ namespace ds {
 		}
 		return idx;
 	}
+
+	int AbstractAction::find(SID id, SID* ids, int num) {
+		for (int i = 0; i < num; ++i) {
+			if (ids[i] == id) {
+				return i;
+			}
+		}
+		return -1;
+	}
 }

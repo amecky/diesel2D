@@ -1,5 +1,4 @@
 #pragma once
-#include "..\..\lib\DataContainer.h"
 #include "..\..\renderer\render_types.h"
 #include "..\..\math\tweening.h"
 #include "..\World.h"
@@ -47,6 +46,7 @@ namespace ds {
 			virtual void allocate(int sz) = 0;
 			int next(SID sid, BasicData& data);
 		protected:
+			int find(SID id,SID* ids, int num);
 			virtual SID swap(int index) = 0;
 			Rect m_BoundingRect;
 		};

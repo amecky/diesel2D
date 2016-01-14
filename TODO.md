@@ -1,3 +1,6 @@
+# World
+- [ ] MoveByAction: add ttl and if used send event
+
 # Editor
 
 - [ ] HUD / game states / GUI / sprite templates / Settings / particles / world
