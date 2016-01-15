@@ -10,6 +10,7 @@ struct DialogDefinition {
 	char name[32];
 	IdString hash;
 	GUIDialog* dialog;
+
 };
 
 typedef Array<DialogDefinition> Dialogs;

@@ -25,7 +25,7 @@ namespace ds {
 		Dialogs::iterator it = m_Dialogs.begin();
 		while ( it != m_Dialogs.end()) {
 			delete it->dialog;
-			it = m_Dialogs.remove(it);
+			++it;
 		}
 	}
 

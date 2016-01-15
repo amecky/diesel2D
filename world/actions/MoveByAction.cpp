@@ -87,28 +87,6 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	SID MoveByAction::swap(int i) {
-		SID current = _ids[i];
-		_buffer.remove(i);
-		return current;
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	void MoveByAction::clear() {
-		_buffer.size = 0;
-	}
-
-	void MoveByAction::removeByID(SID id) {
-		int idx = find(id, _ids, _buffer.size);
-		if (idx != -1) {
-			swap(idx);
-		}
-	}
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
 	void MoveByAction::debug() {
 		LOG << "------- MoveByAction -------";
 		for (int i = 0; i < _buffer.size; ++i) {

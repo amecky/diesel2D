@@ -55,30 +55,6 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	SID WaitAction::swap(int i) {
-		SID current = _ids[i];
-		_buffer.remove(i);
-		return current;
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	void WaitAction::clear() {
-		//m_Mapping.clear();
-		_buffer.size = 0;
-	}
-
-	void WaitAction::removeByID(SID id) {
-		int idx = find(id, _ids, _buffer.size);
-		if (idx != -1) {
-			swap(idx);
-		}
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
 	void WaitAction::debug() {
 		if (_buffer.size > 0) {
 			LOG << "---------- WaitAction ---------- ";
@@ -90,7 +66,7 @@ namespace ds {
 
 	void WaitAction::debug(SID sid) {
 		//int i = m_Mapping[sid];
-		int i = find(sid, _ids, _buffer.size);
+		int i = find(sid);
 		if (i != -1) {
 			LOG << "> wait : id: " << _ids[i] << " ttl: " << _ttl[i] << " timer: " << _timers[i];
 		}

@@ -1696,6 +1696,32 @@ namespace ds {
 			return renderContext->mousePosition;
 		}
 
+		v2 screen_to_world(const v2& screenPos,const v2& worldPos) {
+			v2 wp;
+			const Viewport vp = getSelectedViewport();
+			float dx = worldPos.x - renderContext->screenWidth / 2.0f;
+			const v2& worldSize = vp.getWorldSize();
+			float ddx = worldSize.x - renderContext->screenWidth;
+			if (dx < 0.0f) {
+				dx = 0.0f;
+			}
+			if (dx > ddx) {
+				dx = ddx;
+			}
+			wp.x = screenPos.x + dx;
+
+			float dy = worldPos.y - renderContext->screenHeight / 2.0f;
+			float ddy = worldSize.y - renderContext->screenHeight;
+			if (dy < 0.0f) {
+				dy = 0.0f;
+			}
+			if (dy > ddy) {
+				dy = ddy;
+			}
+			wp.y = screenPos.y + dy;
+			return wp;
+		}
+
 		void setMousePosition(int x, int y) {
 			renderContext->mousePosition = Vector2f(x, y);
 		}

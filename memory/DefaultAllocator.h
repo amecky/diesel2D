@@ -31,7 +31,10 @@ public:
 	uint32 total_allocated();
 	void debug();
 private:
-	std::vector<Header> _headers;
+	//std::vector<Header> _headers;
+	Header* _headers;
+	int _num;
+	int _header_capacity;
 	char* _buffer;
 	uint32 _capacity;
 };

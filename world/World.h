@@ -11,20 +11,27 @@
 #include "..\math\tweening.h"
 #include "..\math\CubicBezierPath.h"
 #include "..\math\StraightPath.h"
-//#include <vector>
+#include "..\math\FloatArray.h"
 
 namespace ds {
 
 	enum ActionType {
+		AT_ALPHA_FADE_TO,
+		AT_COLOR_FADE_TO,
 		AT_MOVE_TO,
 		AT_MOVE_BY,
 		AT_FOLLOW_PATH,
 		AT_FOLLOW_CURVE,
+		AT_FOLLOW_TARGET,
+		AT_REMOVE_AFTER,
 		AT_WAIT,
 		AT_MOVE_WITH,
 		AT_ROTATE,
+		AT_ROTATE_BY,
 		AT_FOLLOW_STRAIGHT_PATH,
-		AT_KILL
+		AT_KILL,
+		AT_SCALE_BY_PATH,
+		AT_SCALE
 	};
 
 	enum RepeatType {
@@ -48,6 +55,7 @@ namespace ds {
 	class FollowStraightPathAction;
 	class ColorFadeToAction;
 	class RemoveAfterAction;
+	class ScaleByPathAction;
 
 	typedef void (*MoveFunc)(Vector2f&,float*,float);
 
@@ -118,7 +126,7 @@ namespace ds {
 			m_Data.scales[index] = Vector2f(sx,sy);
 		}
 		void scaleTo(SID sid,const Vector2f& startScale,const Vector2f& endScale,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
-
+		void scaleByPath(SID id, Vector2fPath* path, float ttl);
 		void clear();
 
 		const int size() const {
@@ -167,11 +175,13 @@ namespace ds {
 
 		void debug(SID sid);
 
-
+		void stopAction(SID sid, ActionType type);
 
 		const ActionEventBuffer& getEventBuffer() const {
 			return m_Buffer;
 		}
+
+		int find_by_type(int type, SID* ids, int max);
 
 		void attachCollider(SID sid, const Vector2f& extent, int type,int layer) {
 			m_Physics.attachCollider(sid, extent, type,layer);
@@ -231,6 +241,7 @@ namespace ds {
 		FollowStraightPathAction* m_FollowStraightPathAction;
 		ColorFadeToAction* m_ColorFadeToAction;
 		RemoveAfterAction* _removeAfterAction;
+		ScaleByPathAction* _scaleByPathAction;
 		Actions m_Actions;
 
 	};

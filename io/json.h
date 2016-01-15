@@ -77,9 +77,9 @@ namespace ds {
 		void write(const char* name, const ds::Color& value);
 		void write(const char* name, const ds::Rect& value);
 		void write(const char* name, const char* value);
-		void write(const ds::ColorPath& path);
-		void write(const ds::Vector2fPath& path);
-		void write(const ds::FloatArray& path);
+		void write(const char* name, const ds::ColorPath& path);
+		void write(const char* name, const ds::Vector2fPath& path);
+		void write(const char* name, const ds::FloatArray& path);
 		void endCategory();
 	private:
 		FILE* f;

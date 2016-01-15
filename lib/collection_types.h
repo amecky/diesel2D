@@ -78,7 +78,7 @@ namespace ds {
 	class Array {
 
 	public:
-		Array(Allocator* allocator = gDefaultMemory) : _allocator(allocator) , _size(0), _capacity(0), _data(0) {
+		Array(Allocator* allocator = gDefaultMemory) : _allocator(allocator), _size(0), _capacity(0), _data(0) {
 			_typeSize = sizeof(T);
 			_constructor = !__has_trivial_constructor(T);
 			_destructor = !__has_trivial_destructor(T);
@@ -88,7 +88,6 @@ namespace ds {
 			_typeSize = sizeof(T);
 			_constructor = !__has_trivial_constructor(T);
 			_destructor = !__has_trivial_destructor(T);
-			//_data = (uchar*)malloc(size * _typeSize);
 			_data = (uchar*)_allocator->allocate(size * _typeSize);
 			uchar* ptr = _data;
 			if (_constructor) {
@@ -102,32 +101,32 @@ namespace ds {
 		~Array() {
 			if (_data != 0) {
 				clear();
-				//free(_data);
 				_allocator->deallocate(_data);
 			}
 		}
 
-		
+
 
 		class iterator {
-			public:
-				typedef iterator self_type;
-				typedef T value_type;
-				typedef T& reference;
-				typedef T* pointer;
-				typedef int difference_type;
-				iterator(pointer ptr) : ptr_(ptr) , _index(0) { }
-				self_type operator++() { self_type i = *this; ptr_++; ++_index; return i; }
-				self_type operator++(int junk) { ptr_++; ++_index; return *this; }
-				self_type operator+(int junk) { ptr_ += junk; _index += junk; return *this; }
-				reference operator*() { return *ptr_; }
-				pointer operator->() { return ptr_; }
-				bool operator==(const self_type& rhs) { return ptr_ == rhs.ptr_; }
-				bool operator!=(const self_type& rhs) { return ptr_ != rhs.ptr_; }
-				uint32 index() { return _index; }
-			private:
-				uint32 _index;
-				pointer ptr_;
+		public:
+			typedef iterator self_type;
+			typedef T value_type;
+			typedef T& reference;
+			typedef T* pointer;
+			typedef int difference_type;
+			iterator(pointer ptr) : ptr_(ptr), _index(0) { }
+			self_type operator++() { self_type i = *this; ptr_++; ++_index; return i; }
+			self_type operator++(int junk) { ptr_++; ++_index; return *this; }
+			self_type operator+(int junk) { ptr_ += junk; _index += junk; return *this; }
+			reference operator*() { return *ptr_; }
+			pointer operator->() { return ptr_; }
+			pointer ptr() { return ptr_; }
+			bool operator==(const self_type& rhs) { return ptr_ == rhs.ptr_; }
+			bool operator!=(const self_type& rhs) { return ptr_ != rhs.ptr_; }
+			uint32 index() { return _index; }
+		private:
+			uint32 _index;
+			pointer ptr_;
 		};
 
 		Array& operator=(const Array &other) {
@@ -135,14 +134,12 @@ namespace ds {
 				resize(other._size);
 				_size = other._size;
 				_capacity = other._capacity;
-				//_data = (uchar*)malloc(_size * _typeSize);
 				_data = (uchar*)_allocator->allocate(_size * _typeSize);
 				memcpy(_data, other._data, sizeof(T) * _size);
 			}
 			else {
 				_size = other._size;
 				_capacity = other._capacity;
-				//_data = (uchar*)malloc(_size * _typeSize);
 				_data = (uchar*)_allocator->allocate(_size * _typeSize);
 				memcpy(_data, other._data, sizeof(T) * _size);
 			}
@@ -172,18 +169,37 @@ namespace ds {
 		}
 
 		iterator remove(iterator it) {
+			if (_size == 0) {
+				return end();
+			}
 			assert(it.index() < _size);
-			uchar* ptr = _data + _typeSize * it.index();
+			T* ptr = it.ptr();
 			if (_destructor) {
 				Destruct<T>(ptr);
 			}
 			if (_size - it.index() - 1 > 0) {
 				uint32 d = _size - it.index() - 1;
-				uchar* old = ptr + _typeSize;
-				memcpy(ptr, old, d * _typeSize);
+				T* old = ptr + d;
+				memcpy(ptr, old, d);
 			}
 			--_size;
-			return iterator(_items + it.index());
+			return iterator(ptr);
+		}
+
+		int remove_all(const T& t) {
+			int cnt = 0;
+			iterator it = begin();
+			while (it != end()) {
+				int d = end().ptr() - it.ptr();
+				if ((*it) == t) {
+					it = remove(it);
+					++cnt;
+				}
+				else {
+					++it;
+				}
+			}
+			return cnt;
 		}
 
 		uint32 size() const {
@@ -194,7 +210,25 @@ namespace ds {
 			return _capacity;
 		}
 
+		void destroy_all() {
+			iterator it = begin();
+			while (it != end()) {
+				delete (*it);
+				++it;
+			}
+			clear();
+		}
+
 		void clear() {
+			if (_destructor) {
+				T* ptr = _items;
+				for (uint32 i = 0; i < _size; ++i) {
+					Destruct<T>(ptr);
+					++ptr;
+				}
+			}
+			_size = 0;
+			/*
 			if (_destructor) {
 				uchar* ptr = _data;
 				for (uint32 i = 0; i < _size; ++i) {
@@ -203,6 +237,7 @@ namespace ds {
 				}
 			}
 			_size = 0;
+			*/
 		}
 
 		T& operator[](uint32 i) {

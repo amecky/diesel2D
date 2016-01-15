@@ -12,6 +12,7 @@ namespace ds {
 		ST_FLOAT,
 		ST_RECT,
 		ST_INT,
+		ST_V2_PATH,
 		ST_NONE
 	};
 
@@ -41,6 +42,9 @@ namespace ds {
 		void addRect(const char* name, Rect* value, const Rect& defaultValue);
 		bool setRect(const char* name, const Rect& value);
 
+		void addPath(const char* name, Vector2fPath* value);
+		bool setPath(const char* name, const Vector2fPath& value);
+
 		//void load();
 
 		//void save();
@@ -61,6 +65,7 @@ namespace ds {
 		Array<float*> _floats;
 		Array<int*> _ints;
 		Array<Rect*> _rects;
+		Array<Vector2fPath*> _v2_paths;
 		gui::ComponentModel<SettingsItem> _model;
 	};
 }

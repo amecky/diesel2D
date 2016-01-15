@@ -30,6 +30,13 @@ namespace ds {
 			}
 			return false;
 		}
+
+		SID getSIDByType(int type) const {
+			if (firstType == type) {
+				return firstSID;
+			}
+			return secondSID;
+		}
 	};
 
 	typedef CollisionTemplate<Vector2f> Collision;

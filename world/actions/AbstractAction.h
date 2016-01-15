@@ -3,32 +3,9 @@
 #include "..\..\math\tweening.h"
 #include "..\World.h"
 #include "..\..\math\tweening.h"
+#include "..\..\lib\BlockArray.h"
 
 namespace ds {
-
-	struct BasicData {
-	
-		int num;
-		int total;
-		char* buffer;
-		SID* ids;
-
-		BasicData() : num(0), total(0), buffer(0) {}
-
-		int findIndex(SID sid) const {
-			for (int i = 0; i < num; ++i) {
-				if (ids[i] == sid) {
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		const bool contains(SID sid) const {
-			return findIndex(sid) != -1;
-		}
-
-	};
 
 	class AbstractAction {
 
@@ -36,19 +13,21 @@ namespace ds {
 			AbstractAction() {}
 			virtual ~AbstractAction() {}
 			virtual void update(SpriteArray& array,float dt,ActionEventBuffer& buffer) = 0;
-			virtual void removeByID(SID id) = 0;
-			void remove(SID id, const BasicData& data);
 			void removeByIndex(int i);
-			virtual void clear() = 0;
 			virtual void debug() = 0;
 			virtual void debug(SID sid) = 0;
 			void setBoundingRect(const Rect& r);
 			virtual void allocate(int sz) = 0;
-			int next(SID sid, BasicData& data);
+			virtual ActionType getActionType() const = 0;
+			void clear();
+			void removeByID(SID id);
+			bool contains(SID id);
 		protected:
-			int find(SID id,SID* ids, int num);
-			virtual SID swap(int index) = 0;
+			int find(SID id);
+			SID swap(int index);
 			Rect m_BoundingRect;
+			BlockArray _buffer;
+			SID* _ids;
 		};
 
 }

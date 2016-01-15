@@ -1,10 +1,7 @@
 #pragma once
 #include "..\..\renderer\render_types.h"
-#include "..\..\math\tweening.h"
 #include "..\World.h"
-#include "..\..\math\tweening.h"
 #include "AbstractAction.h"
-#include "..\..\lib\BlockArray.h"
 
 namespace ds {
 
@@ -19,6 +16,9 @@ namespace ds {
 		void debug();
 		void debug(SID sid) {}
 		void removeByID(SID id);
+		ActionType getActionType() const {
+			return AT_MOVE_BY;
+		}
 	protected:
 		SID swap(int index);
 	private:
@@ -26,8 +26,6 @@ namespace ds {
 		void rotateTo(SpriteArray& array, int index);
 		bool isOutOfBounds(const Vector2f& pos, const Vector2f& v);
 
-		BlockArray _buffer;
-		SID* _ids;
 		v2* _velocities;
 		float* _timers;
 		bool* _bounce;

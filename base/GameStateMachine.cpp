@@ -15,11 +15,7 @@ namespace ds {
 
 	GameStateMachine::~GameStateMachine() {
 		_model.clear();
-		GameStates::iterator it = _gameStates.begin();
-		while (it != _gameStates.end()) {
-			delete (*it);
-			it = _gameStates.remove(it);
-		}
+		_gameStates.destroy_all();
 	}
 
 	void GameStateMachine::add(GameState* gameState) {

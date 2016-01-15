@@ -1,32 +1,32 @@
 #pragma once
 #include "..\..\renderer\render_types.h"
-#include "..\..\math\tweening.h"
-#include <map>
 #include "..\World.h"
-#include "..\..\math\tweening.h"
 #include "AbstractAction.h"
-#include "..\..\math\BezierCurve.h"
+#include "..\..\math\FloatArray.h"
 
 namespace ds {
 
-	class FollowCurveAction : public AbstractAction {
+	class ScaleByPathAction : public AbstractAction {
 
 	public:
-		FollowCurveAction();
-		virtual ~FollowCurveAction();
-		void attach(SID id,BezierCurve* path,float ttl,int mode = 0);
+		ScaleByPathAction();
+		virtual ~ScaleByPathAction();
+		void attach(SpriteArray& array,SID id, Vector2fPath* path, float ttl);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
+		void clear();
 		void debug();
 		void debug(SID sid) {}
+		void removeByID(SID id);
 		ActionType getActionType() const {
-			return AT_FOLLOW_CURVE;
+			return AT_SCALE_BY_PATH;
 		}
+	protected:
+		SID swap(int i);
 	private:
 		void allocate(int sz);
-		BezierCurve** _path;
+		Vector2fPath** _path;
 		float* _timers;
 		float* _ttl;
-		int* _modes;
 	};
 
 }

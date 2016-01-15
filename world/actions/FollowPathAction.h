@@ -11,32 +11,22 @@ namespace ds {
 
 	class FollowPathAction : public AbstractAction {
 
-		struct FollowPathActionData : public BasicData {
-
-			CubicBezierPath** path;
-			float* timers;
-			float* ttl;
-			int* modes;
-
-			FollowPathActionData() : BasicData() {}
-		};
-
 	public:
 		FollowPathAction();
 		virtual ~FollowPathAction();
 		void attach(SID id,CubicBezierPath* path,float ttl,int mode = 0);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
-		void clear();
 		void debug();
 		void debug(SID sid) {}
-		void removeByID(SID id) {
-			remove(id, m_Data);
+		ActionType getActionType() const {
+			return AT_FOLLOW_PATH;
 		}
-	protected:
-		SID swap(int i);
 	private:
 		void allocate(int sz);
-		FollowPathActionData m_Data;
+		CubicBezierPath** _path;
+		float* _timers;
+		float* _ttl;
+		int* _modes;
 	};
 
 }

@@ -840,7 +840,7 @@ void JSONWriter::writeLineIdent() {
 // ----------------------------------------------------------
 // write color path
 // ----------------------------------------------------------
-void JSONWriter::write(const ds::ColorPath& path) {
+void JSONWriter::write(const char* name, const ds::ColorPath& path) {
 	for (int i = 0; i < path.size(); ++i) {
 		const ds::Color& value = path.value(i);
 		float key = path.key(i);
@@ -857,12 +857,14 @@ void JSONWriter::write(const ds::ColorPath& path) {
 // ----------------------------------------------------------
 // write color path
 // ----------------------------------------------------------
-void JSONWriter::write(const ds::Vector2fPath& path) {
+void JSONWriter::write(const char* name, const ds::Vector2fPath& path) {
+	writeLineIdent();
+	fprintf(f, "%s : ", name);
 	for (int i = 0; i < path.size(); ++i) {
 		const v2& value = path.value(i);
 		float key = path.key(i);
+		fprintf(f, "%g,%g,%g", key, value.x, value.y);
 		writeLineIdent();
-		fprintf(f, "\"%g\" : \"%g,%g\"", key, value.x, value.y);
 		++_items;
 	}
 }
@@ -870,7 +872,7 @@ void JSONWriter::write(const ds::Vector2fPath& path) {
 // ----------------------------------------------------------
 // write color path
 // ----------------------------------------------------------
-void JSONWriter::write(const ds::FloatArray& path) {
+void JSONWriter::write(const char* name, const ds::FloatArray& path) {
 	for (int i = 0; i < path.size(); ++i) {
 		float value = path.value(i);
 		float key = path.key(i);

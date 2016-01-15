@@ -7,54 +7,52 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	FollowTargetAction::FollowTargetAction() : AbstractAction() {
-
+		int sizes[] = { sizeof(SID), sizeof(SID), sizeof(float)};
+		_buffer.init(sizes, 3);
 	}
 
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	FollowTargetAction::~FollowTargetAction() {
-		if (m_Data.buffer != 0) {
-			delete[] m_Data.buffer;
-		}
-	}
+	FollowTargetAction::~FollowTargetAction() {}
 
 	void FollowTargetAction::allocate(int sz) {
-		int size = sz * (sizeof(SID) * 2 + sizeof(float));
-		m_Data.buffer = new char[size];
-		m_Data.ids = (SID*)(m_Data.buffer);
-		m_Data.targets = (SID*)(m_Data.ids + sz);
-		m_Data.velocities = (float*)(m_Data.targets + sz);
-		m_Data.total = sz;
+		if (_buffer.resize(sz)) {
+			_ids = (SID*)_buffer.get_ptr(0);
+			_targets = (SID*)_buffer.get_ptr(1);
+			_velocities = (float*)_buffer.get_ptr(2);
+		}
 	}
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
 	void FollowTargetAction::attach(SID id,SID target,float velocity) {
-		int idx = next(id, m_Data);
-		m_Data.ids[idx] = id;
-		m_Data.velocities[idx] = velocity;
-		m_Data.targets[idx] = target;
+		allocate(_buffer.size + 1);
+		int idx = _buffer.size;
+		_ids[idx] = id;
+		_velocities[idx] = velocity;
+		_targets[idx] = target;
+		++_buffer.size;
 	}
 
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
 	void FollowTargetAction::update(SpriteArray& array, float dt, ActionEventBuffer& buffer) {
-		if ( m_Data.num > 0 ) {				
-			for ( int i = 0; i < m_Data.num; ++i ) {
-				SID targetID = m_Data.targets[i];
+		if (_buffer.size > 0) {
+			for (int i = 0; i <_buffer.size; ++i) {
+				SID targetID = _targets[i];
 				if (array.contains(targetID)) {
-					v2 p = sar::getPosition(array, m_Data.ids[i]);
+					v2 p = sar::getPosition(array, _ids[i]);
 					v2 targetPos = sar::getPosition(array, targetID);
 					v2 diff = targetPos - p;
 					if (sqr_length(diff) > 100.0f) {
 						v2 n = normalize(diff);
-						n *= m_Data.velocities[i] * dt;
+						n *= _velocities[i] * dt;
 						p += n;
-						sar::setPosition(array, m_Data.ids[i], p);
+						sar::setPosition(array, _ids[i], p);
 						float angle = vector::calculateRotation(n);
-						sar::rotate(array, m_Data.ids[i], angle);
+						sar::rotate(array, _ids[i], angle);
 					}
 				}
 				else {
@@ -63,13 +61,13 @@ namespace ds {
 			}
 
 			//Vector2f v;
-			//for (int i = 0; i < m_Data.num; ++i) {
+			//for (int i = 0; i < _num; ++i) {
 				/*
-				int in = array.getIndex(m_Data.ids[i]);
+				int in = array.getIndex(_ids[i]);
 				int cnt = computeSeparation(array, i, 20.0f, &v);
 				if (cnt > 0) {
 					Vector2f n = normalize(v);
-					array.positions[in] += n * m_Data.velocities[in] * dt * 0.75f;
+					array.positions[in] += n * _velocities[in] * dt * 0.75f;
 				}
 				*/
 				/*
@@ -80,10 +78,10 @@ namespace ds {
 					if (sqr_length(diff) < 400.0f) {
 						Vector2f n = normalize(diff);
 						//n *= 0.5f;
-						n *= m_Data.velocities[i] * dt;
+						n *= _velocities[i] * dt;
 						array.positions[in] += n;
 						//n = normalize(diff);
-						//n *= -1.0f * m_Data.velocities[idx] * dt;
+						//n *= -1.0f * _velocities[idx] * dt;
 						array.positions[idx] -= n;
 					}
 				}
@@ -144,29 +142,9 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	SID FollowTargetAction::swap(int i) {
-		int last = m_Data.num - 1;
-		SID last_id = m_Data.ids[last];
-		SID current = m_Data.ids[i];
-		m_Data.ids[i] = m_Data.ids[last];
-		m_Data.velocities[i] = m_Data.velocities[last];
-		--m_Data.num;
-		return current;
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	void FollowTargetAction::clear() {
-		m_Data.num = 0;
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
 	void FollowTargetAction::debug() {
-		for ( int i = 0; i < m_Data.num; ++i ) {
-			LOG << i << " : id: " << m_Data.ids[i] << " velocity: " << m_Data.velocities[i];
+		for (int i = 0; i < _buffer.size; ++i) {
+			LOG << i << " : id: " << _ids[i] << " velocity: " << _velocities[i];
 		}
 		/*
 		std::map<SID,int>::iterator it = m_Mapping.begin();

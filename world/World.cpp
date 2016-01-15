@@ -15,6 +15,7 @@
 #include "actions\FollowStraightPathAction.h"
 #include "actions\ColorFadeToAction.h"
 #include "actions\RemoveAfterAction.h"
+#include "actions\ScaleByPathAction.h"
 #include "..\physics\ColliderArray.h"
 #include "..\utils\Profiler.h"
 #include "..\utils\Log.h"
@@ -50,16 +51,13 @@ namespace ds {
 		m_Actions.push_back(m_ColorFadeToAction);
 		_removeAfterAction = new RemoveAfterAction;
 		m_Actions.push_back(_removeAfterAction);
-		
+		_scaleByPathAction = new ScaleByPathAction;
+		m_Actions.push_back(_scaleByPathAction);
 	}
 
 
 	World::~World(void) {
-		Actions::iterator it = m_Actions.begin();
-		while ( it != m_Actions.end()) {
-			delete (*it);
-			it = m_Actions.remove(it);
-		}		
+		m_Actions.destroy_all();
 		if ( m_Data.buffer != 0 ) {
 			delete[] m_Data.buffer;
 		}
@@ -157,6 +155,14 @@ namespace ds {
 		PR_END("World:tick");
 	}
 
+	void World::stopAction(SID sid, ActionType type) {
+		for (size_t i = 0; i < m_Actions.size(); ++i) {
+			if (m_Actions[i]->getActionType() == type) {
+				m_Actions[i]->removeByID(sid);
+			}
+		}
+	}
+
 	void World::moveTo(SID sid,const Vector2f& startPos,const Vector2f& endPos,float ttl,int mode,const tweening::TweeningType& tweeningType) {
 		m_MoveToAction->attach(sid,m_Data,startPos,endPos,ttl,mode,tweeningType);
 	}
@@ -170,7 +176,11 @@ namespace ds {
 	}
 
 	const int World::getMovingNumber() const {
-		return m_MoveToAction->size();
+		return 0;// m_MoveToAction->size();
+	}
+
+	void World::scaleByPath(SID id, Vector2fPath* path, float ttl) {
+		_scaleByPathAction->attach(m_Data,id, path, ttl);
 	}
 
 	void World::scaleTo(SID sid,const Vector2f& startScale,const Vector2f& endScale,float ttl,int mode,const tweening::TweeningType& tweeningType) {
@@ -255,7 +265,15 @@ namespace ds {
 		}		
 	}
 
-	
+	int World::find_by_type(int type,SID* ids, int max) {
+		int cnt = 0;
+		for (int i = 0; i < m_Data.num; ++i) {
+			if (m_Data.types[i] == type && cnt < max) {
+				ids[cnt++] = m_Data.ids[i];
+			}
+		}
+		return cnt;
+	}
 
 	void World::setBoundingRect(const Rect& r) {
 		// we need to switch y

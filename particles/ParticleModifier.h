@@ -303,7 +303,7 @@ struct ColorPathModifierData : ParticleModifierData {
 	ColorPath path;
 
 	void save(JSONWriter& writer) {
-		writer.write(path);
+		writer.write("path", path);
 	}
 
 	void read(const JSONReader& reader, int category) {
@@ -347,7 +347,7 @@ struct AlphaPathModifierData : ParticleModifierData{
 	FloatArray path;
 
 	void save(JSONWriter& writer) {
-		writer.write(path);
+		writer.write("path", path);
 	}
 
 };
@@ -431,7 +431,7 @@ struct SizePathModifierData : ParticleModifierData{
 	Vector2fPath path;
 
 	void save(JSONWriter& writer) {
-		writer.write(path);
+		writer.write("path", path);
 	}
 
 	void read(const JSONReader& reader, int category) {

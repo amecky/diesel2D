@@ -516,6 +516,8 @@ namespace ds {
 
 		Vector2f& getMousePosition();
 
+		v2 screen_to_world(const v2& screenPos,const v2& worldPos);
+
 		void setMousePosition(int x, int y);
 
 		// -------------------------------------------------

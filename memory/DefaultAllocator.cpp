@@ -4,7 +4,7 @@
 namespace ds {
 
 	DefaultAllocator* gDefaultMemory;
-
+	/*
 // Given a pointer to the header, returns a pointer to the data that follows it.
 inline void *data_pointer(Header *header, uint32 align) {
 	void *p = header + 1;
@@ -27,9 +27,12 @@ inline void fill(Header *header, void *data, uint32 size) {
 	while (p < data)
 		*p++ = HEADER_PAD_VALUE;
 }
-
+*/
 DefaultAllocator::DefaultAllocator(uint32 size) : _capacity(size) {
 	_buffer = (char*)malloc(sizeof(char) * size);
+	_headers = (Header*)malloc(sizeof(Header) * 32);
+	_num = 0;
+	_header_capacity = 32;
 }
 
 
@@ -38,7 +41,8 @@ DefaultAllocator::~DefaultAllocator() {
 	//assert(total_allocated() == 0);
 	if (total_allocated() > 0) {
 		LOG << "--------------- Memory leaks ----------------------------";
-		for (uint32 i = 0; i < _headers.size(); ++i) {
+		//for (uint32 i = 0; i < _headers.size(); ++i) {
+		for (int i = 0; i < _num; ++i) {
 			const Header& h = _headers[i];
 			if (h.used) {
 				LOG << i << " size: " << h.size << " index: " << h.index << " used: " << h.used;
@@ -52,7 +56,8 @@ void* DefaultAllocator::allocate(uint32 size, uint32 align) {
 	//LOG << "Allocating size " << size << " align " << align;
 	uint32 s = size + align;
 	int idx = -1;
-	for (uint32 i = 0; i < _headers.size(); ++i) {
+	//for (uint32 i = 0; i < _headers.size(); ++i) {
+	for (int i = 0; i < _num; ++i) {
 		const Header& h = _headers[i];
 		if (!h.used && h.size >= s && idx == -1) {
 			idx = i;
@@ -65,11 +70,22 @@ void* DefaultAllocator::allocate(uint32 size, uint32 align) {
 		h.size = s;
 		h.originalSize = s;
 		h.index = 0;
-		if (!_headers.empty()) {
-			const Header& last = _headers.back();
+		//if (!_headers.empty()) {
+		if ( _num > 0 ) {
+			//const Header& last = _headers.back();
+			const Header& last = _headers[_num - 1];
 			h.index = last.index + last.size;
 		}
-		_headers.push_back(h);
+		if (_num + 1 > _header_capacity) {
+			int sz = _header_capacity * 2 + 16;
+			Header* tmp = (Header*)malloc(sizeof(Header) * sz);
+			memcpy(tmp, _headers, sizeof(Header) * _num);
+			_header_capacity = sz;
+			free(_headers);
+			_headers = tmp;
+		}
+		_headers[_num++] = h;
+		//_headers.push_back(h);
 		void* p = _buffer + h.index;
 		return p;
 	}
@@ -86,7 +102,8 @@ void DefaultAllocator::deallocate(void *p) {
 	if (!p)
 		return;
 	int d = (int)((char*)p - _buffer);
-	for (uint32 i = 0; i < _headers.size(); ++i) {
+	//for (uint32 i = 0; i < _headers.size(); ++i) {
+	for (int i = 0; i < _num; ++i) {
 		Header& h = _headers[i];
 		if (h.index == d) {
 			//LOG << "dealloc - found header at: " << i;
@@ -97,7 +114,8 @@ void DefaultAllocator::deallocate(void *p) {
 
 uint32 DefaultAllocator::allocated_size(void *p) {
 	int d = (int)((char*)p - _buffer);
-	for (uint32 i = 0; i < _headers.size(); ++i) {
+	//for (uint32 i = 0; i < _headers.size(); ++i) {
+	for (int i = 0; i < _num; ++i) {
 		const Header& h = _headers[i];
 		if (h.index == d && h.used) {
 			return h.size;
@@ -108,7 +126,8 @@ uint32 DefaultAllocator::allocated_size(void *p) {
 
 uint32 DefaultAllocator::total_allocated() {
 	uint32 total = 0;
-	for (uint32 i = 0; i < _headers.size(); ++i) {
+	//for (uint32 i = 0; i < _headers.size(); ++i) {
+	for (int i = 0; i < _num; ++i) {
 		const Header& h = _headers[i];
 		if (h.used) {
 			total += h.size;
@@ -118,7 +137,8 @@ uint32 DefaultAllocator::total_allocated() {
 }
 
 void DefaultAllocator::debug() {
-	for (uint32 i = 0; i < _headers.size(); ++i) {
+	//for (uint32 i = 0; i < _headers.size(); ++i) {
+	for (int i = 0; i < _num; ++i) {
 		const Header& h = _headers[i];
 		LOG << i << " size: " << h.size << " (" << h.originalSize << ") index : " << h.index << " used : " << h.used;
 	}

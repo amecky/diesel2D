@@ -86,6 +86,27 @@ namespace ds {
 		return false;
 	}
 
+	void DynamicGameSettings::addPath(const char* name, Vector2fPath* value) {
+		SettingsItem item;
+		item.name = name;
+		item.type = ST_V2_PATH;
+		item.index = _v2_paths.size();
+		_v2_paths.push_back(value);
+		_items.push_back(item);
+		_model.add(name, item);
+	}
+
+	bool DynamicGameSettings::setPath(const char* name, const Vector2fPath& value) {
+		for (int i = 0; i < _items.size(); ++i) {
+			const SettingsItem& item = _items[i];
+			if (strcmp(item.name, name) == 0) {
+				*_v2_paths[item.index] = value;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	// -------------------------------------------------------
 	// export json
 	// -------------------------------------------------------
@@ -98,6 +119,9 @@ namespace ds {
 			}
 			else if (item.type == ST_RECT) {
 				writer.write(item.name, *_rects[item.index]);
+			}
+			else if (item.type == ST_V2_PATH) {
+				writer.write(item.name, *_v2_paths[item.index]);
 			}
 		}
 		writer.endCategory();
@@ -121,6 +145,9 @@ namespace ds {
 					}
 					else if (item.type == ST_RECT) {
 						loader.get_rect(c,item.name, _rects[item.index]);
+					}
+					else if (item.type == ST_V2_PATH) {
+						loader.get_vec2_path(c, item.name, _v2_paths[item.index]);
 					}
 				}
 			}

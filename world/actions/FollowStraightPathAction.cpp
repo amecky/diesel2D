@@ -7,75 +7,74 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	FollowStraightPathAction::FollowStraightPathAction() : AbstractAction() {
+		int sizes[] = { sizeof(SID), sizeof(StraightPath*), sizeof(float),sizeof(float), sizeof(int) };
+		_buffer.init(sizes, 5);
 	}
 
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	FollowStraightPathAction::~FollowStraightPathAction() {
-		if (m_Data.buffer != 0) {
-			delete[] m_Data.buffer;
-		}
-	}
+	FollowStraightPathAction::~FollowStraightPathAction() {}
 
 	void FollowStraightPathAction::allocate(int sz) {
-		int size = sz * (sizeof(SID) + sizeof(StraightPath*) + sizeof(float) + sizeof(float) + sizeof(int));
-		m_Data.buffer = new char[size];
-		m_Data.ids = (SID*)(m_Data.buffer);
-		m_Data.path = (StraightPath**)(m_Data.ids + sz);
-		m_Data.timers = (float*)(m_Data.path + sz);
-		m_Data.ttl = (float*)(m_Data.timers + sz);
-		m_Data.modes = (int*)(m_Data.ttl + sz);
-		m_Data.total = sz;
+		if (_buffer.resize(sz)) {
+			_ids = (SID*)_buffer.get_ptr(0);
+			_path = (StraightPath**)_buffer.get_ptr(1);
+			_timers = (float*)_buffer.get_ptr(2);
+			_ttl = (float*)_buffer.get_ptr(3);
+			_modes = (int*)_buffer.get_ptr(4);
+		}
 	}
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
 	void FollowStraightPathAction::attach(SID id, SpriteArray& array, StraightPath* path, float ttl, int mode) {
-		int idx = next(id, m_Data);
-		m_Data.ids[idx] = id;
-		m_Data.path[idx] = path;
-		m_Data.timers[idx] = 0.0f;
-		m_Data.ttl[idx] = ttl;
-		m_Data.modes[idx] = mode;
+		allocate(_buffer.size + 1);
+		int idx = _buffer.size;
+		_ids[idx] = id;
+		_path[idx] = path;
+		_timers[idx] = 0.0f;
+		_ttl[idx] = ttl;
+		_modes[idx] = mode;
 		if ( mode > 0 ) {
-			--m_Data.modes[idx];
+			--_modes[idx];
 		}
 		Vector2f p;
 		path->approx(0.0f, &p);
 		sar::setPosition(array, id, p);
+		++_buffer.size;
 	}
 
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
 	void FollowStraightPathAction::update(SpriteArray& array, float dt, ActionEventBuffer& buffer) {
-		if ( m_Data.num > 0 ) {				
+		if (_buffer.size > 0) {
 			// move
 			Vector2f p;
 			Vector2f t;
-			for ( int i = 0; i < m_Data.num; ++i ) {
-				float norm = math::norm(m_Data.timers[i] , m_Data.ttl[i]);
-				m_Data.path[i]->approx(norm,&p);
+			for (int i = 0; i < _buffer.size; ++i) {
+				float norm = math::norm(_timers[i] , _ttl[i]);
+				_path[i]->approx(norm,&p);
 
-				m_Data.path[i]->tanget(norm, &t);
+				_path[i]->tanget(norm, &t);
 				float a = vector::calculateRotation(t);
-				sar::rotate(array, m_Data.ids[i], a);
-				sar::setPosition(array,m_Data.ids[i],p);
-				m_Data.timers[i] += dt;
-				if ( m_Data.timers[i] >= m_Data.ttl[i] ) {
-					if ( m_Data.modes[i] < 0 ) {
-						m_Data.timers[i] = 0.0f;
+				sar::rotate(array, _ids[i], a);
+				sar::setPosition(array,_ids[i],p);
+				_timers[i] += dt;
+				if ( _timers[i] >= _ttl[i] ) {
+					if ( _modes[i] < 0 ) {
+						_timers[i] = 0.0f;
 					}
-					else if ( m_Data.modes[i] == 0 ) {
-						m_Data.path[i]->get(1.0f,&p);
-						sar::setPosition(array,m_Data.ids[i],p);						
-						buffer.add(m_Data.ids[i], AT_FOLLOW_STRAIGHT_PATH, array.getType(m_Data.ids[i]));
+					else if ( _modes[i] == 0 ) {
+						_path[i]->get(1.0f,&p);
+						sar::setPosition(array,_ids[i],p);						
+						buffer.add(_ids[i], AT_FOLLOW_STRAIGHT_PATH, array.getType(_ids[i]));
 						removeByIndex(i);
 					}
 					else {
-						--m_Data.modes[i];
-						m_Data.timers[i] = 0.0f;
+						--_modes[i];
+						_timers[i] = 0.0f;
 
 					}
 				}
@@ -86,32 +85,9 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	SID FollowStraightPathAction::swap(int i) {
-		int last = m_Data.num - 1;
-		SID last_id = m_Data.ids[last];
-		SID current = m_Data.ids[i];
-		m_Data.ids[i] = m_Data.ids[last];
-		m_Data.path[i] = m_Data.path[last];
-		m_Data.timers[i] = m_Data.timers[last];
-		m_Data.ttl[i] = m_Data.ttl[last];
-		m_Data.modes[i] = m_Data.modes[last];
-		--m_Data.num;
-		return current;
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
-	void FollowStraightPathAction::clear() {
-		m_Data.num = 0;
-	}
-
-	// -------------------------------------------------------
-	// 
-	// -------------------------------------------------------
 	void FollowStraightPathAction::debug() {
-		for ( int i = 0; i < m_Data.num; ++i ) {
-			LOG << i << " : id: " << m_Data.ids[i] << " timer: " << m_Data.timers[i];
+		for (int i = 0; i < _buffer.size; ++i) {
+			LOG << i << " : id: " << _ids[i] << " timer: " << _timers[i];
 		}
 		/*
 		std::map<SID,int>::iterator it = m_Mapping.begin();
