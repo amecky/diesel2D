@@ -31,7 +31,8 @@ namespace ds {
 		AT_FOLLOW_STRAIGHT_PATH,
 		AT_KILL,
 		AT_SCALE_BY_PATH,
-		AT_SCALE
+		AT_SCALE,
+		AT_COLOR_FLASH
 	};
 
 	enum RepeatType {
@@ -56,6 +57,7 @@ namespace ds {
 	class ColorFadeToAction;
 	class RemoveAfterAction;
 	class ScaleByPathAction;
+	class ColorFlashAction;
 
 	typedef void (*MoveFunc)(Vector2f&,float*,float);
 
@@ -169,6 +171,8 @@ namespace ds {
 
 		void fadeColorTo(SID sid, const Color& startColor, const Color& endColor, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
 
+		void flashColor(SID sid, const Color& startColor, const Color& endColor, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+		
 		void wait(SID sid,float ttl);
 
 		void debug();
@@ -242,6 +246,7 @@ namespace ds {
 		ColorFadeToAction* m_ColorFadeToAction;
 		RemoveAfterAction* _removeAfterAction;
 		ScaleByPathAction* _scaleByPathAction;
+		ColorFlashAction* _colorFlashAction;
 		Actions m_Actions;
 
 	};

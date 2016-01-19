@@ -130,7 +130,9 @@ namespace ds {
 		PR_START("ParticleManager::update");
 		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
 			if (_systems[i] != 0) {
-				_systems[i]->update(elapsed);
+				if (_systems[i]->getCountAlive() > 0) {
+					_systems[i]->update(elapsed);
+				}
 			}
 		}
 		PR_END("ParticleManager::update");

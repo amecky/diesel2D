@@ -6,6 +6,15 @@
 #include "..\utils\Log.h"
 
 namespace ds {
+
+	struct MyToken {
+
+		virtual bool matches(const char* p) = 0;
+
+		virtual char* parse(const char* p) = 0;
+
+		virtual const char* translate() = 0;
+	};
 	
 	struct Token {
 
@@ -599,6 +608,31 @@ bool JSONReader::get_vec2_path(int category_id, const char* name, ds::Vector2fPa
 }
 
 // -------------------------------------------
+// get float path
+// -------------------------------------------
+bool JSONReader::get_float_path(int category_id, const char* name, ds::FloatArray* path) const {
+	int idx = get_index(category_id, name);
+	if (idx != -1) {
+		int entries = _data_sizes[idx];
+		int steps = entries / 2;
+		if ((entries % 2) == 0) {
+			int current = 0;
+			for (int i = 0; i < steps; ++i) {
+				float step = get(_data_indices[idx] + current);
+				++current;
+				float c = get(_data_indices[idx] + current);
+				++current;
+				path->add(step, c);
+			}
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
+}
+
+// -------------------------------------------
 // allocate data buffer
 // -------------------------------------------
 void JSONReader::alloc(int elements) {
@@ -873,11 +907,13 @@ void JSONWriter::write(const char* name, const ds::Vector2fPath& path) {
 // write color path
 // ----------------------------------------------------------
 void JSONWriter::write(const char* name, const ds::FloatArray& path) {
+	writeLineIdent();
+	fprintf(f, "%s : ", name);
 	for (int i = 0; i < path.size(); ++i) {
 		float value = path.value(i);
-		float key = path.key(i);
+		float key = path.key(i);		
+		fprintf(f, "%g,%g", key, value);
 		writeLineIdent();
-		fprintf(f, "\"%g\" : \"%g\"", key, value);
 		++_items;
 	}
 }

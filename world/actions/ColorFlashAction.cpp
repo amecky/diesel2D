@@ -1,4 +1,4 @@
-#include "ColorFadeToAction.h"
+#include "ColorFlashAction.h"
 #include "..\..\math\GameMath.h"
 #include "..\..\utils\Log.h"
 
@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	ColorFadeToAction::ColorFadeToAction() : AbstractAction() {
+	ColorFlashAction::ColorFlashAction() : AbstractAction() {
 		int sizes[] = { sizeof(SID), sizeof(Color), sizeof(Color), sizeof(float), sizeof(float),sizeof(tweening::TweeningType),sizeof(int) };
 		_buffer.init(sizes, 7);
 	}
@@ -14,9 +14,9 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	ColorFadeToAction::~ColorFadeToAction() {}
+	ColorFlashAction::~ColorFlashAction() {}
 
-	void ColorFadeToAction::allocate(int sz) {
+	void ColorFlashAction::allocate(int sz) {
 		if (_buffer.resize(sz)) {
 			_ids = (SID*)_buffer.get_ptr(0);
 			_startColors = (Color*)_buffer.get_ptr(1);
@@ -30,7 +30,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void ColorFadeToAction::attach(SID id, const Color& startColor, const Color& endColor, float ttl, int mode, const tweening::TweeningType& tweeningType) {
+	void ColorFlashAction::attach(SID id, const Color& startColor, const Color& endColor, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		allocate(_buffer.size + 1);
 		int idx = _buffer.size;
 		_ids[idx] = id;
@@ -49,12 +49,17 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void ColorFadeToAction::update(SpriteArray& array, float dt, ActionEventBuffer& buffer) {
+	void ColorFlashAction::update(SpriteArray& array, float dt, ActionEventBuffer& buffer) {
 		if ( _buffer.size > 0 ) {				
-			// move
 			for ( int i = 0; i < _buffer.size; ++i ) {
 				float norm = math::norm(_timers[i] , _ttl[i]);
-				sar::setColor(array, _ids[i], tweening::interpolate(_tweeningTypes[i], _startColors[i], _endColors[i], norm));
+				if (norm < 0.5f) {
+					sar::setColor(array, _ids[i], tweening::interpolate(_tweeningTypes[i],_startColors[i], _endColors[i], norm * 2.0f));
+				}
+				else {
+					float s = (norm - 0.5f) * 2.0f;
+					sar::setColor(array, _ids[i], tweening::interpolate(_tweeningTypes[i], _endColors[i], _startColors[i], s));
+				}
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
@@ -77,7 +82,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void ColorFadeToAction::debug() {
+	void ColorFlashAction::debug() {
 		for ( int i = 0; i < _buffer.size; ++i ) {
 			LOG << i << " : id: " << _ids[i] << " timer: " << _timers[i];
 		}

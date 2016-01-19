@@ -350,6 +350,10 @@ struct AlphaPathModifierData : ParticleModifierData{
 		writer.write("path", path);
 	}
 
+	void read(const JSONReader& reader, int category) {
+		reader.get_float_path(category, "path", &path);
+	}
+
 };
 
 class AlphaPathModifier : public ParticleModifier {

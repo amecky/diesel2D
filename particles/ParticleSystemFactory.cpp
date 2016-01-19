@@ -121,6 +121,8 @@ namespace ds {
 			case PMT_COLOR_PATH: return new ColorPathModifierData(); break;
 			case PMT_LINEAR_COLOR: return new LinearColorModifierData(); break;
 			case PMT_LINEAR_ALPHA: return new LinearAlphaModifierData(); break;
+			case PMT_ALPHA_PATH: return new AlphaPathModifierData(); break;
+			case PMT_SIZE_PATH: return new SizePathModifierData(); break;
 		}
 		return 0;
 	}

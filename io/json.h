@@ -30,6 +30,7 @@ namespace ds {
 		bool get_rect(int category_id, const char* name, Rect* ret) const;
 		bool get_color_path(int category_id, const char* name, ds::ColorPath* path) const;
 		bool get_vec2_path(int category_id, const char* name, ds::Vector2fPath* path) const;
+		bool get_float_path(int category_id, const char* name, ds::FloatArray* path) const;
 		const char* get_string(int category_id, const char* name) const;
 		const char* get_category_name(int category_id) const;
 	private:

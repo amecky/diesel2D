@@ -14,6 +14,7 @@
 #include "actions\FollowTargetAction.h"
 #include "actions\FollowStraightPathAction.h"
 #include "actions\ColorFadeToAction.h"
+#include "actions\ColorFlashAction.h"
 #include "actions\RemoveAfterAction.h"
 #include "actions\ScaleByPathAction.h"
 #include "..\physics\ColliderArray.h"
@@ -53,6 +54,8 @@ namespace ds {
 		m_Actions.push_back(_removeAfterAction);
 		_scaleByPathAction = new ScaleByPathAction;
 		m_Actions.push_back(_scaleByPathAction);
+		_colorFlashAction = new ColorFlashAction;
+		m_Actions.push_back(_colorFlashAction);
 	}
 
 
@@ -236,6 +239,10 @@ namespace ds {
 
 	void World::fadeColorTo(SID sid, const Color& startColor, const Color& endColor, float ttl, int mode, const tweening::TweeningType& tweeningType) {
 		m_ColorFadeToAction->attach(sid, startColor, endColor, ttl, mode, tweeningType);
+	}
+
+	void World::flashColor(SID sid, const Color& startColor, const Color& endColor, float ttl, int mode, const tweening::TweeningType& tweeningType) {
+		_colorFlashAction->attach(sid, startColor, endColor, ttl, mode, tweeningType);
 	}
 
 	void World::followPath(SID sid,CubicBezierPath* path,float ttl,int mode) {

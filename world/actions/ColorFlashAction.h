@@ -6,17 +6,17 @@
 
 namespace ds {
 
-	class ColorFadeToAction : public AbstractAction {
+	class ColorFlashAction : public AbstractAction {
 
 	public:
-		ColorFadeToAction();
-		~ColorFadeToAction();
+		ColorFlashAction();
+		~ColorFlashAction();
 		void attach(SID id,const Color& startColor,const Color& endColor,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);		
 		void debug();
 		void debug(SID sid) {}
 		ActionType getActionType() const {
-			return AT_COLOR_FADE_TO;
+			return AT_COLOR_FLASH;
 		}
 	private:
 		void allocate(int sz);
