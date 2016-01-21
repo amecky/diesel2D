@@ -104,6 +104,9 @@ namespace ds {
 	}
 
 	void World::remove(SID id) {
+		if (_buffer.contains(id)) {
+			_buffer.remove(id);
+		}
 		m_Physics.remove(id);		
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->removeByID(id);
@@ -272,11 +275,27 @@ namespace ds {
 		}		
 	}
 
-	int World::find_by_type(int type,SID* ids, int max) {
+	int World::getType(SID sid) const {
+		return m_Data.getType(sid);
+	}
+
+	int World::find_by_type(int type, SID* ids, int max) const {
 		int cnt = 0;
 		for (int i = 0; i < m_Data.num; ++i) {
 			if (m_Data.types[i] == type && cnt < max) {
 				ids[cnt++] = m_Data.ids[i];
+			}
+		}
+		return cnt;
+	}
+
+	int World::find_by_types(int* types, int num, SID* ids, int max) const {
+		int cnt = 0;
+		for (int j = 0; j < num; ++j) {
+			for (int i = 0; i < m_Data.num; ++i) {
+				if (m_Data.types[i] == types[j] && cnt < max) {
+					ids[cnt++] = m_Data.ids[i];
+				}
 			}
 		}
 		return cnt;
@@ -305,6 +324,9 @@ namespace ds {
 	}
 
 	void World::debug(SID sid) {
+		if (_buffer.contains(sid)) {
+			LOG << "Additional data found";
+		}
 		sar::debug(m_Data, sid);
 		/*
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
