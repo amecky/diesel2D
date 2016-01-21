@@ -1,10 +1,14 @@
 #pragma once
 #include "memory_types.h"
-//#include "..\lib\collection_types.h"
-#include <vector>
 
 namespace ds {
 
+	struct MemoryInfo {
+
+		uint32 allocated;
+		uint32 blocks;
+
+	};
 // -------------------------------------------------------
 //  Header
 // -------------------------------------------------------
@@ -29,9 +33,9 @@ public:
 	void deallocate(void *p);
 	uint32 allocated_size( void *p );
 	uint32 total_allocated();
+	MemoryInfo get_info();
 	void debug();
 private:
-	//std::vector<Header> _headers;
 	Header* _headers;
 	int _num;
 	int _header_capacity;

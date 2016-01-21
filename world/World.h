@@ -15,6 +15,8 @@
 
 namespace ds {
 
+
+
 	enum ActionType {
 		AT_ALPHA_FADE_TO,
 		AT_COLOR_FADE_TO,
@@ -86,6 +88,88 @@ namespace ds {
 	};
 
 	class World {
+
+		struct AdditionalDataHeader {
+			int index;
+			int size;
+			bool used;
+			SID sid;
+		};
+
+		struct AdditionalData {
+
+			void* attach(SID sid, int size) {
+				int idx = find_free_header(size);
+				if (idx == -1) {
+					AdditionalDataHeader header;
+					header.sid = sid;
+					header.size = size;
+					header.index = data.size;
+					header.used = true;
+					headers.push_back(header);
+					return data.alloc(size);
+				}
+				else {
+					AdditionalDataHeader& header = headers[idx];
+					header.used = true;
+					header.sid = sid;
+					return data.data + header.index;
+				}
+			}
+
+			void remove(SID sid) {
+				int idx = find_header(sid);
+				if (idx != -1) {
+					AdditionalDataHeader& header = headers[idx];
+					if (header.used) {
+						header.used = false;
+					}
+				}
+			}
+
+			void* get(SID sid) {
+				int idx = find_header(sid);
+				if (idx != -1) {
+					AdditionalDataHeader& header = headers[idx];
+					if (header.used) {
+						return data.data + header.index;
+					}
+				}
+				return 0;
+			}
+
+			int find_free_header(int size) {
+				for (uint32 i = 0; i < headers.size(); ++i) {
+					const AdditionalDataHeader& h = headers[i];
+					if (h.size == size && !h.used) {
+						return i;
+					}
+				}
+				return -1;
+			}
+
+			int find_header(SID sid) {
+				for (uint32 i = 0; i < headers.size(); ++i) {
+					const AdditionalDataHeader& h = headers[i];
+					if (h.sid == sid) {
+						return i;
+					}
+				}
+				return -1;
+			}
+
+			bool contains(SID sid) {
+				int idx = find_header(sid);
+				if (idx != -1) {
+					AdditionalDataHeader& header = headers[idx];
+					return header.used;
+				}
+				return false;
+			}
+
+			CharBuffer data;
+			Array<AdditionalDataHeader> headers;
+		};
 
 	typedef Array<AbstractAction*> Actions;
 
@@ -185,7 +269,11 @@ namespace ds {
 			return m_Buffer;
 		}
 
-		int find_by_type(int type, SID* ids, int max);
+		int getType(SID sid) const;
+
+		int find_by_type(int type, SID* ids, int max) const;
+
+		int find_by_types(int* types, int num, SID* ids, int max) const;
 
 		void attachCollider(SID sid, const Vector2f& extent, int type,int layer) {
 			m_Physics.attachCollider(sid, extent, type,layer);
@@ -222,13 +310,23 @@ namespace ds {
 		const SpriteArray& getSpriteArray() const {
 			return m_Data;
 		}
+
+		void* attach_data(SID sid,int size) {
+			return _buffer.attach(sid, size);
+		}
+
+		void* get_data(SID sid) {
+			return _buffer.get(sid);
+		}
+
 	private:
 		ActionEventBuffer m_Buffer;
 		void allocate(int size);
 		
 
 		SpriteArray m_Data;
-		
+		AdditionalData _buffer;
+
 		PhysicalWorld m_Physics;
 
 		MoveToAction* m_MoveToAction;	
