@@ -31,6 +31,8 @@ namespace ds {
 		bool get_color_path(int category_id, const char* name, ds::ColorPath* path) const;
 		bool get_vec2_path(int category_id, const char* name, ds::Vector2fPath* path) const;
 		bool get_float_path(int category_id, const char* name, ds::FloatArray* path) const;
+		int get_array(int category_id, const char* name, float* values, int max) const;
+		int get_array(int category_id, const char* name, int* values, int max) const;
 		const char* get_string(int category_id, const char* name) const;
 		const char* get_category_name(int category_id) const;
 	private:
@@ -81,6 +83,7 @@ namespace ds {
 		void write(const char* name, const ds::ColorPath& path);
 		void write(const char* name, const ds::Vector2fPath& path);
 		void write(const char* name, const ds::FloatArray& path);
+		void write(const char* name, const int* values,int count);
 		void endCategory();
 	private:
 		FILE* f;

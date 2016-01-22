@@ -118,12 +118,6 @@
     <ClCompile Include="math\tweening.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="sprites\modifiers.cpp">
-      <Filter>sprites</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\DataContainer.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
     <ClCompile Include="world\World.cpp">
       <Filter>world</Filter>
     </ClCompile>
@@ -267,6 +261,12 @@
     </ClCompile>
     <ClCompile Include="io\DataFile.cpp">
       <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\ScaleByPathAction.cpp">
+      <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="world\actions\ColorFlashAction.cpp">
+      <Filter>world\actions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -467,12 +467,6 @@
     <ClInclude Include="lib\Bitset.h">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="sprites\modifiers.h">
-      <Filter>sprites</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\DataContainer.h">
-      <Filter>lib</Filter>
-    </ClInclude>
     <ClInclude Include="world\World.h">
       <Filter>world</Filter>
     </ClInclude>
@@ -632,6 +626,12 @@
     </ClInclude>
     <ClInclude Include="io\DataFile.h">
       <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\ScaleByPathAction.h">
+      <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="world\actions\ColorFlashAction.h">
+      <Filter>world\actions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

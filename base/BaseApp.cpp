@@ -518,6 +518,11 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 				m_Running = false;
 			}
 		}
+		if (!m_DebugInfo.showEditor) {
+			if (!m_Running)  {
+				m_Running = true;
+			}
+		}
 	}
 	else if (virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
 		m_DebugInfo.debugRenderer = true;

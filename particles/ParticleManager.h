@@ -5,6 +5,12 @@
 #include "ParticleSystemFactory.h"
 
 namespace ds {
+
+struct ParticleSystemGroup {
+	uint32 id;
+	char name[20];
+	Array<int> systems;
+};
 	
 class ParticleManager : public DataFile {
 
@@ -13,6 +19,7 @@ public:
 	~ParticleManager();
 	void init(const Descriptor& desc);
 	void start(uint32 id,const Vector3f& pos);
+	void startGroup(uint32 id, const Vector3f& pos);
 	void stop(uint32 id);
 	void setBlendState(int blendState) {
 		m_BlendState = blendState;
@@ -41,6 +48,7 @@ private:
 	void end();
 	void flush();
 	void begin();
+	int findGroup(uint32 id);
 	NewParticleSystem** _systems;
 	int m_BlendState;
 	int bufferIndex;
@@ -49,6 +57,7 @@ private:
 	ParticleVertex particles[4096 * 4];
 	int m_ParticleIndex;
 	ParticleSystemFactory _factory;
+	Array<ParticleSystemGroup> _groups;
 };
 
 }

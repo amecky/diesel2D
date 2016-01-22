@@ -243,7 +243,6 @@
     <ClCompile Include="io\json.cpp" />
     <ClCompile Include="io\TextCompressor.cpp" />
     <ClCompile Include="lib\BlockArray.cpp" />
-    <ClCompile Include="lib\DataContainer.cpp" />
     <ClCompile Include="math\CubicBezierPath.cpp" />
     <ClCompile Include="math\GameMath.cpp" />
     <ClCompile Include="math\hex.cpp" />
@@ -274,7 +273,6 @@
     <ClCompile Include="renderer\shader.cpp" />
     <ClCompile Include="renderer\VertexDeclaration.cpp" />
     <ClCompile Include="renderer\Viewport.cpp" />
-    <ClCompile Include="sprites\modifiers.cpp" />
     <ClCompile Include="sprites\SpriteArray.cpp" />
     <ClCompile Include="sprites\SpriteBatch.cpp" />
     <ClCompile Include="sprites\SpriteGroup.cpp" />
@@ -297,6 +295,7 @@
     <ClCompile Include="world\actions\AbstractAction.cpp" />
     <ClCompile Include="world\actions\AlphaFadeToAction.cpp" />
     <ClCompile Include="world\actions\ColorFadeToAction.cpp" />
+    <ClCompile Include="world\actions\ColorFlashAction.cpp" />
     <ClCompile Include="world\actions\FollowCurveAction.cpp" />
     <ClCompile Include="world\actions\FollowPathAction.cpp" />
     <ClCompile Include="world\actions\FollowStraightPathAction.cpp" />
@@ -307,6 +306,7 @@
     <ClCompile Include="world\actions\RemoveAfterAction.cpp" />
     <ClCompile Include="world\actions\RotateAction.cpp" />
     <ClCompile Include="world\actions\RotateByAction.cpp" />
+    <ClCompile Include="world\actions\ScaleByPathAction.cpp" />
     <ClCompile Include="world\actions\ScalingAction.cpp" />
     <ClCompile Include="world\actions\WaitAction.cpp" />
     <ClCompile Include="world\World.cpp" />
@@ -349,7 +349,6 @@
     <ClInclude Include="lib\container\String.h" />
     <ClInclude Include="lib\DataArray.h" />
     <ClInclude Include="lib\DataBuffer.h" />
-    <ClInclude Include="lib\DataContainer.h" />
     <ClInclude Include="lib\Grid.h" />
     <ClInclude Include="lib\IDMap.h" />
     <ClInclude Include="lib\PriorityQueue.h" />
@@ -397,7 +396,6 @@
     <ClInclude Include="renderer\vertex_types.h" />
     <ClInclude Include="renderer\Viewport.h" />
     <ClInclude Include="base\Input.h" />
-    <ClInclude Include="sprites\modifiers.h" />
     <ClInclude Include="sprites\SpriteArray.h" />
     <ClInclude Include="sprites\SpriteBatch.h" />
     <ClInclude Include="sprites\Sprite.h" />
@@ -422,6 +420,7 @@
     <ClInclude Include="world\actions\AbstractAction.h" />
     <ClInclude Include="world\actions\AlphaFadeToAction.h" />
     <ClInclude Include="world\actions\ColorFadeToAction.h" />
+    <ClInclude Include="world\actions\ColorFlashAction.h" />
     <ClInclude Include="world\actions\FollowCurveAction.h" />
     <ClInclude Include="world\actions\FollowPathAction.h" />
     <ClInclude Include="world\actions\FollowStraightPathAction.h" />
@@ -432,6 +431,7 @@
     <ClInclude Include="world\actions\RemoveAfterAction.h" />
     <ClInclude Include="world\actions\RotateAction.h" />
     <ClInclude Include="world\actions\RotateByAction.h" />
+    <ClInclude Include="world\actions\ScaleByPathAction.h" />
     <ClInclude Include="world\actions\ScalingAction.h" />
     <ClInclude Include="world\actions\WaitAction.h" />
     <ClInclude Include="world\World.h" />

@@ -228,16 +228,6 @@ namespace ds {
 				}
 			}
 			_size = 0;
-			/*
-			if (_destructor) {
-				uchar* ptr = _data;
-				for (uint32 i = 0; i < _size; ++i) {
-					Destruct<T>(ptr);
-					ptr += _typeSize;
-				}
-			}
-			_size = 0;
-			*/
 		}
 
 		T& operator[](uint32 i) {

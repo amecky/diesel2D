@@ -64,6 +64,31 @@ namespace ds {
 		PR_END("ParticleManager::start");
 	}
 
+	int ParticleManager::findGroup(uint32 id) {
+		for (int i = 0; i < _groups.size(); ++i) {
+			if (_groups[i].id == id) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	// --------------------------------------------------------------------------
+	// start specific particlesystem
+	// --------------------------------------------------------------------------
+	void ParticleManager::startGroup(uint32 id, const Vector3f& pos) {
+		PR_START("ParticleManager::start");
+		int idx = findGroup(id);
+		if (idx != -1) {
+			const ParticleSystemGroup& group = _groups[idx];
+			for (int i = 0; i < group.systems.size(); ++i) {
+				NewParticleSystem* system = _systems[group.systems[i]];
+				assert(system != 0);
+				system->start(pos);
+			}
+		}
+		PR_END("ParticleManager::start");
+	}
+
 	// --------------------------------------------------------------------------
 	// stop specific particlesystem
 	// --------------------------------------------------------------------------
@@ -94,6 +119,17 @@ namespace ds {
 				writer.endCategory();
 			}
 		}
+		if (!_groups.empty()) {
+			writer.startCategory("groups");
+			for (int i = 0; i < _groups.size(); ++i) {
+				const ParticleSystemGroup& group = _groups[i];
+				writer.startCategory(group.name);
+				writer.write("id", group.id);
+				writer.write("systems", group.systems.data(), group.systems.size());
+				writer.endCategory();
+			}
+			writer.endCategory();
+		}
 		return true;
 	}
 
@@ -103,14 +139,33 @@ namespace ds {
 		int num = reader.get_categories(cats, 256);
 		for (int i = 0; i < num; ++i) {
 			LOG << "name: " << reader.get_category_name(cats[i]);
-			const char* name = reader.get_string(cats[i],"file");
-			int id = -1;
-			reader.get_int(cats[i],"id", &id);
-			if (id != -1) {
-				NewParticleSystem* system = create(id, name);
-				LOG << "id: " << id << " name: " << name;
-				system->load();
-				_systems[id] = system;
+			if (reader.matches(cats[i], "groups")) {
+				int groups[256];
+				int num_groups = reader.get_categories(groups, 256, cats[i]);
+				for (int z = 0; z < num_groups; ++z) {
+					const char* name = reader.get_category_name(groups[z]);
+					ParticleSystemGroup group;
+					sprintf_s(group.name, 20, "%s", name);
+					int id = -1;
+					reader.get_uint(groups[z], "id", &group.id);
+					int sar[32];
+					int nr_sar = reader.get_array(groups[z], "systems", sar, 32);
+					for (int j = 0; j < nr_sar; ++j) {
+						group.systems.push_back(sar[j]);
+					}
+					_groups.push_back(group);
+				}
+			}
+			else {
+				const char* name = reader.get_string(cats[i], "file");
+				int id = -1;
+				reader.get_int(cats[i], "id", &id);
+				if (id != -1) {
+					NewParticleSystem* system = create(id, name);
+					LOG << "id: " << id << " name: " << name;
+					system->load();
+					_systems[id] = system;
+				}
 			}
 		}
 		return true;

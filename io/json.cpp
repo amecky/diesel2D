@@ -633,6 +633,40 @@ bool JSONReader::get_float_path(int category_id, const char* name, ds::FloatArra
 }
 
 // -------------------------------------------
+// get array
+// -------------------------------------------
+int JSONReader::get_array(int category_id, const char* name, float* values, int max) const {
+	int idx = get_index(category_id, name);
+	int cnt = 0;
+	if (idx != -1) {
+		int entries = _data_sizes[idx];
+		for (int i = 0; i < entries; ++i) {
+			if (cnt < max) {
+				values[cnt++] = get(_data_indices[idx] + i);
+			}
+		}
+	}
+	return cnt;
+}
+
+// -------------------------------------------
+// get int array
+// -------------------------------------------
+int JSONReader::get_array(int category_id, const char* name, int* values, int max) const {
+	int idx = get_index(category_id, name);
+	int cnt = 0;
+	if (idx != -1) {
+		int entries = _data_sizes[idx];
+		for (int i = 0; i < entries; ++i) {
+			if (cnt < max) {
+				values[cnt++] = static_cast<int>(get(_data_indices[idx] + i));
+			}
+		}
+	}
+	return cnt;
+}
+
+// -------------------------------------------
 // allocate data buffer
 // -------------------------------------------
 void JSONReader::alloc(int elements) {
@@ -916,6 +950,21 @@ void JSONWriter::write(const char* name, const ds::FloatArray& path) {
 		writeLineIdent();
 		++_items;
 	}
+}
+
+void JSONWriter::write(const char* name, const int* values, int count) {
+	writeLineIdent();
+	fprintf(f, "%s : ", name);
+	for (int i = 0; i < count; ++i) {
+		if (i > 0) {
+			fprintf(f, ",%d", values[i]);
+		}
+		else {
+			fprintf(f, "%d", values[i]);
+		}
+		++_items;
+	}
+	writeLineIdent();
 }
 
 // ----------------------------------------------------------
