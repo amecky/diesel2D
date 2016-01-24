@@ -75,10 +75,10 @@ public:
 	}
 	virtual ~RingGenerator() {}
 	void generate(ParticleArray* array, const ParticleGeneratorData* data, float dt, uint32 start, uint32 end) {
+		PR_START("RingGenerator:generate");
 		uint32 count = end - start;
 		//float angle = 0.0f;
 		const RingGeneratorData* my_data = static_cast<const RingGeneratorData*>(data);
-
 		float angleVariance = DEGTORAD(my_data->angleVariance);
 		float step = TWO_PI / static_cast<float>(count);
 		if (my_data->step != 0.0f) {
@@ -87,14 +87,15 @@ public:
 		for ( uint32 i = 0; i < count; ++i ) {
 			float myAngle = m_Angle + ds::math::random(-angleVariance,angleVariance);
 			float rad = ds::math::random(my_data->radius - my_data->variance, my_data->radius + my_data->variance);
-			array->position[start + i].x = array->position[start + i].x + rad * cos(myAngle);
-			array->position[start + i].y = array->position[start + i].y + rad * sin(myAngle);
+			array->position[start + i].x = array->position[start + i].x + rad * math::fastCos(myAngle);
+			array->position[start + i].y = array->position[start + i].y + rad * math::fastSin(myAngle);
 			array->position[start + i].z = array->position[start + i].z;
 			//array->position[start + i].y = position.y;
-			//array->position[start + i].z = position.z + rad * sin(myAngle);
+			//array->position[start + i].z = position.z + rad * math::fastSin(myAngle);
 			array->rotation[start + i] = myAngle;
 			m_Angle += step;
 		}
+		PR_END("RingGenerator:generate");
 	}
 	const char* getName() const {
 		return "ring_position";
@@ -133,8 +134,8 @@ public:
 		for (uint32 i = 0; i < count; ++i) {
 			float myAngle = ds::math::random(0.0f,TWO_PI);
 			float rad = ds::math::random(m_Data.minRadius, m_Data.maxRadius);
-			array->position[start + i].x = data.position.x + rad * cos(myAngle);
-			array->position[start + i].y = data.position.y + rad * sin(myAngle);
+			array->position[start + i].x = data.position.x + rad * math::fastCos(myAngle);
+			array->position[start + i].y = data.position.y + rad * math::fastSin(myAngle);
 			array->rotation[start + i] = myAngle;
 			array->type[start + i] = 1;
 		}
@@ -265,9 +266,9 @@ public:
 			for (int i = 0; i < ring; ++i) {				
 				float myAngle = static_cast<float>(i) / static_cast<float>(ring)* TWO_PI;
 				float rad = ds::math::random(m_Data.radius - m_Data.radiusVariance, m_Data.radius + m_Data.radiusVariance);
-				array->position[start + cnt].x = data.position.x + rad * cos(myAngle) * sin(beta);
-				array->position[start + cnt].y = data.position.y + rad * sin(myAngle) * sin(beta);
-				array->position[start + cnt].z = data.position.z + rad * cos(beta);
+				array->position[start + cnt].x = data.position.x + rad * math::fastCos(myAngle) * math::fastSin(beta);
+				array->position[start + cnt].y = data.position.y + rad * math::fastSin(myAngle) * math::fastSin(beta);
+				array->position[start + cnt].z = data.position.z + rad * math::fastCos(beta);
 				array->rotation[start + cnt] = beta;
 				array->type[start + cnt] = 1;
 				++cnt;
@@ -312,9 +313,9 @@ public:
 			float myAngle = ds::math::random(DEGTORAD(m_Data.phi.x), DEGTORAD(m_Data.phi.y));
 			float beta = ds::math::random(DEGTORAD(m_Data.beta.x), DEGTORAD(m_Data.beta.y));
 			float rad = ds::math::random(m_Data.radius - m_Data.radiusVariance, m_Data.radius + m_Data.radiusVariance);
-			array->position[start + i].x = data.position.x + rad * cos(myAngle) * sin(beta);
-			array->position[start + i].y = data.position.y + rad * sin(myAngle) * sin(beta);
-			array->position[start + i].z = data.position.z + rad * cos(beta);
+			array->position[start + i].x = data.position.x + rad * math::fastCos(myAngle) * math::fastSin(beta);
+			array->position[start + i].y = data.position.y + rad * math::fastSin(myAngle) * math::fastSin(beta);
+			array->position[start + i].z = data.position.z + rad * math::fastCos(beta);
 			array->rotation[start + i] = beta;
 			array->type[start + i] = 1;
 		}
@@ -355,6 +356,7 @@ public:
 	RadialVelocityGenerator() : ParticleGenerator() {}
 	virtual ~RadialVelocityGenerator() {}
 	void generate(ParticleArray* array, const ParticleGeneratorData* data, float dt, uint32 start, uint32 end) {
+		PR_START("RadialVelocityGenerator:generate");
 		assert(data != 0);
 		uint32 count = end - start;
 		const RadialVelocityGeneratorData* my_data = static_cast<const RadialVelocityGeneratorData*>(data);
@@ -365,6 +367,7 @@ public:
 			//array->velocity[start + i] = dn * v;
 			array->velocity[start+i] = vector::getRadialVelocity(array->rotation[start+i],v);
 		}
+		PR_END("RadialVelocityGenerator:generate");
 	}
 	const char* getName() const {
 		return "radial_velocity";
@@ -439,6 +442,7 @@ public:
 	}
 	virtual ~LifetimeGenerator() {}
 	void generate(ParticleArray* array, const ParticleGeneratorData* data, float dt, uint32 start, uint32 end) {
+		PR_START("LifetimeGenerator:generate");
 		assert(data != 0);
 		uint32 count = end - start;
 		const LifetimeGeneratorData* my_data = static_cast<const LifetimeGeneratorData*>(data);
@@ -446,6 +450,7 @@ public:
 			float ttl = ds::math::random(my_data->ttl - my_data->variance, my_data->ttl + my_data->variance);
 			array->timer[start+i] = Vector3f(0.0f,0.0f,ttl);
 		}
+		PR_END("LifetimeGenerator:generate");
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_LIFETIME;

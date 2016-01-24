@@ -76,9 +76,11 @@ namespace ds {
 			if ( def.hash == hashName ) {
 				found = true;
 				if ( active ) {
+					TIMER("DialogManager::activate")
 					def.dialog->activate();
 				}
 				else {
+					TIMER("DialogManager::deactivate")
 					def.dialog->deactivate();
 				}
 			}

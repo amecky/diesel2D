@@ -35,6 +35,7 @@ namespace ds {
 		StopWatch s;
 		s.start();
 		sprintf_s(buffer, 64, "content\\%s", getFileName());
+		// FIXME: assert that file name contains .
 		LOG << "Reading simplified json file: " << buffer;
 		JSONReader reader;
 		if (BINARY) {

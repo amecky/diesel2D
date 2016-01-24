@@ -7,10 +7,26 @@
 
 StopWatch::StopWatch() {
 	QueryPerformanceFrequency(&_frequency);
+	_running = false;
+	sprintf_s(_name, 32, "StopWatch");
+}
+
+StopWatch::StopWatch(const char* name) {
+	QueryPerformanceFrequency(&_frequency);
+	_running = false;
+	sprintf_s(_name, 32, name);
+}
+
+StopWatch::~StopWatch() {
+	if (_running) {
+		end();
+		LOG << _name << " - elapsed: " << _elapsed;
+	}
 }
 
 void StopWatch::start() {
 	QueryPerformanceCounter(&startingTime);
+	_running = true;
 }
 
 double StopWatch::LIToSecs(LARGE_INTEGER & L) {
@@ -18,6 +34,7 @@ double StopWatch::LIToSecs(LARGE_INTEGER & L) {
 }
 
 void StopWatch::end() {
+	_running = false;
 	LARGE_INTEGER EndingTime;
 	QueryPerformanceCounter(&EndingTime);
 	LARGE_INTEGER time;
@@ -251,6 +268,24 @@ namespace profiler {
 		LOG << "------------------------------------------------------------";
 	}
 
+	void save(FILE* f) {
+		fprintf(f, "------------------------------------------------------------\n");
+		fprintf(f, " C  | Percent | Accu       | Name\n");
+		fprintf(f, "------------------------------------------------------------\n");
+		float norm = ctx.data[0].totalTime;
+		for (int i = 0; i < ctx.index; ++i) {
+			ProfileData& pd = ctx.data[i];
+			int ident = pd.level * 2;
+			float per = pd.totalTime / norm * 100.0f;
+			fprintf(f, "%3d | %s  | %3.8f | ", pd.invokeCounter, formatPercentage(per).c_str(), pd.totalTime);
+			for (int j = 0; j < ident; ++j) {
+				fprintf(f," ");
+			}
+			fprintf(f,"%s\n",pd.name);
+		}
+		fprintf(f,"------------------------------------------------------------\n");
+	}
+
 	void showDialog(v2* position) {
 		gui::start(EDITOR_ID, position);
 		int state = 1;
@@ -261,7 +296,7 @@ namespace profiler {
 				ProfileData& pd = ctx.data[i];
 				int ident = pd.level * 2;
 				//float per = pd.totalTime / norm * 100.0f;
-				sprintf(buffer, "%3d - %3.8f - %.11s", pd.invokeCounter, pd.totalTime,pd.name);
+				sprintf(buffer, "%3d - %3.8f - %2.11s", pd.invokeCounter, pd.totalTime,pd.name);
 				gui::Label(buffer);
 			}
 		}

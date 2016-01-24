@@ -1,5 +1,6 @@
 #include "SparkleEffect.h"
 #include "..\sprites\SpriteBatch.h"
+#include "..\math\GameMath.h"
 
 namespace ds {
 	// --------------------------------------------
@@ -18,7 +19,7 @@ namespace ds {
 	// --------------------------------------------
 	// start block
 	// --------------------------------------------
-	void SparkleEffect::start(int xp, int yp, const ds::Rect& r, int pieces) {
+	void SparkleEffect::start(int xp, int yp, const Rect& r, int pieces) {
 		int total = pieces * pieces;
 		float dx = r.width() / pieces;
 		float dy = r.height() / pieces;
@@ -37,10 +38,10 @@ namespace ds {
 				for (int x = 0; x < pieces; ++x) {
 					_sparkles.positions[cnt] = v2(np.x + (dx + gap) * x, np.y - (dy + gap) * y);
 					_sparkles.timers[cnt] = 0.0f;
-					_sparkles.textures[cnt] = ds::math::buildTexture(r.top + dy * y, r.left + dx * x, dx, dy);
-					float v = _settings.velocity + ds::math::random(-_settings.velocityVariance, _settings.velocityVariance);
-					float angle = ds::math::getTargetAngle(_sparkles.positions[cnt], v2(512, 384));
-					_sparkles.velocities[cnt] = ds::math::getRadialVelocity(angle, v);
+					_sparkles.textures[cnt] = math::buildTexture(r.top + dy * y, r.left + dx * x, dx, dy);
+					float v = _settings.velocity + math::random(-_settings.velocityVariance, _settings.velocityVariance);
+					float angle = math::getTargetAngle(_sparkles.positions[cnt], v2(512, 384));
+					_sparkles.velocities[cnt] = math::getRadialVelocity(angle, v);
 					++cnt;
 				}
 			}
@@ -68,7 +69,7 @@ namespace ds {
 	// --------------------------------------------
 	void SparkleEffect::render() {
 		for (int i = 0; i < _sparkles.countAlive; ++i) {
-			ds::sprites::draw(_sparkles.positions[i], _sparkles.textures[i], 0.0f, _sparkles.scales[i].x, _sparkles.scales[i].y);
+			sprites::draw(_sparkles.positions[i], _sparkles.textures[i], 0.0f, _sparkles.scales[i].x, _sparkles.scales[i].y);
 		}
 	}
 
@@ -80,8 +81,8 @@ namespace ds {
 	// --------------------------------------------
 	// start
 	// --------------------------------------------
-	void IntroEffect::start(int xp, int yp, const ds::Rect& r, int stepX, int stepY, float gap, float textureSize) {
-		_texture = ds::math::buildTexture(r,textureSize,textureSize);
+	void IntroEffect::start(int xp, int yp, const Rect& r, int stepX, int stepY, float gap, float textureSize) {
+		_texture = math::buildTexture(r,textureSize,textureSize);
 		int total = stepX * stepY;
 		float dx = r.width() / stepX;
 		float dy = r.height() / stepY;
@@ -99,11 +100,11 @@ namespace ds {
 				for (int x = 0; x < stepX; ++x) {
 					_sparkles.positions[cnt] = v2(np.x + (dx + gap) * x, np.y - (dy + gap) * y);
 					_sparkles.timers[cnt] = 0.0f;
-					_sparkles.textures[cnt] = ds::math::buildTexture(r.top + dy * y, r.left + dx * x, dx, dy,textureSize,textureSize);
-					float angle = ds::math::getTargetAngle(_sparkles.positions[cnt], v2(512, 384));
-					//float angle = ds::math::random(0.0f, TWO_PI);
-					float v = _settings.velocity + ds::math::random(-_settings.velocityVariance, _settings.velocityVariance);
-					_sparkles.velocities[cnt] = ds::math::getRadialVelocity(RADTODEG(angle), v);
+					_sparkles.textures[cnt] = math::buildTexture(r.top + dy * y, r.left + dx * x, dx, dy,textureSize,textureSize);
+					float angle = math::getTargetAngle(_sparkles.positions[cnt], v2(512, 384));
+					//float angle = math::random(0.0f, TWO_PI);
+					float v = _settings.velocity + math::random(-_settings.velocityVariance, _settings.velocityVariance);
+					_sparkles.velocities[cnt] = math::getRadialVelocity(RADTODEG(angle), v);
 					_sparkles.scales[cnt] = v2(1, 1);
 					++cnt;
 				}
@@ -116,7 +117,7 @@ namespace ds {
 	void IntroEffect::render() {
 		if (_running) {
 			if (_warmUpTimer > 0.0f) {
-				ds::sprites::draw(v2(512, 384), _texture);
+				sprites::draw(v2(512, 384), _texture);
 			}
 			else {
 				SparkleEffect::render();

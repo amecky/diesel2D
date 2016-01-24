@@ -15,7 +15,7 @@ class GameState;
 struct BitmapFont;
 class ParticleManager;
 class SpriteTemplatesEditor;
-
+class World;
 
 struct GameTime {
 	float elapsed;
@@ -128,17 +128,18 @@ protected:
 	void showPerformceOverlay(v2* position);
 
 	DialogManager* gui;
-	AudioManager* audio;
-	
+	AudioManager* audio;	
 	ParticleManager* particles;
+	World* world;
+	
+private:
 	HINSTANCE hInstance;
 	HWND m_hWnd;
 	bool m_Active;
-	WINDOWPLACEMENT m_wp;	
+	WINDOWPLACEMENT m_wp;
 	GameTime m_GameTime;
 	float _totalTime;
 	Settings _settings;
-private:
 	void loadSettings();
 	void showProfilerSnapshot(v2* position);
 	void showEditor();

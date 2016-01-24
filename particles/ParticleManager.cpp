@@ -207,7 +207,7 @@ namespace ds {
 				const Texture& t = _systems[i]->getTexture();
 				if (array.countAlive > 0) {
 					for (int j = 0; j < array.countAlive; ++j) {
-						if (m_ParticleIndex > 2048) {
+						if (m_ParticleIndex > MAX_PARTICLES) {
 							flush();
 						}
 						for (int k = 0; k < 4; ++k) {
@@ -275,7 +275,7 @@ namespace ds {
 	}
 
 	void ParticleManager::init(const Descriptor& desc) {
-		bufferIndex = renderer::createVertexBuffer(VD_PARTICLE, 4096 * 4, true);
+		bufferIndex = renderer::createVertexBuffer(VD_PARTICLE, MAX_PARTICLES * 4, true);
 		indexBufferIndex = renderer::getQuadIndexBufferIndex();
 		descriptorIndex = renderer::addDescriptor(desc);
 	}

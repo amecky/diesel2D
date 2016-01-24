@@ -15,6 +15,11 @@ namespace ds {
 		float hill(float x);
 		float fastSin(float x);
 		float fastCos(float x);
+		float sin_f(float x);
+		float cos_f(float x);
+		float f_sin(float x);
+
+		void sincos(float x, float* s, float* c);
 
 		float norm(float t,float max);
 		bool addClamped(float *value,float add,float max,float newValue = 0.0f);

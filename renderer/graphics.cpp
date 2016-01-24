@@ -1739,9 +1739,7 @@ namespace ds {
 			group->load();
 			return group;
 		}
-	}
 
-	/*
 		void showDrawCounter(v2* position) {
 			gui::start(EDITOR_ID, position);
 			int state = 1;
@@ -1767,7 +1765,7 @@ namespace ds {
 
 		void printDrawCounter() {
 			LOG << "DrawCounter";
-			LOG << "-------------------------------------------";
+			LOG << "------------------------------------------------------------";
 			LOG << "Indices  : " << renderContext->drawCounter.indexCounter;
 			LOG << "Vertices : " << renderContext->drawCounter.numPrim;
 			LOG << "Sprites  : " << renderContext->drawCounter.sprites;
@@ -1778,5 +1776,20 @@ namespace ds {
 			LOG << "Particles: " << renderContext->drawCounter.particles;
 		}
 
-	*/
+		void saveDrawCounter(FILE* f) {
+			fprintf(f, "DrawCounter\n");
+			fprintf(f, "------------------------------------------------------------\n");
+			fprintf(f, "Indices  : %d\n", renderContext->drawCounter.indexCounter);
+			fprintf(f, "Vertices : %d\n", renderContext->drawCounter.numPrim);
+			fprintf(f, "Sprites  : %d\n", renderContext->drawCounter.sprites);
+			fprintf(f, "Flushes  : %d\n", renderContext->drawCounter.flushes);
+			fprintf(f, "DrawCalls: %d\n", renderContext->drawCounter.drawCalls);
+			fprintf(f, "Textures : %d\n", renderContext->drawCounter.textures);
+			fprintf(f, "Shaders  : %d\n", renderContext->drawCounter.shaders);
+			fprintf(f, "Particles: %d\n", renderContext->drawCounter.particles);
+		}
+
+	}
+
+	
 }

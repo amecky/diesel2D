@@ -62,7 +62,8 @@ namespace ds {
 	World::~World(void) {
 		m_Actions.destroy_all();
 		if ( m_Data.buffer != 0 ) {
-			delete[] m_Data.buffer;
+			//delete[] m_Data.buffer;
+			gDefaultMemory->deallocate(m_Data.buffer);
 		}
 		
 	}
@@ -303,7 +304,9 @@ namespace ds {
 
 	void World::setBoundingRect(const Rect& r) {
 		// we need to switch y
-		Rect newRect = r;
+		Rect newRect;
+		newRect.left = r.left;
+		newRect.right = r.right;
 		newRect.top = r.bottom;
 		newRect.bottom = r.top;
 		for (size_t i = 0; i < m_Actions.size(); ++i) {
@@ -321,6 +324,20 @@ namespace ds {
 			m_Actions[i]->debug();
 		}
 		
+	}
+
+	void World::save(FILE* f) {
+		fprintf(f, "------------------------------------------------------------\n");
+		fprintf(f, "                       World\n");
+		fprintf(f, "------------------------------------------------------------\n");
+		fprintf(f, "---------------------- Sprites -----------------------------\n");
+		for (int i = 0; i < m_Data.num; ++i) {
+			fprintf(f, "%d id: %d type: %d pos: %g,%g rotation: %g scale: %g,%g\n",
+				i, m_Data.ids[i], m_Data.types[i], m_Data.positions[i].x,
+				m_Data.positions[i].y, RADTODEG(m_Data.rotations[i]),
+				m_Data.scales[i].x, m_Data.scales[i].y);
+		}
+
 	}
 
 	void World::debug(SID sid) {

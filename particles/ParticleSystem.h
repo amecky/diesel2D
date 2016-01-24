@@ -16,8 +16,6 @@ namespace ds {
 // -------------------------------------------------------
 // New particle system
 // -------------------------------------------------------
-const int MAX_PARTICLES = 4096;
-
 struct ParticleSystemData {
 
 	uint32 id;
@@ -50,6 +48,8 @@ struct GeneratorInstance {
 // -------------------------------------------------------
 // Particle system
 // -------------------------------------------------------
+const int MAX_PARTICLE_SYSTEM = 2048;
+
 class NewParticleSystem : public DataFile {
 
 public:

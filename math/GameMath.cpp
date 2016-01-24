@@ -49,6 +49,100 @@ namespace ds {
 			return fastSin(x + HALF_PI);
 		}
 
+		void sincos(float x, float* s, float* c) {
+			//always wrap input angle to -PI..PI
+			if (x < -PI) {
+				x += TWO_PI;
+			}
+			else {
+				if (x > PI) {
+					x -= TWO_PI;
+				}
+			}
+			//compute sine
+			if (x < 0) {
+				*s = 1.27323954f * x + 0.405284735f * x * x;
+			}
+			else {
+				*s = 1.27323954f * x - 0.405284735f * x * x;
+			}
+			//compute cosine: sin(x + PI/2) = cos(x)
+			x += HALF_PI;
+			if (x > PI) {
+				x -= TWO_PI;
+			}
+			if (x < 0) {
+				*c = 1.27323954f * x + 0.405284735f * x * x;
+			}
+			else {
+				*c = 1.27323954f * x - 0.405284735f * x * x;
+			}
+		}
+
+		unsigned int SIN_LOOP = 15;
+		unsigned int COS_LOOP = 15;
+
+		// sin(x) = x - x^3/3! + x^5/5! - x^7/7! + ...
+		float sin_f(float x) {
+			float Sum = 0;
+			float Power = x;
+			float Sign = 1;
+			const float x2 = x * x;
+			float Fact = 1.0;
+			for (unsigned int i = 1; i < SIN_LOOP; i += 2) {
+				Sum += Sign * Power / Fact;
+				Power *= x2;
+				Fact *= (i + 1) * (i + 2);
+				Sign *= -1.0;
+			}
+			return Sum;
+		}
+
+		static const float fact3 = 0.148148148148148f;//6.75f;
+
+		float f_sin(float a) {
+			float y = 0.0f;
+			float tmp = 0.0f;
+			bool sign = false;
+			if ((a > TWO_PI) || (a < -TWO_PI)) {
+				a = fmod(a, TWO_PI);
+			}
+			if (a > PI) {
+				a -= TWO_PI;
+				sign = true;
+			}
+
+			if (a < HALF_PI) {
+				y = a - a * a * a * fact3;
+			}
+			else {
+				tmp = a - PI;
+				y = -tmp + tmp * tmp * tmp * fact3;
+			}
+
+			if (sign) {
+				y = -y;
+			}
+			return y;
+		}
+
+		// cos(x) = 1 - x^2/2! + x^4/4! - x^6/6! + ...
+		float cos_f(float x) {
+			float Sum = x;
+			float Power = x;
+			float Sign = 1.0;
+			const float x2 = x * x;
+			float Fact = 1.0;
+			for (unsigned int i = 3; i < COS_LOOP; i += 2) {
+				Power *= x2;
+				Fact *= i * (i - 1);
+				Sign *= -1.0;
+				Sum += Sign * Power / Fact;
+			}
+			return Sum;
+		}
+
+
 
 
 		const Vector2f V2_RIGHT = Vector2f(1.0f,0.0f);

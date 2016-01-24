@@ -526,6 +526,15 @@ namespace ds {
 		SpriteGroup* getSpriteGroup(const char* name);
 
 		SpriteGroupContainer* getSpriteGroupContainer();
+
+		// -------------------------------------------------
+		// debug
+		// -------------------------------------------------
+		void showDrawCounter(v2* position);
+
+		void printDrawCounter();
+
+		void saveDrawCounter(FILE* f);
 	}
 
 }

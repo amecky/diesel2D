@@ -17,6 +17,8 @@
 #include "..\editor\ParticlesEditState.h"
 #include "..\io\FileRepository.h"
 #include "..\memory\DefaultAllocator.h"
+#include "..\world\World.h"
+#include <time.h>
 
 namespace ds {
 
@@ -57,6 +59,7 @@ BaseApp::BaseApp() {
 	_editor.state = 1;
 	particles = new ParticleManager;
 	gui = new DialogManager;
+	world = new World;
 	_templatesEditor = 0;
 	_perfHUDPos = v2(750, 710);
 	_prepared = false;
@@ -79,9 +82,10 @@ BaseApp::~BaseApp() {
 	sprites::shutdown();
 	repository::shutdown();
 	delete _bmfDialog;
-	delete _templatesEditor;
-	delete particles;
+	delete _templatesEditor;	
+	delete world;
 	delete gui;
+	delete particles;
 	delete _stateMachine;
 	//delete gProfiler;
 	delete audio;
@@ -206,8 +210,7 @@ void BaseApp::loadSettings() {
 // -------------------------------------------------------
 void BaseApp::prepare() {	
 	assert(!_prepared);
-	StopWatch s;
-	s.start();
+	TIMER("Load Settings")
 	LOG << "---> Init <---";
 	LOG << "---- Loading settings ----";
 	//Category root("root");
@@ -246,8 +249,6 @@ void BaseApp::prepare() {
 	_perfHUDPos = dp;
 	m_Running = true;
 	_prepared = true;
-	s.end();
-	LOG << "Total time to initialize: " << s.elapsed();
 }
 
 void BaseApp::logKeyBindings() {
@@ -397,9 +398,10 @@ void BaseApp::buildFrame() {
 	if ( m_Running ) {
 		_totalTime += m_GameTime.elapsed;
 		PR_START("UPDATE");
+		PR_START("UPDATE:gui");
 		gui->updateMousePos(getMousePos());
 		gui->tick(m_GameTime.elapsed);
-		PR_END("GameObjects::update");
+		PR_END("UPDATE:gui");
 		PR_START("Game::update");
 		update(m_GameTime.elapsed);
 		_stateMachine->update(m_GameTime.elapsed);
@@ -452,9 +454,22 @@ void BaseApp::buildFrame() {
 	profiler::finalize();
 	if (m_DebugInfo.monitoring) {
 		if (profiler::get_current_total_time() > m_DebugInfo.treshold) {
-			//debug::printDrawCounter();
-			LOG << "--------------------------------";
-			profiler::print();
+			char timeFormat[255];
+			time_t now;
+			time(&now);
+			tm *now_tm = localtime(&now);
+			strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
+			char filename[255];
+			sprintf_s(filename, "%s.prof", timeFormat);
+			FILE* f = fopen(filename, "w");
+			renderer::saveDrawCounter(f);
+			profiler::save(f);
+			world->save(f);
+			fclose(f);
+			//renderer::printDrawCounter();
+			LOG << "performance treshold exceeded: " << profiler::get_current_total_time();
+			//LOG << "--------------------------------";
+			//profiler::print();			
 		}
 	}
 	renderer::endRendering();
@@ -462,7 +477,7 @@ void BaseApp::buildFrame() {
 	//PR_END("MAIN")
 	if ( m_DebugInfo.printProfiler ) {
 		m_DebugInfo.printProfiler = false;
-		//debug::printDrawCounter();
+		renderer::printDrawCounter();
 		LOG << "------------------------------------------------------------";
 		gDefaultMemory->debug();
 		profiler::print();

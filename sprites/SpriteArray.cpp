@@ -1,5 +1,6 @@
 #include "SpriteArray.h"
 #include "..\utils\Log.h"
+#include "..\memory\DefaultAllocator.h"
 
 namespace ds {
 
@@ -135,7 +136,7 @@ namespace ds {
 
 		void debug(SpriteArray& array) {
 			for ( int i = 0; i < array.num; ++i ) {
-				LOG << i << " : id: " << array.ids[i] << " pos: " << DBG_V2(array.positions[i]);
+				LOG << i << " : id: " << array.ids[i] << " type: " << array.types[i] << " pos: " << DBG_V2(array.positions[i]);
 			}
 		}
 
@@ -156,7 +157,8 @@ namespace ds {
 			if (size > array.total) {
 				SpriteArray sad;
 				int sz = size * (sizeof(SpriteArrayIndex) + sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(float) + sizeof(Texture) + sizeof(Color) + sizeof(float) + sizeof(int) + sizeof(int));
-				sad.buffer = new char[sz];
+				//sad.buffer = new char[sz];
+				sad.buffer = (char*)gDefaultMemory->allocate(sz);
 				sad.total = size;
 				sad.num = 0;
 				sad.indices = (SpriteArrayIndex*)(sad.buffer);
@@ -183,7 +185,8 @@ namespace ds {
 					sad.free_dequeue = array.free_dequeue;
 					sad.free_enqueue = array.free_enqueue;
 					sad.num = array.num;
-					delete[] array.buffer;
+					//delete[] array.buffer;
+					gDefaultMemory->deallocate(array.buffer);
 				}
 				else {
 					clear(sad);

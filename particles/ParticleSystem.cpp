@@ -3,6 +3,7 @@
 #include "..\sprites\SpriteBatch.h"
 #include "..\renderer\graphics.h"
 #include "..\utils\Log.h"
+#include "ParticleManager.h"
 
 namespace ds {
 
@@ -15,7 +16,7 @@ namespace ds {
 		strcpy_s(m_DebugName, 32, name);
 		sprintf_s(_json_name, 64, "particles\\%s.json", name);
 		_id = id;
-		m_Array.initialize(MAX_PARTICLES);
+		m_Array.initialize(MAX_PARTICLE_SYSTEM);
 		_count_modifiers = 0;
 		_count_generators = 0;
 		_factory = factory;
@@ -110,6 +111,7 @@ namespace ds {
 	// generate
 	// -------------------------------------------------------
 	void NewParticleSystem::emittParticles(const ParticleEmitterInstance& instance, int count, uint32* start, uint32* end, float dt) {
+		PR_START("NPS:emittParticles");
 		*start = m_Array.countAlive;
 		*end = *start + count;
 		if (*end > m_Array.count) {
@@ -129,10 +131,13 @@ namespace ds {
 		for (uint32 i = *start; i < *end; ++i) {
 			m_Array.wake(i);
 		}
+		PR_START("NPS:emittParticles:generate");
 		for (int i = 0; i < _count_generators; ++i) {
 			const GeneratorInstance& instance = _generator_instances[i];
 			instance.generator->generate(&m_Array, instance.data, 0.0f, *start, *end);
 		}
+		PR_END("NPS:emittParticles:generate");
+		PR_END("NPS:emittParticles");
 	}
 
 	void NewParticleSystem::update(float elapsed) {

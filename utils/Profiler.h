@@ -7,16 +7,21 @@ class StopWatch {
 
 public:
 	StopWatch();
-	~StopWatch() {}
+	explicit StopWatch(const char* name);
+	~StopWatch();
 	void start();
 	void end();
 	float elapsed();
 private:
 	double LIToSecs(LARGE_INTEGER & L);
 	float _elapsed;
+	bool _running;
 	LARGE_INTEGER startingTime;
 	LARGE_INTEGER _frequency;
+	char _name[32];
 };
+
+#define TIMER(name) StopWatch s(name); s.start();
 // -------------------------------------------------------
 // Profile data
 // -------------------------------------------------------
@@ -44,6 +49,8 @@ namespace profiler {
 	void finalize();
 
 	void print();
+
+	void save(FILE* f);
 
 	int get_total_times(float* values, int max);
 

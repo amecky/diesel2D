@@ -261,6 +261,8 @@ namespace ds {
 
 		void debug();
 
+		void save(FILE* f);
+
 		void debug(SID sid);
 
 		void stopAction(SID sid, ActionType type);

@@ -6,6 +6,8 @@
 
 namespace ds {
 
+const int MAX_PARTICLES = 16386;
+
 struct ParticleSystemGroup {
 	uint32 id;
 	char name[20];
@@ -54,7 +56,7 @@ private:
 	int bufferIndex;
 	int indexBufferIndex;
 	int descriptorIndex;
-	ParticleVertex particles[4096 * 4];
+	ParticleVertex particles[MAX_PARTICLES * 4];
 	int m_ParticleIndex;
 	ParticleSystemFactory _factory;
 	Array<ParticleSystemGroup> _groups;
