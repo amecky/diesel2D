@@ -472,24 +472,18 @@ void BaseApp::buildFrame() {
 	profiler::finalize();
 	perf::finalize();
 	if (m_DebugInfo.monitoring) {
-		if (profiler::get_current_total_time() > m_DebugInfo.treshold) {
+		if (perf::get_current_total_time() > m_DebugInfo.treshold) {
 			saveHTMLProfilingReport();
-			//renderer::printDrawCounter();
-			LOG << "performance treshold exceeded: " << profiler::get_current_total_time();
-			//LOG << "--------------------------------";
-			//profiler::print();			
+			LOG << "performance treshold exceeded: " << perf::get_current_total_time();
 		}
 	}
 	renderer::endRendering();
-	//profiler::finalize();
-	//PR_END("MAIN")
 	if ( m_DebugInfo.printProfiler ) {
 		m_DebugInfo.printProfiler = false;
 		renderer::printDrawCounter();
 		LOG << "------------------------------------------------------------";
 		gDefaultMemory->debug();
 		profiler::print();
-
 		saveHTMLProfilingReport(); 
 	}	
 }

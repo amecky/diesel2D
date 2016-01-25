@@ -1342,7 +1342,7 @@ namespace gui {
 						ds::sprites::drawText(guiContext->font, p.x, p.y, call.text, call.padding);
 					}
 				}
-
+				LOG << "num: " << win.num;
 			}
 		}
 		ds::sprites::setTexture(current);
