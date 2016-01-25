@@ -20,6 +20,7 @@ namespace ds {
 		ActionType getActionType() const {
 			return AT_SCALE_BY_PATH;
 		}
+		void save(const ReportWriter& writer);
 	protected:
 		SID swap(int i);
 	private:

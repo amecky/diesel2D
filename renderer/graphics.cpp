@@ -864,7 +864,7 @@ namespace ds {
 		}
 
 		void draw_render_target_common(RTID rtID, int shaderID, int blendState) {
-			PR_START("draw_render_target");
+			ZoneTracker z("draw_render_target");
 			sprites::flush();
 			fillBuffer(renderContext->renderTargetQuad.vertexBufferID, renderContext->renderTargetQuad.vertices, 4);
 			const VertexBuffer& vb = renderContext->vertexBuffers[renderContext->renderTargetQuad.vertexBufferID];
@@ -900,7 +900,6 @@ namespace ds {
 			}
 			shader->end();
 			renderer::setBlendState(current);
-			PR_END("draw_render_target");
 		}
 
 		void draw_render_target(RTID rtID, int shaderID) {
@@ -925,7 +924,7 @@ namespace ds {
 				renderContext->currentDescriptor = descriptorID;
 			}
 			// FIXME: check if we need to switch this
-			PR_START("drawBuffer");
+			ZoneTracker z("drawBuffer");
 			const VertexBuffer& vb = renderContext->vertexBuffers[vertexBufferID];
 			VDStruct& vds = renderContext->vdStructs[vb.vertexDeclaration];
 			HR(renderContext->device->SetVertexDeclaration(renderContext->vdStructs[vb.vertexDeclaration].declaration->get()));
@@ -945,7 +944,6 @@ namespace ds {
 			++renderContext->drawCounter.shaders;
 			++renderContext->drawCounter.drawCalls;
 			++renderContext->drawCounter.flushes;			
-			PR_END("drawBuffer");
 		}
 		
 		// -------------------------------------------------------
@@ -1787,6 +1785,46 @@ namespace ds {
 			fprintf(f, "Textures : %d\n", renderContext->drawCounter.textures);
 			fprintf(f, "Shaders  : %d\n", renderContext->drawCounter.shaders);
 			fprintf(f, "Particles: %d\n", renderContext->drawCounter.particles);
+		}
+
+		void saveDrawCounter(const ReportWriter& writer) {
+			writer.startBox("DrawCounter");
+			const char* HEADERS[] = { "Type", "Count" };
+			writer.startTable(HEADERS, 2);
+			writer.startRow();
+			writer.addCell("Indices");
+			writer.addCell(renderContext->drawCounter.indexCounter);
+			writer.endRow();
+			writer.startRow();
+			writer.addCell("Vertices"); 
+			writer.addCell(renderContext->drawCounter.numPrim);
+			writer.endRow();
+			writer.startRow();
+			writer.addCell("Sprites"); 
+			writer.addCell(renderContext->drawCounter.sprites);
+			writer.endRow();
+			writer.startRow();
+			writer.addCell("Flushes"); 
+			writer.addCell(renderContext->drawCounter.flushes);
+			writer.endRow();
+			writer.startRow();
+			writer.addCell("DrawCalls"); 
+			writer.addCell(renderContext->drawCounter.drawCalls);
+			writer.endRow();
+			writer.startRow();
+			writer.addCell("Textures"); 
+			writer.addCell(renderContext->drawCounter.textures);
+			writer.endRow();
+			writer.startRow();
+			writer.addCell("Shaders"); 
+			writer.addCell(renderContext->drawCounter.shaders);
+			writer.endRow();
+			writer.startRow();
+			writer.addCell("Particles"); 
+			writer.addCell(renderContext->drawCounter.particles);
+			writer.endRow();
+			writer.endTable();
+			writer.endBox();
 		}
 
 	}

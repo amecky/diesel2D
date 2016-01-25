@@ -1,5 +1,4 @@
 #include "Profiler.h"
-
 #include "Log.h"
 #include "StringUtils.h"
 #include "..\ui\IMGUI.h"
@@ -49,6 +48,27 @@ float StopWatch::elapsed() {
 namespace profiler {
 
 	const int MAX_PROFLING_ENTRIES = 256;
+
+	// -------------------------------------------------------
+	// Profile event type
+	// -------------------------------------------------------
+	enum ProfileEventType {
+		PET_START,
+		PET_END,
+		PET_EOL
+	};
+
+	// -------------------------------------------------------
+	// Profile event
+	// -------------------------------------------------------
+	struct ProfileEvent {
+		int parent;
+		LARGE_INTEGER startingTime;
+		float duration;
+		ProfileEventType type;
+		int name_index;
+		IdString hash;
+	};
 	
 	// -------------------------------------------------------
 	// Profile data
@@ -286,6 +306,25 @@ namespace profiler {
 		fprintf(f,"------------------------------------------------------------\n");
 	}
 
+	void save(const ReportWriter& writer) {
+		writer.addHeader("Profiling");
+		const char* HEADERS[] = { "C", "Percent", "Accu", "Name" };
+		writer.startTable(HEADERS, 4);
+		float norm = ctx.data[0].totalTime;
+		for (int i = 0; i < ctx.index; ++i) {
+			writer.startRow();
+			ProfileData& pd = ctx.data[i];
+			int ident = pd.level * 2;
+			float per = pd.totalTime / norm * 100.0f;
+			writer.addCell(pd.invokeCounter);
+			writer.addCell(formatPercentage(per).c_str());
+			writer.addCell(pd.totalTime);
+			writer.addCell(ident,pd.name);
+			writer.endRow();
+		}
+		writer.endTable();
+	}
+
 	void showDialog(v2* position) {
 		gui::start(EDITOR_ID, position);
 		int state = 1;
@@ -322,3 +361,173 @@ namespace profiler {
 		return realMax;
 	}
 }
+
+
+
+namespace perf {
+
+	struct ZoneTrackerEvent {
+		IdString hash;
+		int parent;
+		LARGE_INTEGER started;
+		float duration;
+		int name_index;
+		int ident;
+	};
+
+	struct ZoneTrackerContext {
+		ds::CharBuffer names;
+		ds::Array<IdString> hashes;
+		int current_parent;
+		int root_event;
+		ds::Array<ZoneTrackerEvent> events;
+		int ident;
+	};
+
+	static ZoneTrackerContext* zoneTrackerCtx;
+
+	void init() {
+		zoneTrackerCtx = new ZoneTrackerContext;
+	}
+
+	void reset() {
+		zoneTrackerCtx->names.size = 0;
+		zoneTrackerCtx->events.clear();
+		zoneTrackerCtx->ident = 0;
+		// create root event
+		zoneTrackerCtx->current_parent = -1;
+		zoneTrackerCtx->root_event = start("ROOT");		
+		zoneTrackerCtx->current_parent = zoneTrackerCtx->root_event;
+	}
+
+	void finalize() {
+		end(zoneTrackerCtx->root_event);
+	}
+
+	void debug() {
+		LOG << "------------------------------------------------------------";
+		LOG << " Percent | Accu       | Name";
+		LOG << "------------------------------------------------------------";
+		float norm = zoneTrackerCtx->events[0].duration;
+		char buffer[256];
+		std::string line;
+		for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
+			const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];
+			int ident = event.ident * 2;
+			float per = event.duration / norm * 100.0f;
+			sprintf(buffer, "%s  | %3.8f | ", profiler::formatPercentage(per).c_str(), event.duration);
+			line = buffer;
+			for (int j = 0; j < ident; ++j) {
+				line += " ";
+			}
+			const char* n = zoneTrackerCtx->names.data + zoneTrackerCtx->events[i].name_index;
+			LOG << line << " " << n;
+		}
+		LOG << "------------------------------------------------------------";
+
+	}
+
+	int start(const char* name) {
+		// create event
+		ZoneTrackerEvent event;
+		event.parent = zoneTrackerCtx->current_parent;
+		QueryPerformanceCounter(&event.started);
+		event.ident = zoneTrackerCtx->ident++;
+		event.name_index = zoneTrackerCtx->names.size;
+		event.hash = ds::string::murmur_hash(name);
+		int l = strlen(name);
+		if (zoneTrackerCtx->names.size + l > zoneTrackerCtx->names.capacity) {
+			zoneTrackerCtx->names.resize(zoneTrackerCtx->names.capacity + 256);
+		}
+		zoneTrackerCtx->names.append(name, l);
+
+		int idx = zoneTrackerCtx->events.size();
+		zoneTrackerCtx->events.push_back(event);
+		zoneTrackerCtx->current_parent = idx;
+		return idx;
+	}
+
+	void end(int index) {
+		ZoneTrackerEvent& event = zoneTrackerCtx->events[index];
+		LARGE_INTEGER EndingTime;
+		QueryPerformanceCounter(&EndingTime);
+		LARGE_INTEGER time;
+		time.QuadPart = EndingTime.QuadPart - event.started.QuadPart;
+		event.duration = profiler::LIToSecs(time);
+		if (zoneTrackerCtx->events[zoneTrackerCtx->current_parent].parent != -1) {
+			zoneTrackerCtx->current_parent = zoneTrackerCtx->events[zoneTrackerCtx->current_parent].parent;
+		}
+		--zoneTrackerCtx->ident;
+	}
+
+	void shutdown() {
+		delete zoneTrackerCtx;
+	}
+
+	void save(const ReportWriter& writer) {
+		writer.startBox("Perf - Profiling");
+		const char* HEADERS[] = { "Percent", "Accu", "Name" };
+		writer.startTable(HEADERS, 3);
+		float norm = zoneTrackerCtx->events[0].duration;
+		for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
+			writer.startRow();
+			const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];
+			int ident = event.ident * 2;
+			float per = event.duration / norm * 100.0f;
+			writer.addCell(profiler::formatPercentage(per).c_str());
+			writer.addCell(event.duration);
+			const char* n = zoneTrackerCtx->names.data + zoneTrackerCtx->events[i].name_index;
+			writer.addCell(event.ident * 2, n);
+			writer.endRow();
+		}
+		writer.endTable();
+		writer.endBox();
+	}
+
+	float get_current_total_time() {
+		if (zoneTrackerCtx->events.size() > 0) {
+			return zoneTrackerCtx->events[0].duration;
+		}
+		else {
+			return 0.0f;
+		}
+	}
+	/*
+	void showDialog(v2* position) {
+		gui::start(EDITOR_ID, position);
+		int state = 1;
+		if (gui::begin("Profiler", &state)) {
+			char buffer[256];
+			float norm = zoneTrackerCtx->events[0].duration;
+			for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
+				const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];
+				int ident = pd.level * 2;
+				//float per = pd.totalTime / norm * 100.0f;
+				sprintf(buffer, "%3.8f - %2.11s", pd.totalTime, pd.name);
+				gui::Label(buffer);
+			}
+		}
+		gui::end();
+	}
+
+	int get_snapshot(ProfileSnapshot* items, int max) {
+		int realMax = ctx.index;
+		if (realMax > max) {
+			realMax = max;
+		}
+		float total = 0.0f;
+		for (int i = 0; i < realMax; ++i) {
+			ProfileData& pd = ctx.data[i];
+			ProfileSnapshot& snap = items[i];
+			strcpy(snap.name, pd.name);
+			snap.level = pd.level;
+			snap.invokeCounter = pd.invokeCounter;
+			snap.totalTime = pd.totalTime;
+			total += pd.totalTime;
+		}
+		items[0].totalTime = total;
+		return realMax;
+	}
+	*/
+}
+

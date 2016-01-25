@@ -126,6 +126,8 @@ protected:
 	virtual void OnChar(char ascii,unsigned int keyState) {}
 	void logKeyBindings();
 	void showPerformceOverlay(v2* position);
+	void saveProfilingReport();
+	void saveHTMLProfilingReport();
 
 	DialogManager* gui;
 	AudioManager* audio;	

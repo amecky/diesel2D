@@ -77,7 +77,7 @@ namespace ds {
 	// tick
 	// --------------------------------------------------------------------------
 	void Trails::tick(float dt) {
-		PR_START("Trail:tick");
+		ZoneTracker z("Trail:tick");
 		Pieces::iterator it = _pieces.begin();
 		while (it != _pieces.end()) {
 			if (_world->contains(it->first)) {
@@ -116,7 +116,6 @@ namespace ds {
 				it = _pieces.erase(it);
 			}
 		}
-		PR_END("Trail:tick");
 	}
 
 }

@@ -4,6 +4,7 @@
 #include "..\World.h"
 #include "..\..\math\tweening.h"
 #include "..\..\lib\BlockArray.h"
+#include "..\..\io\ReportWriter.h"
 
 namespace ds {
 
@@ -22,6 +23,7 @@ namespace ds {
 			void clear();
 			void removeByID(SID id);
 			bool contains(SID id);
+			virtual void save(const ReportWriter& writer) {}
 		protected:
 			int find(SID id);
 			SID swap(int index);

@@ -95,18 +95,20 @@ namespace sprites {
 		//flush();
 	}
 
-	void end() {
+	void end(bool count) {
 		if (spriteCtx->size > 0) {
-			PR_START("sprites");
+			ZoneTracker z("sprites:end");
 			renderer::fillBuffer(spriteCtx->bufferIndex, spriteCtx->sprites, spriteCtx->index);
 			renderer::draw(spriteCtx->descriptorID, spriteCtx->bufferIndex, spriteCtx->index, renderer::getQuadIndexBufferIndex());
-			renderer::drawCounter().sprites += spriteCtx->index;
-			PR_END("sprites");
+			if (count) {
+				renderer::drawCounter().sprites += spriteCtx->size;
+			}
 		}
 	}
 
-	void flush() {
-		end();
+	void flush(bool count) {
+		ZoneTracker z("sprites:flush");
+		end(count);
 		begin();
 	}
 
@@ -183,7 +185,7 @@ namespace sprites {
 		int idx = spriteCtx->index;
 		for (uint32 i = 0; i < array.countAlive; ++i) {
 			if ((spriteCtx->index + 4) >= spriteCtx->maxVertices) {
-				flush();
+				flush(false);
 			}			
 			idx = spriteCtx->index;
 			for (int j = 0; j < 4; ++j) {

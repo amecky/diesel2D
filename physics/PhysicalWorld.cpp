@@ -237,6 +237,24 @@ namespace ds {
 		}
 	}
 
+	void PhysicalWorld::save(const ReportWriter& writer) {
+		writer.startBox("Colliders");
+		const char* HEADERS[] = { "Index", "SID", "CID", "Type", "Position", "Extent" };
+		writer.startTable(HEADERS, 6);
+		for (int i = 0; i < m_ColliderData.num; ++i) {
+			writer.startRow();
+			writer.addCell(i);
+			writer.addCell(m_ColliderData.sids[i]);
+			writer.addCell(m_ColliderData.ids[i]);
+			writer.addCell(m_ColliderData.types[i]);
+			writer.addCell(m_ColliderData.positions[i]);
+			writer.addCell(m_ColliderData.extents[i]);
+			writer.endRow();
+		}
+		writer.endTable();
+		writer.endBox();
+	}
+
 	// --------------------------------------------------------------------------
 	// should be ignored
 	// --------------------------------------------------------------------------

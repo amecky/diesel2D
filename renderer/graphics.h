@@ -535,6 +535,8 @@ namespace ds {
 		void printDrawCounter();
 
 		void saveDrawCounter(FILE* f);
+
+		void saveDrawCounter(const ReportWriter& writer);
 	}
 
 }

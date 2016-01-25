@@ -116,17 +116,16 @@ namespace ds {
 	}
 
 	void World::renderSingleLayer(int layer) {
-		PR_START("World:render");
+		ZoneTracker z("World:renderSingleLayer");
 		for (int i = 0; i < m_Data.num; ++i) {
 			if (m_Data.layers[i] == layer) {
 				sprites::draw(m_Data.positions[i], m_Data.textures[i], m_Data.rotations[i], m_Data.scales[i].x, m_Data.scales[i].y, m_Data.colors[i]);
 			}
 		}
-		PR_END("World:render");
 	}
 
 	void World::renderLayers(int* layers, int num_layers) {
-		PR_START("World:render");
+		ZoneTracker z("World:renderLayers");
 		for (int j = 0; j < num_layers; ++j) {
 			for (int i = 0; i < m_Data.num; ++i) {
 				if (m_Data.layers[i] == layers[j]) {					
@@ -134,19 +133,17 @@ namespace ds {
 				}
 			}
 		}
-		PR_END("World:render");
 	}
 
 	void World::render() {
-		PR_START("World:render");
+		ZoneTracker z("World:render");
 		for ( int i = 0; i < m_Data.num; ++i ) {
 			sprites::draw(m_Data.positions[i],m_Data.textures[i],m_Data.rotations[i],m_Data.scales[i].x,m_Data.scales[i].y,m_Data.colors[i]);
 		}
-		PR_END("World:render");
 	}
 
 	void World::tick(float dt) {
-		PR_START("World:tick");
+		ZoneTracker z("World:tick");
 		m_Buffer.reset();
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->update(m_Data, dt, m_Buffer);
@@ -159,7 +156,6 @@ namespace ds {
 			}
 		}
 		m_Physics.tick(dt);
-		PR_END("World:tick");
 	}
 
 	void World::stopAction(SID sid, ActionType type) {
@@ -338,6 +334,30 @@ namespace ds {
 				m_Data.scales[i].x, m_Data.scales[i].y);
 		}
 
+	}
+
+	void World::save(const ReportWriter& writer) {
+		writer.startBox("Sprites");
+		const char* HEADERS[] = { "Index", "ID", "Type", "Position", "Rotation", "Scale" };
+		writer.startTable(HEADERS, 6);
+		for (int i = 0; i < m_Data.num; ++i) {
+			writer.startRow();
+			writer.addCell(i);
+			writer.addCell(m_Data.ids[i]);
+			writer.addCell(m_Data.types[i]);
+			writer.addCell(m_Data.positions[i]);
+			writer.addCell(RADTODEG(m_Data.rotations[i]));
+			writer.addCell(m_Data.scales[i]);
+			writer.endRow();
+		}
+		writer.endTable();
+		writer.endBox();
+		writer.startBox("Actions");
+		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
+			m_Actions[i]->save(writer);
+		}
+		writer.endBox();
+		m_Physics.save(writer);
 	}
 
 	void World::debug(SID sid) {

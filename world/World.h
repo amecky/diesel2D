@@ -263,6 +263,8 @@ namespace ds {
 
 		void save(FILE* f);
 
+		void save(const ReportWriter& writer);
+
 		void debug(SID sid);
 
 		void stopAction(SID sid, ActionType type);

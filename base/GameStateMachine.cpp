@@ -41,20 +41,18 @@ namespace ds {
 	}
 
 	void GameStateMachine::update(float dt) {
-		PR_START("GameStateMachine:update");
+		ZoneTracker z("GameStateMachine:update");
 		if (_activeState != 0) {
 			int transition = _activeState->update(dt);
 			handleStateTransition(transition);
 		}
-		PR_END("GameStateMachine:update");
 	}
 
 	void GameStateMachine::render() {
-		PR_START("GameStateMachine:render");
+		ZoneTracker z("GameStateMachine:render");
 		if (_activeState != 0) {
 			_activeState->render();
-		}
-		PR_END("GameStateMachine:render");
+		}		
 	}
 
 	void GameStateMachine::onButtonDown(int button, int x, int y) {
@@ -145,7 +143,7 @@ namespace ds {
 	}
 
 	void GameStateMachine::showDialog() {
-		PR_START("GameStateMachine::showDialog");
+		ZoneTracker z("GameStateMachine::showDialog");
 		gui::start(GAMESTATE_ID,&_dialogPos);
 		if (gui::begin("GameStates", &_dialogState)) {
 			gui::ComboBox(&_model, &_offset);
@@ -157,6 +155,5 @@ namespace ds {
 			}
 		}
 		gui::end();
-		PR_END("GameStateMachine::showDialog");
 	}
 }

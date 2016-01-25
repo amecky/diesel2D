@@ -124,4 +124,24 @@ void DefaultAllocator::debug() {
 	//}
 }
 
+void DefaultAllocator::save(const ReportWriter& writer) {
+	const char* HEADERS[] = { "Index", "Size", "Original Size", "Block Index", "Used" };
+	writer.startBox("Memory Dump");
+	MemoryInfo info = get_info();
+	//fprintf(f, "<h2>Allocated memory: %d in %d blocks</h2>\n", info.allocated, info.blocks);
+	writer.startTable(HEADERS, 5);
+	for (int i = 0; i < _num; ++i) {
+		const Header& h = _headers[i];
+		writer.startRow();
+		writer.addCell(i);
+		writer.addCell(h.size);
+		writer.addCell(h.originalSize);
+		writer.addCell(h.index);
+		writer.addCell(h.used);
+		writer.endRow();
+	}
+	writer.endTable();
+	writer.endBox();
+}
+
 }

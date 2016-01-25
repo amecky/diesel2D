@@ -17,6 +17,7 @@ namespace ds {
 		ActionType getActionType() const {
 			return AT_MOVE_BY;
 		}
+		void save(const ReportWriter& writer);
 	private:
 		void allocate(int sz);
 		void rotateTo(SpriteArray& array, int index);

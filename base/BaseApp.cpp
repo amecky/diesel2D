@@ -19,7 +19,7 @@
 #include "..\memory\DefaultAllocator.h"
 #include "..\world\World.h"
 #include <time.h>
-
+#include "..\io\ReportWriter.h"
 namespace ds {
 
 // -------------------------------------------------------
@@ -27,6 +27,7 @@ namespace ds {
 // -------------------------------------------------------	
 BaseApp::BaseApp() {
 	gDefaultMemory = new DefaultAllocator();
+	perf::init();
 	repository::initialize(repository::RM_DEBUG);
 	//gBlockMemory = new DataBlockAllocator();
 	
@@ -71,7 +72,13 @@ BaseApp::BaseApp() {
 	reader.get_int(c, "screen_width", &_settings.screenWidth);
 	reader.get_int(c, "screen_height", &_settings.screenHeight);
 	reader.get_color(c, "clear_color", &_settings.clearColor);
-	
+	if (reader.contains_property(c, "reporting_directory")) {
+		const char* dir = reader.get_string(c, "reporting_directory");
+		sprintf_s(_settings.reportingDirectory, 64, "%s\\", dir);
+	}
+	else {
+		sprintf_s(_settings.reportingDirectory, "");
+	}
 }
 
 // -------------------------------------------------------
@@ -91,6 +98,7 @@ BaseApp::~BaseApp() {
 	delete audio;
 	renderer::shutdown();	
 	gui::shutdown();
+	perf::shutdown();
 	//delete gBlockMemory;
 	// FIXME: should be enabled
 	delete gDefaultMemory;
@@ -353,28 +361,30 @@ void BaseApp::updateTime() {
 void BaseApp::buildFrame() {	
 	//gProfiler->reset();	
 	profiler::reset();
+	perf::reset();
 	//PR_START("MAIN")
 	renderer::drawCounter().reset();
 	// handle key states
-	PR_START("INPUT");
-	if ( m_KeyStates.keyDown ) {
-		m_KeyStates.keyDown = false;
-		_stateMachine->onKeyDown(m_KeyStates.keyPressed);
-		OnKeyDown(m_KeyStates.keyPressed);
-	}
-	if ( m_KeyStates.keyUp ) {
-		m_KeyStates.keyUp = false;
-		_stateMachine->onKeyUp(m_KeyStates.keyReleased);
-		OnKeyUp(m_KeyStates.keyReleased);
-	}
-	if ( m_KeyStates.onChar ) {
-		m_KeyStates.onChar = false;
-		if (m_KeyStates.ascii >= 0 && m_KeyStates.ascii < 256) {
-			_stateMachine->onChar(m_KeyStates.ascii);
-			OnChar(m_KeyStates.ascii, 0);
+	{
+		ZoneTracker z("INPUT");
+		if (m_KeyStates.keyDown) {
+			m_KeyStates.keyDown = false;
+			_stateMachine->onKeyDown(m_KeyStates.keyPressed);
+			OnKeyDown(m_KeyStates.keyPressed);
+		}
+		if (m_KeyStates.keyUp) {
+			m_KeyStates.keyUp = false;
+			_stateMachine->onKeyUp(m_KeyStates.keyReleased);
+			OnKeyUp(m_KeyStates.keyReleased);
+		}
+		if (m_KeyStates.onChar) {
+			m_KeyStates.onChar = false;
+			if (m_KeyStates.ascii >= 0 && m_KeyStates.ascii < 256) {
+				_stateMachine->onChar(m_KeyStates.ascii);
+				OnChar(m_KeyStates.ascii, 0);
+			}
 		}
 	}
-	PR_END("INPUT");
 	if ( !m_ButtonState.processed ) {
 		m_ButtonState.processed = true;
 		if ( m_ButtonState.down ) {
@@ -397,75 +407,73 @@ void BaseApp::buildFrame() {
 	sprites::begin();
 	if ( m_Running ) {
 		_totalTime += m_GameTime.elapsed;
-		PR_START("UPDATE");
-		PR_START("UPDATE:gui");
-		gui->updateMousePos(getMousePos());
-		gui->tick(m_GameTime.elapsed);
-		PR_END("UPDATE:gui");
-		PR_START("Game::update");
-		update(m_GameTime.elapsed);
-		_stateMachine->update(m_GameTime.elapsed);
-		PR_END("Game::update");
-		PR_END("UPDATE");
-	}
-	PR_START("RENDER");
-	renderer::beginRendering(_settings.clearColor);	
-	renderer::setupMatrices();
-	PR_START("RENDER_GAME");
-	ds::sprites::begin();		
-	_stateMachine->render();
-	draw();
-	ds::sprites::flush();
-	PR_END("RENDER_GAME");
-	//m_World.draw();
-	PRS("RENDER_GUI");
-	gui->render();
-	PRE("RENDER_GUI");
-	PRS("RENDER_EDITOR");
-	if (m_DebugInfo.showEditor) {
-		showEditor();
-	}
-	PRE("RENDER_EDITOR");
-	if (m_DebugInfo.performanceOverlay) {
-		showPerformceOverlay(&_perfHUDPos);
-	}
-	PRS("RENDER_FLUSH");
-	renderer::flush();
-	PRE("RENDER_FLUSH");
-	PR_START("DEBUG_RENDER");
-#ifdef DEBUG		
-	if ( m_DebugInfo.showDrawCounter ) {
-		int y = ds::renderer::getSelectedViewport().getHeight() - 80;
-		//debug::showDrawCounter(&_perfHUDPos);
-	}
-	if ( m_DebugInfo.showProfiler ) {
-		++m_DebugInfo.profilerTicks;
-		if (m_DebugInfo.profilerTicks > 10) {
-			m_DebugInfo.profilerTicks = 0;
-			m_DebugInfo.snapshotCount = profiler::get_snapshot(_snapshots, 64);
+		ZoneTracker u1("UPDATE");
+		{
+			{
+				ZoneTracker u2("UPDATE:gui");
+				gui->updateMousePos(getMousePos());
+				gui->tick(m_GameTime.elapsed);
+			}
+			{
+				ZoneTracker u3("Game::update");
+				update(m_GameTime.elapsed);
+				_stateMachine->update(m_GameTime.elapsed);
+			}
 		}
-		showProfilerSnapshot(&_perfHUDPos);
-	}		
+	}
+	{
+		ZoneTracker r1("RENDER");
+		renderer::beginRendering(_settings.clearColor);
+		renderer::setupMatrices();
+		{
+			ZoneTracker r("RENDER_GAME");
+			ds::sprites::begin();
+			_stateMachine->render();
+			draw();
+			ds::sprites::flush();
+		}
+		{
+			ZoneTracker r("RENDER_GUI");
+			gui->render();
+		}
+		{
+			ZoneTracker r("RENDER_EDITOR");
+			if (m_DebugInfo.showEditor) {
+				showEditor();
+			}
+		}
+		if (m_DebugInfo.performanceOverlay) {
+			showPerformceOverlay(&_perfHUDPos);
+		}
+		{
+			ZoneTracker r("RENDER_FLUSH");
+			renderer::flush();
+		}
+		{
+			ZoneTracker r("DEBUG_RENDER");
+#ifdef DEBUG		
+			if (m_DebugInfo.showDrawCounter) {
+				int y = ds::renderer::getSelectedViewport().getHeight() - 80;
+				//debug::showDrawCounter(&_perfHUDPos);
+			}
+			if (m_DebugInfo.showProfiler) {
+				++m_DebugInfo.profilerTicks;
+				if (m_DebugInfo.profilerTicks > 10) {
+					m_DebugInfo.profilerTicks = 0;
+					m_DebugInfo.snapshotCount = profiler::get_snapshot(_snapshots, 64);
+				}
+				showProfilerSnapshot(&_perfHUDPos);
+			}
 #endif
-	
-	PR_END("DEBUG_RENDER");
-	PR_END("RENDER");
-	gui::endFrame();
+
+		}
+		gui::endFrame();
+	}	
 	profiler::finalize();
+	perf::finalize();
 	if (m_DebugInfo.monitoring) {
 		if (profiler::get_current_total_time() > m_DebugInfo.treshold) {
-			char timeFormat[255];
-			time_t now;
-			time(&now);
-			tm *now_tm = localtime(&now);
-			strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
-			char filename[255];
-			sprintf_s(filename, "%s.prof", timeFormat);
-			FILE* f = fopen(filename, "w");
-			renderer::saveDrawCounter(f);
-			profiler::save(f);
-			world->save(f);
-			fclose(f);
+			saveHTMLProfilingReport();
 			//renderer::printDrawCounter();
 			LOG << "performance treshold exceeded: " << profiler::get_current_total_time();
 			//LOG << "--------------------------------";
@@ -481,9 +489,46 @@ void BaseApp::buildFrame() {
 		LOG << "------------------------------------------------------------";
 		gDefaultMemory->debug();
 		profiler::print();
+
+		saveHTMLProfilingReport(); 
 	}	
 }
 
+// -------------------------------------------------------
+// Save profiling report
+// -------------------------------------------------------
+void BaseApp::saveProfilingReport() {
+	char timeFormat[255];
+	time_t now;
+	time(&now);
+	tm *now_tm = localtime(&now);
+	strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
+	char filename[255];
+	sprintf_s(filename, "%s%s.prof", _settings.reportingDirectory,timeFormat);
+	FILE* f = fopen(filename, "w");
+	renderer::saveDrawCounter(f);
+	profiler::save(f);
+	world->save(f);
+	fclose(f);
+}
+
+// -------------------------------------------------------
+// Save profiling report
+// -------------------------------------------------------
+void BaseApp::saveHTMLProfilingReport() {
+	char timeFormat[255];
+	time_t now;
+	time(&now);
+	tm *now_tm = localtime(&now);
+	strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
+	char filename[255];
+	sprintf_s(filename, "%s%s.html", _settings.reportingDirectory, timeFormat);
+	ReportWriter rw(filename);
+	renderer::saveDrawCounter(rw);
+	perf::save(rw);
+	world->save(rw);
+	gDefaultMemory->save(rw);
+}
 // -------------------------------------------------------
 // Mouse button
 // -------------------------------------------------------

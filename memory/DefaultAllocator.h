@@ -1,5 +1,6 @@
 #pragma once
 #include "memory_types.h"
+#include "..\io\ReportWriter.h"
 
 namespace ds {
 
@@ -35,6 +36,7 @@ public:
 	uint32 total_allocated();
 	MemoryInfo get_info();
 	void debug();
+	void save(const ReportWriter& writer);
 private:
 	Header* _headers;
 	int _num;

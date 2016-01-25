@@ -75,7 +75,7 @@ public:
 	}
 	virtual ~RingGenerator() {}
 	void generate(ParticleArray* array, const ParticleGeneratorData* data, float dt, uint32 start, uint32 end) {
-		PR_START("RingGenerator:generate");
+		ZoneTracker z("RingGenerator:generate");
 		uint32 count = end - start;
 		//float angle = 0.0f;
 		const RingGeneratorData* my_data = static_cast<const RingGeneratorData*>(data);
@@ -95,7 +95,6 @@ public:
 			array->rotation[start + i] = myAngle;
 			m_Angle += step;
 		}
-		PR_END("RingGenerator:generate");
 	}
 	const char* getName() const {
 		return "ring_position";
@@ -356,7 +355,7 @@ public:
 	RadialVelocityGenerator() : ParticleGenerator() {}
 	virtual ~RadialVelocityGenerator() {}
 	void generate(ParticleArray* array, const ParticleGeneratorData* data, float dt, uint32 start, uint32 end) {
-		PR_START("RadialVelocityGenerator:generate");
+		ZoneTracker z("RadialVelocityGenerator:generate");
 		assert(data != 0);
 		uint32 count = end - start;
 		const RadialVelocityGeneratorData* my_data = static_cast<const RadialVelocityGeneratorData*>(data);
@@ -367,7 +366,6 @@ public:
 			//array->velocity[start + i] = dn * v;
 			array->velocity[start+i] = vector::getRadialVelocity(array->rotation[start+i],v);
 		}
-		PR_END("RadialVelocityGenerator:generate");
 	}
 	const char* getName() const {
 		return "radial_velocity";
@@ -442,7 +440,7 @@ public:
 	}
 	virtual ~LifetimeGenerator() {}
 	void generate(ParticleArray* array, const ParticleGeneratorData* data, float dt, uint32 start, uint32 end) {
-		PR_START("LifetimeGenerator:generate");
+		ZoneTracker z("LifetimeGenerator:generate");
 		assert(data != 0);
 		uint32 count = end - start;
 		const LifetimeGeneratorData* my_data = static_cast<const LifetimeGeneratorData*>(data);
@@ -450,7 +448,6 @@ public:
 			float ttl = ds::math::random(my_data->ttl - my_data->variance, my_data->ttl + my_data->variance);
 			array->timer[start+i] = Vector3f(0.0f,0.0f,ttl);
 		}
-		PR_END("LifetimeGenerator:generate");
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_LIFETIME;

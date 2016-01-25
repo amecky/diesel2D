@@ -57,11 +57,10 @@ namespace ds {
 	// start specific particlesystem
 	// --------------------------------------------------------------------------
 	void ParticleManager::start(uint32 id,const Vector3f& pos) {	
-		PR_START("ParticleManager::start");
+		ZoneTracker z("ParticleManager::start");
 		NewParticleSystem* system = _systems[id];
 		assert(system != 0);
 		system->start(pos);
-		PR_END("ParticleManager::start");
 	}
 
 	int ParticleManager::findGroup(uint32 id) {
@@ -76,7 +75,7 @@ namespace ds {
 	// start specific particlesystem
 	// --------------------------------------------------------------------------
 	void ParticleManager::startGroup(uint32 id, const Vector3f& pos) {
-		PR_START("ParticleManager::start");
+		ZoneTracker z("ParticleManager::start");
 		int idx = findGroup(id);
 		if (idx != -1) {
 			const ParticleSystemGroup& group = _groups[idx];
@@ -86,7 +85,6 @@ namespace ds {
 				system->start(pos);
 			}
 		}
-		PR_END("ParticleManager::start");
 	}
 
 	// --------------------------------------------------------------------------
@@ -182,7 +180,7 @@ namespace ds {
 	// update
 	// --------------------------------------------------------------------------
 	void ParticleManager::update(float elapsed) {
-		PR_START("ParticleManager::update");
+		ZoneTracker z("ParticleManager::update");
 		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
 			if (_systems[i] != 0) {
 				if (_systems[i]->getCountAlive() > 0) {
@@ -190,7 +188,6 @@ namespace ds {
 				}
 			}
 		}
-		PR_END("ParticleManager::update");
 	}
 
 	// --------------------------------------------------------------------------
@@ -200,7 +197,7 @@ namespace ds {
 		sprites::flush();
 		int batchSize = 0;
 		begin();
-		PR_START("ParticleManager::render");
+		ZoneTracker z("ParticleManager::render");
 		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
 			if (_systems[i] != 0) {
 				const ParticleArray& array = _systems[i]->getArray();
@@ -230,7 +227,6 @@ namespace ds {
 			flush();
 		}
 		renderer::setCurrentShader(renderer::getDefaultShaderID());
-		PR_END("ParticleManager::render");
 	}
 
 	// --------------------------------------------------------------------------
@@ -257,12 +253,11 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	void ParticleManager::end() {
 		if (m_ParticleIndex > 0) {
-			PR_START("ParticleManager");
+			ZoneTracker z("ParticleManager:end");
 			renderer::setWorldMatrix(matrix::m4identity());
 			renderer::fillBuffer(bufferIndex, particles, m_ParticleIndex);
 			renderer::draw(descriptorIndex, bufferIndex,m_ParticleIndex, indexBufferIndex);
 			renderer::drawCounter().particles += m_ParticleIndex;
-			PR_END("ParticleManager");
 		}
 	}
 

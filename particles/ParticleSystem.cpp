@@ -36,17 +36,19 @@ namespace ds {
 			instance.timer = 0.0f;
 			instance.accumulated = 0.0f;
 			instance.pos = startPosition;
-			PR_START("NPS:emitterGenerate");
 			uint32 start = 0;
 			uint32 end = 0;
-			emittParticles(instance, 0.0f, &start, &end);
-			PR_END("NPS:emitterGenerate");
-			PR_START("NPS:emitterModifiers");
-			for (int i = 0; i < _count_modifiers; ++i) {
-				const ModifierInstance& instance = _modifier_instances[i];
-				instance.modifier->init(&m_Array, instance.data, start, end);
+			{
+				ZoneTracker z("NPS:emitterGenerate");
+				emittParticles(instance, 0.0f, &start, &end);
 			}
-			PR_END("NPS:emitterModifiers");
+			{
+				ZoneTracker z("NPS:emitterModifiers");
+				for (int i = 0; i < _count_modifiers; ++i) {
+					const ModifierInstance& instance = _modifier_instances[i];
+					instance.modifier->init(&m_Array, instance.data, start, end);
+				}
+			}
 			return id;
 		}
 		else {
@@ -111,7 +113,7 @@ namespace ds {
 	// generate
 	// -------------------------------------------------------
 	void NewParticleSystem::emittParticles(const ParticleEmitterInstance& instance, int count, uint32* start, uint32* end, float dt) {
-		PR_START("NPS:emittParticles");
+		ZoneTracker z("NPS:emittParticles");
 		*start = m_Array.countAlive;
 		*end = *start + count;
 		if (*end > m_Array.count) {
@@ -131,17 +133,17 @@ namespace ds {
 		for (uint32 i = *start; i < *end; ++i) {
 			m_Array.wake(i);
 		}
-		PR_START("NPS:emittParticles:generate");
-		for (int i = 0; i < _count_generators; ++i) {
-			const GeneratorInstance& instance = _generator_instances[i];
-			instance.generator->generate(&m_Array, instance.data, 0.0f, *start, *end);
+		{
+			ZoneTracker z("NPS:emittParticles:generate");
+			for (int i = 0; i < _count_generators; ++i) {
+				const GeneratorInstance& instance = _generator_instances[i];
+				instance.generator->generate(&m_Array, instance.data, 0.0f, *start, *end);
+			}
 		}
-		PR_END("NPS:emittParticles:generate");
-		PR_END("NPS:emittParticles");
 	}
 
 	void NewParticleSystem::update(float elapsed) {
-		PR_START("NPS:update");
+		ZoneTracker z("NPS:update");
 		uint32 start = 0;
 		uint32 end = 0;
 		tickEmitters(elapsed);
@@ -153,16 +155,14 @@ namespace ds {
 			const ModifierInstance& instance = _modifier_instances[i];
 			instance.modifier->update(&m_Array, instance.data, elapsed);
 		}
-		PR_END("NPS:update");
 	}
 
 	void NewParticleSystem::render() {
-		PR_START("NPS:render");
+		ZoneTracker z("NPS:render");
 		if (m_Array.countAlive > 0) {
 			ds::sprites::draw(_system_data.texture, m_Array);
 			renderer::drawCounter().particles += m_Array.countAlive;
 		}
-		PR_END("NPS:render");
 	}
 
 	void NewParticleSystem::clear() {
@@ -302,7 +302,7 @@ namespace ds {
 	}
 
 	void NewParticleSystem::buildVertices() {
-		PR_START("NPS:buildVertices");
+		ZoneTracker z("NPS:buildVertices");
 		Vector3f p(0, 0 , 0);
 		Vector3f dp(0, 0, 0);
 		for (uint32 i = 0; i < m_Array.countAlive; ++i) {
@@ -320,7 +320,6 @@ namespace ds {
 				m_Array.vertices[i * 4 + j].color = m_Array.color[i];
 			}
 		}
-		PR_END("NPS:buildVertices");
 	}
 
 	void NewParticleSystem::initEmitterData() {

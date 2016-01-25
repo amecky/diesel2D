@@ -47,7 +47,7 @@ namespace sprites {
 
 	void begin();
 
-	void flush();
+	void flush(bool count = true);
 
 	void setTexture(int textureID);
 

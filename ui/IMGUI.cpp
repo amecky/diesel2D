@@ -616,7 +616,7 @@ namespace gui {
 	// input scalar
 	// -------------------------------------------------------
 	void InputScalar(int id, int index, int* v, float width = INPUT_BOX_WIDTH) {
-		PR_START("IMGUI::InputScalar-I");
+		ZoneTracker z("IMGUI::InputScalar-I");
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
@@ -644,14 +644,13 @@ namespace gui {
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->tempBuffer);
 		}		
-		PR_END("IMGUI::InputScalar-I");
 	}
 
 	// -------------------------------------------------------
 	// input scalar
 	// -------------------------------------------------------
 	void InputScalar(int id, int index, float* v, float width = INPUT_BOX_WIDTH) {
-		PR_START("IMGUI::InputScalar-F");
+		ZoneTracker z("IMGUI::InputScalar-F");
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
@@ -681,14 +680,13 @@ namespace gui {
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->tempBuffer);
 		}
-		PR_END("IMGUI::InputScalar-F");
 	}
 
 	// -------------------------------------------------------
 	// input scalar
 	// -------------------------------------------------------
 	void InputScalar(int id, int index, char* v,int maxLength,float width = INPUT_BOX_WIDTH) {
-		PR_START("IMGUI::InputScalar-C");
+		ZoneTracker z("IMGUI::InputScalar-C");
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
@@ -719,7 +717,6 @@ namespace gui {
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->tempBuffer);
 		}
-		PR_END("IMGUI::InputScalar-C");
 	}
 
 	// -------------------------------------------------------
@@ -915,7 +912,7 @@ namespace gui {
 	// prepare combo box
 	// -------------------------------------------------------
 	void prepareComboBox(int id,int* offset,int size,int max) {		
-		PR_START("IMGUI::prepareComboBox");
+		ZoneTracker z("IMGUI::prepareComboBox");
 		float width = 200.0f;
 		v2 p = guiContext->position;
 		float height = max * BOX_HEIGHT;
@@ -957,14 +954,13 @@ namespace gui {
 			p.y -= slid;
 			guiContext->addImage(p, guiContext->textures[ICN_ARROW_LEFT]);
 		}
-		PR_END("IMGUI::prepareComboBox");
 	}
 
 	// -------------------------------------------------------
 	// combo box with model
 	// -------------------------------------------------------	
 	void ComboBox(AbstractComponentModel* model,int *offset,int max) {
-		PR_START("IMGUI::ComboBox");
+		ZoneTracker z("IMGUI::ComboBox");
 		HashedId id = HashPointer(model);
 		prepareComboBox(id, offset, model->size(),max);
 		float width = 200.0f;
@@ -987,7 +983,6 @@ namespace gui {
 			p.y -= BOX_HEIGHT;
 		}
 		guiContext->nextPosition(height + BOX_HEIGHT);
-		PR_END("IMGUI::ComboBox");
 	}
 
 	// -------------------------------------------------------
@@ -1278,7 +1273,7 @@ namespace gui {
 	// end panel
 	// -------------------------------------------------------	
 	void end() {
-		PR_START("IMGUI::end");
+		ZoneTracker z("IMGUI::end");
 		assert(guiContext->ready);
 		int current = ds::sprites::getCurrentTextureID();
 		ds::sprites::setTexture(guiContext->textureID);
@@ -1355,7 +1350,6 @@ namespace gui {
 		if (!guiContext->editorMode) {
 			guiContext->position.y -= 6.0f;
 		}
-		PR_END("IMGUI::end");
 	}
 
 	// -------------------------------------------

@@ -11,6 +11,7 @@ namespace ds {
 		bool fullScreen;
 		bool synched;
 		int mode;
+		char reportingDirectory[64];
 
 		Settings() {
 			screenWidth = 1024;
