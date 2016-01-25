@@ -78,7 +78,7 @@ namespace ds {
 				}
 				else {
 					sar::setPosition(array, _ids[i], p);
-				}
+				}				
 				_timers[i] += dt;
 			}
 		}

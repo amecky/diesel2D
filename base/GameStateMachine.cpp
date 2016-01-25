@@ -131,7 +131,6 @@ namespace ds {
 	}
 
 	void GameStateMachine::switchState(int newIndex) {
-		TIMER("GameStateMachine:switchState")
 		if (_activeState != 0) {
 			//LOG << "deactivating " << _activeState->getName();
 			_activeState->deactivate();

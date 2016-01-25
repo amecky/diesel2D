@@ -125,16 +125,17 @@ protected:
 	virtual void onGUIButton(DialogID dlgID,int button) {}
 	virtual void OnChar(char ascii,unsigned int keyState) {}
 	void logKeyBindings();
-	void showPerformceOverlay(v2* position);
-	void saveProfilingReport();
-	void saveHTMLProfilingReport();
-
+	void showPerformceOverlay(v2* position);	
 	DialogManager* gui;
 	AudioManager* audio;	
 	ParticleManager* particles;
-	World* world;
-	
+	World* world;	
 private:
+	void saveHTMLProfilingReport();
+	void loadSettings();
+	void showProfilerSnapshot(v2* position);
+	void showEditor();
+
 	HINSTANCE hInstance;
 	HWND m_hWnd;
 	bool m_Active;
@@ -142,9 +143,6 @@ private:
 	GameTime m_GameTime;
 	float _totalTime;
 	Settings _settings;
-	void loadSettings();
-	void showProfilerSnapshot(v2* position);
-	void showEditor();
 	Vector2f m_MousePos;
 	Vector2f m_TwistedMousePos;
 	DWORD m_CurTime;

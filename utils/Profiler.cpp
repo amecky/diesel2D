@@ -3,6 +3,8 @@
 #include "StringUtils.h"
 #include "..\ui\IMGUI.h"
 #include "..\DialogResources.h"
+#include <algorithm>
+#include <functional>
 
 StopWatch::StopWatch() {
 	QueryPerformanceFrequency(&_frequency);
@@ -247,22 +249,6 @@ namespace profiler {
 		}
 		return cnt;
 	}
-	// -------------------------------------------------------
-	// format percentage
-	// -------------------------------------------------------
-	std::string formatPercentage(float percentage) {
-		char buffer[20];
-		sprintf(buffer, "%3.2f", percentage);
-		std::string ret;
-		if (percentage < 100.0f) {
-			ret.append(" ");
-		}
-		if (percentage < 10.0f) {
-			ret.append(" ");
-		}
-		ret.append(buffer);
-		return ret;
-	}
 
 	// -------------------------------------------------------
 	// Logs profiling data
@@ -274,11 +260,13 @@ namespace profiler {
 		float norm = ctx.data[0].totalTime;
 		char buffer[256];
 		std::string line;
+		char p[10];
 		for (int i = 0; i < ctx.index; ++i) {
 			ProfileData& pd = ctx.data[i];
 			int ident = pd.level * 2;
 			float per = pd.totalTime / norm * 100.0f;
-			sprintf(buffer,"%3d | %s  | %3.8f | ", pd.invokeCounter, formatPercentage(per).c_str(), pd.totalTime);
+			ds::string::formatPercentage(per, p);
+			sprintf(buffer,"%3d | %s  | %3.8f | ", pd.invokeCounter, p, pd.totalTime);
 			line = buffer;
 			for (int j = 0; j < ident; ++j) {
 				line += " ";
@@ -288,26 +276,9 @@ namespace profiler {
 		LOG << "------------------------------------------------------------";
 	}
 
-	void save(FILE* f) {
-		fprintf(f, "------------------------------------------------------------\n");
-		fprintf(f, " C  | Percent | Accu       | Name\n");
-		fprintf(f, "------------------------------------------------------------\n");
-		float norm = ctx.data[0].totalTime;
-		for (int i = 0; i < ctx.index; ++i) {
-			ProfileData& pd = ctx.data[i];
-			int ident = pd.level * 2;
-			float per = pd.totalTime / norm * 100.0f;
-			fprintf(f, "%3d | %s  | %3.8f | ", pd.invokeCounter, formatPercentage(per).c_str(), pd.totalTime);
-			for (int j = 0; j < ident; ++j) {
-				fprintf(f," ");
-			}
-			fprintf(f,"%s\n",pd.name);
-		}
-		fprintf(f,"------------------------------------------------------------\n");
-	}
-
 	void save(const ReportWriter& writer) {
 		writer.addHeader("Profiling");
+		char p[10];
 		const char* HEADERS[] = { "C", "Percent", "Accu", "Name" };
 		writer.startTable(HEADERS, 4);
 		float norm = ctx.data[0].totalTime;
@@ -317,7 +288,8 @@ namespace profiler {
 			int ident = pd.level * 2;
 			float per = pd.totalTime / norm * 100.0f;
 			writer.addCell(pd.invokeCounter);
-			writer.addCell(formatPercentage(per).c_str());
+			ds::string::formatPercentage(per, p);
+			writer.addCell(p);
 			writer.addCell(pd.totalTime);
 			writer.addCell(ident,pd.name);
 			writer.endRow();
@@ -410,12 +382,14 @@ namespace perf {
 		LOG << "------------------------------------------------------------";
 		float norm = zoneTrackerCtx->events[0].duration;
 		char buffer[256];
+		char p[10];
 		std::string line;
 		for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
 			const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];
 			int ident = event.ident * 2;
 			float per = event.duration / norm * 100.0f;
-			sprintf(buffer, "%s  | %3.8f | ", profiler::formatPercentage(per).c_str(), event.duration);
+			ds::string::formatPercentage(per, p);
+			sprintf(buffer, "%s  | %3.8f | ", p, event.duration);
 			line = buffer;
 			for (int j = 0; j < ident; ++j) {
 				line += " ";
@@ -464,17 +438,31 @@ namespace perf {
 		delete zoneTrackerCtx;
 	}
 
+	struct CallAggregator {
+
+		IdString hash;
+		int calls;
+		float total;
+		int name_index;
+
+		bool operator > (const CallAggregator& other) const {
+			return (total > other.total);
+		}
+	};
+
 	void save(const ReportWriter& writer) {
 		writer.startBox("Perf - Profiling");
 		const char* HEADERS[] = { "Percent", "Accu", "Name" };
 		writer.startTable(HEADERS, 3);
+		char p[10];
 		float norm = zoneTrackerCtx->events[0].duration;
 		for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
 			writer.startRow();
 			const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];
 			int ident = event.ident * 2;
 			float per = event.duration / norm * 100.0f;
-			writer.addCell(profiler::formatPercentage(per).c_str());
+			ds::string::formatPercentage(per, p);
+			writer.addCell(p);
 			writer.addCell(event.duration);
 			const char* n = zoneTrackerCtx->names.data + zoneTrackerCtx->events[i].name_index;
 			writer.addCell(event.ident * 2, n);
@@ -482,6 +470,47 @@ namespace perf {
 		}
 		writer.endTable();
 		writer.endBox();
+
+		std::vector<CallAggregator> calls;
+		for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
+			const ZoneTrackerEvent& event = zoneTrackerCtx->events[i];
+			int idx = -1;
+			for (size_t j = 0; j < calls.size(); ++j) {
+				if (calls[j].hash == event.hash) {
+					idx = j;
+				}
+			}
+			if (idx == -1) {
+				CallAggregator ac;
+				ac.calls = 1;
+				ac.hash = event.hash;
+				ac.total = event.duration;
+				ac.name_index = event.name_index;
+				calls.push_back(ac);
+			}
+			else {
+				CallAggregator& ac = calls[idx];
+				++ac.calls;
+				ac.total += event.duration;
+			}
+		}
+		std::sort(calls.begin(), calls.end(),std::greater<CallAggregator>());
+		
+		writer.startBox("Perf - Top calls");
+		const char* TC_HEADERS[] = { "Calls", "Total", "Name" };
+		writer.startTable(TC_HEADERS, 3);
+		for (int i = 0; i < calls.size(); ++i) {
+			const CallAggregator& ac = calls[i];
+			writer.startRow();
+			writer.addCell(ac.calls);
+			writer.addCell(ac.total);
+			const char* n = zoneTrackerCtx->names.data + ac.name_index;
+			writer.addCell(n);
+			writer.endRow();
+		}
+		writer.endTable();
+		writer.endBox();
+
 	}
 
 	float get_current_total_time() {

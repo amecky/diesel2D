@@ -491,24 +491,6 @@ void BaseApp::buildFrame() {
 // -------------------------------------------------------
 // Save profiling report
 // -------------------------------------------------------
-void BaseApp::saveProfilingReport() {
-	char timeFormat[255];
-	time_t now;
-	time(&now);
-	tm *now_tm = localtime(&now);
-	strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
-	char filename[255];
-	sprintf_s(filename, "%s%s.prof", _settings.reportingDirectory,timeFormat);
-	FILE* f = fopen(filename, "w");
-	renderer::saveDrawCounter(f);
-	profiler::save(f);
-	world->save(f);
-	fclose(f);
-}
-
-// -------------------------------------------------------
-// Save profiling report
-// -------------------------------------------------------
 void BaseApp::saveHTMLProfilingReport() {
 	char timeFormat[255];
 	time_t now;

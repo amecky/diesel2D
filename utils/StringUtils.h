@@ -38,6 +38,8 @@ namespace string {
 
 	void trim(std::string& str);
 
+	void formatPercentage(float percentage, char* ret);
+
 	void trim(std::string& str,const std::string& ws);
 
 	void formatInt(int value, char* buffer, int maxBuffer, int length);

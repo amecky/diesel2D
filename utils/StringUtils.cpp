@@ -96,6 +96,15 @@ namespace ds {
 			datetime << now->tm_mday << "." << (now->tm_mon + 1) << "." << (now->tm_year + 1900) << " " << now->tm_hour << ":" << now->tm_min;
 			str = datetime.str();
 		}
+
+		void formatPercentage(float percentage,char* ret) {
+			if (percentage < 100.0f) {
+				sprintf(ret, "% 2.2f", percentage);
+			}
+			else {
+				sprintf(ret, "%3.2f", percentage);
+			}
+		}
 		/*
 		Array<std::string> split(const std::string& str, const char delimiter) {
 			Array<std::string> words;
