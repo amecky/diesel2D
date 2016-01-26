@@ -279,6 +279,8 @@ namespace ds {
 
 		int find_by_types(int* types, int num, SID* ids, int max) const;
 
+		SID find_at(int x, int y) const;
+
 		void attachCollider(SID sid, const Vector2f& extent, int type,int layer) {
 			m_Physics.attachCollider(sid, extent, type,layer);
 		}

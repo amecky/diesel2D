@@ -14,8 +14,14 @@ namespace ds {
 		int onGUIButton(DialogID dlgID, int button);
 		void activate();
 		void deactivate();
+		int onChar(int ascii);
+		int onButtonUp(int button, int x, int y);
 	private:
 		SpriteTemplatesEditor* _editor;
+		bool _showSprite;
+		v2 _offset;
+		v2 _texturePos;
+		v2 _dim;
 	};
 
 }

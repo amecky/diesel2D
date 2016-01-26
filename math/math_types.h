@@ -110,6 +110,22 @@ struct Rect {
 	Rect(int _top,int _left,int _width,int _height);
 	const float width() const;
 	const float height() const;
+
+	bool isInside(float x, float y) {
+		if (x > right) {
+			return false;
+		}
+		if (x < left) {
+			return false;
+		}
+		if (y < bottom) {
+			return false;
+		}
+		if (y > top) {
+			return false;
+		}
+		return true;
+	}
 };
 
 inline Rect::Rect() : top(0.0f) , left(0.0f) , bottom(0.0f) , right(0.0f) {}

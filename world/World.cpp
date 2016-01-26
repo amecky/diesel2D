@@ -298,6 +298,17 @@ namespace ds {
 		return cnt;
 	}
 
+	SID World::find_at(int x, int y) const {
+		for (int i = 0; i < m_Data.num; ++i) {
+			Rect r = m_Data.textures[i].rect;
+			int layer = m_Data.layers[i];
+			if (r.isInside(x, y)) {
+				return m_Data.ids[i];
+			}
+		}
+		return INVALID_SID;
+	}
+
 	void World::setBoundingRect(const Rect& r) {
 		// we need to switch y
 		Rect newRect;
