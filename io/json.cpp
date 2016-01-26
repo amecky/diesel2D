@@ -16,40 +16,12 @@ namespace ds {
 		virtual const char* translate() = 0;
 	};
 	
-	struct Token {
-
-		enum TokenType { EMPTY, NUMBER, NAME, DELIMITER, SEPARATOR, OPEN_BRACES, CLOSE_BRACES, STRING };
-
-		Token() {}
-		Token(TokenType type) : type(type) {}
-		Token(TokenType type, float v) : type(type), value(v) {}
-		Token(TokenType type, int i, int s) : type(type), index(i), size(s) {}
-
-		TokenType type;
-		float value;
-		int index;
-		int size;
-	};
-
-	const char* translate(const Token& token) {
-		switch (token.type) {
-		case Token::NAME: return "NAME"; break;
-		case Token::NUMBER: return "NUMBER"; break;
-		case Token::DELIMITER: return "DELIMITER"; break;
-		case Token::SEPARATOR: return "SEPARATOR"; break;
-		case Token::OPEN_BRACES: return "OPEN_BRACES"; break;
-		case Token::CLOSE_BRACES: return "CLOSE_BRACES"; break;
-		case Token::STRING: return "STRING"; break;
-		default: return "UNKNOWN"; break;
-		}
-	}
-
-	int tokenize(const char* text, Token* tokens, int maxTokens) {
+	void Tokenizer::parse(const char* text) {
 		int cnt = 0;
 		const char* p = text;
 		while (*p != 0) {
 			Token token(Token::EMPTY);
-			if (*p >= '0' && *p <= '9') {
+			if (string::isDigit(*p)) {
 				char *out;
 				token = Token(Token::NUMBER, string::strtof(p, &out));
 				p = out;
@@ -83,26 +55,32 @@ namespace ds {
 			}
 			else {
 				switch (*p) {
-				case '{': token = Token(Token::OPEN_BRACES); break;
-				case '}': token = Token(Token::CLOSE_BRACES); break;
-				case ' ': case '\t': case '\n': case '\r': break;
-				case ':': token = Token(Token::SEPARATOR); break;
-				case ',': token = Token(Token::DELIMITER); break;
-
+					case '{': token = Token(Token::OPEN_BRACES); break;
+					case '}': token = Token(Token::CLOSE_BRACES); break;
+					case ' ': case '\t': case '\n': case '\r': break;
+					case ':': token = Token(Token::SEPARATOR); break;
+					case ',': token = Token(Token::DELIMITER); break;
 				}
 				++p;
 			}
 			if (token.type != Token::EMPTY) {
-				if (cnt < maxTokens) {
-					tokens[cnt++] = token;
-				}
+				_tokens.push_back(token);
 			}
 		}
-		return cnt;
 	}
 
-
-
+	const char* translate(const Token& token) {
+		switch (token.type) {
+		case Token::NAME: return "NAME"; break;
+		case Token::NUMBER: return "NUMBER"; break;
+		case Token::DELIMITER: return "DELIMITER"; break;
+		case Token::SEPARATOR: return "SEPARATOR"; break;
+		case Token::OPEN_BRACES: return "OPEN_BRACES"; break;
+		case Token::CLOSE_BRACES: return "CLOSE_BRACES"; break;
+		case Token::STRING: return "STRING"; break;
+		default: return "UNKNOWN"; break;
+		}
+	}
 
 // -------------------------------------------
 //
@@ -265,22 +243,24 @@ bool JSONReader::load_binary(const char* fileName) {
 // parse
 // -------------------------------------------
 bool JSONReader::parse(const char* fileName) {
-	Token tokens[1024];
+	//Token tokens[1024];
 	int fileSize = -1;
 	_text = repository::load(fileName, &fileSize);
 	if (fileSize == -1) {
 		return false;
 	}
-	int cnt = tokenize(_text, tokens, 1024);
+	//tokenize(_text);// , tokens, 1024);
+	Tokenizer tokenizer;
+	tokenizer.parse(_text);
 	char name[128];
 	int n = 0;
 	int category_index = 0;
 	int cat = -1;
 	Stack<int> cat_stack;
-	while (n < cnt) {
-		Token t = tokens[n];
+	while (n < tokenizer.size()) {
+		Token& t = tokenizer.get(n);
 		if (t.type == Token::NAME) {
-			if (tokens[n + 1].type == Token::OPEN_BRACES) {
+			if (tokenizer.get(n + 1).type == Token::OPEN_BRACES) {
 				++n;
 				strncpy(name, _text + t.index, t.size);
 				name[t.size] = '\0';
@@ -293,7 +273,7 @@ bool JSONReader::parse(const char* fileName) {
 				cat_stack.push(cat);
 				++n;
 			}
-			else if (tokens[n + 1].type == Token::SEPARATOR) {
+			else if (tokenizer.get(n + 1).type == Token::SEPARATOR) {
 				++n;
 				strncpy(name, _text + t.index, t.size);
 				name[t.size] = '\0';
@@ -303,7 +283,7 @@ bool JSONReader::parse(const char* fileName) {
 				}
 				int p = create_property(name, parent);
 				++n;
-				Token v = tokens[n];
+				Token& v = tokenizer.get(n);
 				if (v.type == Token::STRING) {
 					int start = v.index;
 					int end = v.index + v.size;
@@ -326,12 +306,12 @@ bool JSONReader::parse(const char* fileName) {
 					while (parsing) {
 						if (v.type == Token::NUMBER) {
 							add(p, v.value);
-							if (tokens[n + 1].type != Token::DELIMITER) {
+							if (tokenizer.get(n + 1).type != Token::DELIMITER) {
 								parsing = false;
 							}
 						}
 						++n;
-						v = tokens[n];
+						v = tokenizer.get(n);
 
 					}
 				}
@@ -348,7 +328,7 @@ bool JSONReader::parse(const char* fileName) {
 		else {
 			++n;
 		}
-		t = tokens[n];		
+		t = tokenizer.get(n);
 	}
 	return true;
 }

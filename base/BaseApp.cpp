@@ -62,7 +62,7 @@ BaseApp::BaseApp() {
 	gui = new DialogManager;
 	world = new World;
 	_templatesEditor = 0;
-	_perfHUDPos = v2(750, 710);
+	_perfHUDPos = v2(10, 710);
 	_prepared = false;
 	JSONReader reader;
 	bool ret = reader.parse("content\\engine_settings.json");
@@ -254,7 +254,7 @@ void BaseApp::prepare() {
 	dp.y = _settings.screenHeight - 10.0f;
 	_editor.dialogPos.y = _settings.screenHeight - 10.0f;
 	_editor.position.y = _settings.screenHeight - 10.0f;
-	_perfHUDPos = dp;
+	//_perfHUDPos = dp;
 	m_Running = true;
 	_prepared = true;
 }
@@ -454,7 +454,7 @@ void BaseApp::buildFrame() {
 #ifdef DEBUG		
 			if (m_DebugInfo.showDrawCounter) {
 				int y = ds::renderer::getSelectedViewport().getHeight() - 80;
-				//debug::showDrawCounter(&_perfHUDPos);
+				renderer::showDrawCounter(&_perfHUDPos);
 			}
 			if (m_DebugInfo.showProfiler) {
 				++m_DebugInfo.profilerTicks;

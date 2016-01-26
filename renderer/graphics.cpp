@@ -1743,7 +1743,7 @@ namespace ds {
 			int state = 1;
 			if (gui::begin("Draw Calls", &state)) {
 				char buffer[256];
-				sprintf(buffer, "DrawCounter IDX: %d", renderContext->drawCounter.indexCounter);
+				sprintf(buffer, "Indices: %d", renderContext->drawCounter.indexCounter);
 				gui::Label(buffer);
 				sprintf(buffer, "Vertices: %d", renderContext->drawCounter.numPrim);
 				gui::Label(buffer);
@@ -1756,6 +1756,8 @@ namespace ds {
 				sprintf(buffer, "Textures: %d", renderContext->drawCounter.textures);
 				gui::Label(buffer);
 				sprintf(buffer, "Shaders: %d", renderContext->drawCounter.shaders);
+				gui::Label(buffer);
+				sprintf(buffer, "Particles: %d", renderContext->drawCounter.particles);
 				gui::Label(buffer);
 			}
 			gui::end();

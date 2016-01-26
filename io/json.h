@@ -8,6 +8,53 @@
 
 namespace ds {
 
+	struct Token {
+
+		enum TokenType { EMPTY, NUMBER, NAME, DELIMITER, SEPARATOR, OPEN_BRACES, CLOSE_BRACES, STRING };
+
+		Token() {}
+		Token(TokenType type) : type(type) {}
+		Token(TokenType type, float v) : type(type), value(v) {}
+		Token(TokenType type, int i, int s) : type(type), index(i), size(s) {}
+
+		TokenType type;
+		float value;
+		int index;
+		int size;
+	};
+
+	class Tokenizer {
+
+	public:
+		Tokenizer() : UNKNOWN_TOKEN(Token::EMPTY) {}
+		~Tokenizer() {}
+		void parse(const char* text);
+		int size() const {
+			return _tokens.size();
+		}
+		const Token& get(int index) const {
+			if (index >= 0 && index < _tokens.size()) {
+				return _tokens[index];
+			}
+			else {
+				return UNKNOWN_TOKEN;
+			}
+		}
+
+		Token& get(int index) {
+			if (index >= 0 && index < _tokens.size()) {
+				return _tokens[index];
+			}
+			else {
+				return UNKNOWN_TOKEN;
+			}
+		}
+
+	private:
+		Array<Token> _tokens;
+		Token UNKNOWN_TOKEN;
+	};
+
 	class JSONReader {
 
 	public:
