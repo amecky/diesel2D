@@ -7,15 +7,6 @@
 
 namespace ds {
 
-	struct MyToken {
-
-		virtual bool matches(const char* p) = 0;
-
-		virtual char* parse(const char* p) = 0;
-
-		virtual const char* translate() = 0;
-	};
-	
 	void Tokenizer::parse(const char* text) {
 		int cnt = 0;
 		const char* p = text;
@@ -59,6 +50,8 @@ namespace ds {
 					case '}': token = Token(Token::CLOSE_BRACES); break;
 					case ' ': case '\t': case '\n': case '\r': break;
 					case ':': token = Token(Token::SEPARATOR); break;
+					case '=': token = Token(Token::ASSIGN); break;
+					case ';': token = Token(Token::SEMICOLON); break;
 					case ',': token = Token(Token::DELIMITER); break;
 				}
 				++p;
@@ -69,16 +62,17 @@ namespace ds {
 		}
 	}
 
-	const char* translate(const Token& token) {
+	const char* Tokenizer::name(int index) const {
+		const Token& token = _tokens[index];
 		switch (token.type) {
-		case Token::NAME: return "NAME"; break;
-		case Token::NUMBER: return "NUMBER"; break;
-		case Token::DELIMITER: return "DELIMITER"; break;
-		case Token::SEPARATOR: return "SEPARATOR"; break;
-		case Token::OPEN_BRACES: return "OPEN_BRACES"; break;
-		case Token::CLOSE_BRACES: return "CLOSE_BRACES"; break;
-		case Token::STRING: return "STRING"; break;
-		default: return "UNKNOWN"; break;
+			case Token::NAME: return "NAME"; break;
+			case Token::NUMBER: return "NUMBER"; break;
+			case Token::DELIMITER: return "DELIMITER"; break;
+			case Token::SEPARATOR: return "SEPARATOR"; break;
+			case Token::OPEN_BRACES: return "OPEN_BRACES"; break;
+			case Token::CLOSE_BRACES: return "CLOSE_BRACES"; break;
+			case Token::STRING: return "STRING"; break;
+			default: return "UNKNOWN"; break;
 		}
 	}
 

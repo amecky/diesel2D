@@ -10,7 +10,7 @@ namespace ds {
 
 	struct Token {
 
-		enum TokenType { EMPTY, NUMBER, NAME, DELIMITER, SEPARATOR, OPEN_BRACES, CLOSE_BRACES, STRING };
+		enum TokenType { EMPTY, NUMBER, NAME, DELIMITER, SEPARATOR, OPEN_BRACES, CLOSE_BRACES, STRING, ASSIGN, SEMICOLON };
 
 		Token() {}
 		Token(TokenType type) : type(type) {}
@@ -49,6 +49,8 @@ namespace ds {
 				return UNKNOWN_TOKEN;
 			}
 		}
+
+		const char* name(int index) const;
 
 	private:
 		Array<Token> _tokens;
