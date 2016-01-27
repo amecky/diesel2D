@@ -72,6 +72,19 @@ namespace ds {
 			}
 			data[size++] = '\0';
 		}
+
+		void append(const char* s) {
+			int len = strlen(s);
+			if (size + len + 1 > capacity) {
+				resize(capacity + len + 1 + 8);
+			}
+			const char* t = s;
+			for (int i = 0; i < len; ++i) {
+				data[size++] = *t;
+				++t;
+			}
+			data[size++] = '\0';
+		}
 	};
 
 	template<class T>

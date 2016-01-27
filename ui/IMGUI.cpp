@@ -44,13 +44,20 @@ namespace gui {
 		return hash;
 	}
 
+	enum DrawCallType {
+		DCT_BOX,
+		DCT_IMAGE,
+		DCT_TEXT,
+		DCT_HEADER,
+		DCT_EOL
+	};
 	// -------------------------------------------------------
 	// DrawCall
 	// -------------------------------------------------------
 	struct DrawCall {
 
-		int type;
-		char text[32];
+		DrawCallType type;
+		int textIndex;
 		ds::Color color;
 		v2 size;
 		v2 position;
@@ -66,92 +73,89 @@ namespace gui {
 	// -------------------------------------------------------
 	struct GUIWindow {
 
-		DrawCall calls[MAX_DRAW_CALLS];
-		int num;
+		ds::Array<DrawCall> calls;
+		ds::CharBuffer textBuffer;
 
 		void reset() {
-			num = 0;
+			calls.clear();
+			textBuffer.size = 0;
 		}
 
 		void addBox(const v2& position,const v2& size, const ds::Color& color) {
-			if (num < MAX_DRAW_CALLS) {
-				DrawCall& call = calls[num++];
-				call.type = 1;
-				call.color = color;
-				call.size = size;
-				call.position = position;
-				call.padding = 2;
-				call.tilingDef = TD_NONE;
-			}
+			DrawCall call;
+			call.type = DCT_BOX;
+			call.color = color;
+			call.size = size;
+			call.position = position;
+			call.padding = 2;
+			call.tilingDef = TD_NONE;
+			calls.push_back(call);
 		}
 
 		void addTiledXImage(const v2& position, const ds::Texture& texture, float width,float cornerSize) {
-			if (num < MAX_DRAW_CALLS) {
-				DrawCall& call = calls[num++];
-				call.type = 3;
-				call.color = ds::Color::WHITE;
-				call.size = v2(width,1.0f);
-				call.position = position;
-				call.texture = texture;
-				call.padding = 1;
-				call.additional = cornerSize;
-				call.tilingDef = TD_TILE_X;
-			}
+			DrawCall call;
+			call.type = DCT_IMAGE;
+			call.color = ds::Color::WHITE;
+			call.size = v2(width,1.0f);
+			call.position = position;
+			call.texture = texture;
+			call.padding = 1;
+			call.additional = cornerSize;
+			call.tilingDef = TD_TILE_X;
+			calls.push_back(call);
 		}
 
 		void addTiledXYImage(const v2& position, const ds::Texture& texture, const v2& size,float cornerSize) {
-			if (num < MAX_DRAW_CALLS) {
-				DrawCall& call = calls[num++];
-				call.type = 3;
-				call.color = ds::Color::WHITE;
-				call.size = size;
-				call.position = position;
-				call.texture = texture;
-				call.padding = 1;
-				call.additional = cornerSize;
-				call.tilingDef = TD_TILE_BOTH;
-			}
+			DrawCall call;
+			call.type = DCT_IMAGE;
+			call.color = ds::Color::WHITE;
+			call.size = size;
+			call.position = position;
+			call.texture = texture;
+			call.padding = 1;
+			call.additional = cornerSize;
+			call.tilingDef = TD_TILE_BOTH;
+			calls.push_back(call);
 		}
 
 		void addImage(const v2& position, const ds::Texture& texture,const v2& size = v2(1,1)) {
-			if (num < MAX_DRAW_CALLS) {
-				DrawCall& call = calls[num++];
-				call.type = 3;
-				call.color = ds::Color::WHITE;
-				call.size = size;
-				call.position = position;
-				call.texture = texture;
-				call.padding = 1;
-				call.tilingDef = TD_NONE;
-			}
+			DrawCall call;
+			call.type = DCT_IMAGE;
+			call.color = ds::Color::WHITE;
+			call.size = size;
+			call.position = position;
+			call.texture = texture;
+			call.padding = 1;
+			call.tilingDef = TD_NONE;
+			calls.push_back(call);
 		}
 
 		void addText(const v2& position,const char* text, const v2& size) {
-			if (num < MAX_DRAW_CALLS) {
-				DrawCall& call = calls[num++];
-				call.type = 2;
-				call.color = ds::Color::WHITE;
-				call.size = size;
-				sprintf_s(call.text, 32, text);
-				call.position = position;
-				call.position.y -= TEXT_OFFSET;
-				call.padding = CHAR_PADDING;
-				call.tilingDef = TD_NONE;
-			}
+			DrawCall call;
+			call.type = DCT_TEXT;
+			call.color = ds::Color::WHITE;
+			call.size = size;
+			call.textIndex = textBuffer.size;
+			textBuffer.append(text);
+			call.position = position;
+			call.position.y -= TEXT_OFFSET;
+			call.padding = CHAR_PADDING;
+			call.tilingDef = TD_NONE;
+			calls.push_back(call);
 		}
 
 		void addHeader(const v2& position, const char* text, const v2& size) {
-			if (num < MAX_DRAW_CALLS) {
-				DrawCall& call = calls[num++];
-				call.type = 4;
-				call.color = ds::Color::WHITE;
-				call.size = size;
-				sprintf_s(call.text, 32, text);
-				call.position = position;
-				call.position.y -= TEXT_OFFSET;
-				call.padding = CHAR_PADDING;
-				call.tilingDef = TD_NONE;
-			}
+			DrawCall call;
+			call.type = DCT_HEADER;
+			call.color = ds::Color::WHITE;
+			call.size = size;
+			call.textIndex = textBuffer.size;
+			textBuffer.append(text);
+			call.position = position;
+			call.position.y -= TEXT_OFFSET;
+			call.padding = CHAR_PADDING;
+			call.tilingDef = TD_NONE;
+			calls.push_back(call);
 		}
 
 		
@@ -179,7 +183,13 @@ namespace gui {
 		ICN_MINUS,
 		ICN_CHECKBOX,
 		ICN_CHECKBOX_SELECTED,
-		ICN_DRAG_BOX
+		ICN_DRAG_BOX,
+		ICN_BUTTON,
+		ICN_INPUT,
+		ICN_INPUT_ACTIVE,
+		ICN_HEADER_BOX,
+		ICN_PANEL_BACKGROUND,
+		ICN_BOX_BACKGROUND
 	};
 
 	enum GUIColor {
@@ -294,7 +304,7 @@ namespace gui {
 				position.x = startPosition.x;				
 			}
 			else {
-				position.x += window.calls[window.num - 1].size.x + 50.0f;
+				position.x += window.calls[window.calls.size() - 1].size.x + 50.0f;
 				
 			}
 		}
@@ -449,7 +459,6 @@ namespace gui {
 			else {
 				if (guiContext->buttonPressed) {
 					if (guiContext->dragging == -1) {
-						//LOG << "clicked on ";
 						guiContext->clicked = true;
 					}
 					else {
@@ -628,7 +637,7 @@ namespace gui {
 			guiContext->active = new_id;
 		}
 		if (guiContext->active == new_id) {
-			guiContext->addTiledXBox(p, width, ds::math::buildTexture(160.0f, 160.0f, 150.0f, BOX_HEIGHT), BOX_HEIGHT);
+			guiContext->addTiledXBox(p, width, guiContext->textures[ICN_INPUT_ACTIVE], BOX_HEIGHT);
 			handleTextInput();
 			*v = atoi(guiContext->inputText);
 			v2 cp = p;
@@ -640,7 +649,7 @@ namespace gui {
 		}
 		else {
 			sprintf_s(guiContext->tempBuffer, 64, "%d", *v);
-			guiContext->addTiledXBox(p, width, ds::math::buildTexture(160.0f, 0.0f, 150.0f, BOX_HEIGHT), BOX_HEIGHT);
+			guiContext->addTiledXBox(p, width, guiContext->textures[ICN_INPUT], BOX_HEIGHT);
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->tempBuffer);
 		}		
@@ -662,8 +671,7 @@ namespace gui {
 			guiContext->active = new_id;
 		}
 		if (guiContext->active == new_id) {
-			//guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT_EDIT]);
-			guiContext->addTiledXBox(p, width, ds::math::buildTexture(160.0f, 160.0f, 150.0f, BOX_HEIGHT), BOX_HEIGHT);
+			guiContext->addTiledXBox(p, width, guiContext->textures[ICN_INPUT_ACTIVE], BOX_HEIGHT);
 			handleTextInput();
 			*v = atof(guiContext->inputText);
 			v2 cp = p;
@@ -675,8 +683,7 @@ namespace gui {
 		}
 		else {
 			sprintf_s(guiContext->tempBuffer, 64, "%.2f", *v);
-			//guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
-			guiContext->addTiledXBox(p, width, ds::math::buildTexture(160.0f, 0.0f, 150.0f, BOX_HEIGHT), BOX_HEIGHT);
+			guiContext->addTiledXBox(p, width, guiContext->textures[ICN_INPUT], BOX_HEIGHT);
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->tempBuffer);
 		}
@@ -698,8 +705,7 @@ namespace gui {
 			guiContext->active = new_id;
 		}
 		if (guiContext->active == new_id) {
-			//guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT_EDIT]);
-			guiContext->addTiledXBox(p, width, ds::math::buildTexture(160.0f, 160.0f, 150.0f, BOX_HEIGHT), BOX_HEIGHT);
+			guiContext->addTiledXBox(p, width, guiContext->textures[ICN_INPUT_ACTIVE], BOX_HEIGHT);
 			handleTextInput();
 			strncpy(v, guiContext->inputText, maxLength);
 			v2 cp = p;
@@ -712,8 +718,7 @@ namespace gui {
 		}
 		else {
 			sprintf_s(guiContext->tempBuffer, 64, "%s", v);
-			//guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
-			guiContext->addTiledXBox(p, width, ds::math::buildTexture(160.0f, 0.0f, 150.0f, BOX_HEIGHT), BOX_HEIGHT);
+			guiContext->addTiledXBox(p, width, guiContext->textures[ICN_INPUT], BOX_HEIGHT);
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->tempBuffer);
 		}
@@ -917,7 +922,7 @@ namespace gui {
 		v2 p = guiContext->position;
 		float height = max * BOX_HEIGHT;
 		p.y += BOX_HEIGHT / 2.0f;
-		guiContext->addTiledXYBox(p, v2(width, height), ds::math::buildTexture(30.0f, 500.0f, 100.0f, 100.0f), 10.0f);
+		guiContext->addTiledXYBox(p, v2(width, height), guiContext->textures[ICN_BOX_BACKGROUND], 10.0f);
 		if (size > max)  {
 			p = guiContext->position;
 			p.x += width + BOX_HEIGHT * 0.5f;
@@ -1101,7 +1106,7 @@ namespace gui {
 		v2 p = guiContext->position;
 		HashedId id = HashId(label);
 		bool hot = isHot(id, p, v2(width, BUTTON_HEIGHT),width * 0.5f);
-		guiContext->addTiledXBox(p, width, ds::math::buildTexture(105.0f, 155.0f, 150.0f, 24.0f), BUTTON_HEIGHT);
+		guiContext->addTiledXBox(p, width, guiContext->textures[ICN_BUTTON], BUTTON_HEIGHT);
 		p.x = guiContext->position.x + (width - textDim.x) / 2.0f;
 		guiContext->addText(p,label, textDim);
 		guiContext->nextPosition(LINE_HEIGHT + 4.0f);
@@ -1207,7 +1212,12 @@ namespace gui {
 		guiContext->textures[ICN_CHECKBOX] = ds::math::buildTexture(0.0f, 352.0f, 16.0f, 16.0f);
 		guiContext->textures[ICN_CHECKBOX_SELECTED] = ds::math::buildTexture(0.0f, 368.0f, 16.0f, 16.0f);
 		guiContext->textures[ICN_DRAG_BOX] = ds::math::buildTexture(0.0f, 384.0f, 16.0f, 16.0f);
-		
+		guiContext->textures[ICN_BUTTON] = ds::math::buildTexture(105.0f, 155.0f, 150.0f, 24.0f);
+		guiContext->textures[ICN_INPUT] = ds::math::buildTexture(160.0f, 0.0f, 150.0f, BOX_HEIGHT);
+		guiContext->textures[ICN_INPUT_ACTIVE] = ds::math::buildTexture(160.0f, 160.0f, 150.0f, BOX_HEIGHT);
+		guiContext->textures[ICN_HEADER_BOX] = ds::math::buildTexture(140.0, 0.0f, 150.0f, 16.0f);
+		guiContext->textures[ICN_PANEL_BACKGROUND] = ds::math::buildTexture(30.0, 370.0f, 100.0f, 100.0f);
+		guiContext->textures[ICN_BOX_BACKGROUND] = ds::math::buildTexture(30.0f, 500.0f, 100.0f, 100.0f);
 		guiContext->colors[CLR_PANEL_BACKGROUND] = ds::Color(32, 32, 32, 255);
 		guiContext->colors[CLR_PANEL_HEADER]     = ds::Color(0, 111, 204, 255);
 		guiContext->colors[CLR_INPUT]            = ds::Color(41, 46, 52, 255);
@@ -1235,8 +1245,8 @@ namespace gui {
 	// -------------------------------------------------------	
 	void debugWindow() {
 		GUIWindow& win = guiContext->window;
-		if (win.num > 0) {
-			for (int i = 0; i < win.num; ++i) {
+		if (win.calls.size() > 0) {
+			for (int i = 0; i < win.calls.size(); ++i) {
 				const DrawCall& call = win.calls[i];
 				LOG << "type: " << call.type << " position: " << DBG_V2(call.position) << " size: " << DBG_V2(call.size);
 			}
@@ -1251,7 +1261,7 @@ namespace gui {
 		v2 start = guiContext->startPosition;
 		v2 dim = v2(0, 2000);
 		GUIWindow& win = guiContext->window;
-		for (int i = 0; i < win.num; ++i) {
+		for (int i = 0; i < win.calls.size(); ++i) {
 			const DrawCall& call = win.calls[i];
 			float endX = call.position.x + call.size.x;
 			float endY = call.position.y - call.size.y * 0.5f;
@@ -1262,8 +1272,13 @@ namespace gui {
 				dim.y = endY;
 			}
 		}
+		v2 hd = getTextSize(guiContext->header);
+		hd.x += guiContext->startPosition.x;
+		if (hd.x > dim.x) {
+			dim.x = hd.x;
+		}
 		dim.x = dim.x - start.x;
-		dim.y = start.y - dim.y - BOX_HEIGHT;
+		dim.y = start.y - dim.y - BOX_HEIGHT;		
 		if (guiContext->editorMode) {
 			dim.x = 500.0f;
 		}
@@ -1279,13 +1294,14 @@ namespace gui {
 		ds::sprites::setTexture(guiContext->textureID);
 		// get dimension of entire panel
 		v2 dim = getPanelDimension();
+		// FIXME: check if header text extends dim		
 		dim += v2(20, 20);
 		GUIWindow& win = guiContext->window;
 		// draw header box
 		v2 p = guiContext->startPosition;
 		v2 startPos = guiContext->startPosition;
 		p.x -= 10.0f;
-		ds::sprites::drawTiledX(p, dim.x, ds::math::buildTexture(140.0, 0.0f, 150.0f, 16.0f), 16.0f);		
+		ds::sprites::drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 16.0f);
 		// draw text
 		p.y -= 7.0f;
 		p.x = startPos.x + 10.0f;
@@ -1309,19 +1325,20 @@ namespace gui {
 			}
 			p.x = startPos.x - 10.0f;
 			p.y = startPos.y - BOX_HEIGHT * 0.5f;
-			ds::sprites::drawTiledXY(p, dim, ds::math::buildTexture(30.0, 370.0f, 100.0f, 100.0f), 10.0f);
+			ds::sprites::drawTiledXY(p, dim, guiContext->textures[ICN_PANEL_BACKGROUND], 10.0f);
 
 
-			if (win.num > 0) {
-				for (int i = 0; i < win.num; ++i) {
+			if (win.calls.size() > 0) {
+				for (int i = 0; i < win.calls.size(); ++i) {
 					const DrawCall& call = win.calls[i];
-					if (call.type == 1) {
+					if (call.type == DCT_BOX) {
 						ds::sprites::draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, 1.0f, 1.0f, call.color);
 					}
-					else if (call.type == 2) {
-						ds::sprites::drawText(guiContext->font, call.position.x, call.position.y, call.text, call.padding);
+					else if (call.type == DCT_TEXT) {
+						const char* text = win.textBuffer.data + call.textIndex;
+						ds::sprites::drawText(guiContext->font, call.position.x, call.position.y, text, call.padding);
 					}
-					else if (call.type == 3) {
+					else if (call.type == DCT_IMAGE) {
 						if (call.tilingDef == TD_NONE) {
 							ds::sprites::draw(call.position, call.texture, 0.0f, call.size.x, call.size.y, call.color);
 						}
@@ -1332,14 +1349,15 @@ namespace gui {
 							ds::sprites::drawTiledXY(call.position, call.size, call.texture, call.additional, call.color);
 						}
 					}
-					else if (call.type == 4) {
+					else if (call.type == DCT_HEADER) {
 						v2 p = call.position;
 						p.x -= 10.0f;
-						ds::sprites::drawTiledX(p, dim.x, ds::math::buildTexture(140.0, 0.0f, 150.0f, 16.0f), 16.0f);
+						ds::sprites::drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 16.0f);
 						// draw text
 						p.y -= 8.0f;
 						p.x += 20.0f;
-						ds::sprites::drawText(guiContext->font, p.x, p.y, call.text, call.padding);
+						const char* text = win.textBuffer.data + call.textIndex;
+						ds::sprites::drawText(guiContext->font, p.x, p.y, text, call.padding);
 					}
 				}
 				
