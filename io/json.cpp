@@ -75,7 +75,7 @@ namespace ds {
 			case Token::CLOSE_BRACES: return "CLOSE_BRACES"; break;
 			case Token::STRING: return "STRING"; break;
 			case Token::ASSIGN: return "ASSIGN"; break;
-			case Token::SEMICOLON: return "SMICOLON"; break;
+			case Token::SEMICOLON: return "SEMICOLON"; break;
 			case Token::OPEN_BRACKET: return "OPEN_BRACKET"; break;
 			case Token::CLOSE_BRACKET: return "CLOSE_BRACKET"; break;
 			default: return "UNKNOWN"; break;

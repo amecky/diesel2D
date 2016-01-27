@@ -33,6 +33,8 @@ namespace file {
 	void listDirectory(const char* dir,std::vector<std::string>& files);
 	
 	bool loadTextFile(const char* name,std::vector<std::string>& lines);
+
+	char* loadTextFile(const char* name);
 	
 	void getFileTime(const char* fileName,FILETIME& time);
 
