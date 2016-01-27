@@ -68,6 +68,22 @@ namespace ds {
 			assert(in.index != USHRT_MAX);
 			return textures[in.index];
 		}
+
+		SID create(const Vector2f& pos, const Texture& r,float rotation = 0.0f,float scaleX = 1.0f,float scaleY = 1.0f,const Color& color = Color::WHITE, int type = -1, int layer = 0) {
+			SpriteArrayIndex &in = indices[free_dequeue];
+			free_dequeue = in.next;
+			in.index = num++;
+			ids[in.index] = in.id;
+			positions[in.index] = pos;
+			scales[in.index] = v2(scaleX, scaleY);
+			rotations[in.index] = rotation;
+			textures[in.index] = r;
+			colors[in.index] = color;
+			timers[in.index] = 0.0f;
+			types[in.index] = type;
+			layers[in.index] = layer;
+			return in.id;
+		}
 	};
 
 	namespace sar {

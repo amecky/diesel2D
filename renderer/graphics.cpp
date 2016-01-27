@@ -902,6 +902,34 @@ namespace ds {
 			renderer::setBlendState(current);
 		}
 
+		void draw_screen_quad(Shader* shader) {
+			ZoneTracker z("draw_screen_quad");
+			sprites::flush();
+			fillBuffer(renderContext->renderTargetQuad.vertexBufferID, renderContext->renderTargetQuad.vertices, 4);
+			const VertexBuffer& vb = renderContext->vertexBuffers[renderContext->renderTargetQuad.vertexBufferID];
+			VDStruct& vds = renderContext->vdStructs[vb.vertexDeclaration];
+			HR(renderContext->device->SetVertexDeclaration(renderContext->vdStructs[vb.vertexDeclaration].declaration->get()));
+
+			const IndexBuffer& ib = renderContext->indexBuffers[renderContext->renderTargetQuad.indexBufferID];
+			HR(renderContext->device->SetIndices(ib.buffer));
+			HR(renderContext->device->SetStreamSource(0, vb.buffer, 0, vb.vertexSize));
+
+			D3DPRIMITIVETYPE pt = D3DPT_TRIANGLELIST;
+			int numPrimitives = 4;
+
+			renderContext->drawCounter.numPrim += numPrimitives;
+			renderContext->drawCounter.indexCounter += numPrimitives * 3;
+			shader->setVector2f("viewportPosition", renderer::getSelectedViewport().getPosition());
+			uint32 numPasses = shader->start();
+			for (UINT p = 0; p < numPasses; ++p) {
+				shader->beginPass(p);
+				setShaderParameter(shader, -1);
+				HR(renderContext->device->DrawIndexedPrimitive(pt, 0, 0, 4, 0, numPrimitives));
+				shader->endPass();
+			}
+			shader->end();
+		}
+
 		void draw_render_target(RTID rtID, int shaderID) {
 			const char* name = "rt_blend";
 			IdString hash = string::murmur_hash(name);

@@ -48,6 +48,8 @@ namespace ds {
 				switch (*p) {
 					case '{': token = Token(Token::OPEN_BRACES); break;
 					case '}': token = Token(Token::CLOSE_BRACES); break;
+					case '(': token = Token(Token::OPEN_BRACKET); break;
+					case ')': token = Token(Token::CLOSE_BRACKET); break;
 					case ' ': case '\t': case '\n': case '\r': break;
 					case ':': token = Token(Token::SEPARATOR); break;
 					case '=': token = Token(Token::ASSIGN); break;
@@ -72,6 +74,10 @@ namespace ds {
 			case Token::OPEN_BRACES: return "OPEN_BRACES"; break;
 			case Token::CLOSE_BRACES: return "CLOSE_BRACES"; break;
 			case Token::STRING: return "STRING"; break;
+			case Token::ASSIGN: return "ASSIGN"; break;
+			case Token::SEMICOLON: return "SMICOLON"; break;
+			case Token::OPEN_BRACKET: return "OPEN_BRACKET"; break;
+			case Token::CLOSE_BRACKET: return "CLOSE_BRACKET"; break;
 			default: return "UNKNOWN"; break;
 		}
 	}

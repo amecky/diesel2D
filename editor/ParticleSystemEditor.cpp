@@ -38,7 +38,7 @@ namespace ds {
 		_modifier_selection = -1;
 		_add_modifier_offset = 0;
 		_add_modifier_state = 1;
-		_show_add_modifier = false;
+		_show_add_modifier = false;		
 	}
 
 	// --------------------------------------------

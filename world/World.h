@@ -87,6 +87,14 @@ namespace ds {
 		}
 	};
 
+	struct WorldLayer {
+
+		int viewport_id;
+		bool visible;
+
+		WorldLayer() : viewport_id(0), visible(true) {}
+	};
+
 	class World {
 
 		struct AdditionalDataHeader {
@@ -178,6 +186,7 @@ namespace ds {
 		~World(void);
 		SID create(const Vector2f& pos, const Texture& r, int type = -1, int layer = 0);
 		SID create(const Vector2f& pos, const char* templateName, int layer = 0);
+		SID create(const Vector2f& pos, const Texture& r,float rotation, float scaleX, float scaleY,const Color& color = Color::WHITE,int type = -1, int layer = 0);
 		void remove(SID sid);
 		void render();
 		void renderLayers(int* layers,int num_layers);
@@ -325,10 +334,17 @@ namespace ds {
 			return _buffer.get(sid);
 		}
 
+		void attachViewport(int layer, int viewport_id);
+
+		void activateLayer(int layer);
+
+		void deactivateLayer(int layer);
+
 	private:
 		ActionEventBuffer m_Buffer;
 		void allocate(int size);
 		
+		WorldLayer _layers[32];
 
 		SpriteArray m_Data;
 		AdditionalData _buffer;

@@ -18,10 +18,6 @@ namespace ds {
 		int onButtonUp(int button, int x, int y);
 	private:
 		SpriteTemplatesEditor* _editor;
-		bool _showSprite;
-		v2 _offset;
-		v2 _texturePos;
-		v2 _dim;
 	};
 
 }

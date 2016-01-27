@@ -429,6 +429,8 @@ namespace ds {
 
 		void draw_render_target_additive(RTID rtID, int shaderID = -1);
 
+		void draw_screen_quad(Shader* shader);
+
 		// bitmap fonts
 
 		Array<BitmapFont*>& getBitmapFontList();

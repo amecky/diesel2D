@@ -85,6 +85,16 @@ namespace ds {
 		return sar::create(m_Data,pos,r,type,layer);		
 	}
 
+	SID  World::create(const Vector2f& pos, const Texture& r, float rotation, float scaleX, float scaleY, const Color& color, int type, int layer) {
+		if (m_Data.total == 0) {
+			allocate(256);
+		}
+		if (m_Data.num >= m_Data.total) {
+			allocate(m_Data.total * 2);
+		}
+		return m_Data.create(pos, r, rotation, scaleX, scaleY, color, type, layer);
+	}
+
 	SID World::create(const Vector2f& pos, const char* templateName,int layer) {
 		if (m_Data.total == 0) {
 			allocate(256);
@@ -117,6 +127,7 @@ namespace ds {
 
 	void World::renderSingleLayer(int layer) {
 		ZoneTracker z("World:renderSingleLayer");
+		renderer::selectViewport(_layers[layer].viewport_id);
 		for (int i = 0; i < m_Data.num; ++i) {
 			if (m_Data.layers[i] == layer) {
 				sprites::draw(m_Data.positions[i], m_Data.textures[i], m_Data.rotations[i], m_Data.scales[i].x, m_Data.scales[i].y, m_Data.colors[i]);
@@ -127,6 +138,7 @@ namespace ds {
 	void World::renderLayers(int* layers, int num_layers) {
 		ZoneTracker z("World:renderLayers");
 		for (int j = 0; j < num_layers; ++j) {
+			renderer::selectViewport(_layers[layers[j]].viewport_id);
 			for (int i = 0; i < m_Data.num; ++i) {
 				if (m_Data.layers[i] == layers[j]) {					
 					sprites::draw(m_Data.positions[i], m_Data.textures[i], m_Data.rotations[i], m_Data.scales[i].x, m_Data.scales[i].y, m_Data.colors[i]);
@@ -137,7 +149,12 @@ namespace ds {
 
 	void World::render() {
 		ZoneTracker z("World:render");
+		int current_layer = -1;
 		for ( int i = 0; i < m_Data.num; ++i ) {
+			if (m_Data.layers[i] != current_layer) {
+				current_layer = m_Data.layers[i];
+				renderer::selectViewport(_layers[current_layer].viewport_id);
+			}
 			sprites::draw(m_Data.positions[i],m_Data.textures[i],m_Data.rotations[i],m_Data.scales[i].x,m_Data.scales[i].y,m_Data.colors[i]);
 		}
 	}
@@ -394,6 +411,24 @@ namespace ds {
 			}
 		}
 		return INVALID_SID;
+	}
+
+	void World::attachViewport(int layer, int viewport_id) {
+		if (layer >= 0 && layer < 32) {
+			_layers[layer].viewport_id = viewport_id;
+		}
+	}
+
+	void World::activateLayer(int layer) {
+		if (layer >= 0 && layer < 32) {
+			_layers[layer].visible = true;
+		}
+	}
+
+	void World::deactivateLayer(int layer) {
+		if (layer >= 0 && layer < 32) {
+			_layers[layer].visible = false;
+		}
 	}
 
 	
