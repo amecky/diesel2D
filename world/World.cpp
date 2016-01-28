@@ -382,7 +382,7 @@ namespace ds {
 	// -----------------------------------------------------
 	// find by type
 	// -----------------------------------------------------
-	int World::find_by_types(int* types, int num, SID* ids, int max) const {
+	int World::find_by_types(const int* types, int num, SID* ids, int max) const {
 		int cnt = 0;
 		for (int j = 0; j < num; ++j) {
 			for (int i = 0; i < m_Data.num; ++i) {
@@ -467,7 +467,7 @@ namespace ds {
 	// -----------------------------------------------------
 	// pick
 	// -----------------------------------------------------
-	SID World::pick(const Vector2f& pos) {
+	SID World::pick(const v2& pos) {
 		for ( int i = 0; i < m_Data.num; ++i ) {
 			const v2& p = m_Data.positions[i];
 			// transform to screen space

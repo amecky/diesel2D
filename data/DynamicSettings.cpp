@@ -64,6 +64,34 @@ namespace ds {
 		return false;
 	}
 
+	// -------------------------------------------------------
+	// add color
+	// -------------------------------------------------------
+	void DynamicGameSettings::addColor(const char* name, Color* value, const Color& defaultValue) {
+		*value = defaultValue;
+		SettingsItem item;
+		item.name = name;
+		item.type = ST_COLOR;
+		item.index = _colors.size();
+		_colors.push_back(value);
+		_items.push_back(item);
+		_model.add(name, item);
+	}
+
+	// -------------------------------------------------------
+	// set float
+	// -------------------------------------------------------
+	bool DynamicGameSettings::setColor(const char* name, const Color& value) {
+		for (int i = 0; i < _items.size(); ++i) {
+			const SettingsItem& item = _items[i];
+			if (strcmp(item.name, name) == 0) {
+				*_colors[item.index] = value;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	void DynamicGameSettings::addRect(const char* name, Rect* value, const Rect& defaultValue) {
 		*value = defaultValue;
 		SettingsItem item;
@@ -123,6 +151,9 @@ namespace ds {
 			else if (item.type == ST_V2_PATH) {
 				writer.write(item.name, *_v2_paths[item.index]);
 			}
+			else if (item.type == ST_COLOR) {
+				writer.write(item.name, *_colors[item.index]);
+			}
 		}
 		writer.endCategory();
 		return true;
@@ -148,6 +179,9 @@ namespace ds {
 					}
 					else if (item.type == ST_V2_PATH) {
 						loader.get_vec2_path(c, item.name, _v2_paths[item.index]);
+					}
+					else if (item.type == ST_COLOR) {
+						loader.get_color(c, item.name, _colors[item.index]);
 					}
 				}
 			}

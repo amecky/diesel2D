@@ -284,7 +284,7 @@ namespace ds {
 
 		int find_by_type(int type, SID* ids, int max) const;
 
-		int find_by_types(int* types, int num, SID* ids, int max) const;
+		int find_by_types(const int* types, int num, SID* ids, int max) const;
 
 		int get_count(int type);
 
