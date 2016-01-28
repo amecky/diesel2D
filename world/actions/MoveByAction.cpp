@@ -97,6 +97,16 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
+	void MoveByAction::debug(SID sid) {
+		int i = find(sid);
+		if (i != -1) {
+			LOG << "MoveByAction - id: " << _ids[i] << " velocity: " << DBG_V2(_velocities[i]) << " timer: " << _timers[i];
+		}
+	}
+
+	// -------------------------------------------------------
+	// 
+	// -------------------------------------------------------
 	void MoveByAction::save(const ReportWriter& writer) {
 		if (_buffer.size > 0) {
 			writer.addSubHeader("MoveByAction");

@@ -514,12 +514,13 @@ void BaseApp::sendButton(int button,int x,int y,bool down) {
 	m_ButtonState.y = y;
 	m_ButtonState.button = button;
 	m_ButtonState.down = down;
-	if (!m_Running) {
-		// FIXME: swap y
-		// FIXME: objects are in world space!
-		SID sid = world->find_at(x, y);
+	if (!m_Running && !down) {
+		int ny = renderer::getScreenHeight() - y;
+		SID sid = world->pick(v2(x, ny));
 		if (sid != INVALID_SID) {
-			LOG << "selected: " << sid;
+			LOG << "------------------------------------------";
+			world->debug(sid);
+			LOG << "------------------------------------------";
 		}
 	}
 }

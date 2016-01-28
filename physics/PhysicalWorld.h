@@ -47,6 +47,7 @@ namespace ds {
 		}
 		void tick(float dt);
 		void debug();
+		void debug(SID sid);
 		void save(const ReportWriter& writer);
 		void remove(SID id);
 		void drawColliders(const Texture& texture);

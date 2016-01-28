@@ -65,10 +65,9 @@ namespace ds {
 	}
 
 	void WaitAction::debug(SID sid) {
-		//int i = m_Mapping[sid];
 		int i = find(sid);
 		if (i != -1) {
-			LOG << "> wait : id: " << _ids[i] << " ttl: " << _ttl[i] << " timer: " << _timers[i];
+			LOG << "WaitAction - id: " << _ids[i] << " ttl: " << _ttl[i] << " timer: " << _timers[i];
 		}
 	}
 

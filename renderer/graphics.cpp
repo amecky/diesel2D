@@ -527,6 +527,10 @@ namespace ds {
 			return renderContext->viewPorts[renderContext->selectedViewPort];
 		}
 
+		Viewport& getViewport(int index) {
+			return renderContext->viewPorts[index];
+		}
+
 		void selectViewport(int vw) {
 			assert(vw >= 0);
 			assert(vw < renderContext->viewPorts.size());
@@ -1746,6 +1750,15 @@ namespace ds {
 			}
 			wp.y = screenPos.y + dy;
 			return wp;
+		}
+
+		v2 world_to_screen(const v2& worldPos,int viewportID) {
+			const Viewport vp = renderContext->viewPorts[viewportID];
+			//float dx = worldPos.x - vp.getWorldSize().x / 2.0f + vp.getPosition().x / 2.0f;
+			//float dy = worldPos.y - vp.getWorldSize().y / 2.0f + vp.getPosition().y / 2.0f;
+			float dx = worldPos.x - vp.getPosition().x + renderContext->screenWidth / 2.0f;
+			float dy = worldPos.y - vp.getPosition().y + renderContext->screenHeight / 2.0f;
+			return v2(dx,dy);
 		}
 
 		void setMousePosition(int x, int y) {

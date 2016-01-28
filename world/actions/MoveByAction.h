@@ -13,7 +13,7 @@ namespace ds {
 		void attach(SID id,const Vector2f& velocity,bool bounce = false);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
 		void debug();
-		void debug(SID sid) {}
+		void debug(SID sid);
 		ActionType getActionType() const {
 			return AT_MOVE_BY;
 		}

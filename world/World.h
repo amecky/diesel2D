@@ -270,8 +270,6 @@ namespace ds {
 
 		void debug();
 
-		void save(FILE* f);
-
 		void save(const ReportWriter& writer);
 
 		void debug(SID sid);
@@ -288,7 +286,7 @@ namespace ds {
 
 		int find_by_types(int* types, int num, SID* ids, int max) const;
 
-		SID find_at(int x, int y) const;
+		int get_count(int type);
 
 		void attachCollider(SID sid, const Vector2f& extent, int type,int layer) {
 			m_Physics.attachCollider(sid, extent, type,layer);

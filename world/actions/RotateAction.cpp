@@ -78,7 +78,7 @@ namespace ds {
 	void RotateAction::debug(SID sid) {
 		int i = find(sid);
 		if (i != -1) {
-			LOG << i << " : id: " << _ids[i] << " angle velocity: " << _angleVelocities[i] << " ttl: " << _ttl[i] << " timer: " << _timers[i];
+			LOG << "RotateAction - id: " << _ids[i] << " angle velocity: " << _angleVelocities[i] << " ttl: " << _ttl[i] << " timer: " << _timers[i];
 		}
 	}
 

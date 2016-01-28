@@ -374,17 +374,25 @@ namespace ds {
 
 		int getCurrentShaderID();
 
+		// -------------------------------------------------
+		// viewport
+		// -------------------------------------------------
+
 		int createViewport(int width, int height);
 
 		int createViewport(int screenWidth, int screenHeight, int worldWidth, int worldHeight);
 
 		Viewport& getSelectedViewport();
 
+		Viewport& getViewport(int index);
+
 		void selectViewport(int vw);
 
-		void setTexture(int id, int index = 0);
-
 		void setViewportPosition(int vw, const Vector2f& pos);
+
+
+
+		void setTexture(int id, int index = 0);		
 
 		int createBlendState(const char* name, int srcAlpha, int dstAlpha, bool alphaEnabled);
 
@@ -519,6 +527,8 @@ namespace ds {
 		Vector2f& getMousePosition();
 
 		v2 screen_to_world(const v2& screenPos,const v2& worldPos);
+
+		v2 world_to_screen(const v2& worldPos, int viewportID);
 
 		void setMousePosition(int x, int y);
 
