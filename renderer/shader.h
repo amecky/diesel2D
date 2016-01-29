@@ -51,6 +51,7 @@ namespace ds {
 		IdString _hashName;
 		ShaderConstant* _constants;
 		uint32 _constantCount;
+		char debugName[32];
 	};
 
 

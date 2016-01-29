@@ -484,6 +484,15 @@ namespace ds {
 			return renderContext->shaders[id];
 		}
 
+		Shader* getShader(const char* name) {
+			IdString hash = string::murmur_hash(name);
+			int sid = getShaderID(hash);
+			if (sid != -1) {
+				return renderContext->shaders[sid];
+			}
+			return 0;
+		}
+
 		int getDefaultShaderID() {
 			return renderContext->defaultShaderID;
 		}
@@ -949,14 +958,13 @@ namespace ds {
 		}
 
 		void draw(int descriptorID, int vertexBufferID, int numVertices,int indexBufferID) {
-
+			ZoneTracker z("drawBuffer");
 			if (descriptorID != renderContext->currentDescriptor) {
 				applyDescriptor(descriptorID);
 				//m_Renderer->setTexture(m_ShaderID, "gTex", m_TextureID);
 				renderContext->currentDescriptor = descriptorID;
 			}
-			// FIXME: check if we need to switch this
-			ZoneTracker z("drawBuffer");
+			// FIXME: check if we need to switch this			
 			const VertexBuffer& vb = renderContext->vertexBuffers[vertexBufferID];
 			VDStruct& vds = renderContext->vdStructs[vb.vertexDeclaration];
 			HR(renderContext->device->SetVertexDeclaration(renderContext->vdStructs[vb.vertexDeclaration].declaration->get()));

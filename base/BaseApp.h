@@ -135,7 +135,9 @@ private:
 	void loadSettings();
 	void showProfilerSnapshot(v2* position);
 	void showEditor();
-
+	void loadShaders(const JSONReader& reader);
+	void loadDescriptors(const JSONReader& reader);
+	void loadViewports(const JSONReader& reader);
 	HINSTANCE hInstance;
 	HWND m_hWnd;
 	bool m_Active;

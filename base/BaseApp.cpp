@@ -212,6 +212,10 @@ void BaseApp::loadSettings() {
 		_stateMachine->add(new ParticlesEditState(particles));
 		_stateMachine->add(new DialogEditorState(gui));
 	}
+
+	loadShaders(reader);
+
+	loadDescriptors(reader);
 }
 // -------------------------------------------------------
 // Init
@@ -534,6 +538,9 @@ void BaseApp::sendOnChar(char ascii,unsigned int state) {
 	gui::sendKey(ascii);
 }
 
+// -------------------------------------------------------
+// send key down
+// -------------------------------------------------------
 void BaseApp::sendKeyDown(WPARAM virtualKey) {
 	m_KeyStates.keyDown = true;
 	m_KeyStates.keyPressed = virtualKey;
@@ -584,12 +591,18 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 #endif
 }
 
+// -------------------------------------------------------
+// send key up
+// -------------------------------------------------------
 void BaseApp::sendKeyUp(WPARAM virtualKey) {
 	m_KeyStates.keyUp = true;
 	m_KeyStates.keyReleased = virtualKey;
 	gui::sendSpecialKey(virtualKey);
 }
 
+// -------------------------------------------------------
+// show performance overlay FIXME: broken
+// -------------------------------------------------------
 void BaseApp::showPerformceOverlay(v2* position) {
 	gui::start(EDITOR_ID, position);
 	int state = 1;
@@ -608,6 +621,9 @@ void BaseApp::showPerformceOverlay(v2* position) {
 	gui::end();
 }
 
+// -------------------------------------------------------
+// show editor
+// -------------------------------------------------------
 void BaseApp::showEditor() {
 	gui::start(EDITOR_ID, &_editor.position);
 	if (gui::begin("Game", &_editor.state)) {
@@ -650,6 +666,9 @@ void BaseApp::showEditor() {
 	}
 }
 
+// -------------------------------------------------------
+// show profiler snapshot FIXME: broken
+// -------------------------------------------------------
 void BaseApp::showProfilerSnapshot(v2* position) {
 	gui::start(EDITOR_ID, position);
 	int state = 1;
@@ -665,16 +684,109 @@ void BaseApp::showProfilerSnapshot(v2* position) {
 	gui::end();
 }
 
+// -------------------------------------------------------
+// add game state
+// -------------------------------------------------------
 void BaseApp::addGameState(GameState* gameState) {
 	_stateMachine->add(gameState);
 }
 
+// -------------------------------------------------------
+// activate game state
+// -------------------------------------------------------
 void BaseApp::activate(const char* name) {
 	_stateMachine->activate(name);
 }
 
+// -------------------------------------------------------
+// connect game states
+// -------------------------------------------------------
 void BaseApp::connectGameStates(const char* firstStateName, int outcome, const char* secondStateName) {
 	_stateMachine->connect(firstStateName, outcome, secondStateName);
+}
+
+// -------------------------------------------------------
+// load shaders
+// -------------------------------------------------------
+void BaseApp::loadShaders(const JSONReader& reader) {
+	int root = reader.find_category("shaders");
+	if(root != -1) {
+		int entries[128];
+		int num = reader.get_categories(entries,128,root);
+		for (int i = 0; i < num; ++i) {
+			const char* file = reader.get_string(entries[i], "file");
+			const char* tech = reader.get_string(entries[i], "tech");
+			int sh = ds::renderer::loadShader(file, tech);
+			assert(sh >= 0);
+			LOG << "shader '" << file << "' id: " << sh;
+		}
+	}
+	else {
+		LOG << "No shaders defined";
+	}
+}
+
+// -------------------------------------------------------
+// load descriptors
+// -------------------------------------------------------
+void BaseApp::loadDescriptors(const JSONReader& reader) {
+	int root = reader.find_category("descriptors");
+	if (root != -1) {
+		int entries[128];
+		int num = reader.get_categories(entries, 128, root);
+		for (int i = 0; i < num; ++i) {
+			const char* texture = reader.get_string(entries[i], "texture");
+			const char* shader = reader.get_string(entries[i], "shader");
+			const char* blend_state = reader.get_string(entries[i], "blend_state");
+			Descriptor desc;
+			desc.hash = string::murmur_hash(reader.get_category_name(entries[i]));
+			desc.shader = ds::renderer::getShaderID(string::murmur_hash(shader));
+			assert(desc.shader != 0);
+			desc.texture = renderer::getTextureId(texture);
+			int did = renderer::addDescriptor(desc);
+			LOG << "descriptor: '" << reader.get_category_name(entries[i]) << "' id: " << did;
+		}
+	}
+	else {
+		LOG << "No descriptors defined";
+	}
+}
+
+// -------------------------------------------------------
+// load viewports
+// -------------------------------------------------------
+/*
+viewports {
+default {
+screen_size : 1280,720
+world_size : 1280,720
+}
+main {
+screen_size : 1280,720
+world_size : 1600,900
+}
+}
+*/
+void BaseApp::loadViewports(const JSONReader& reader) {
+	int root = reader.find_category("viewports");
+	if (root != -1) {
+		int entries[128];
+		int num = reader.get_categories(entries, 128, root);
+		for (int i = 0; i < num; ++i) {
+			const char* texture = reader.get_string(entries[i], "texture");
+			const char* shader = reader.get_string(entries[i], "shader");
+			const char* blend_state = reader.get_string(entries[i], "blend_state");
+			Descriptor desc;
+			desc.hash = string::murmur_hash(reader.get_category_name(entries[i]));
+			desc.shader = ds::renderer::getShaderID(string::murmur_hash(shader));
+			assert(desc.shader != 0);
+			desc.texture = renderer::getTextureId(texture);
+			int did = renderer::addDescriptor(desc);
+		}
+	}
+	else {
+		LOG << "No descriptors defined";
+	}
 }
 
 }

@@ -144,6 +144,8 @@ namespace ds {
 	void World::renderSingleLayer(int layer) {
 		ZoneTracker z("World:renderSingleLayer");
 		renderer::selectViewport(_layers[layer].viewport_id);
+		sprites::setDescriptorID(_layers[layer].descriptor_id);
+		//LOG << "layer: " << layer << " viewport: " << _layers[layer].viewport_id << " descriptor: " << _layers[layer].descriptor_id;
 		for (int i = 0; i < m_Data.num; ++i) {
 			if (m_Data.layers[i] == layer) {
 				sprites::draw(m_Data.positions[i], m_Data.textures[i], m_Data.rotations[i], m_Data.scales[i].x, m_Data.scales[i].y, m_Data.colors[i]);
@@ -158,6 +160,7 @@ namespace ds {
 		ZoneTracker z("World:renderLayers");
 		for (int j = 0; j < num_layers; ++j) {
 			renderer::selectViewport(_layers[layers[j]].viewport_id);
+			sprites::setDescriptorID(_layers[layers[j]].descriptor_id);
 			for (int i = 0; i < m_Data.num; ++i) {
 				if (m_Data.layers[i] == layers[j]) {					
 					sprites::draw(m_Data.positions[i], m_Data.textures[i], m_Data.rotations[i], m_Data.scales[i].x, m_Data.scales[i].y, m_Data.colors[i]);
@@ -176,6 +179,7 @@ namespace ds {
 			if (m_Data.layers[i] != current_layer) {
 				current_layer = m_Data.layers[i];
 				renderer::selectViewport(_layers[current_layer].viewport_id);
+				sprites::setDescriptorID(_layers[current_layer].descriptor_id);
 			}
 			sprites::draw(m_Data.positions[i],m_Data.textures[i],m_Data.rotations[i],m_Data.scales[i].x,m_Data.scales[i].y,m_Data.colors[i]);
 		}
@@ -488,6 +492,12 @@ namespace ds {
 	void World::attachViewport(int layer, int viewport_id) {
 		if (layer >= 0 && layer < 32) {
 			_layers[layer].viewport_id = viewport_id;
+		}
+	}
+
+	void World::attach_descriptor(int layer, const char* descName) {
+		if (layer >= 0 && layer < 32) {
+			_layers[layer].descriptor_id = renderer::getDescriptorID(descName);
 		}
 	}
 

@@ -91,8 +91,9 @@ namespace ds {
 
 		int viewport_id;
 		bool visible;
+		int descriptor_id;
 
-		WorldLayer() : viewport_id(0), visible(true) {}
+		WorldLayer() : viewport_id(0), visible(true), descriptor_id(0) {}
 	};
 
 	class World {
@@ -333,6 +334,8 @@ namespace ds {
 		}
 
 		void attachViewport(int layer, int viewport_id);
+
+		void attach_descriptor(int layer, const char* descName);
 
 		void activateLayer(int layer);
 

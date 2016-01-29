@@ -70,9 +70,12 @@ namespace sprites {
 		return spriteCtx->descriptorID;
 	}
 
-	void setDescriptorID(int id) {
-		spriteCtx->descriptorID = id;
-		flush();
+	void setDescriptorID(int id) {	
+		// FIXME: correct order?????
+		//if (spriteCtx->descriptorID != id) {			
+			flush();
+			spriteCtx->descriptorID = id;			
+		//}
 	}
 
 	void begin() {

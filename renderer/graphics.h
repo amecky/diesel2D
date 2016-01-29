@@ -366,6 +366,8 @@ namespace ds {
 
 		Shader* getShader(int id);
 
+		Shader* getShader(const char* name);
+
 		int loadShader(const char* fxName, const char* techName);
 
 		int createEmptyShader(const char* name);

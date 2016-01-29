@@ -13,6 +13,7 @@ namespace ds {
 
 	Shader::Shader(int id,const char* name) : _id(id) , _hashName(0), _FX(0), _constants(0), _constantCount(0) {
 		_hashName = string::murmur_hash(name);
+		sprintf_s(debugName, 32, "%s", name);
 	}
 
 	bool Shader::setFloat(const char* name, float value) {
