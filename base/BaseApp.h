@@ -16,6 +16,8 @@ struct BitmapFont;
 class ParticleManager;
 class SpriteTemplatesEditor;
 class World;
+class GameConsole;
+class AssetEditorManager;
 
 struct GameTime {
 	float elapsed;
@@ -24,13 +26,6 @@ struct GameTime {
 };
 
 class BaseApp {
-
-struct GameEditor {
-	v2 dialogPos;
-	v2 position;
-	int dialogIndex;
-	int state;
-};
 
 struct DebugInfo {
 	bool showProfiler;
@@ -43,6 +38,7 @@ struct DebugInfo {
 	int snapshotCount;
 	bool monitoring;
 	float treshold;
+	bool showConsole;
 };
 	
 struct KeyStates {
@@ -130,11 +126,13 @@ protected:
 	AudioManager* audio;	
 	ParticleManager* particles;
 	World* world;	
+	GameConsole* console;
+	AssetEditorManager* assetEditors;
 private:
 	void saveHTMLProfilingReport();
 	void loadSettings();
 	void showProfilerSnapshot(v2* position);
-	void showEditor();
+	//void showEditor();
 	void loadShaders(const JSONReader& reader);
 	void loadDescriptors(const JSONReader& reader);
 	void loadViewports(const JSONReader& reader);
@@ -157,10 +155,6 @@ private:
 	MTRand_open rand;		
 	bool m_Running;
 	GameStateMachine* _stateMachine;
-	GameEditor _editor;
-	BitmapFontsDialog* _bmfDialog;
-
-	SpriteTemplatesEditor* _templatesEditor;
 	v2 _perfHUDPos;
 	ProfileSnapshot _snapshots[64];
 	bool _prepared;

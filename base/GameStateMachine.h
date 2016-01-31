@@ -3,10 +3,11 @@
 #include "..\utils\Log.h"
 #include "..\ui\IMGUI.h"
 #include "..\lib\collection_types.h"
+#include "..\editor\AssetEditor.h"
 
 namespace ds {
 
-class GameStateMachine	{
+class GameStateMachine	: public AssetEditor {
 
 struct FSMConnection {
 	int firstStateIndex;
@@ -41,6 +42,10 @@ public:
 	void onGUIButton(ds::DialogID dlgID, int button);
 	void connect(const char* firstStateName, int outcome, const char* secondStateName);
 	void showDialog();
+	void init() {}
+	const char* getShortcut() const {
+		return "GSM";
+	}
 private:
 	void handleStateTransition(int outcome);
 	int find(const char* name) const;

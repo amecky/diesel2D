@@ -111,7 +111,9 @@ namespace gui {
 
 	void InputFloat(const char* label, float* v);
 
-	void Input(const char* label, char* str,int maxLength);
+	bool Input(const char* label, char* str,int maxLength);
+
+	bool Input(char* str, int maxLength);
 
 	void InputFloat(const char* label, float* v, float minValue, float maxValue, float step);
 

@@ -15,7 +15,12 @@
 
 namespace ds {
 
-
+	enum BounceDirection {
+		BD_X,
+		BD_Y,
+		BD_BOTH,
+		BD_EOL
+	};
 
 	enum ActionType {
 		AT_ALPHA_FADE_TO,
@@ -232,6 +237,7 @@ namespace ds {
 		void moveTo(SID sid,const Vector2f& startPos,const Vector2f& endPos,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
 		const int getMovingNumber() const;
 		void moveBy(SID sid,const Vector2f& velocity,bool bounce = false);
+		void bounce(SID sid, BounceDirection direction);
 		const Vector2f& getPosition(SID sid) const {
 			return sar::getPosition(m_Data,sid);
 		}
@@ -295,6 +301,10 @@ namespace ds {
 
 		void attachCollider(SID sid, int type, int layer){
 			m_Physics.attachCollider(sid, type, layer);
+		}
+
+		void attachBoxCollider(SID sid, int type, int layer){
+			m_Physics.attachBoxCollider(sid, type, layer);
 		}
 
 		void ignoreCollisions(int firstType, int secondType) {

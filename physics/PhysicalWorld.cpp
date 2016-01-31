@@ -136,8 +136,21 @@ namespace ds {
 			allocateCollider(m_ColliderData.total * 2);
 		}
 		const Vector2f& p = m_Sprites->getPosition(sid);
-		const ds::Texture& t = m_Sprites->getTexture(sid);
+		const Texture& t = m_Sprites->getTexture(sid);
 		CID cid = m_ColliderData.create(sid, p, t.dim, type,layer);
+		//m_ColliderMap[sid] = cid;
+	}
+
+	void PhysicalWorld::attachBoxCollider(SID sid, int type, int layer) {
+		if (m_ColliderData.total == 0) {
+			allocateCollider(256);
+		}
+		if (m_ColliderData.num >= m_ColliderData.total) {
+			allocateCollider(m_ColliderData.total * 2);
+		}
+		const v2& p = m_Sprites->getPosition(sid);
+		const Texture& t = m_Sprites->getTexture(sid);
+		CID cid = m_ColliderData.create(sid, p, t.dim, type, layer, CS_BOX);
 		//m_ColliderMap[sid] = cid;
 	}
 
@@ -171,6 +184,11 @@ namespace ds {
 			float u0, u1;
 			if( physics::testCircleSweepIntersection(r1, fpp, fp, r2, spp, sp, &u0, &u1) ) {
 			//if (physics::testCircleIntersection(fp, r1, sp, r2)) {
+				return true;
+			}
+		}
+		else if (firstShape == CS_BOX && secondShape == CS_BOX)  {
+			if (physics::testBoxIntersection(fp,fe,sp,se)) {
 				return true;
 			}
 		}
@@ -309,7 +327,7 @@ namespace ds {
 			const Vector2f& scale = m_Sprites->getScale(m_ColliderData.sids[i]);
 			float sx = e.x / texture.dim.x * scale.x;
 			float sy = e.y / texture.dim.y * scale.y;
-			ds::sprites::draw(m_ColliderData.positions[i], texture, 0.0f, sx, sy);
+			sprites::draw(m_ColliderData.positions[i], texture, 0.0f, sx, sy);
 		}
 	}
 

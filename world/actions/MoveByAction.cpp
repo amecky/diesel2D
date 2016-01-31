@@ -52,6 +52,19 @@ namespace ds {
 		}
 		return false;
 	}
+
+	void MoveByAction::bounce(SID sid, BounceDirection direction) {
+		for (int i = 0; i < _buffer.size; ++i) {
+			if (_ids[i] == sid) {
+				if (direction == BD_Y || direction == BD_BOTH) {
+					_velocities[i].y *= -1.0f;
+				}
+				if (direction == BD_X || direction == BD_BOTH) {
+					_velocities[i].x *= -1.0f;
+				}
+			}
+		}
+	}
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------

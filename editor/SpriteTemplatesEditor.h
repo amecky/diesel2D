@@ -26,6 +26,9 @@ namespace ds {
 		v2 getTexturePosition() const;
 		void setTexturePosition(int x, int y);
 		void setDimension(int x, int y);
+		const char* getShortcut() const {
+			return "SPT";
+		}
 	private:
 		SpriteTemplates* _templates;
 		int _state;

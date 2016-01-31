@@ -219,6 +219,10 @@ namespace ds {
 		m_MoveByAction->attach(sid,velocity,bounce);
 	}
 
+	void World::bounce(SID sid, BounceDirection direction) {
+		m_MoveByAction->bounce(sid, direction);
+	}
+
 	void World::moveWith(SID sid,const MoveFunc& function,float ttl) {
 		m_MoveWithAction->attach(sid,function,ttl);
 	}

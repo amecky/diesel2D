@@ -5,25 +5,18 @@
 
 namespace ds {
 
-	DialogEditorState::DialogEditorState(DialogManager* manager) : GameState("DialogEditorState") , _manager(manager) {
+	DialogEditorState::DialogEditorState(DialogManager* manager) : AssetEditor("DialogEditorState",0) , _manager(manager) {
 	}
 
 
 	DialogEditorState::~DialogEditorState() {
 	}
 
-	// --------------------------------------------
-	// activate
-	// --------------------------------------------
-	void DialogEditorState::activate() {
+	void DialogEditorState::init() {
 		_dialogPos = v2(10, 710);
 		_dialogState = 1;
 		_offset = 0;
 		_showAdd = false;
-		init();
-	}
-
-	void DialogEditorState::init() {
 		const Dialogs& dialogs = _manager->getDialogs();
 		_model.clear();
 		for (size_t i = 0; i < dialogs.size(); ++i) {
@@ -32,30 +25,9 @@ namespace ds {
 	}
 
 	// --------------------------------------------
-	// activate
-	// --------------------------------------------
-	void DialogEditorState::deactivate() {
-		
-	}
-
-	// --------------------------------------------
-	// update
-	// --------------------------------------------
-	int DialogEditorState::update(float dt) {
-		return 0;
-	}
-
-	// --------------------------------------------
-	// click
-	// --------------------------------------------
-	int DialogEditorState::onGUIButton(ds::DialogID dlgID, int button) {
-		return button;
-	}
-
-	// --------------------------------------------
 	// render
 	// --------------------------------------------
-	void DialogEditorState::render() {
+	void DialogEditorState::showDialog() {
 		gui::start(280, &_dialogPos);
 		if (gui::begin("Dialogs", &_dialogState)) {
 			gui::ComboBox(&_model, &_offset);

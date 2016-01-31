@@ -1471,7 +1471,8 @@ namespace ds {
 			if (SUCCEEDED(renderContext->device->BeginScene())) {
 				renderer::restoreDefaultBlendState();
 				set2DCameraOn();
-				sprites::setShaderID(renderContext->defaultShaderID);
+				//sprites::setShaderID(renderContext->defaultShaderID);
+				sprites::setDescriptorID(renderContext->defaultDescriptor);
 				return true;
 			}
 			else {

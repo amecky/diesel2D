@@ -12,6 +12,7 @@ namespace ds {
 		virtual ~MoveByAction() {}
 		void attach(SID id,const Vector2f& velocity,bool bounce = false);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
+		void bounce(SID sid, BounceDirection direction);
 		void debug();
 		void debug(SID sid);
 		ActionType getActionType() const {

@@ -5,7 +5,7 @@
 
 namespace ds {
 
-	SpriteTemplatesEditor::SpriteTemplatesEditor(SpriteTemplates* templates) : AssetEditor(templates) , _templates(templates) {
+	SpriteTemplatesEditor::SpriteTemplatesEditor(SpriteTemplates* templates) : AssetEditor("SPT", templates) , _templates(templates) {
 		_offset = 0;
 		_state = 1;
 		_position = v2(20, 710);

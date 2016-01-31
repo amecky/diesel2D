@@ -16,6 +16,7 @@ namespace ds {
 		void deactivate();
 		int onChar(int ascii);
 		int onButtonUp(int button, int x, int y);
+		
 	private:
 		SpriteTemplatesEditor* _editor;
 	};

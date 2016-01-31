@@ -5,7 +5,7 @@
 
 namespace ds {
 
-	GameStateMachine::GameStateMachine() {
+	GameStateMachine::GameStateMachine() : AssetEditor("GameStateEditor",0) {
 		_activeState = 0;
 		_currentIndex = -1;
 		_dialogPos = v2(1050, 690);

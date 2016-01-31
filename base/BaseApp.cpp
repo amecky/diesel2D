@@ -20,6 +20,9 @@
 #include "..\world\World.h"
 #include <time.h>
 #include "..\io\ReportWriter.h"
+#include "..\ui\GameConsole.h"
+#include "..\editor\AssetEditor.h"
+
 namespace ds {
 
 // -------------------------------------------------------
@@ -48,20 +51,19 @@ BaseApp::BaseApp() {
 	m_DebugInfo.showEditor = false;
 	m_DebugInfo.profilerTicks = 0;
 	m_DebugInfo.monitoring = false;
+	m_DebugInfo.showConsole = false;
 	m_ButtonState.processed = true;
 	m_MousePos = Vector2f(0,0);
 	rand.seed(GetTickCount());
-	audio = new AudioManager;
+	audio = new AudioManager();
 	_totalTime = 0.0f;
-	_stateMachine = new GameStateMachine;
-	_editor.dialogPos = v2(10, 710);
-	_editor.position = v2(10, 710);
-	_editor.dialogIndex = -1;
-	_editor.state = 1;
-	particles = new ParticleManager;
-	gui = new DialogManager;
-	world = new World;
-	_templatesEditor = 0;
+	_stateMachine = new GameStateMachine();
+	particles = new ParticleManager();
+	gui = new DialogManager();
+	world = new World();
+	console = new GameConsole();
+	assetEditors = new AssetEditorManager();
+	//_templatesEditor = 0;
 	_perfHUDPos = v2(10, 710);
 	_prepared = false;
 	JSONReader reader;
@@ -88,8 +90,10 @@ BaseApp::~BaseApp() {
 	LOG << "Destructing all elements";
 	sprites::shutdown();
 	repository::shutdown();
-	delete _bmfDialog;
-	delete _templatesEditor;	
+	//delete _bmfDialog;
+	//delete _templatesEditor;	
+	delete assetEditors;
+	delete console;
 	delete world;
 	delete gui;
 	delete particles;
@@ -204,13 +208,11 @@ void BaseApp::loadSettings() {
 	bool initialize_editor = false;
 	reader.get_bool(root, "initialize_editor", &initialize_editor);
 	if (initialize_editor) {
-		_bmfDialog = new BitmapFontsDialog;
-		_bmfDialog->init();
-		_templatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
-		_templatesEditor->init();
-		_stateMachine->add(new SpriteTemplatesState());
-		_stateMachine->add(new ParticlesEditState(particles));
-		_stateMachine->add(new DialogEditorState(gui));
+		assetEditors->add(_stateMachine);
+		assetEditors->add(new BitmapFontsDialog());
+		assetEditors->add(new SpriteTemplatesEditor(renderer::getSpriteTemplates()));
+		assetEditors->add(new ParticlesEditState(particles));
+		assetEditors->add(new DialogEditorState(gui));
 	}
 
 	loadShaders(reader);
@@ -225,21 +227,6 @@ void BaseApp::prepare() {
 	TIMER("Load Settings")
 	LOG << "---> Init <---";
 	LOG << "---- Loading settings ----";
-	//Category root("root");
-	//bool loaded = json::read_simplified_json("content\\engine_settings.json", &root);
-	/*
-	//settings.mode = 1;		
-	if (loaded) {
-		Category* basic = root.getChild("basic_settings");
-		if (basic != 0) {
-			//full_screen = false
-			//synched = true
-			basic->getInt("screen_width", &_settings.screenWidth);
-			basic->getInt("screen_height", &_settings.screenHeight);
-			basic->getColor("clear_color", &_settings.clearColor);
-		}
-	}
-	*/
 	renderer::initialize(m_hWnd,_settings);   	
 	audio->initialize(m_hWnd);
 
@@ -256,8 +243,6 @@ void BaseApp::prepare() {
 	v2 dp;
 	dp.x = _settings.screenWidth - 350.0f;
 	dp.y = _settings.screenHeight - 10.0f;
-	_editor.dialogPos.y = _settings.screenHeight - 10.0f;
-	_editor.position.y = _settings.screenHeight - 10.0f;
 	//_perfHUDPos = dp;
 	m_Running = true;
 	_prepared = true;
@@ -423,6 +408,7 @@ void BaseApp::buildFrame() {
 				update(m_GameTime.elapsed);
 				_stateMachine->update(m_GameTime.elapsed);
 			}
+			world->tick(m_GameTime.elapsed);
 		}
 	}
 	{
@@ -441,16 +427,18 @@ void BaseApp::buildFrame() {
 			gui->render();
 		}
 		{
-			ZoneTracker r("RENDER_EDITOR");
-			if (m_DebugInfo.showEditor) {
-				showEditor();
-			}
+			ZoneTracker r("RENDER_ASSET_EDITORS");
+			assetEditors->render();
 		}
 		if (m_DebugInfo.performanceOverlay) {
 			showPerformceOverlay(&_perfHUDPos);
 		}
+		if (m_DebugInfo.showConsole) {
+			console->show();
+		}
 		{
 			ZoneTracker r("RENDER_FLUSH");
+			ds::sprites::flush();
 			renderer::flush();
 		}
 		{
@@ -564,17 +552,7 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 		m_DebugInfo.performanceOverlay = !m_DebugInfo.performanceOverlay;
 	}
 	else if (virtualKey == VK_F6) {
-		m_DebugInfo.showEditor = !m_DebugInfo.showEditor;
-		if (m_DebugInfo.showEditor) {
-			if (m_Running)  {
-				m_Running = false;
-			}
-		}
-		if (!m_DebugInfo.showEditor) {
-			if (!m_Running)  {
-				m_Running = true;
-			}
-		}
+		assetEditors->toggle();
 	}
 	else if (virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
 		m_DebugInfo.debugRenderer = true;
@@ -587,6 +565,9 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 	}	
 	else if (virtualKey == VK_F11) {
 		_stateMachine->activate("DialogEditorState");
+	}
+	else if (virtualKey == VK_F12) {
+		m_DebugInfo.showConsole = !m_DebugInfo.showConsole;
 	}
 #endif
 }
@@ -624,6 +605,7 @@ void BaseApp::showPerformceOverlay(v2* position) {
 // -------------------------------------------------------
 // show editor
 // -------------------------------------------------------
+/*
 void BaseApp::showEditor() {
 	gui::start(EDITOR_ID, &_editor.position);
 	if (gui::begin("Game", &_editor.state)) {
@@ -631,25 +613,8 @@ void BaseApp::showEditor() {
 		if (gui::Button("GSM")) {
 			_editor.dialogIndex = 2;
 		}
-		if (gui::Button("DLG")) {
-			m_DebugInfo.showEditor = false;
-			_stateMachine->activate("DialogEditorState");
-		}
-		if (_templatesEditor != 0 && gui::Button("SPT")) {
-			//_templatesEditor->init();
-			//_editor.dialogIndex = 4;
-			m_DebugInfo.showEditor = false;
-			_stateMachine->activate("SpriteTemplatesState");
-		}
 		if (gui::Button("SCG")) {
 			_editor.dialogIndex = 5;
-		}
-		if (gui::Button("BMF")) {
-			_editor.dialogIndex = 6;
-		}
-		if (gui::Button("PS")) {
-			m_DebugInfo.showEditor = false;
-			_stateMachine->activate("ParticlesEditState");
 		}
 		gui::endGroup();
 	}
@@ -661,11 +626,8 @@ void BaseApp::showEditor() {
 	if (_editor.dialogIndex == 5) {
 		renderer::getSpriteGroupContainer()->showDialog();
 	}
-	if (_editor.dialogIndex == 6) {
-		_bmfDialog->show();
-	}
 }
-
+*/
 // -------------------------------------------------------
 // show profiler snapshot FIXME: broken
 // -------------------------------------------------------

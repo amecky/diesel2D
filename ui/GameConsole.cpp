@@ -1,10 +1,12 @@
 #include "GameConsole.h"
 #include "..\io\json.h"
 #include "..\utils\Log.h"
+#include "IMGUI.h"
 
 namespace ds {
 
-	GameConsole::GameConsole() {
+	GameConsole::GameConsole() : _position(10,60) {
+		_buffer[0] = '\0';
 	}
 
 
@@ -49,7 +51,17 @@ namespace ds {
 		return false;
 	}
 
-	void GameConsole::render() {
+	void GameConsole::show() {
+		int state = 1;
+		gui::start(1, &_position);
+		if (gui::begin("Console", &state)) {
+			if (gui::Input(_buffer, 128)) {
+				execute(_buffer);
+				_buffer[0] = '\0';
+			}
+		}
+		
+		gui::end();
 
 	}
 

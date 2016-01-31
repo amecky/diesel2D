@@ -5,7 +5,7 @@
 
 namespace ds {
 
-	BitmapFontsDialog::BitmapFontsDialog() : _state(1) , _offset(0) , _position(512,384) {
+	BitmapFontsDialog::BitmapFontsDialog() : AssetEditor("BitmapFonts",0) , _state(1), _offset(0), _position(512, 384) {
 	}
 
 	BitmapFontsDialog::~BitmapFontsDialog() {
@@ -18,7 +18,7 @@ namespace ds {
 		}
 	}
 
-	void BitmapFontsDialog::show() {
+	void BitmapFontsDialog::showDialog() {
 		gui::start(DIALOG_MANAGER_ID, &_position);
 		if (gui::begin("Bitmap Fonts", &_state)) {
 			gui::ComboBox(&_fontNames, &_offset);

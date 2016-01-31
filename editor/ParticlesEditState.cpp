@@ -5,7 +5,7 @@
 
 namespace ds {
 
-	ParticlesEditState::ParticlesEditState(ParticleManager* particles) : GameState("ParticlesEditState"), AssetEditor(particles) , _particles(particles) {
+	ParticlesEditState::ParticlesEditState(ParticleManager* particles) : AssetEditor("ParticlesEditor", particles), _particles(particles) {
 		_editor = new ParticleSystemEditor(particles);
 		_dialogState = 1;
 		_offset = 0;
@@ -16,34 +16,6 @@ namespace ds {
 
 	ParticlesEditState::~ParticlesEditState() {
 		delete _editor;
-	}
-
-	// --------------------------------------------
-	// activate
-	// --------------------------------------------
-	void ParticlesEditState::activate() {
-		_particles->fillModel(&_model);
-	}
-
-	// --------------------------------------------
-	// activate
-	// --------------------------------------------
-	void ParticlesEditState::deactivate() {
-	}
-
-	// --------------------------------------------
-	// update
-	// --------------------------------------------
-	int ParticlesEditState::update(float dt) {
-		_particles->update(dt);
-		return 0;
-	}
-
-	// --------------------------------------------
-	// click
-	// --------------------------------------------
-	int ParticlesEditState::onGUIButton(ds::DialogID dlgID, int button) {
-		return button;
 	}
 
 	// --------------------------------------------
@@ -108,7 +80,7 @@ namespace ds {
 	// --------------------------------------------
 	// render
 	// --------------------------------------------
-	void ParticlesEditState::render() {
+	void ParticlesEditState::showDialog() {
 		gui::start(209, &_dialogPos);
 		int gen_id = -1;
 		renderSelection();

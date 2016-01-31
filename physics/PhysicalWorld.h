@@ -36,6 +36,7 @@ namespace ds {
 		void setDataPtr(SpriteArray* sprites);
 		void attachCollider(SID sid, const Vector2f& extent, int type,int layer);
 		void attachCollider(SID sid, int type,int layer);
+		void attachBoxCollider(SID sid, int type, int layer);
 		bool hasCollisions() {
 			return m_NumCollisions > 0;
 		}

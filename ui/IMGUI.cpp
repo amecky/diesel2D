@@ -559,7 +559,8 @@ namespace gui {
 	// -------------------------------------------------------
 	// handle text input
 	// -------------------------------------------------------
-	void handleTextInput() {
+	bool handleTextInput() {
+		bool ret = false;
 		int len = strlen(guiContext->inputText);
 		if (guiContext->keyInput.num > 0) {
 			for (int i = 0; i < guiContext->keyInput.num; ++i) {
@@ -591,7 +592,9 @@ namespace gui {
 					guiContext->caretPos = strlen(guiContext->inputText);
 				}
 				else if (guiContext->keyInput.keys[i] == 133) {
+					// return pressed
 					guiContext->active = -1;
+					ret = true;
 				}
 				else if (guiContext->keyInput.keys[i] == 134) {
 					if (len > 0) {
@@ -617,6 +620,7 @@ namespace gui {
 			guiContext->inputText[len] = '\0';
 			guiContext->keyInput.num = 0;
 		}
+		return ret;
 	}
 
 
@@ -692,9 +696,10 @@ namespace gui {
 	// -------------------------------------------------------
 	// input scalar
 	// -------------------------------------------------------
-	void InputScalar(int id, int index, char* v,int maxLength,float width = INPUT_BOX_WIDTH) {
+	bool InputScalar(int id, int index, char* v,int maxLength,float width = INPUT_BOX_WIDTH) {
 		ZoneTracker z("IMGUI::InputScalar-C");
 		int new_id = id + 1024 * index;
+		bool ret = false;
 		v2 p = guiContext->position;
 		p.x += (width + 10.0f) * index;
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT), width * 0.5f);
@@ -706,7 +711,7 @@ namespace gui {
 		}
 		if (guiContext->active == new_id) {
 			guiContext->addTiledXBox(p, width, guiContext->textures[ICN_INPUT_ACTIVE], BOX_HEIGHT);
-			handleTextInput();
+			ret = handleTextInput();
 			strncpy(v, guiContext->inputText, maxLength);
 			v2 cp = p;
 			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
@@ -722,18 +727,31 @@ namespace gui {
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->tempBuffer);
 		}
+		return ret;
 	}
 
 	// -------------------------------------------------------
 	// input string
 	// -------------------------------------------------------
-	void Input(const char* label, char* str, int maxLength) {
+	bool Input(const char* label, char* str, int maxLength) {
 		HashedId id = HashPointer(str);
-		InputScalar(id, 0, str, maxLength,400.0f);
+		bool ret = InputScalar(id, 0, str, maxLength,400.0f);
 		v2 p = guiContext->position;
 		p.x += 410.0f;
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
+		return ret;
+	}
+
+	// -------------------------------------------------------
+	// input string without label
+	// -------------------------------------------------------
+	bool Input(char* str, int maxLength) {
+		HashedId id = HashPointer(str);
+		bool ret = InputScalar(id, 0, str, maxLength, 400.0f);
+		v2 p = guiContext->position;
+		guiContext->nextPosition();
+		return ret;
 	}
 
 	// -------------------------------------------------------

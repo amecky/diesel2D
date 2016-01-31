@@ -7,12 +7,20 @@ namespace ds {
 	class AssetEditor {
 
 	public:
-		AssetEditor(DataFile* data) : _data(data) , _showAdd(false) {}
+		AssetEditor(const char* name, DataFile* data) : _name(name), _data(data), _showAdd(false) , _active(false) {}
 		virtual ~AssetEditor() {}
 
 		virtual void showDialog() = 0;
 
 		virtual void init() = 0;
+
+		bool isActive() const {
+			return _active;
+		}
+		void setActive(bool active) {
+			_active = active;
+		}
+		virtual const char* getShortcut() const = 0;
 
 	protected:
 		void buttonGroup() {
@@ -31,7 +39,26 @@ namespace ds {
 		}
 		bool _showAdd;
 		DataFile* _data;
+	private:
+		const char* _name;
+		bool _active;
+	};
 
+	class AssetEditorManager {
+
+	public:
+		AssetEditorManager();
+		~AssetEditorManager();
+		void add(AssetEditor* editor);
+		void activate(const char* name);
+		void deactivate(const char* name);
+		void deactivateAll();
+		void render();
+		void toggle();
+	private:
+		bool _active;
+		Array<AssetEditor*> _editors;
+		v2 _position;
 	};
 
 }

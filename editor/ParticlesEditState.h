@@ -7,20 +7,16 @@
 
 namespace ds {
 
-	class ParticlesEditState : public GameState , public AssetEditor {
+	class ParticlesEditState : public AssetEditor {
 
 	public:
 		ParticlesEditState(ParticleManager* particles);
 		~ParticlesEditState();
-		int update(float dt);
-		void render();
-		int onGUIButton(DialogID dlgID, int button);
-		void activate();
-		void deactivate();
-
-		void showDialog() {}
-
+		void showDialog();
 		void init();
+		const char* getShortcut() const {
+			return "PS";
+		}
 	private:
 		void renderSelection();
 		void reloadNames();

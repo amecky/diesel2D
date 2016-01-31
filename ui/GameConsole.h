@@ -10,6 +10,10 @@ namespace ds {
 
 	class ConsoleCommand {
 
+		struct RecentEntries {
+			char command[128];
+		};
+
 	public:
 		ConsoleCommand() {}
 		virtual ~ConsoleCommand() {}
@@ -25,11 +29,13 @@ namespace ds {
 		~GameConsole();
 		void add(ConsoleCommand* command);
 		bool execute(const char* text);
-		void render();
+		void show();
 		void logHelp();
 	private:
 		Array<ConsoleCommand*> _commands;
 		ConsoleVars _vars;
+		v2 _position;
+		char _buffer[128];
 	};
 
 }
