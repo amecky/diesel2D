@@ -34,6 +34,115 @@ namespace ds {
 			LOG << "second - id: " << c.secondColliderID << " sid: " << c.secondSID << " type: " << c.secondType << " pos: " << DBG_V2(c.secondPos);
 		}
 
+		// Given three colinear points p, q, r, the function checks if
+		// point q lies on line segment 'pr'
+		bool onSegment(const v2& p, const v2& q, const v2& r) {
+			if (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) &&
+				q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y))
+				return true;
+
+			return false;
+		}
+
+		// To find orientation of ordered triplet (p, q, r).
+		// The function returns following values
+		// 0 --> p, q and r are colinear
+		// 1 --> Clockwise
+		// 2 --> Counterclockwise
+		int orientation(const v2& p, const v2& q, const v2& r) {
+			// See http://www.geeksforgeeks.org/orientation-3-ordered-points/
+			// for details of below formula.
+			float val = (q.y - p.y) * (r.x - q.x) -	(q.x - p.x) * (r.y - q.y);
+			if (val == 0.0f) {
+				return 0;  // colinear
+			}
+			return (val > 0.0f) ? 1 : 2; // clock or counterclock wise
+		}
+
+		// ------------------------------------------------------------------
+		// http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+		// ------------------------------------------------------------------
+		bool testLineIntersections(const v2& a, const v2& b, const v2& c, const v2& d) {
+			/*
+			v2 e = b - a;
+			v2 f = d - c;
+			v2 p = v2(-e.y, e.x);
+			float dd = dot(f, p);
+			if (dd == 0.0f) {
+				return true;
+			}
+			float h = dot(a - c,p) / dd;
+			if (h >= 0.0f && h <= 1.0f) {
+				return true;
+			}
+			//return false;
+			*/
+			int o1 = orientation(a, b, c);
+			int o2 = orientation(a, b, d);
+			int o3 = orientation(c, d, a);
+			int o4 = orientation(c, d, b);
+
+			// General case
+			if (o1 != o2 && o3 != o4)
+				return true;
+
+			// Special Cases
+			// p1, q1 and p2 are colinear and p2 lies on segment p1q1
+			if (o1 == 0 && onSegment(a, c, b)) return true;
+
+			// p1, q1 and p2 are colinear and q2 lies on segment p1q1
+			if (o2 == 0 && onSegment(a, d, b)) return true;
+
+			// p2, q2 and p1 are colinear and p1 lies on segment p2q2
+			if (o3 == 0 && onSegment(c, a, d)) return true;
+
+			// p2, q2 and q1 are colinear and q1 lies on segment p2q2
+			if (o4 == 0 && onSegment(c, b, d)) return true;
+
+			return false; // Doesn't fall in any of the above cases
+			/*
+				float dd = (a.x - b.x) * (c.y - d.y) - (a.y - b.y) * (c.x - d.x);
+				if (dd == 0.0f) {
+					return false;
+				}
+				v2 ip;
+				ip.x = ((c.x - d.x) * (a.x * b.y - a.y * b.x) - (a.x - b.x)*(c.x*d.y - c.y*d.x)) / dd;
+				ip.y = ((c.y - d.y)*(a.x * b.y - a.y*b.x) - (a.y - b.y)*(c.x*d.y - b.y*d.x)) / dd;
+				LOG << "ip: " << DBG_V2(ip);
+				return true;
+				*/
+		}
+
+		int testLineBox(const v2& lineStart, const v2& boxCenter, const v2& dim) {
+			// http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+			// 1 = upper line
+			int ret = 0;
+			v2 s = v2(boxCenter.x - dim.x / 2.0f, boxCenter.y + dim.y / 2.0f);
+			v2 e = v2(boxCenter.x + dim.x / 2.0f, boxCenter.y + dim.y / 2.0f);
+			if (testLineIntersections(lineStart, boxCenter, s, e)) {
+				ret += 1;
+			}
+			// 2 = right line
+			s = v2(boxCenter.x + dim.x / 2.0f, boxCenter.y + dim.y / 2.0f);
+			e = v2(boxCenter.x + dim.x / 2.0f, boxCenter.y - dim.y / 2.0f);
+			if (testLineIntersections(lineStart, boxCenter, s, e)) {
+				ret += 2;
+			}
+			// 3 = bottom line
+			s = v2(boxCenter.x - dim.x / 2.0f, boxCenter.y - dim.y / 2.0f);
+			e = v2(boxCenter.x + dim.x / 2.0f, boxCenter.y - dim.y / 2.0f);
+			if (testLineIntersections(lineStart, boxCenter, s, e)) {
+				ret += 4;
+			}
+			// 4 = left line
+			s = v2(boxCenter.x - dim.x / 2.0f, boxCenter.y + dim.y / 2.0f);
+			e = v2(boxCenter.x - dim.x / 2.0f, boxCenter.y - dim.y / 2.0f);
+			if (testLineIntersections(lineStart, boxCenter, s, e)) {
+				ret += 8;
+			}
+			return ret;
+		}
+
 		bool isInsideBox(const Vector2f& ray,const Vector2f& p,const Vector2f& dim) {
 			float top = p.y - dim.y;
 			float left = p.x - dim.x;

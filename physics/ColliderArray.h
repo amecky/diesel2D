@@ -140,6 +140,13 @@ namespace ds {
 
 		void debug(const Collision& c);
 
+		// ------------------------------------------------------------------
+		// test if a line from A to B intersects with a line from C to D
+		// ------------------------------------------------------------------
+		bool testLineIntersections(const v2& a, const v2& b, const v2& c, const v2& d);
+
+		int testLineBox(const v2& lineStart, const v2& boxCenter, const v2& dim);
+
 		bool isInsideBox(const Vector2f& ray,const Vector2f& p,const Vector2f& dim);
 
 		bool testCircleSweepIntersection(float ra, const Vector2f& A0, const Vector2f& A1, float rb, const Vector2f& B0, const Vector2f&	B1, float* u0, float* u1);
