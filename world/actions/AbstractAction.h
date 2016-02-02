@@ -8,6 +8,12 @@
 
 namespace ds {
 
+	struct AbstractActionDefinition {
+
+		virtual void read(const JSONReader& reader, int category_id) = 0;
+		virtual ActionType getActionType() = 0;
+	};
+
 	class AbstractAction {
 
 		public:
@@ -20,6 +26,7 @@ namespace ds {
 			void setBoundingRect(const Rect& r);
 			virtual void allocate(int sz) = 0;
 			virtual ActionType getActionType() const = 0;
+			virtual void attach(SID sid, AbstractActionDefinition* definition) {}// = 0;
 			void clear();
 			void removeByID(SID id);
 			bool contains(SID id);
@@ -31,5 +38,7 @@ namespace ds {
 			BlockArray _buffer;
 			SID* _ids;
 		};
+
+	
 
 }

@@ -6,6 +6,23 @@
 
 namespace ds {
 
+	struct ColorFlashDefinition : public AbstractActionDefinition {
+		Color start;
+		Color end;
+		float ttl;
+		tweening::TweeningType tweening;
+		int mode;
+
+		ActionType getActionType() const {
+			return AT_COLOR_FLASH;
+		}
+		
+
+		void read(const JSONReader& reader, int category_id) {
+
+		}
+	};
+
 	class ColorFlashAction : public AbstractAction {
 
 	public:

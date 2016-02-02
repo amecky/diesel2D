@@ -127,11 +127,41 @@ namespace tweening {
 		float s = p / 4;
 
 		if (t < 1) {
-			float postFix = a*pow(2, 10 * (t -= 1)); // postIncrement is evil
+			float postFix = a*pow(2, 10 * (t -= 1));
 			return -.5f*(postFix* sin((t*duration - s)*(2 * PI) / p)) + start;
 		}
-		float postFix = a*pow(2, -10 * (t -= 1)); // postIncrement is evil
+		float postFix = a*pow(2, -10 * (t -= 1)); 
 		return postFix * sin((t*duration - s)*(2 * PI) / p)*.5f + c + start;
+	}
+
+	float easeInBounce(float t, float start, float end, float d) {
+		float c = end - start;
+		return c - easeOutBounce(d - t, 0, c, d) + start;
+	}
+
+	float easeOutBounce(float t, float start, float end, float d) {
+		float c = end - start;
+		if ((t /= d) < (1 / 2.75f)) {
+			return c*(7.5625f*t*t) + start;
+		}
+		else if (t < (2 / 2.75f)) {
+			float postFix = t -= (1.5f / 2.75f);
+			return c*(7.5625f*(postFix)*t + .75f) + start;
+		}
+		else if (t < (2.5 / 2.75)) {
+			float postFix = t -= (2.25f / 2.75f);
+			return c*(7.5625f*(postFix)*t + .9375f) + start;
+		}
+		else {
+			float postFix = t -= (2.625f / 2.75f);
+			return c*(7.5625f*(postFix)*t + .984375f) + start;
+		}
+	}
+
+	float easeInOutBounce(float t, float start, float end, float d) {
+		float c = end - start;
+		if (t < d / 2) return easeInBounce(t * 2, 0, c, d) * .5f + start;
+		else return easeOutBounce(t * 2 - d, 0, c, d) * .5f + c*.5f + start;
 	}
 	// -------------------------------------------------------
 	// interpolate
@@ -175,6 +205,9 @@ namespace tweening {
 			case 11: return easeInElastic; break;
 			case 12: return easeOutElastic; break;
 			case 13: return easeInOutElastic; break;
+			case 14: return easeInBounce; break;
+			case 15: return easeOutBounce; break;
+			case 16: return easeInOutBounce; break;
 		}
 		return linear;
 	}

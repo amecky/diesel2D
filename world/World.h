@@ -12,6 +12,7 @@
 #include "..\math\CubicBezierPath.h"
 #include "..\math\StraightPath.h"
 #include "..\math\FloatArray.h"
+#include "..\io\DataFile.h"
 
 namespace ds {
 
@@ -65,6 +66,7 @@ namespace ds {
 	class RemoveAfterAction;
 	class ScaleByPathAction;
 	class ColorFlashAction;
+	struct AbstractActionDefinition;
 
 	typedef void (*MoveFunc)(Vector2f&,float*,float);
 
@@ -90,6 +92,29 @@ namespace ds {
 			e.spriteType = spriteType;
 			events.push_back(e);
 		}
+	};
+
+	class BehaviorDefinitions : public DataFile {
+
+		struct BehaviorDefinition {
+
+			IdString hash;
+			AbstractActionDefinition* definition;
+
+		};
+
+	public:
+		BehaviorDefinitions() {}
+		~BehaviorDefinitions() {}
+		bool saveData(JSONWriter& writer);
+		bool loadData(const JSONReader& loader);
+		const char* getFileName() const {
+			return "behaviors.json";
+		}
+	private:
+		AbstractActionDefinition* createDefinition(const char* name);
+
+		CharBuffer _data;
 	};
 
 	struct WorldLayer {
@@ -237,7 +262,7 @@ namespace ds {
 		void moveTo(SID sid,const Vector2f& startPos,const Vector2f& endPos,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
 		const int getMovingNumber() const;
 		void moveBy(SID sid,const Vector2f& velocity,bool bounce = false);
-		void bounce(SID sid, BounceDirection direction);
+		void bounce(SID sid, BounceDirection direction,float dt);
 		const Vector2f& getPosition(SID sid) const {
 			return sar::getPosition(m_Data,sid);
 		}
@@ -351,6 +376,8 @@ namespace ds {
 
 		void deactivateLayer(int layer);
 
+		void loadBehaviors();
+
 	private:
 		ActionEventBuffer m_Buffer;
 		void allocate(int size);
@@ -379,6 +406,7 @@ namespace ds {
 		ScaleByPathAction* _scaleByPathAction;
 		ColorFlashAction* _colorFlashAction;
 		Actions m_Actions;
+		BehaviorDefinitions _behaviorDefinitions;
 
 	};
 

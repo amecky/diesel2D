@@ -53,7 +53,7 @@ namespace ds {
 		return false;
 	}
 
-	void MoveByAction::bounce(SpriteArray& array, SID sid, BounceDirection direction) {
+	void MoveByAction::bounce(SpriteArray& array, SID sid, BounceDirection direction,float dt) {
 		for (int i = 0; i < _buffer.size; ++i) {
 			if (_ids[i] == sid) {
 				if (direction == BD_Y || direction == BD_BOTH) {
@@ -64,6 +64,9 @@ namespace ds {
 				}
 				float angle = vector::calculateRotation(_velocities[i]);
 				sar::rotate(array, _ids[i], angle);
+				Vector2f p = sar::getPosition(array, _ids[i]);
+				p += _velocities[i] * dt;
+				sar::setPosition(array, _ids[i], p);
 			}
 		}
 	}

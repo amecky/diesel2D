@@ -23,6 +23,36 @@
 
 namespace ds {
 
+	bool BehaviorDefinitions::saveData(JSONWriter& writer) {
+		return true;
+	}
+
+	bool BehaviorDefinitions::loadData(const JSONReader& loader) {
+		int cats[256];
+		int num = loader.get_categories(cats, 256);
+		for (int i = 0; i < num; ++i) {
+			// create Behavior
+			int sub_cats[64];
+			int sub_num = loader.get_categories(sub_cats, 64, cats[i]);
+			for (int j = 0; j < sub_num; ++j) {
+				// find action definition
+				AbstractActionDefinition* def = createDefinition(loader.get_category_name(sub_cats[j]));
+				if (def != 0) {
+					def->read(loader, sub_cats[j]);
+				}
+			}
+		}
+		return true;
+	}
+
+	AbstractActionDefinition* BehaviorDefinitions::createDefinition(const char* name) {
+		if (strcmp(name, "flash_color") == 0) {
+			ColorFlashDefinition* def = (ColorFlashDefinition*)_data.alloc(sizeof(ColorFlashDefinition));
+			return def;
+		}
+		return 0;
+	}
+
 	World::World(void) {
 		m_MoveToAction = new MoveToAction;
 		m_Actions.push_back(m_MoveToAction);
@@ -219,8 +249,8 @@ namespace ds {
 		m_MoveByAction->attach(sid,velocity,bounce);
 	}
 
-	void World::bounce(SID sid, BounceDirection direction) {
-		m_MoveByAction->bounce(m_Data, sid, direction);
+	void World::bounce(SID sid, BounceDirection direction, float dt) {
+		m_MoveByAction->bounce(m_Data, sid, direction, dt);
 	}
 
 	void World::moveWith(SID sid,const MoveFunc& function,float ttl) {
@@ -523,5 +553,8 @@ namespace ds {
 		}
 	}
 
+	void World::loadBehaviors() {
+		_behaviorDefinitions.load();
+	}
 	
 }

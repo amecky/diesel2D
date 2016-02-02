@@ -38,6 +38,12 @@ namespace tweening {
 
 	float easeInOutElastic(float t, float start, float end, float duration);
 
+	float easeInBounce(float t, float start, float end, float d);
+
+	float easeOutBounce(float t, float start, float end, float d);
+
+	float easeInOutBounce(float t, float start, float end, float d);
+
 	TweeningType get_by_index(int index);
 
 	float interpolate(TweeningType type, float start, float end, float t, float duration);
