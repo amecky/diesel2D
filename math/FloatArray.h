@@ -99,7 +99,7 @@ public:
 					const PathItem<T>* next = &_array[i + 1];
 					if (normTime >= current->time && normTime <= next->time) {
 						float t = (normTime - current->time) / (next->time - current->time);
-						*ret = tweening::interpolate(_tweening, current->value, next->value, t);
+						*ret = tweening::interpolate(_tweening, current->value, next->value, t, 1.0f);
 					}
 				}
 			}

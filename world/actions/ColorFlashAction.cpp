@@ -52,21 +52,14 @@ namespace ds {
 	void ColorFlashAction::update(SpriteArray& array, float dt, ActionEventBuffer& buffer) {
 		if ( _buffer.size > 0 ) {				
 			for ( int i = 0; i < _buffer.size; ++i ) {
-				float norm = math::norm(_timers[i] , _ttl[i]);
-				if (norm < 0.5f) {
-					sar::setColor(array, _ids[i], tweening::interpolate(_tweeningTypes[i],_startColors[i], _endColors[i], norm * 2.0f));
-				}
-				else {
-					float s = (norm - 0.5f) * 2.0f;
-					sar::setColor(array, _ids[i], tweening::interpolate(_tweeningTypes[i], _endColors[i], _startColors[i], s));
-				}
+				sar::setColor(array, _ids[i], tweening::interpolate(tweening::easeSinus, _startColors[i], _endColors[i], _timers[i], _ttl[i]));
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						sar::setColor(array, _ids[i], _endColors[i]);
+						sar::setColor(array, _ids[i], _startColors[i]);
 						removeByIndex(i);
 					}
 					else {

@@ -53,15 +53,14 @@ namespace ds {
 		if (_buffer.size > 0) {
 			// move
 			for (int i = 0; i < _buffer.size; ++i) {
-				float norm = math::norm(_timers[i] , _ttl[i]);
-				sar::scale(array,_ids[i],tweening::interpolate(_tweeningTypes[i], _startScale[i], _endScale[i], norm));
+				sar::scale(array, _ids[i], tweening::interpolate(_tweeningTypes[i], _startScale[i], _endScale[i], _timers[i], _ttl[i]));
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						sar::scale(array,_ids[i],tweening::interpolate(_tweeningTypes[i], _startScale[i], _endScale[i], 1.0f));
+						sar::scale(array,_ids[i],_endScale[i]);
 						removeByIndex(i);
 					}
 					else {

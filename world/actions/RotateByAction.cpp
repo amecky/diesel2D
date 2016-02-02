@@ -50,15 +50,14 @@ namespace ds {
 		if (_buffer.size > 0) {
 			// move
 			for (int i = 0; i < _buffer.size; ++i) {
-				float norm = math::norm(_timers[i] , _ttl[i]);
-				sar::rotate(array,_ids[i],tweening::interpolate(_tweeningTypes[i], _startAngles[i], _endAngles[i], norm));
+				sar::rotate(array, _ids[i], tweening::interpolate(_tweeningTypes[i], _startAngles[i], _endAngles[i], _timers[i], _ttl[i]));
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						sar::rotate(array,_ids[i],tweening::interpolate(_tweeningTypes[i], _startAngles[i], _endAngles[i], 1.0f));
+						sar::rotate(array,_ids[i], _endAngles[i]);
 						removeByIndex(i);
 					}
 					else {

@@ -220,7 +220,7 @@ namespace ds {
 	}
 
 	void World::bounce(SID sid, BounceDirection direction) {
-		m_MoveByAction->bounce(sid, direction);
+		m_MoveByAction->bounce(m_Data, sid, direction);
 	}
 
 	void World::moveWith(SID sid,const MoveFunc& function,float ttl) {

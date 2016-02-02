@@ -182,7 +182,7 @@ public:
 		assert(data != 0);
 		const LinearAlphaModifierData* my_data = static_cast<const LinearAlphaModifierData*>(data);
 		for (uint32 i = 0; i < array->countAlive; ++i) {
-			array->color[i].a = tweening::interpolate(tweening::easeInOutQuad, my_data->startAlpha, my_data->endAlpha, array->timer[i].y);
+			array->color[i].a = tweening::interpolate(tweening::easeInOutQuad, my_data->startAlpha, my_data->endAlpha, array->timer[i].x,array->timer[i].z);
 		}
 	}
 	void init(ParticleArray* array, const ParticleModifierData* data, uint32 start, uint32 end) {

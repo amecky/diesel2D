@@ -53,8 +53,7 @@ namespace ds {
 		if ( _buffer.size > 0 ) {				
 			// move
 			for ( int i = 0; i < _buffer.size; ++i ) {
-				float norm = math::norm(_timers[i] , _ttl[i]);
-				float alpha = tweening::interpolate(_tweeningTypes[i], _startAlphas[i], _endAlphas[i], norm);
+				float alpha = tweening::interpolate(_tweeningTypes[i], _startAlphas[i], _endAlphas[i], _timers[i], _ttl[i]);
 				sar::setAlpha(array,_ids[i],alpha);
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
@@ -62,7 +61,7 @@ namespace ds {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						sar::setAlpha(array,_ids[i],tweening::interpolate(_tweeningTypes[i], _startAlphas[i], _endAlphas[i], 1.0f));
+						sar::setAlpha(array,_ids[i], _endAlphas[i]);
 						removeByIndex(i);
 					}
 					else {
