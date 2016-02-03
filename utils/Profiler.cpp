@@ -7,13 +7,13 @@
 #include <functional>
 
 StopWatch::StopWatch() {
-	QueryPerformanceFrequency(&_frequency);
+	//QueryPerformanceFrequency(&_frequency);
 	_running = false;
 	sprintf_s(_name, 32, "StopWatch");
 }
 
 StopWatch::StopWatch(const char* name) {
-	QueryPerformanceFrequency(&_frequency);
+	//QueryPerformanceFrequency(&_frequency);
 	_running = false;
 	sprintf_s(_name, 32, name);
 }
@@ -21,30 +21,30 @@ StopWatch::StopWatch(const char* name) {
 StopWatch::~StopWatch() {
 	if (_running) {
 		end();
-		LOG << _name << " - elapsed: " << _elapsed;
+		LOG << _name << " - elapsed: " << elapsed();
 	}
 }
 
 void StopWatch::start() {
-	QueryPerformanceCounter(&startingTime);
+	_start = _end = std::chrono::steady_clock::now();
 	_running = true;
 }
 
-double StopWatch::LIToSecs(LARGE_INTEGER & L) {
-	return ((double)L.QuadPart * 1000.0 / (double)_frequency.QuadPart);
-}
+//double StopWatch::LIToSecs(LARGE_INTEGER & L) {
+	//return ((double)L.QuadPart * 1000.0 / (double)_frequency.QuadPart);
+//}
 
 void StopWatch::end() {
 	_running = false;
-	LARGE_INTEGER EndingTime;
-	QueryPerformanceCounter(&EndingTime);
-	LARGE_INTEGER time;
-	time.QuadPart = EndingTime.QuadPart - startingTime.QuadPart;
-	_elapsed = LIToSecs(time);
+	_end = std::chrono::steady_clock::now();
 }
 
-float StopWatch::elapsed() {
-	return _elapsed;
+double StopWatch::elapsed() {
+	auto duration = _end - _start;
+	auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+
+	//auto delta = std::chrono::duration_cast<double>(_end - _start);
+	return static_cast<double>(time_span) / 1000.0;
 }
 
 namespace profiler {

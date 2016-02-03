@@ -66,7 +66,7 @@ namespace ds {
 	class RemoveAfterAction;
 	class ScaleByPathAction;
 	class ColorFlashAction;
-	struct AbstractActionDefinition;
+	class BehaviorDefinitions;
 
 	typedef void (*MoveFunc)(Vector2f&,float*,float);
 
@@ -94,28 +94,7 @@ namespace ds {
 		}
 	};
 
-	class BehaviorDefinitions : public DataFile {
-
-		struct BehaviorDefinition {
-
-			IdString hash;
-			AbstractActionDefinition* definition;
-
-		};
-
-	public:
-		BehaviorDefinitions() {}
-		~BehaviorDefinitions() {}
-		bool saveData(JSONWriter& writer);
-		bool loadData(const JSONReader& loader);
-		const char* getFileName() const {
-			return "behaviors.json";
-		}
-	private:
-		AbstractActionDefinition* createDefinition(const char* name);
-
-		CharBuffer _data;
-	};
+	
 
 	struct WorldLayer {
 
@@ -406,7 +385,7 @@ namespace ds {
 		ScaleByPathAction* _scaleByPathAction;
 		ColorFlashAction* _colorFlashAction;
 		Actions m_Actions;
-		BehaviorDefinitions _behaviorDefinitions;
+		BehaviorDefinitions* _behaviorDefinitions;
 
 	};
 

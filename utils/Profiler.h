@@ -2,25 +2,25 @@
 #define PROFILING TRUE
 #include <Vector.h>
 #include <windows.h>
+#include <chrono>
+#include "Log.h"
 
 class ReportWriter;
 
 class StopWatch {
 
-public:
+public:	
 	StopWatch();
 	explicit StopWatch(const char* name);
 	~StopWatch();
 	void start();
 	void end();
-	float elapsed();
+	double elapsed();
+	
 private:
-	double LIToSecs(LARGE_INTEGER & L);
-	float _elapsed;
-	bool _running;
-	LARGE_INTEGER startingTime;
-	LARGE_INTEGER _frequency;
+	std::chrono::steady_clock::time_point _start, _end;
 	char _name[32];
+	bool _running;
 };
 
 #define TIMER(name) StopWatch s(name); s.start();

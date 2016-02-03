@@ -23,7 +23,14 @@ namespace ds {
 	struct SettingsItem {
 		const char* name;
 		SettingsType type;
-		int index;
+		union {
+			int* iPtr;
+			float* fPtr;
+			v2* v2Ptr;
+			Color* cPtr;
+			Rect* rPtr;
+			Vector2fPath* pPtr;
+		} ptr;
 	};
 
 	// -------------------------------------------------------
@@ -49,15 +56,9 @@ namespace ds {
 		void addPath(const char* name, Vector2fPath* value);
 		bool setPath(const char* name, const Vector2fPath& value);
 
-		//void load();
-
-		//void save();
-
 		void showDialog(v2* pos);
 
 		void showCompleteDialog(v2* pos);
-
-		//virtual const char* getName() const = 0;
 
 		bool saveData(JSONWriter& writer);
 		bool loadData(const JSONReader& loader);
@@ -66,11 +67,6 @@ namespace ds {
 		int _state;
 		int _offset;
 		Array<SettingsItem> _items;
-		Array<float*> _floats;
-		Array<int*> _ints;
-		Array<Rect*> _rects;
-		Array<Color*> _colors;
-		Array<Vector2fPath*> _v2_paths;
 		gui::ComponentModel<SettingsItem> _model;
 	};
 }

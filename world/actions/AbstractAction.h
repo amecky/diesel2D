@@ -11,7 +11,7 @@ namespace ds {
 	struct AbstractActionDefinition {
 
 		virtual void read(const JSONReader& reader, int category_id) = 0;
-		virtual ActionType getActionType() = 0;
+		virtual ActionType getActionType() const = 0;
 	};
 
 	class AbstractAction {

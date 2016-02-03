@@ -16,8 +16,7 @@ namespace ds {
 		SettingsItem item;
 		item.name = name;
 		item.type = ST_INT;
-		item.index = _ints.size();
-		_ints.push_back(value);
+		item.ptr.iPtr = value;
 		_items.push_back(item);
 		_model.add(name, item);
 	}
@@ -29,7 +28,7 @@ namespace ds {
 		for (int i = 0; i < _items.size(); ++i) {
 			const SettingsItem& item = _items[i];
 			if (strcmp(item.name, name) == 0) {
-				*_ints[item.index] = value;
+				*item.ptr.iPtr = value;
 				return true;
 			}
 		}
@@ -44,8 +43,7 @@ namespace ds {
 		SettingsItem item;
 		item.name = name;
 		item.type = ST_FLOAT;
-		item.index = _floats.size();
-		_floats.push_back(value);
+		item.ptr.fPtr = value;
 		_items.push_back(item);
 		_model.add(name, item);
 	}
@@ -57,7 +55,7 @@ namespace ds {
 		for (int i = 0; i < _items.size(); ++i) {
 			const SettingsItem& item = _items[i];
 			if (strcmp(item.name, name) == 0) {
-				*_floats[item.index] = value;
+				*item.ptr.fPtr = value;
 				return true;
 			}
 		}
@@ -72,8 +70,7 @@ namespace ds {
 		SettingsItem item;
 		item.name = name;
 		item.type = ST_COLOR;
-		item.index = _colors.size();
-		_colors.push_back(value);
+		item.ptr.cPtr = value;
 		_items.push_back(item);
 		_model.add(name, item);
 	}
@@ -85,7 +82,7 @@ namespace ds {
 		for (int i = 0; i < _items.size(); ++i) {
 			const SettingsItem& item = _items[i];
 			if (strcmp(item.name, name) == 0) {
-				*_colors[item.index] = value;
+				*item.ptr.cPtr = value;
 				return true;
 			}
 		}
@@ -97,8 +94,7 @@ namespace ds {
 		SettingsItem item;
 		item.name = name;
 		item.type = ST_RECT;
-		item.index = _rects.size();
-		_rects.push_back(value);
+		item.ptr.rPtr = value;
 		_items.push_back(item);
 		_model.add(name, item);
 	}
@@ -107,7 +103,7 @@ namespace ds {
 		for (int i = 0; i < _items.size(); ++i) {
 			const SettingsItem& item = _items[i];
 			if (strcmp(item.name, name) == 0) {
-				*_rects[item.index] = value;
+				*item.ptr.rPtr = value;
 				return true;
 			}
 		}
@@ -118,8 +114,7 @@ namespace ds {
 		SettingsItem item;
 		item.name = name;
 		item.type = ST_V2_PATH;
-		item.index = _v2_paths.size();
-		_v2_paths.push_back(value);
+		item.ptr.pPtr = value;
 		_items.push_back(item);
 		_model.add(name, item);
 	}
@@ -128,7 +123,7 @@ namespace ds {
 		for (int i = 0; i < _items.size(); ++i) {
 			const SettingsItem& item = _items[i];
 			if (strcmp(item.name, name) == 0) {
-				*_v2_paths[item.index] = value;
+				*item.ptr.pPtr = value;
 				return true;
 			}
 		}
@@ -142,17 +137,23 @@ namespace ds {
 		writer.startCategory("settings");
 		for (int i = 0; i < _items.size(); ++i) {
 			const SettingsItem& item = _items[i];
-			if (item.type == ST_FLOAT) {
-				writer.write(item.name, *_floats[item.index]);
+			if (item.type == ST_INT) {				
+				writer.write(item.name, *item.ptr.iPtr);
+			}
+			else if (item.type == ST_FLOAT) {
+				writer.write(item.name, *item.ptr.fPtr);
 			}
 			else if (item.type == ST_RECT) {
-				writer.write(item.name, *_rects[item.index]);
+				writer.write(item.name, *item.ptr.rPtr);
 			}
 			else if (item.type == ST_V2_PATH) {
-				writer.write(item.name, *_v2_paths[item.index]);
+				writer.write(item.name, *item.ptr.pPtr);
 			}
 			else if (item.type == ST_COLOR) {
-				writer.write(item.name, *_colors[item.index]);
+				writer.write(item.name, *item.ptr.cPtr);
+			}
+			else if (item.type == ST_V2_PATH) {
+				writer.write(item.name, *item.ptr.pPtr);
 			}
 		}
 		writer.endCategory();
@@ -163,25 +164,26 @@ namespace ds {
 	// import json
 	// -------------------------------------------------------
 	bool DynamicGameSettings::loadData(const JSONReader& loader) {
+		StopWatch sw("DNG::loadData");
 		int c = loader.find_category("settings");
 		if (c != -1) {
 			for (int i = 0; i < _items.size(); ++i) {
 				const SettingsItem& item = _items[i];
 				if (loader.contains_property(c,item.name)) {
 					if (item.type == ST_FLOAT) {
-						loader.get_float(c,item.name, _floats[item.index]);
+						loader.get_float(c,item.name, item.ptr.fPtr);
 					}
-					else if (item.type == ST_INT) {
-						loader.get_int(c,item.name, _ints[item.index]);
+					else if (item.type == ST_INT) {				
+						loader.get_int(c, item.name, item.ptr.iPtr);
 					}
 					else if (item.type == ST_RECT) {
-						loader.get_rect(c,item.name, _rects[item.index]);
+						loader.get_rect(c, item.name, item.ptr.rPtr);
 					}
 					else if (item.type == ST_V2_PATH) {
-						loader.get_vec2_path(c, item.name, _v2_paths[item.index]);
+						loader.get_vec2_path(c, item.name, item.ptr.pPtr);
 					}
 					else if (item.type == ST_COLOR) {
-						loader.get_color(c, item.name, _colors[item.index]);
+						loader.get_color(c, item.name, item.ptr.cPtr);
 					}
 				}
 			}
@@ -209,13 +211,14 @@ namespace ds {
 			SettingsItem element = _model.getSelectedValue();
 			gui::Header(element.name);
 			if (element.type == ST_FLOAT) {
-				gui::InputFloat(element.name, _floats[element.index]);
+				gui::InputFloat(element.name, element.ptr.fPtr);
 			}
 			else if (element.type == ST_INT) {
-				gui::InputInt(element.name, _ints[element.index]);
+				//char* p = _data.data + element.index;
+				gui::InputInt(element.name, element.ptr.iPtr);
 			}
 			else if (element.type == ST_RECT) {
-				gui::InputRect(element.name, _rects[element.index]);
+				gui::InputRect(element.name, element.ptr.rPtr);
 			}
 		}
 		gui::end();
@@ -230,13 +233,13 @@ namespace ds {
 			for (int i = 0; i < _items.size(); ++i) {
 				const SettingsItem& element = _items[i];
 				if (element.type == ST_FLOAT) {
-					gui::InputFloat(element.name, _floats[element.index]);
+					gui::InputFloat(element.name, element.ptr.fPtr);
 				}
 				else if (element.type == ST_INT) {
-					gui::InputInt(element.name, _ints[element.index]);
+					gui::InputInt(element.name, element.ptr.iPtr);
 				}
 				else if (element.type == ST_RECT) {
-					gui::InputRect(element.name, _rects[element.index]);
+					gui::InputRect(element.name, element.ptr.rPtr);
 				}
 			}
 			gui::beginGroup();

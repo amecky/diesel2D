@@ -20,40 +20,15 @@
 #include "..\physics\ColliderArray.h"
 #include "..\utils\Profiler.h"
 #include "..\utils\Log.h"
+#include "BehaviorDefinitions.h"
 
 namespace ds {
 
-	bool BehaviorDefinitions::saveData(JSONWriter& writer) {
-		return true;
-	}
-
-	bool BehaviorDefinitions::loadData(const JSONReader& loader) {
-		int cats[256];
-		int num = loader.get_categories(cats, 256);
-		for (int i = 0; i < num; ++i) {
-			// create Behavior
-			int sub_cats[64];
-			int sub_num = loader.get_categories(sub_cats, 64, cats[i]);
-			for (int j = 0; j < sub_num; ++j) {
-				// find action definition
-				AbstractActionDefinition* def = createDefinition(loader.get_category_name(sub_cats[j]));
-				if (def != 0) {
-					def->read(loader, sub_cats[j]);
-				}
-			}
-		}
-		return true;
-	}
-
-	AbstractActionDefinition* BehaviorDefinitions::createDefinition(const char* name) {
-		if (strcmp(name, "flash_color") == 0) {
-			ColorFlashDefinition* def = (ColorFlashDefinition*)_data.alloc(sizeof(ColorFlashDefinition));
-			return def;
-		}
-		return 0;
-	}
-
+	// -----------------------------------------------------
+	// World
+	// -----------------------------------------------------
 	World::World(void) {
+		_behaviorDefinitions = new BehaviorDefinitions();
 		m_MoveToAction = new MoveToAction;
 		m_Actions.push_back(m_MoveToAction);
 		m_ScalingAction = new ScalingAction;
@@ -94,7 +69,7 @@ namespace ds {
 		if ( m_Data.buffer != 0 ) {
 			gDefaultMemory->deallocate(m_Data.buffer);
 		}
-		
+		delete _behaviorDefinitions;
 	}
 
 	// -----------------------------------------------------
@@ -554,7 +529,7 @@ namespace ds {
 	}
 
 	void World::loadBehaviors() {
-		_behaviorDefinitions.load();
+		_behaviorDefinitions->load();
 	}
 	
 }
