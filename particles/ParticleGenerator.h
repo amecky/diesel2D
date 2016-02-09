@@ -22,6 +22,7 @@ enum ParticleGeneratorType {
 	PGT_COLOR,
 	PGT_HSV_COLOR,
 	PGT_ROTATION_VELOCITY,
+	PGT_BOX,
 	PGT_UNKNOWN
 };
 // -------------------------------------------------------
@@ -101,6 +102,68 @@ public:
 	}
 	const ParticleGeneratorType getType() const {
 		return PGT_RING;
+	}
+private:
+	float m_Angle;
+};
+
+// -------------------------------------------------------
+// Box generator
+// -------------------------------------------------------
+struct BoxGeneratorData : ParticleGeneratorData {
+
+	int numX;
+	int numY;
+	float stepX;
+	float stepY;
+
+	BoxGeneratorData() : numX(1), numY(1), stepX(10.0f), stepY(10.0f) {}
+
+	void save(JSONWriter& writer) {
+		writer.write("num_x", numX);
+		writer.write("num_y", numY);
+		writer.write("step_x", stepX);
+		writer.write("step_y", stepY);
+	}
+
+	void read(const JSONReader& reader, int category) {
+		reader.get_int(category, "num_x", &numX);
+		reader.get_int(category, "num_y", &numY);
+		reader.get_float(category, "step_x", &stepX);
+		reader.get_float(category, "step_y", &stepY);
+	}
+};
+
+class BoxGenerator : public ParticleGenerator {
+
+public:
+	BoxGenerator() : ParticleGenerator() {
+		m_Angle = 0.0f;
+	}
+	virtual ~BoxGenerator() {}
+	void generate(ParticleArray* array, const ParticleGeneratorData* data, float dt, uint32 start, uint32 end) {
+		ZoneTracker z("BoxGenerator:generate");
+		uint32 count = end - start;
+		const BoxGeneratorData* my_data = static_cast<const BoxGeneratorData*>(data);
+		int cnt = 0;
+		for (int y = 0; y < my_data->numY; ++y) {
+			for (int x = 0; x < my_data->numX; ++x) {
+				v2 center = array->position[cnt].xy();
+				float dx = center.x + x * my_data->stepX - my_data->numX * my_data->stepX * 0.5f;
+				float dy = center.y + y * my_data->stepY - my_data->numY * my_data->stepY * 0.5f;
+				if (cnt < count) {
+					array->position[cnt] = v3(dx, dy, 0.0f);
+					array->rotation[cnt] = math::getTargetAngle(array->position[cnt].xy(), center);
+				}
+				++cnt;
+			}
+		}
+	}
+	const char* getName() const {
+		return "box";
+	}
+	const ParticleGeneratorType getType() const {
+		return PGT_BOX;
 	}
 private:
 	float m_Angle;

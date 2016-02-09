@@ -29,6 +29,7 @@ namespace ds {
 		_known_generators[_count_generators++] = new ColorGenerator();
 		_known_generators[_count_generators++] = new HSVColorGenerator();
 		_known_generators[_count_generators++] = new RotationVelocityGenerator();
+		_known_generators[_count_generators++] = new BoxGenerator();
 		for (int i = 0; i < _count_generators; ++i) {
 			_known_generator_names.push_back(_known_generators[i]->getName());
 		}
@@ -110,6 +111,7 @@ namespace ds {
 			case PGT_COLOR: return new ColorGeneratorData(); break;
 			case PGT_HSV_COLOR: return new HSVColorGeneratorData(); break;
 			case PGT_ROTATION_VELOCITY: return new RotationVelocityGeneratorData(); break;
+			case PGT_BOX: return new BoxGeneratorData(); break;
 		}
 		return 0;
 	}

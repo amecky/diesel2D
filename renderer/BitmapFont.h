@@ -26,11 +26,13 @@ struct CharDef {
 	int startX;
 	int startY;
 	int width;
-	float u1;
-	float u2;
-	float v1;
-	float v2;
-	Rect texureRect;
+	Texture texture;
+
+	//float u1;
+	//float u2;
+	//float v1;
+	//float v2;
+	//Rect texureRect;
 };
 
 struct BitmapFont : public DataFile {

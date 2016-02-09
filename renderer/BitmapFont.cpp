@@ -22,11 +22,14 @@ namespace ds {
 		cd.startX = startX;
 		cd.startY = startY;
 		cd.width = width;
+		/*
 		cd.u1 = (float)cd.startX / textureSize;
 		cd.v1 = (float)cd.startY / textureSize;
 		cd.u2 = cd.u1 + (float)cd.width / (textureSize);
 		cd.v2 = cd.v1 + ((float)charHeight) / (textureSize);
 		cd.texureRect = Rect(static_cast<float>(startY), static_cast<float>(startX), static_cast<float>(width), static_cast<float>(charHeight));
+		*/
+		cd.texture = math::buildTexture(startY, startX, width, charHeight, textureSize, textureSize);
 		definitions.append(cd);
 	}
 

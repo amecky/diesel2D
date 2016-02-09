@@ -126,7 +126,7 @@ namespace sprites {
 				padding = (cd.width + 2)  * scaleX;
 				float dimX = cd.width * scaleX;
 				float dimY = spriteCtx->font->charHeight * scaleY;
-				draw(Vector2f(x + dimX * 0.5f, y + dimY * 0.5f), math::buildTexture(cd.texureRect), 0.0f, scaleX, scaleY, color);
+				draw(Vector2f(x + dimX * 0.5f, y + dimY * 0.5f), cd.texture, 0.0f, scaleX, scaleY, color);
 				x += dimX + 4;
 			}
 		}		
@@ -146,7 +146,7 @@ namespace sprites {
 				//padding = (cd.width + 2)  * scaleX;
 				float dimX = cd.width * scaleX;
 				float dimY = font->charHeight * scaleY;
-				draw(v2(x + dimX * 0.5f, y + dimY * 0.5f), math::buildTexture(cd.texureRect,font->textureSize,font->textureSize,false), 0.0f, scaleX, scaleY, color);
+				draw(v2(x + dimX * 0.5f, y + dimY * 0.5f),cd.texture, 0.0f, scaleX, scaleY, color);
 				x += dimX + padding;
 			}
 		}
@@ -174,9 +174,18 @@ namespace sprites {
 			p.x = VP_ARRAY[i * 2] * dim.x;
 			p.y = VP_ARRAY[i * 2 + 1] * dim.y;
 			p = p - center;
-			Vector2f np = vector::srt(cor, p, scaleX, scaleY, rotation);
-			spriteCtx->sprites[idx + i].x = np.x;
-			spriteCtx->sprites[idx + i].y = np.y;
+			if (rotation != 0.0f) {
+				Vector2f np = vector::srt(cor, p, scaleX, scaleY, rotation);
+				spriteCtx->sprites[idx + i].x = np.x;
+				spriteCtx->sprites[idx + i].y = np.y;
+			}
+			else {
+				p.x *= scaleX;
+				p.y *= scaleY;
+				p += cor;
+				spriteCtx->sprites[idx + i].x = p.x;
+				spriteCtx->sprites[idx + i].y = p.y;
+			}
 			spriteCtx->sprites[idx + i].z = 0.0f;
 			spriteCtx->sprites[idx + i].color = color;
 		}	
@@ -258,9 +267,18 @@ namespace sprites {
 			p.x = VP_ARRAY[i * 2] * tex.dim.x;
 			p.y = VP_ARRAY[i * 2 + 1] * tex.dim.y;
 			p = p - center;
-			Vector2f np = vector::srt(cor, p, scaleX, scaleY, rotation);
-			spriteCtx->sprites[idx + i].x = np.x;
-			spriteCtx->sprites[idx + i].y = np.y;
+			if (rotation != 0.0f) {
+				Vector2f np = vector::srt(cor, p, scaleX, scaleY, rotation);
+				spriteCtx->sprites[idx + i].x = np.x;
+				spriteCtx->sprites[idx + i].y = np.y;
+			}
+			else {
+				p.x *= scaleX;
+				p.y *= scaleY;
+				p += cor;
+				spriteCtx->sprites[idx + i].x = p.x;
+				spriteCtx->sprites[idx + i].y = p.y;
+			}
 			spriteCtx->sprites[idx + i].z = 0.0f;
 			spriteCtx->sprites[idx + i].color = color;
 		}

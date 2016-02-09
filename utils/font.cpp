@@ -68,7 +68,7 @@ namespace ds {
 					// quad buffer is centered by default so adjust position!
 					Sprite sp;
 					sp.position = (Vector2f(x + dimX * 0.5f, y + dimY * 0.5f));
-					sp.texture = math::buildTexture(cd.texureRect);
+					sp.texture = cd.texture;// math::buildTexture(cd.texureRect);
 					sp.color = color;
 					sp.scale = Vector2f(scaleX, scaleY);
 					sprites.push_back(sp);
@@ -89,7 +89,7 @@ namespace ds {
 			// quad buffer is centered by default so adjust position!
 			Sprite sp;
 			sp.position = (Vector2f(x + dimX * 0.5f, y + dimY * 0.5f));
-			sp.texture = math::buildTexture(cd.texureRect);
+			sp.texture = cd.texture;// math::buildTexture(cd.texureRect);
 			sp.color = color;
 			sp.scale = Vector2f(scaleX, scaleY);
 			sprites.push_back(sp);
