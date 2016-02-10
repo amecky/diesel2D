@@ -22,17 +22,12 @@ namespace ds {
 		
 
 		void read(const JSONReader& reader, int category_id) {
-			const auto now = std::chrono::steady_clock::now();
 			reader.get_color(category_id, "start_color", &start);
 			reader.get_color(category_id, "end_color", &end);
 			int type = reader.get_int(category_id, "tweening", &type);
 			tweening = tweening::get_by_index(type);
 			reader.get_float(category_id, "ttl", &ttl);
 			reader.get_int(category_id, "mode", &mode);
-			auto end = std::chrono::steady_clock::now();
-			//auto diff = end - now;
-			auto delta = std::chrono::duration_cast<std::chrono::nanoseconds>(end - now);
-			LOG << "-----> coloraction: " << delta.count();
 		}
 	};
 
@@ -42,11 +37,15 @@ namespace ds {
 		ColorFlashAction();
 		~ColorFlashAction();
 		void attach(SID id,const Color& startColor,const Color& endColor,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+		void attach(SID id, AbstractActionDefinition* definition);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);		
 		void debug();
 		void debug(SID sid) {}
 		ActionType getActionType() const {
 			return AT_COLOR_FLASH;
+		}
+		AbstractActionDefinition* createDefinition() const {
+			return new ColorFlashDefinition();
 		}
 	private:
 		void allocate(int sz);

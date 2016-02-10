@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	ColorFlashAction::ColorFlashAction() : AbstractAction() {
+	ColorFlashAction::ColorFlashAction() : AbstractAction("flash_color") {
 		int sizes[] = { sizeof(SID), sizeof(Color), sizeof(Color), sizeof(float), sizeof(float),sizeof(tweening::TweeningType),sizeof(int) };
 		_buffer.init(sizes, 7);
 	}
@@ -41,6 +41,23 @@ namespace ds {
 		_tweeningTypes[idx] = tweeningType;
 		_modes[idx] = mode;
 		if ( mode > 0 ) {
+			--_modes[idx];
+		}
+		++_buffer.size;
+	}
+
+	void ColorFlashAction::attach(SID id, AbstractActionDefinition* definition) {
+		ColorFlashDefinition* def = static_cast<ColorFlashDefinition*>(definition);
+		allocate(_buffer.size + 1);
+		int idx = _buffer.size;
+		_ids[idx] = id;
+		_startColors[idx] = def->start;
+		_endColors[idx] = def->end;
+		_timers[idx] = 0.0f;
+		_ttl[idx] = def->ttl;
+		_tweeningTypes[idx] = def->tweening;
+		_modes[idx] = def->mode;
+		if (def->mode > 0) {
 			--_modes[idx];
 		}
 		++_buffer.size;

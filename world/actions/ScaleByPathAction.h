@@ -6,12 +6,29 @@
 
 namespace ds {
 
+	struct ScaleByPathDefinition : public AbstractActionDefinition {
+
+		Vector2fPath path;
+		float ttl;
+
+		ActionType getActionType() const {
+			return AT_SCALE_BY_PATH;
+		}
+
+
+		void read(const JSONReader& reader, int category_id) {
+			reader.get_vec2_path(category_id, "path", &path);
+			reader.get_float(category_id, "ttl", &ttl);
+		}
+	};
+
 	class ScaleByPathAction : public AbstractAction {
 
 	public:
 		ScaleByPathAction();
 		virtual ~ScaleByPathAction();
 		void attach(SpriteArray& array,SID id, Vector2fPath* path, float ttl);
+		void attach(SID id, AbstractActionDefinition* definition);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
 		void clear();
 		void debug();
@@ -21,6 +38,9 @@ namespace ds {
 			return AT_SCALE_BY_PATH;
 		}
 		void save(const ReportWriter& writer);
+		AbstractActionDefinition* createDefinition() const {
+			return new ScaleByPathDefinition();
+		}
 	protected:
 		SID swap(int i);
 	private:

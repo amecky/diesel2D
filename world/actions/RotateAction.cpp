@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	RotateAction::RotateAction() {
+	RotateAction::RotateAction() : AbstractAction("rotate") {
 		int sizes[] = { sizeof(SID), sizeof(float), sizeof(float), sizeof(float), sizeof(int) };
 		_buffer.init(sizes, 5);
 	}

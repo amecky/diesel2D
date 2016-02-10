@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	WaitAction::WaitAction() : AbstractAction() {
+	WaitAction::WaitAction() : AbstractAction("wait") {
 		int sizes[] = { sizeof(SID), sizeof(float), sizeof(float) };
 		_buffer.init(sizes, 3);
 	}

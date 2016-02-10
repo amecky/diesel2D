@@ -28,7 +28,7 @@ namespace ds {
 	// World
 	// -----------------------------------------------------
 	World::World(void) {
-		_behaviorDefinitions = new BehaviorDefinitions();
+		_behaviorDefinitions = new BehaviorDefinitions(this);
 		m_MoveToAction = new MoveToAction;
 		m_Actions.push_back(m_MoveToAction);
 		m_ScalingAction = new ScalingAction;
@@ -150,7 +150,6 @@ namespace ds {
 		ZoneTracker z("World:renderSingleLayer");
 		renderer::selectViewport(_layers[layer].viewport_id);
 		sprites::setDescriptorID(_layers[layer].descriptor_id);
-		//LOG << "layer: " << layer << " viewport: " << _layers[layer].viewport_id << " descriptor: " << _layers[layer].descriptor_id;
 		for (int i = 0; i < m_Data.num; ++i) {
 			if (m_Data.layers[i] == layer) {
 				sprites::draw(m_Data.positions[i], m_Data.textures[i], m_Data.rotations[i], m_Data.scales[i].x, m_Data.scales[i].y, m_Data.colors[i]);
@@ -530,6 +529,38 @@ namespace ds {
 
 	void World::loadBehaviors() {
 		_behaviorDefinitions->load();
+	}
+
+	AbstractAction* World::find_action(const char* name) const {
+		IdString hash = string::murmur_hash(name);
+		for (size_t i = 0; i < m_Actions.size(); ++i) {
+			if (m_Actions[i]->getHash() == hash) {
+				return m_Actions[i];
+			}
+		}
+		return 0;
+	}
+
+	AbstractAction* World::find_action(ActionType type) const {
+		for (size_t i = 0; i < m_Actions.size(); ++i) {
+			if (m_Actions[i]->getActionType() == type) {
+				return m_Actions[i];
+			}
+		}
+		return 0;
+	}
+
+	void World::startBehavior(SID id, const char* name) {
+		Behavior* b = _behaviorDefinitions->get(name);
+		if (b != 0) {
+			for (int i = 0; i < b->num; ++i) {
+				AbstractActionDefinition* def = _behaviorDefinitions->getDefinition(b->definitions[i]);
+				AbstractAction* action = find_action(def->getActionType());
+				if (action != 0) {
+					action->attach(id, def);
+				}
+			}
+		}
 	}
 	
 }

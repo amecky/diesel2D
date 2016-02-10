@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	FollowCurveAction::FollowCurveAction() : AbstractAction() {
+	FollowCurveAction::FollowCurveAction() : AbstractAction("follow_curve") {
 		int sizes[] = { sizeof(SID), sizeof(BezierCurve*), sizeof(float), sizeof(float), sizeof(int) };
 		_buffer.init(sizes, 5);
 	}

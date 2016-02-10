@@ -1,9 +1,13 @@
 #include "BehaviorDefinitions.h"
 #include "actions\ColorFlashAction.h"
 #include "actions\AbstractAction.h"
+#include "World.h"
 
 namespace ds {
 
+	void BehaviorDefinitions::clear() {
+		_definitions.destroy_all();
+	}
 	// -----------------------------------------------------
 	// save data
 	// -----------------------------------------------------
@@ -15,6 +19,7 @@ namespace ds {
 	// load data
 	// -----------------------------------------------------
 	bool BehaviorDefinitions::loadData(const JSONReader& loader) {
+		clear();
 		int cats[256];
 		int num = loader.get_categories(cats, 256);
 		int index = 0;
@@ -33,7 +38,9 @@ namespace ds {
 					b.definitions[b.num++] = index;
 				}
 			}
-			_behaviors.push_back(b);
+			if (b.num > 0) {
+				_behaviors.push_back(b);
+			}
 		}
 		return true;
 	}
@@ -42,11 +49,24 @@ namespace ds {
 	// create definition
 	// -----------------------------------------------------
 	AbstractActionDefinition* BehaviorDefinitions::createDefinition(const char* name,int* index) {
-		if (strcmp(name, "flash_color") == 0) {
+		AbstractAction* action = _world->find_action(name);
+		if (action != 0) {
 			*index = _definitions.size();
-			ColorFlashDefinition* def = new ColorFlashDefinition();
-			_definitions.push_back(def);
-			return def;
+			AbstractActionDefinition* def = action->createDefinition();			
+			if (def != 0) {
+				_definitions.push_back(def);
+				return def;
+			}
+		}
+		return 0;
+	}
+
+	Behavior* BehaviorDefinitions::get(const char* name) {
+		IdString hash = string::murmur_hash(name);
+		for (size_t i = 0; i < _behaviors.size(); ++i) {
+			if (_behaviors[i].hash == hash) {
+				return &_behaviors[i];
+			}
 		}
 		return 0;
 	}

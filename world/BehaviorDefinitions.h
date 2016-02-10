@@ -11,29 +11,36 @@ namespace ds {
 		int num;
 	};
 
-	class BehaviorDefinitions : public DataFile {
+	class World;
 
+	class BehaviorDefinitions : public DataFile {
+		/*
 		struct BehaviorDefinition {
 
 			IdString hash;
 			AbstractActionDefinition* definition;
-
 		};
-
+		*/
 	public:
-		BehaviorDefinitions() {}
-		~BehaviorDefinitions() {}
+		BehaviorDefinitions(World* world) : _world(world) {}
+		~BehaviorDefinitions() {
+			clear();
+		}
 		bool saveData(JSONWriter& writer);
 		bool loadData(const JSONReader& loader);
 		Behavior* get(const char* name);
 		const char* getFileName() const {
 			return "resources\\behaviors.json";
 		}
-		void* getDefinition(int index);
+		AbstractActionDefinition* getDefinition(int index) {
+			return _definitions[index];
+		}
 	private:
+		void clear();
 		AbstractActionDefinition* createDefinition(const char* name, int* index);
 		Array<Behavior> _behaviors;
 		Array<AbstractActionDefinition*> _definitions;
+		World* _world;
 	};
 
 }

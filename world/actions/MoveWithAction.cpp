@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	MoveWithAction::MoveWithAction() {
+	MoveWithAction::MoveWithAction() : AbstractAction("move_with") {
 		int sizes[] = { sizeof(SID), sizeof(MoveFunc), sizeof(float), sizeof(float) };
 		_buffer.init(sizes, 4);
 	}

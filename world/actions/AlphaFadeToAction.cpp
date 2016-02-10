@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	AlphaFadeToAction::AlphaFadeToAction() : AbstractAction() {		
+	AlphaFadeToAction::AlphaFadeToAction() : AbstractAction("alpha_fade") {
 		int sizes[] = { sizeof(SID), sizeof(float), sizeof(float),sizeof(float),sizeof(float),sizeof(tweening::TweeningType),sizeof(int) };
 		_buffer.init(sizes, 7);
 	}

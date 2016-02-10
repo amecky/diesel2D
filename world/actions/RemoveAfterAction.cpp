@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	RemoveAfterAction::RemoveAfterAction() {
+	RemoveAfterAction::RemoveAfterAction() : AbstractAction("remove_after") {
 		int sizes[] = { sizeof(SID), sizeof(float), sizeof(float) };
 		_buffer.init(sizes, 3);
 	}

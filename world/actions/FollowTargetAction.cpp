@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	FollowTargetAction::FollowTargetAction() : AbstractAction() {
+	FollowTargetAction::FollowTargetAction() : AbstractAction("follow_target") {
 		int sizes[] = { sizeof(SID), sizeof(SID), sizeof(float)};
 		_buffer.init(sizes, 3);
 	}

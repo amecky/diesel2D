@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	ScaleByPathAction::ScaleByPathAction() : AbstractAction() {
+	ScaleByPathAction::ScaleByPathAction() : AbstractAction("scale_by_path") {
 		int sizes[] = { sizeof(SID), sizeof(Vector2fPath*), sizeof(float), sizeof(float) };
 		_buffer.init(sizes, 4);
 	}
@@ -39,6 +39,20 @@ namespace ds {
 		sar::scale(array, id, s);
 		_timers[idx] = 0.0f;
 		_ttl[idx] = ttl;
+		++_buffer.size;
+	}
+
+	void ScaleByPathAction::attach(SID id, AbstractActionDefinition* definition) {
+		ScaleByPathDefinition* def = static_cast<ScaleByPathDefinition*>(definition);
+		allocate(_buffer.size + 1);
+		int idx = _buffer.size;
+		_ids[idx] = id;
+		_path[idx] = &def->path;
+		v2 s(1, 1);
+		def->path.get(0.0f, &s);
+		//sar::scale(array, id, s);
+		_timers[idx] = 0.0f;
+		_ttl[idx] = def->ttl;
 		++_buffer.size;
 	}
 

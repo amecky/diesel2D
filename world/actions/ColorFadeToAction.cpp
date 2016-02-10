@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	ColorFadeToAction::ColorFadeToAction() : AbstractAction() {
+	ColorFadeToAction::ColorFadeToAction() : AbstractAction("color_fade") {
 		int sizes[] = { sizeof(SID), sizeof(Color), sizeof(Color), sizeof(float), sizeof(float),sizeof(tweening::TweeningType),sizeof(int) };
 		_buffer.init(sizes, 7);
 	}

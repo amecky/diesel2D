@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	FollowStraightPathAction::FollowStraightPathAction() : AbstractAction() {
+	FollowStraightPathAction::FollowStraightPathAction() : AbstractAction("follow_straight_path") {
 		int sizes[] = { sizeof(SID), sizeof(StraightPath*), sizeof(float),sizeof(float), sizeof(int) };
 		_buffer.init(sizes, 5);
 	}

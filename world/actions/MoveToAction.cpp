@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	MoveToAction::MoveToAction() {
+	MoveToAction::MoveToAction() : AbstractAction("move_to") {
 		int sizes[] = { sizeof(SID), sizeof(v2), sizeof(v2), sizeof(float), sizeof(float), sizeof(tweening::TweeningType), sizeof(int) };
 		_buffer.init(sizes, 7);
 	}

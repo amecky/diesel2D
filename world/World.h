@@ -357,10 +357,15 @@ namespace ds {
 
 		void loadBehaviors();
 
+		AbstractAction* find_action(const char* name) const;
+
+		void startBehavior(SID id, const char* name);
+
 	private:
 		ActionEventBuffer m_Buffer;
 		void allocate(int size);
-		
+		AbstractAction* find_action(ActionType type) const;
+
 		WorldLayer _layers[32];
 
 		SpriteArray m_Data;

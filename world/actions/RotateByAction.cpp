@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	RotateByAction::RotateByAction() {
+	RotateByAction::RotateByAction() : AbstractAction("rotate_by") {
 		int sizes[] = { sizeof(SID), sizeof(float), sizeof(float), sizeof(float), sizeof(float), sizeof(float), sizeof(tweening::TweeningType), sizeof(int) };
 		_buffer.init(sizes, 8);
 	}

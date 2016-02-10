@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	MoveByAction::MoveByAction() {
+	MoveByAction::MoveByAction() : AbstractAction("move_by") {
 		int sizes[] = { sizeof(SID), sizeof(v2), sizeof(float), sizeof(bool) };
 		_buffer.init(sizes, 4);
 	}

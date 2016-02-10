@@ -6,7 +6,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	FollowPathAction::FollowPathAction() : AbstractAction() {
+	FollowPathAction::FollowPathAction() : AbstractAction("follow_path") {
 		int sizes[] = { sizeof(SID), sizeof(CubicBezierPath*), sizeof(float), sizeof(float), sizeof(int) };
 		_buffer.init(sizes, 5);
 	}
