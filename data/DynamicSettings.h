@@ -56,10 +56,6 @@ namespace ds {
 		void addPath(const char* name, Vector2fPath* value);
 		bool setPath(const char* name, const Vector2fPath& value);
 
-		void showDialog(v2* pos);
-
-		void showCompleteDialog(v2* pos);
-
 		bool saveData(JSONWriter& writer);
 		bool loadData(const JSONReader& loader);
 		virtual const char* getFileName() const = 0;

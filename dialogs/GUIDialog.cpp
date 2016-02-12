@@ -871,7 +871,6 @@ namespace ds {
 				int id = loadItem(cats[i], reader, &item);
 				Rect r;
 				reader.get_rect(cats[i], "rect", &r);
-				const char* label = reader.get_string(cats[i], "text");
 				GUID gid = addImageButton(id, item.pos.x, item.pos.y, r, item.centered);
 				addToModel(gid.id, GIT_IMAGE_BUTTON, "ImageButton");
 			}
