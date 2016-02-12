@@ -194,14 +194,14 @@ namespace ds {
 	// -------------------------------------------------------
 	// Adds a text
 	// -------------------------------------------------------
-	GUID GUIDialog::addText(int id,int x,int y,const std::string& text,const Color& color,float scale,bool centered) {
+	GUID GUIDialog::addText(int id,int x,int y,const char* text,const Color& color,float scale,bool centered) {
 		GUID& gid = _ids[_idIndex++];
 		assert(gid.id == -1);
 		gid.id = id;
 		Vector2f p = v2(x,y);
 		gid.entryIndex = createItem(p, GIT_TEXT, scale, centered, color);
 		GUIText guiText;
-		strcpy(guiText.text, text.c_str());
+		strcpy(guiText.text, text);
 		gid.index = _texts.size();
 		_texts.push_back(guiText);
 		return gid;
@@ -233,7 +233,7 @@ namespace ds {
 	// -------------------------------------------------------
 	// Update text
 	// -------------------------------------------------------
-	void GUIDialog::updateText(int id,int x,int y,const std::string& text,const Color& color,float scale,bool centered) {
+	void GUIDialog::updateText(int id,int x,int y,const char* text,const Color& color,float scale,bool centered) {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
 		GUIItem& item = m_Items[gid.entryIndex];
@@ -243,19 +243,19 @@ namespace ds {
 		item.color = color;
 		item.scale = scale;
 		item.pos = v2(x,y);
-		strcpy(txt.text, text.c_str());
+		strcpy(txt.text, text);
 	}
 
 	// -------------------------------------------------------
 	// Update text
 	// -------------------------------------------------------
-	void GUIDialog::updateText(int id,const std::string& text) {	
+	void GUIDialog::updateText(int id,const char* text) {	
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
 		GUIItem& item = m_Items[gid.entryIndex];
 		assert(item.type == GIT_TEXT);
 		GUIText& txt = _texts[gid.index];
-		strcpy(txt.text, text.c_str());
+		strcpy(txt.text, text);
 	}
 
 	// -------------------------------------------------------

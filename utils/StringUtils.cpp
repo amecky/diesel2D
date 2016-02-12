@@ -236,6 +236,33 @@ namespace ds {
 		}
 
 		// -------------------------------------------------------
+		// Formats an int to a string using fixed length
+		// -------------------------------------------------------
+		void formatInt(int value, char* str, int length) {
+			//str = "";
+			int index = 0;
+			if (value < 0) {
+				str[index++] = '-';
+				//str += '-';
+				value = -value;
+			}
+			int tmp = value;
+			int div = 1;
+			for (int i = 0; i < length; ++i) {
+				if (i > 0) {
+					div *= 10;
+				}
+			}
+			for (int i = 0; i < length; ++i) {
+				int r = tmp / div;
+				str[index++] = ('0' + r);
+				tmp = tmp - r * div;
+				div /= 10;
+			}
+			str[index++] = '\0';
+		}
+
+		// -------------------------------------------------------
 		// Formats an int to a string
 		// -------------------------------------------------------
 		void formatInt(int value, std::string& str) {

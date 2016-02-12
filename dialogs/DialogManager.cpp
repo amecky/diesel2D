@@ -11,21 +11,19 @@ namespace ds {
 	// -------------------------------------------------------
 	// Constructor
 	// -------------------------------------------------------
-	DialogManager::DialogManager(void) : _index(1) , m_Initialized(false) {
+	DialogManager::DialogManager() : _index(1) , _initialized(false) , _current(-1) {
 	}
 
 	// -------------------------------------------------------
 	// Destructor - delete all dialogs
 	// -------------------------------------------------------
-	DialogManager::~DialogManager(void) {
+	DialogManager::~DialogManager() {
 		clear();
 	}
 
 	void DialogManager::clear() {
-		Dialogs::iterator it = m_Dialogs.begin();
-		while ( it != m_Dialogs.end()) {
+		for (Dialogs::iterator it = _dialogs.begin(), itEnd = _dialogs.end(); it != itEnd; ++it) {
 			delete it->dialog;
-			++it;
 		}
 	}
 
@@ -33,8 +31,8 @@ namespace ds {
 	// Init
 	// -------------------------------------------------------
 	void DialogManager::init(BitmapFont* font) {
-		m_Font = font;
-		m_Initialized = true;
+		_font = font;
+		_initialized = true;
 	}
 
 	// -------------------------------------------------------
@@ -46,9 +44,9 @@ namespace ds {
 		def.dialog = dialog;
 		def.hash = string::murmur_hash(name);
 		strncpy(def.name, name, 32);
-		dialog->init(name,id,m_Font);
+		dialog->init(name,id,_font);
 		++_index;
-		m_Dialogs.push_back(def);
+		_dialogs.push_back(def);
 	}
 
 	// -------------------------------------------------------
@@ -71,8 +69,8 @@ namespace ds {
 	void DialogManager::setActiveFlag(const char* name,bool active) {
 		IdString hashName = string::murmur_hash(name);
 		bool found = false;
-		for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
-			const DialogDefinition& def = m_Dialogs[i];
+		for (size_t i = 0; i < _dialogs.size(); ++i) {
+			const DialogDefinition& def = _dialogs[i];
 			if ( def.hash == hashName ) {
 				found = true;
 				if ( active ) {
@@ -92,9 +90,9 @@ namespace ds {
 	// Render all active dialogs
 	// -------------------------------------------------------
 	void DialogManager::render() {
-		if ( m_Initialized && !m_Dialogs.empty() ) {
-			for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
-				const DialogDefinition& def = m_Dialogs[i];
+		if (_initialized && !_dialogs.empty()) {
+			for (size_t i = 0; i < _dialogs.size(); ++i) {
+				const DialogDefinition& def = _dialogs[i];
 				GUIDialog* dlg = def.dialog;
 				if ( dlg->isActive() ) {
 					dlg->render();
@@ -107,8 +105,8 @@ namespace ds {
 	// On button down
 	// -------------------------------------------------------
 	bool DialogManager::onButtonUp(int button,int x,int y,DialogID* dlgId,int* selected) {
-		for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
-			const DialogDefinition& def = m_Dialogs[i];
+		for (size_t i = 0; i < _dialogs.size(); ++i) {
+			const DialogDefinition& def = _dialogs[i];
 			GUIDialog* dlg = def.dialog;
 			if ( dlg->isActive() ) {
 				int ret = dlg->onButton(button,x,renderer::getScreenHeight() - y,true);
@@ -126,8 +124,8 @@ namespace ds {
 	// Update mouse position
 	// -------------------------------------------------------
 	void DialogManager::updateMousePos(const Vector2f& mousePos) {
-		for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
-			const DialogDefinition& def = m_Dialogs[i];
+		for (size_t i = 0; i < _dialogs.size(); ++i) {
+			const DialogDefinition& def = _dialogs[i];
 			GUIDialog* dlg = def.dialog;
 			if ( dlg->isActive() ) {
 				dlg->updateMousePos(mousePos);			
@@ -137,8 +135,8 @@ namespace ds {
 
 	bool DialogManager::contains(const char* name) const {
 		IdString hashName = string::murmur_hash(name);
-		for (size_t i = 0; i < m_Dialogs.size(); ++i) {
-			const DialogDefinition& def = m_Dialogs[i];
+		for (size_t i = 0; i < _dialogs.size(); ++i) {
+			const DialogDefinition& def = _dialogs[i];
 			if (def.hash == hashName){
 				return true;
 			}
@@ -153,8 +151,8 @@ namespace ds {
 		GUIDialog* dialog = new GUIDialog();
 		LOG << "Creating new dialog: " << dialogName;
 		def.dialog = dialog;
-		dialog->init(def.name, _index, m_Font);
-		m_Dialogs.push_back(def);
+		dialog->init(def.name, _index, _font);
+		_dialogs.push_back(def);
 		++_index;
 		return dialog;
 	}
@@ -163,8 +161,8 @@ namespace ds {
 	// -------------------------------------------------------
 	GUIDialog* DialogManager::get(const char* name) {
 		IdString hashName = string::murmur_hash(name);
-		for ( size_t i = 0; i < m_Dialogs.size(); ++i) {
-			const DialogDefinition& def = m_Dialogs[i];	
+		for (size_t i = 0; i < _dialogs.size(); ++i) {
+			const DialogDefinition& def = _dialogs[i];
 			if (def.hash == hashName){
 				return def.dialog;
 			}
@@ -177,11 +175,11 @@ namespace ds {
 	// -------------------------------------------------------
 	bool DialogManager::remove(const char* name) {
 		IdString hashName = string::murmur_hash(name);
-		Dialogs::iterator it = m_Dialogs.begin();
-		while (it != m_Dialogs.end()) {
+		Dialogs::iterator it = _dialogs.begin();
+		while (it != _dialogs.end()) {
 			if (it->hash == hashName) {
 				delete it->dialog;
-				it = m_Dialogs.remove(it);
+				it = _dialogs.remove(it);
 				return true;
 			}
 			else {
@@ -195,8 +193,8 @@ namespace ds {
 	// tick
 	// -------------------------------------------------------
 	void DialogManager::tick(float dt) {
-		for (size_t i = 0; i < m_Dialogs.size(); ++i) {
-			const DialogDefinition& def = m_Dialogs[i];
+		for (size_t i = 0; i < _dialogs.size(); ++i) {
+			const DialogDefinition& def = _dialogs[i];
 			GUIDialog* dlg = def.dialog;
 			if (dlg->isActive()) {
 				dlg->tick(dt);
@@ -226,8 +224,8 @@ namespace ds {
 			sprintf_s(def.name, 32, "%s", name);
 			def.hash = string::murmur_hash(name);
 			def.dialog = dialog;
-			dialog->init(def.name, id, m_Font);
-			m_Dialogs.push_back(def);
+			dialog->init(def.name, id, _font);
+			_dialogs.push_back(def);
 		}
 		return true;
 	}

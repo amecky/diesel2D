@@ -34,7 +34,7 @@ public:
 		return "resources\\gui.json";
 	}
 	const Dialogs& getDialogs() const {
-		return m_Dialogs;
+		return _dialogs;
 	}
 	bool remove(const char* name);
 	bool contains(const char* name) const;
@@ -43,10 +43,11 @@ private:
 	void clear();
 	void setActiveFlag(const char* name,bool active);	
 	void createDialog(const char* name,int id,GUIDialog* dialog);
-	BitmapFont* m_Font;
-	bool m_Initialized;
-	Dialogs m_Dialogs;
+	BitmapFont* _font;
+	bool _initialized;
+	Dialogs _dialogs;
 	uint32 _index;
+	int _current;
 };
 
 }

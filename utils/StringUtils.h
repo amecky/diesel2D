@@ -46,6 +46,8 @@ namespace string {
 
 	void formatInt(int value,std::string& str,int length);
 
+	void formatInt(int value, char* str, int length);
+
 	void formatInt(int value,std::string& str);
 
 	int extract_used_characters(const char* text, char* array, int max);
