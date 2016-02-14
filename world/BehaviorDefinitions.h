@@ -14,13 +14,7 @@ namespace ds {
 	class World;
 
 	class BehaviorDefinitions : public DataFile {
-		/*
-		struct BehaviorDefinition {
 
-			IdString hash;
-			AbstractActionDefinition* definition;
-		};
-		*/
 	public:
 		BehaviorDefinitions(World* world) : _world(world) {}
 		~BehaviorDefinitions() {

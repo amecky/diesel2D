@@ -189,6 +189,9 @@ namespace tweening {
 		);
 	}
 
+	// -------------------------------------------------------
+	// get by index
+	// -------------------------------------------------------
 	TweeningType get_by_index(int index) {
 		switch (index) {
 			case 0: return linear; break;		
@@ -212,6 +215,9 @@ namespace tweening {
 		return linear;
 	}
 
+	// -------------------------------------------------------
+	// draw
+	// -------------------------------------------------------
 	void draw(TweeningType type, const ds::Texture& texture, float step, float delta) {
 		v2 p(100, 100);
 		float t = 0.0f;

@@ -90,21 +90,16 @@ BaseApp::~BaseApp() {
 	LOG << "Destructing all elements";
 	sprites::shutdown();
 	repository::shutdown();
-	//delete _bmfDialog;
-	//delete _templatesEditor;	
 	delete assetEditors;
 	delete console;
 	delete world;
 	delete gui;
 	delete particles;
 	delete _stateMachine;
-	//delete gProfiler;
 	delete audio;
 	renderer::shutdown();	
 	gui::shutdown();
 	perf::shutdown();
-	//delete gBlockMemory;
-	// FIXME: should be enabled
 	delete gDefaultMemory;
 }
 
@@ -120,14 +115,14 @@ void BaseApp::loadSettings() {
 	if (reader.contains_property(root,"textures")) {
 		const char* textureNames = reader.get_string(root,"textures");
 		if (strchr(textureNames,',') == 0) {
-			int texture = ds::renderer::loadTexture(textureNames);
+			int texture = renderer::loadTexture(textureNames);
 			assert(texture != -1);
 		}
 		else {
 			Array<std::string> values;
 			string::split(textureNames,values);
 			for (size_t i = 0; i < values.size(); ++i) {
-				int texture = ds::renderer::loadTexture(values[i].c_str());
+				int texture = renderer::loadTexture(values[i].c_str());
 				assert(texture != -1);
 			}
 		}
@@ -153,8 +148,6 @@ void BaseApp::loadSettings() {
 	}
 	// initialize text system
 	int text_id = reader.find_category("use_text_system",root);
-	//Category* textSystem = init->getChild("text_system");
-	//if (textSystem != 0) {
 	if ( text_id != -1 ) {
 		const char* fontName = reader.get_string(text_id,"font");
 		BitmapFont* font = renderer::getBitmapFont(fontName);
@@ -177,8 +170,6 @@ void BaseApp::loadSettings() {
 	// load particles
 	bool load_particles = false;
 	reader.get_bool(root, "load_particles", &load_particles);
-	//int particles_id = reader.find_category("")
-	//if (init->getBool("load_particles", false)) {
 	if ( load_particles) {
 		LOG << "loading particle systems";
 		// prepare particle system
@@ -232,6 +223,7 @@ void BaseApp::prepare() {
 
 	profiler::init();
 	sprites::init();
+	world->setDefaultDescriptor(sprites::getDescriptorID());
 	loadSettings();
 	LOG << "---> Start loading content <---";
 	loadContent();	
@@ -417,10 +409,10 @@ void BaseApp::buildFrame() {
 		renderer::setupMatrices();
 		{
 			ZoneTracker r("RENDER_GAME");
-			ds::sprites::begin();
+			sprites::begin();
 			_stateMachine->render();
 			draw();
-			ds::sprites::flush();
+			sprites::flush();
 		}
 		{
 			ZoneTracker r("RENDER_GUI");
@@ -438,14 +430,14 @@ void BaseApp::buildFrame() {
 		}
 		{
 			ZoneTracker r("RENDER_FLUSH");
-			ds::sprites::flush();
+			sprites::flush();
 			renderer::flush();
 		}
 		{
 			ZoneTracker r("DEBUG_RENDER");
 #ifdef DEBUG		
 			if (m_DebugInfo.showDrawCounter) {
-				int y = ds::renderer::getSelectedViewport().getHeight() - 80;
+				int y = renderer::getSelectedViewport().getHeight() - 80;
 				renderer::showDrawCounter(&_perfHUDPos);
 			}
 			if (m_DebugInfo.showProfiler) {
@@ -678,7 +670,7 @@ void BaseApp::loadShaders(const JSONReader& reader) {
 		for (int i = 0; i < num; ++i) {
 			const char* file = reader.get_string(entries[i], "file");
 			const char* tech = reader.get_string(entries[i], "tech");
-			int sh = ds::renderer::loadShader(file, tech);
+			int sh = renderer::loadShader(file, tech);
 			assert(sh >= 0);
 			LOG << "shader '" << file << "' id: " << sh;
 		}
@@ -702,7 +694,7 @@ void BaseApp::loadDescriptors(const JSONReader& reader) {
 			const char* blend_state = reader.get_string(entries[i], "blend_state");
 			Descriptor desc;
 			desc.hash = string::murmur_hash(reader.get_category_name(entries[i]));
-			desc.shader = ds::renderer::getShaderID(string::murmur_hash(shader));
+			desc.shader = renderer::getShaderID(string::murmur_hash(shader));
 			assert(desc.shader != 0);
 			desc.texture = renderer::getTextureId(texture);
 			int did = renderer::addDescriptor(desc);
@@ -740,7 +732,7 @@ void BaseApp::loadViewports(const JSONReader& reader) {
 			const char* blend_state = reader.get_string(entries[i], "blend_state");
 			Descriptor desc;
 			desc.hash = string::murmur_hash(reader.get_category_name(entries[i]));
-			desc.shader = ds::renderer::getShaderID(string::murmur_hash(shader));
+			desc.shader = renderer::getShaderID(string::murmur_hash(shader));
 			assert(desc.shader != 0);
 			desc.texture = renderer::getTextureId(texture);
 			int did = renderer::addDescriptor(desc);

@@ -158,6 +158,7 @@ private:
 	v2 _perfHUDPos;
 	ProfileSnapshot _snapshots[64];
 	bool _prepared;
+
 }; 
 
 }

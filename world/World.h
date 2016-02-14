@@ -201,7 +201,7 @@ namespace ds {
 		void render();
 		void renderLayers(int* layers,int num_layers);
 		void renderSingleLayer(int layer);
-
+		void setDefaultDescriptor(int id);
 		void setBoundingRect(const Rect& r);
 
 		const bool contains(SID sid) const {

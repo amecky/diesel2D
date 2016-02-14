@@ -29,7 +29,7 @@ namespace sprites {
 
 	void draw(const Shape& shape,const Texture& tex);
 
-	void draw(const Texture& texture,const ParticleArray& array);
+	//void draw(const Texture& texture,const ParticleArray& array);
 
 	void drawTiledX(const v2& position, float width, const Texture& texture, float cornersize, const Color& color = Color::WHITE);
 

@@ -156,15 +156,7 @@ namespace ds {
 			instance.modifier->update(&m_Array, instance.data, elapsed);
 		}
 	}
-
-	void NewParticleSystem::render() {
-		ZoneTracker z("NPS:render");
-		if (m_Array.countAlive > 0) {
-			ds::sprites::draw(_system_data.texture, m_Array);
-			renderer::drawCounter().particles += m_Array.countAlive;
-		}
-	}
-
+	
 	void NewParticleSystem::clear() {
 		LOG << "clearing particlesystem: " << m_DebugName;
 		for (int i = 0; i < _count_modifiers; ++i) {

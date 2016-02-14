@@ -72,6 +72,11 @@ namespace ds {
 		delete _behaviorDefinitions;
 	}
 
+	void World::setDefaultDescriptor(int id){
+		for (int j = 0; j < 32; ++j) {
+			_layers[j].descriptor_id = id;
+		}
+	}
 	// -----------------------------------------------------
 	// allocate
 	// -----------------------------------------------------

@@ -57,7 +57,6 @@ public:
 	~NewParticleSystem();
 	void clear();
 	void update(float elapsed);
-	void render();
 	ParticleSystemData& getParticleData() {
 		return _system_data;
 	}

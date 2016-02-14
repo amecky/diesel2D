@@ -1472,7 +1472,7 @@ namespace ds {
 				renderer::restoreDefaultBlendState();
 				set2DCameraOn();
 				//sprites::setShaderID(renderContext->defaultShaderID);
-				sprites::setDescriptorID(renderContext->defaultDescriptor);
+				//sprites::setDescriptorID(renderContext->defaultDescriptor);
 				return true;
 			}
 			else {

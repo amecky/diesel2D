@@ -3,7 +3,7 @@
 #include "..\renderer\shader.h"
 #include "..\math\matrix.h"
 #include "..\renderer\graphics.h"
-#include "..\sprites\SpriteBatch.h"
+//#include "..\sprites\SpriteBatch.h"
 #include "..\utils\Log.h"
 
 namespace ds {
@@ -194,7 +194,7 @@ namespace ds {
 	// render
 	// --------------------------------------------------------------------------
 	void ParticleManager::render() {
-		sprites::flush();
+		//sprites::flush();
 		int batchSize = 0;
 		begin();
 		ZoneTracker z("ParticleManager::render");
@@ -226,7 +226,7 @@ namespace ds {
 		if (m_ParticleIndex > 0) {
 			flush();
 		}
-		renderer::setCurrentShader(renderer::getDefaultShaderID());
+		//renderer::setCurrentShader(renderer::getDefaultShaderID());
 	}
 
 	// --------------------------------------------------------------------------

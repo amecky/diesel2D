@@ -8,6 +8,7 @@
 #include "..\math\GameMath.h"
 #include "..\renderer\VertexDeclaration.h"
 #include "..\renderer\graphics.h"
+#include "..\math\matrix.h"
 
 namespace ds {
 
@@ -34,7 +35,9 @@ namespace sprites {
 
 		int maxSprites;
 		int bufferIndex;
-		PTCVertex sprites[MAX_SPRITES * 4];
+		int indexBufferIndex;
+		//PTCVertex sprites[MAX_SPRITES * 4];
+		ParticleVertex sprites[MAX_SPRITES * 4];
 		int size;
 		int index;
 		int maxVertices;
@@ -54,12 +57,15 @@ namespace sprites {
 		spriteCtx->size = 0;
 		spriteCtx->index = 0;
 		spriteCtx->maxVertices = MAX_SPRITES * 4;
+
 		Descriptor desc;
-		desc.blendState = renderer::getDefaultBlendState();
-		desc.shader = renderer::getDefaultShaderID();
+		desc.shader = shader::createParticleShader();
+		assert(desc.shader != 0);
 		desc.texture = 0;
+		desc.blendState = renderer::getDefaultBlendState();
+		spriteCtx->bufferIndex = renderer::createVertexBuffer(VD_PARTICLE, MAX_SPRITES * 4, true);
+		spriteCtx->indexBufferIndex = renderer::getQuadIndexBufferIndex();
 		spriteCtx->descriptorID = renderer::addDescriptor(desc);
-		spriteCtx->bufferIndex = renderer::createVertexBuffer(VD_PTC,MAX_SPRITES * 4);
 	}
 
 	void initializeTextSystem(BitmapFont * font) {
@@ -71,11 +77,12 @@ namespace sprites {
 	}
 
 	void setDescriptorID(int id) {	
+		
 		// FIXME: correct order?????
-		//if (spriteCtx->descriptorID != id) {			
+		if (spriteCtx->descriptorID != id) {		
 			flush();
 			spriteCtx->descriptorID = id;			
-		//}
+		}
 	}
 
 	void begin() {
@@ -101,6 +108,7 @@ namespace sprites {
 	void end(bool count) {
 		if (spriteCtx->size > 0) {
 			ZoneTracker z("sprites:end");
+			renderer::setWorldMatrix(matrix::m4identity());
 			renderer::fillBuffer(spriteCtx->bufferIndex, spriteCtx->sprites, spriteCtx->index);
 			renderer::draw(spriteCtx->descriptorID, spriteCtx->bufferIndex, spriteCtx->index, renderer::getQuadIndexBufferIndex());
 			if (count) {
@@ -171,45 +179,18 @@ namespace sprites {
 		cor = cor - ds::renderer::getSelectedViewport().getPosition();
 		Vector2f p(0, 0);
 		for (int i = 0; i < 4; ++i) {
-			p.x = VP_ARRAY[i * 2] * dim.x;
-			p.y = VP_ARRAY[i * 2 + 1] * dim.y;
-			p = p - center;
-			if (rotation != 0.0f) {
-				Vector2f np = vector::srt(cor, p, scaleX, scaleY, rotation);
-				spriteCtx->sprites[idx + i].x = np.x;
-				spriteCtx->sprites[idx + i].y = np.y;
-			}
-			else {
-				p.x *= scaleX;
-				p.y *= scaleY;
-				p += cor;
-				spriteCtx->sprites[idx + i].x = p.x;
-				spriteCtx->sprites[idx + i].y = p.y;
-			}
+			spriteCtx->sprites[idx + i].x = pos.x;
+			spriteCtx->sprites[idx + i].y = pos.y;
 			spriteCtx->sprites[idx + i].z = 0.0f;
+			spriteCtx->sprites[idx + i].scale.x = scaleX;
+			spriteCtx->sprites[idx + i].scale.y = scaleY;
+			spriteCtx->sprites[idx + i].dimension = dim;
+			spriteCtx->sprites[idx + i].rotationIndex.x = rotation;
+			spriteCtx->sprites[idx + i].rotationIndex.y = i;
 			spriteCtx->sprites[idx + i].color = color;
 		}	
 		spriteCtx->index += 4;
 		++spriteCtx->size;
-	}
-
-	void draw(const Texture& texture, const ParticleArray& array) {
-		int idx = spriteCtx->index;
-		for (uint32 i = 0; i < array.countAlive; ++i) {
-			if ((spriteCtx->index + 4) >= spriteCtx->maxVertices) {
-				flush(false);
-			}			
-			idx = spriteCtx->index;
-			for (int j = 0; j < 4; ++j) {
-				spriteCtx->sprites[idx + j].x = array.vertices[i * 4 + j].x;
-				spriteCtx->sprites[idx + j].y = array.vertices[i * 4 + j].y;
-				spriteCtx->sprites[idx + j].z = 0.0f;
-				spriteCtx->sprites[idx + j].uv = array.vertices[i * 4 + j].uv;
-				spriteCtx->sprites[idx + j].color = array.color[i];
-			}
-			spriteCtx->index += 4;
-			++spriteCtx->size;
-		}
 	}
 
 	void draw(const Shape& shape, const Texture& tex) {
@@ -227,18 +208,15 @@ namespace sprites {
 		spriteCtx->sprites[idx + 2].uv.y = tex.uv.w;
 		spriteCtx->sprites[idx + 3].uv.x = tex.uv.x;
 		spriteCtx->sprites[idx + 3].uv.y = tex.uv.w;
-		//Vector2f cor = pos;
-		//cor = cor - ds::renderer::getSelectedViewport().getPosition();
-		//Vector2f p(0, 0);
 		for (int i = 0; i < 4; ++i) {
-			//p.x = VP_ARRAY[i * 2] * tex.dim.x;
-			//p.y = VP_ARRAY[i * 2 + 1] * tex.dim.y;
-			//p = p - center;
-			//Vector2f np = vector::srt(cor, p, scaleX, scaleY, rotation);
-			Vector2f np = shape.v[i] - ds::renderer::getSelectedViewport().getPosition();
-			spriteCtx->sprites[idx + i].x = np.x;
-			spriteCtx->sprites[idx + i].y = np.y;
+			spriteCtx->sprites[idx + i].x = shape.v[i].x;
+			spriteCtx->sprites[idx + i].y = shape.v[i].y;
 			spriteCtx->sprites[idx + i].z = 0.0f;
+			spriteCtx->sprites[idx + i].scale.x = 1.0f;
+			spriteCtx->sprites[idx + i].scale.y = 1.0f;
+			spriteCtx->sprites[idx + i].dimension = tex.dim;
+			spriteCtx->sprites[idx + i].rotationIndex.x = 0.0f;
+			spriteCtx->sprites[idx + i].rotationIndex.y = i;
 			spriteCtx->sprites[idx + i].color = shape.color;
 		}
 		spriteCtx->index += 4;
@@ -260,26 +238,15 @@ namespace sprites {
 		spriteCtx->sprites[idx + 2].uv.y = tex.uv.w;
 		spriteCtx->sprites[idx + 3].uv.x = tex.uv.x;
 		spriteCtx->sprites[idx + 3].uv.y = tex.uv.w;
-		Vector2f cor = pos;
-		cor = cor - ds::renderer::getSelectedViewport().getPosition();
-		Vector2f p(0, 0);
 		for (int i = 0; i < 4; ++i) {
-			p.x = VP_ARRAY[i * 2] * tex.dim.x;
-			p.y = VP_ARRAY[i * 2 + 1] * tex.dim.y;
-			p = p - center;
-			if (rotation != 0.0f) {
-				Vector2f np = vector::srt(cor, p, scaleX, scaleY, rotation);
-				spriteCtx->sprites[idx + i].x = np.x;
-				spriteCtx->sprites[idx + i].y = np.y;
-			}
-			else {
-				p.x *= scaleX;
-				p.y *= scaleY;
-				p += cor;
-				spriteCtx->sprites[idx + i].x = p.x;
-				spriteCtx->sprites[idx + i].y = p.y;
-			}
+			spriteCtx->sprites[idx + i].x = pos.x;
+			spriteCtx->sprites[idx + i].y = pos.y;
 			spriteCtx->sprites[idx + i].z = 0.0f;
+			spriteCtx->sprites[idx + i].scale.x = scaleX;
+			spriteCtx->sprites[idx + i].scale.y = scaleY;
+			spriteCtx->sprites[idx + i].dimension = tex.dim;
+			spriteCtx->sprites[idx + i].rotationIndex.x = rotation;
+			spriteCtx->sprites[idx + i].rotationIndex.y = i;
 			spriteCtx->sprites[idx + i].color = color;
 		}
 		spriteCtx->index += 4;

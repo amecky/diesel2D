@@ -50,13 +50,12 @@ namespace ds {
 		AssetEditorManager();
 		~AssetEditorManager();
 		void add(AssetEditor* editor);
-		void activate(const char* name);
-		void deactivate(const char* name);
 		void deactivateAll();
 		void render();
 		void toggle();
 	private:
 		bool _active;
+		int _current;
 		Array<AssetEditor*> _editors;
 		v2 _position;
 	};
