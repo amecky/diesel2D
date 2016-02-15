@@ -32,7 +32,8 @@ namespace ds {
 		HWND hwnd;
 		Color clearColor;
 		bool initialized;
-		TextureAsset textures[MAX_TEXTURES];
+		//TextureAsset textures[MAX_TEXTURES];
+		Array<TextureAsset> textures;
 		LPDIRECT3DDEVICE9 device;
 		LPDIRECT3D9 pD3D;
 		D3DCAPS9 deviceCaps;
@@ -227,20 +228,11 @@ namespace ds {
 		void initialize(HWND hWnd, const Settings& settings) {
 			renderContext = new RenderContext;
 			renderContext->hwnd = hWnd;
-
 			LOG << "RenderDevice::RenderDevice";
 			LOG << "Preparing internal structs";
-			for (int i = 0; i < MAX_TEXTURES; ++i) {
-				renderContext->textures[i].texture = 0;
-				renderContext->textures[i].flags = 0;
-				renderContext->textures[i].name = 0;
-			}
 			for (int i = 0; i < MAX_BLENDSTATES; ++i) {
 				renderContext->blendStates[i].flag = 0;
 			}
-			//for (int i = 0; i < MAX_VERDECLS; ++i) {
-				//renderContext->vdStructs[i].vertexSize = 0;
-			//}
 			// create the internal device
 			renderer::initializeDevice(settings);
 			int vp = renderer::createViewport(settings.screenWidth, settings.screenHeight, settings.screenWidth, settings.screenHeight);
@@ -305,10 +297,8 @@ namespace ds {
 			}
 			renderContext->rasterizerStates.deleteContents();
 			LOG << "Releasing textures";
-			for (int i = 0; i < MAX_TEXTURES; ++i) {
-				if (renderContext->textures[i].flags != 0) {
-					SAFE_RELEASE(renderContext->textures[i].texture);
-				}
+			for (size_t i = 0; i < renderContext->textures.size(); ++i) {
+				SAFE_RELEASE(renderContext->textures[i].texture);
 			}
 			LOG << "Releasing shaders";
 			for (int i = 0; i < renderContext->shaders.size(); ++i) {				
@@ -822,9 +812,7 @@ namespace ds {
 		// -------------------------------------------------------
 		void setTexture(int textureID, int index) {
 			if (renderContext->currentTextures[index] != textureID) {
-				assert(textureID < MAX_TEXTURES);
 				TextureAsset* tr = &renderContext->textures[textureID];
-				assert(tr->flags != 0);
 				renderContext->currentTextures[index] = textureID;
 				IDirect3DDevice9 * pDevice = renderContext->device;
 				HR(pDevice->SetTexture(index, tr->texture));
@@ -1092,7 +1080,6 @@ namespace ds {
 		// -------------------------------------------------------
 		void initializeBitmapFont(BitmapFont* bitmapFont, int textureID, const Color& fillColor) {
 			D3DLOCKED_RECT lockedRect;
-			assert(textureID < MAX_TEXTURES);
 			TextureAsset* texture = &renderContext->textures[textureID];
 			HR(texture->texture->LockRect(0, &lockedRect, NULL, 0));
 			uint32 x = bitmapFont->startX + bitmapFont->padding - 1;
@@ -1183,7 +1170,7 @@ namespace ds {
 		// Creates a render target and returns the attached texture
 		// ---------------------------------------------------------
 		RTID createRenderTarget(const Color& clearColor) {
-			int tid = findFreeTextureSlot();
+			int tid = renderContext->textures.size();
 			if (tid != -1) {
 				RenderTarget rt;// = renderContext->renderTargets[id];				
 				// make sure it is not used so far
@@ -1193,7 +1180,6 @@ namespace ds {
 				TextureAsset* t = &renderContext->textures[tid];
 				t->height = renderContext->viewportHeight;
 				t->width = renderContext->viewportWidth;
-				t->flags = 1;
 				t->texture = rt.texture;
 				rt.texture->GetSurfaceLevel(0, &rt.surface);
 				rt.textureID = tid;
@@ -1209,7 +1195,7 @@ namespace ds {
 		}
 
 		RTID createRenderTarget(float width, float height, const Color& clearColor) {			
-			int tid = findFreeTextureSlot();
+			int tid = renderContext->textures.size();
 			if ( tid != -1 ) {
 				RenderTarget renderTarget;
 				renderTarget.clearColor = clearColor;
@@ -1218,7 +1204,6 @@ namespace ds {
 				TextureAsset* t = &renderContext->textures[tid];
 				t->height = height;
 				t->width = width;
-				t->flags = 1;
 				t->texture = renderTarget.texture;
 				renderTarget.texture->GetSurfaceLevel(0,&renderTarget.surface);
 				int id = renderContext->renderTargets.size();
@@ -1273,26 +1258,13 @@ namespace ds {
 		}
 
 		// -------------------------------------------------------
-		// Find free texture slot
-		// -------------------------------------------------------
-		int findFreeTextureSlot() {
-			for (int i = 0; i < MAX_TEXTURES; ++i) {
-				if (renderContext->textures[i].flags == 0) {
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		// -------------------------------------------------------
 		// Create empty texture
 		// -------------------------------------------------------
 		int createTexture(int width, int height) {
-			int id = findFreeTextureSlot();
+			int id = renderContext->textures.size();
 			XASSERT(id != -1, "No more texture slots available");
 			TextureAsset* tr = &renderContext->textures[id];
 			tr->name = string::murmur_hash("xxxx");
-			tr->flags = 1;
 			HR(renderContext->device->CreateTexture(width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &tr->texture, NULL));
 			tr->width = width;
 			tr->height = height;
@@ -1309,11 +1281,10 @@ namespace ds {
 		// Creates and loads a texture from specific directory
 		// -------------------------------------------------------
 		int loadTexture(const char* dirName, const char* name) {
-			int id = findFreeTextureSlot();
+			int id = renderContext->textures.size();
 			XASSERT(id != -1, "No more texture slots available");
 			TextureAsset* tr = &renderContext->textures[id];
 			tr->name = string::murmur_hash(name);
-			tr->flags = 1;
 			int lw = D3DX_DEFAULT;
 			int lh = D3DX_DEFAULT;
 			D3DXIMAGE_INFO imageInfo;
@@ -1339,11 +1310,10 @@ namespace ds {
 		// Creates and loads a texture from specific directory
 		// -------------------------------------------------------
 		int loadTextureBinary(const char* fileName) {
-			int id = findFreeTextureSlot();
+			int id = renderContext->textures.size();
 			if (id != -1) {
 				TextureAsset* tr = &renderContext->textures[id];
 				tr->name = string::murmur_hash(fileName);
-				tr->flags = 1;
 				int lw = D3DX_DEFAULT;
 				int lh = D3DX_DEFAULT;
 				D3DXIMAGE_INFO imageInfo;
@@ -1373,7 +1343,6 @@ namespace ds {
 			}
 			TextureAsset* tr = &renderContext->textures[id];
 			SAFE_RELEASE(tr->texture);
-			tr->flags = 1;
 			int lw = D3DX_DEFAULT;
 			int lh = D3DX_DEFAULT;
 			D3DXIMAGE_INFO imageInfo;
@@ -1394,9 +1363,9 @@ namespace ds {
 		}
 
 		int getTextureId(IdString hash) {
-			for (int i = 0; i < MAX_TEXTURES; ++i) {
+			for (size_t i = 0; i < renderContext->textures.size(); ++i) {
 				TextureAsset* tr = &renderContext->textures[i];
-				if (tr->flags == 1 && tr->name == hash) {
+				if (tr->name == hash) {
 					return i;
 				}
 			}
@@ -1415,9 +1384,8 @@ namespace ds {
 		// -------------------------------------------------------
 		Vector2f getTextureSize(int idx) {
 			// FIXME: check if valid id
-			assert(idx >= 0 && idx < MAX_TEXTURES);
+			assert(idx >= 0 && idx < renderContext->textures.size());
 			TextureAsset* tr = &renderContext->textures[idx];
-			assert(tr->flags != 0);
 			return Vector2f(static_cast<int>(tr->width), static_cast<int>(tr->height));
 		}
 
@@ -1425,7 +1393,7 @@ namespace ds {
 		// get direct texture pointer
 		// -------------------------------------------------------
 		LPDIRECT3DTEXTURE9 getDirectTexture(int textureID) {
-			assert(textureID < MAX_TEXTURES);
+			assert(textureID >= 0 && textureID < renderContext->textures.size());
 			return renderContext->textures[textureID].texture;
 		}
 

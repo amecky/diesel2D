@@ -21,7 +21,7 @@ namespace ds {
 	// Constants
 	// -------------------------------------------------------	
 	const int MAX_VERDECLS = 12;
-	const int MAX_TEXTURES = 256;
+	//const int MAX_TEXTURES = 256;
 	const int MAX_SHADERS = 128;
 	const int MAX_BLENDSTATES = 10;
 	const int MAX_BUFFERS = 256;
@@ -496,8 +496,6 @@ namespace ds {
 		void unlockTexture(int id);
 
 		Vector2f getTextureSize(int idx);
-
-		int findFreeTextureSlot();
 
 		void loadSpriteTemplates();
 
