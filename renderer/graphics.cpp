@@ -149,8 +149,8 @@ namespace ds {
 			particleVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // rotation / index	
 			particleVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR); // color
 			particleVD->create();
-			renderContext->vdStructs[VD_PARTICLE].vertexSize = 60;
-			renderContext->vdStructs[VD_PARTICLE].declaration = particleVD;
+			renderContext->vdStructs[VD_QUAD].vertexSize = 60;
+			renderContext->vdStructs[VD_QUAD].declaration = particleVD;
 		}
 
 		void getRenderStates() {
@@ -1732,8 +1732,8 @@ namespace ds {
 			if (strcmp(name, "PNC") == 0) {
 				return VD_PNC;
 			}
-			if (strcmp(name, "PARTICLE") == 0) {
-				return VD_PARTICLE;
+			if (strcmp(name, "QUAD") == 0) {
+				return VD_QUAD;
 			}
 			if (strcmp(name, "PNTC") == 0) {
 				return VD_PNTC;

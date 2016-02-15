@@ -63,7 +63,7 @@ namespace sprites {
 		assert(desc.shader != 0);
 		desc.texture = 0;
 		desc.blendState = renderer::getDefaultBlendState();
-		spriteCtx->bufferIndex = renderer::createVertexBuffer(VD_PARTICLE, MAX_SPRITES * 4, true);
+		spriteCtx->bufferIndex = renderer::createVertexBuffer(VD_QUAD, MAX_SPRITES * 4, true);
 		spriteCtx->indexBufferIndex = renderer::getQuadIndexBufferIndex();
 		spriteCtx->descriptorID = renderer::addDescriptor(desc);
 	}

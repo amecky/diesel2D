@@ -34,7 +34,7 @@ namespace ds {
 	const int VD_PTNBT    = 1;
 	const int VD_PTC      = 2;
 	const int VD_PNC      = 3;
-	const int VD_PARTICLE = 4;
+	const int VD_QUAD     = 4;
 	const int VD_PNTC     = 5;
 	const int VD_UNKNOWN  = -1;
 
