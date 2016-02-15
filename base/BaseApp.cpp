@@ -29,6 +29,10 @@ namespace ds {
 // Constructing new BaseApp
 // -------------------------------------------------------	
 BaseApp::BaseApp() {
+	_bitmapFontEditor = 0;
+	_spriteTemplatesEditor = 0;
+	_particlesEditor = 0;
+	_dialogEditor = 0;
 	gDefaultMemory = new DefaultAllocator();
 	perf::init();
 	repository::initialize(repository::RM_DEBUG);
@@ -91,6 +95,18 @@ BaseApp::~BaseApp() {
 	sprites::shutdown();
 	repository::shutdown();
 	delete assetEditors;
+	if (_bitmapFontEditor != 0) {
+		delete _bitmapFontEditor;
+	}
+	if (_spriteTemplatesEditor != 0) {
+		delete _spriteTemplatesEditor;
+	}
+	if (_particlesEditor != 0) {
+		delete _particlesEditor;
+	}
+	if (_dialogEditor != 0) {
+		delete _dialogEditor;
+	}
 	delete console;
 	delete world;
 	delete gui;
@@ -200,10 +216,15 @@ void BaseApp::loadSettings() {
 	reader.get_bool(root, "initialize_editor", &initialize_editor);
 	if (initialize_editor) {
 		assetEditors->add(_stateMachine);
-		assetEditors->add(new BitmapFontsDialog());
-		assetEditors->add(new SpriteTemplatesEditor(renderer::getSpriteTemplates()));
-		assetEditors->add(new ParticlesEditState(particles));
-		assetEditors->add(new DialogEditorState(gui));
+		_bitmapFontEditor = new BitmapFontsDialog();
+		_spriteTemplatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
+		_particlesEditor = new ParticlesEditState(particles);
+		_dialogEditor = new DialogEditorState(gui);
+
+		assetEditors->add(_bitmapFontEditor);
+		assetEditors->add(_spriteTemplatesEditor);
+		assetEditors->add(_particlesEditor);
+		assetEditors->add(_dialogEditor);
 	}
 
 	loadShaders(reader);

@@ -14,7 +14,7 @@ namespace ds {
 	void AssetEditorManager::add(AssetEditor* editor) {
 		_editors.push_back(editor);
 	}
-	
+
 	void AssetEditorManager::toggle() {
 		_active = !_active;
 		if (_active) {

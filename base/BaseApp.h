@@ -18,6 +18,9 @@ class SpriteTemplatesEditor;
 class World;
 class GameConsole;
 class AssetEditorManager;
+class BitmapFontsDialog;
+class ParticlesEditState;
+class DialogEditorState;
 
 struct GameTime {
 	float elapsed;
@@ -159,6 +162,10 @@ private:
 	ProfileSnapshot _snapshots[64];
 	bool _prepared;
 
+	BitmapFontsDialog* _bitmapFontEditor;
+	SpriteTemplatesEditor* _spriteTemplatesEditor;
+	ParticlesEditState* _particlesEditor;
+	DialogEditorState* _dialogEditor;
 }; 
 
 }

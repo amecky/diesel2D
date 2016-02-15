@@ -317,10 +317,10 @@ namespace ds {
 
 	class VertexDeclaration;
 
-	struct VDStruct {
-		int vertexSize;
-		VertexDeclaration* declaration;
-	};
+	//struct VDStruct {
+		//int vertexSize;
+		//VertexDeclaration* declaration;
+	//};
 
 	
 
@@ -360,7 +360,7 @@ namespace ds {
 
 		void endRendering();		
 
-		VDStruct& getVertexDeclaration(int declarationType);
+		VertexDeclaration* getVertexDeclaration(int declarationType);
 
 		int createShaderFromText(const char* buffer, const char* techName);
 

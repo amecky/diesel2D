@@ -50,6 +50,7 @@ namespace ds {
 		AssetEditorManager();
 		~AssetEditorManager();
 		void add(AssetEditor* editor);
+		void addDefaultEditors();
 		void deactivateAll();
 		void render();
 		void toggle();

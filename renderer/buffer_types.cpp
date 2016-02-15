@@ -9,8 +9,8 @@ namespace ds {
 	namespace buffer {
 
 		void create(VertexBuffer& buffer,int vertexType, int size, bool dynamic) {
-			VDStruct vd = renderer::getVertexDeclaration(vertexType);
-			buffer.vertexSize = vd.vertexSize;
+			VertexDeclaration* vd = renderer::getVertexDeclaration(vertexType);
+			buffer.vertexSize = vd->getSize();
 			buffer.vertexDeclaration = vertexType;
 			buffer.dynamic = dynamic;
 			buffer.size = size;

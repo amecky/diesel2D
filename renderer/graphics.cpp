@@ -43,7 +43,8 @@ namespace ds {
 		int viewportHeight;
 		DrawCounter drawCounter;
 		D3DFORMAT format;
-		VDStruct vdStructs[MAX_VERDECLS];
+		//VDStruct vdStructs[MAX_VERDECLS];
+		std::map<int, VertexDeclaration*> vertexDeclarations;
 		Array<Shader*> shaders;
 		int defaultShaderID;
 		int currentShaderID;
@@ -103,8 +104,9 @@ namespace ds {
 			vd->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD);
 			vd->addElement(ds::VT_FLOAT4, ds::VDU_COLOR);
 			vd->create();
-			renderContext->vdStructs[VD_TTC].vertexSize = 40;
-			renderContext->vdStructs[VD_TTC].declaration = vd;
+			renderContext->vertexDeclarations[VD_TTC] = vd;
+			//renderContext->vdStructs[VD_TTC].vertexSize = 40;
+			//renderContext->vdStructs[VD_TTC].declaration = vd;
 			// position tangent binormal normal texture coords
 			VertexDeclaration* ptbntVD = new VertexDeclaration;
 			ptbntVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION);
@@ -113,8 +115,9 @@ namespace ds {
 			ptbntVD->addElement(ds::VT_FLOAT3, ds::VDU_NORMAL);
 			ptbntVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD);
 			ptbntVD->create();
-			renderContext->vdStructs[VD_PTNBT].vertexSize = 56;
-			renderContext->vdStructs[VD_PTNBT].declaration = ptbntVD;
+			//renderContext->vdStructs[VD_PTNBT].vertexSize = 56;
+			//renderContext->vdStructs[VD_PTNBT].declaration = ptbntVD;
+			renderContext->vertexDeclarations[VD_PTNBT] = ptbntVD;
 
 			VertexDeclaration* pntcVD = new VertexDeclaration;
 			pntcVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION);
@@ -122,35 +125,39 @@ namespace ds {
 			pntcVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD);
 			pntcVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR);
 			pntcVD->create();
-			renderContext->vdStructs[VD_PNTC].vertexSize = 48;
-			renderContext->vdStructs[VD_PNTC].declaration = pntcVD;
+			//renderContext->vdStructs[VD_PNTC].vertexSize = 48;
+			//renderContext->vdStructs[VD_PNTC].declaration = pntcVD;
+			renderContext->vertexDeclarations[VD_PNTC] = pntcVD;
 
 			VertexDeclaration* ptcVD = new VertexDeclaration;
 			ptcVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION);
 			ptcVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD);
 			ptcVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR);
 			ptcVD->create();
-			renderContext->vdStructs[VD_PTC].vertexSize = 36;
-			renderContext->vdStructs[VD_PTC].declaration = ptcVD;
+			//renderContext->vdStructs[VD_PTC].vertexSize = 36;
+			//renderContext->vdStructs[VD_PTC].declaration = ptcVD;
+			renderContext->vertexDeclarations[VD_PTC] = ptcVD;
 
 			VertexDeclaration* pncVD = new VertexDeclaration;
 			pncVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION);
 			pncVD->addElement(ds::VT_FLOAT3, ds::VDU_NORMAL);
 			pncVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR);
 			pncVD->create();
-			renderContext->vdStructs[VD_PNC].vertexSize = 40;
-			renderContext->vdStructs[VD_PNC].declaration = pncVD;
+			//renderContext->vdStructs[VD_PNC].vertexSize = 40;
+			//renderContext->vdStructs[VD_PNC].declaration = pncVD;
+			renderContext->vertexDeclarations[VD_PNC] = pncVD;
 
-			VertexDeclaration* particleVD = new VertexDeclaration;
-			particleVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION); // pos
-			particleVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // uv
-			particleVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // scale
-			particleVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // dimension
-			particleVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // rotation / index	
-			particleVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR); // color
-			particleVD->create();
-			renderContext->vdStructs[VD_QUAD].vertexSize = 60;
-			renderContext->vdStructs[VD_QUAD].declaration = particleVD;
+			VertexDeclaration* quadVD = new VertexDeclaration;
+			quadVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION); // pos
+			quadVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // uv
+			quadVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // scale
+			quadVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // dimension
+			quadVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // rotation / index	
+			quadVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR); // color
+			quadVD->create();
+			//renderContext->vdStructs[VD_QUAD].vertexSize = 60;
+			//renderContext->vdStructs[VD_QUAD].declaration = particleVD;
+			renderContext->vertexDeclarations[VD_QUAD] = quadVD;
 		}
 
 		void getRenderStates() {
@@ -229,9 +236,9 @@ namespace ds {
 			for (int i = 0; i < MAX_BLENDSTATES; ++i) {
 				renderContext->blendStates[i].flag = 0;
 			}
-			for (int i = 0; i < MAX_VERDECLS; ++i) {
-				renderContext->vdStructs[i].vertexSize = 0;
-			}
+			//for (int i = 0; i < MAX_VERDECLS; ++i) {
+				//renderContext->vdStructs[i].vertexSize = 0;
+			//}
 			// create the internal device
 			renderer::initializeDevice(settings);
 			int vp = renderer::createViewport(settings.screenWidth, settings.screenHeight, settings.screenWidth, settings.screenHeight);
@@ -307,10 +314,13 @@ namespace ds {
 				delete renderContext->shaders[i];
 			}
 			LOG << "Releasing vertex declarations";
-			for (int i = 0; i < MAX_VERDECLS; ++i) {
-				if (renderContext->vdStructs[i].vertexSize != 0) {
-					delete renderContext->vdStructs[i].declaration;
-				}
+			//for (int i = 0; i < MAX_VERDECLS; ++i) {
+				//if (renderContext->vdStructs[i].vertexSize != 0) {
+					//delete renderContext->vdStructs[i].declaration;
+				//}
+			//}
+			for (std::map<int, VertexDeclaration*>::iterator it = renderContext->vertexDeclarations.begin(), itEnd = renderContext->vertexDeclarations.end(); it != itEnd; ++it) {
+				delete it->second;
 			}
 			if (renderContext->descriptorData.buffer != 0) {
 				delete[] renderContext->descriptorData.buffer;
@@ -458,8 +468,8 @@ namespace ds {
 			return renderContext->camera;
 		}
 
-		VDStruct& getVertexDeclaration(int declarationType) {
-			return renderContext->vdStructs[declarationType];
+		VertexDeclaration* getVertexDeclaration(int declarationType) {
+			return renderContext->vertexDeclarations[declarationType];
 		}
 
 		// FIXME: add name as parameter
@@ -891,8 +901,8 @@ namespace ds {
 			sprites::flush();
 			fillBuffer(renderContext->renderTargetQuad.vertexBufferID, renderContext->renderTargetQuad.vertices, 4);
 			const VertexBuffer& vb = renderContext->vertexBuffers[renderContext->renderTargetQuad.vertexBufferID];
-			VDStruct& vds = renderContext->vdStructs[vb.vertexDeclaration];
-			HR(renderContext->device->SetVertexDeclaration(renderContext->vdStructs[vb.vertexDeclaration].declaration->get()));
+			VertexDeclaration* vds = renderContext->vertexDeclarations[vb.vertexDeclaration];
+			HR(renderContext->device->SetVertexDeclaration(vds->get()));
 
 			const IndexBuffer& ib = renderContext->indexBuffers[renderContext->renderTargetQuad.indexBufferID];
 			HR(renderContext->device->SetIndices(ib.buffer));
@@ -930,8 +940,8 @@ namespace ds {
 			sprites::flush();
 			fillBuffer(renderContext->renderTargetQuad.vertexBufferID, renderContext->renderTargetQuad.vertices, 4);
 			const VertexBuffer& vb = renderContext->vertexBuffers[renderContext->renderTargetQuad.vertexBufferID];
-			VDStruct& vds = renderContext->vdStructs[vb.vertexDeclaration];
-			HR(renderContext->device->SetVertexDeclaration(renderContext->vdStructs[vb.vertexDeclaration].declaration->get()));
+			VertexDeclaration* vds = renderContext->vertexDeclarations[vb.vertexDeclaration];
+			HR(renderContext->device->SetVertexDeclaration(vds->get()));
 
 			const IndexBuffer& ib = renderContext->indexBuffers[renderContext->renderTargetQuad.indexBufferID];
 			HR(renderContext->device->SetIndices(ib.buffer));
@@ -976,8 +986,8 @@ namespace ds {
 			}
 			// FIXME: check if we need to switch this			
 			const VertexBuffer& vb = renderContext->vertexBuffers[vertexBufferID];
-			VDStruct& vds = renderContext->vdStructs[vb.vertexDeclaration];
-			HR(renderContext->device->SetVertexDeclaration(renderContext->vdStructs[vb.vertexDeclaration].declaration->get()));
+			VertexDeclaration* vds = renderContext->vertexDeclarations[vb.vertexDeclaration];
+			HR(renderContext->device->SetVertexDeclaration(vds->get()));
 
 			const IndexBuffer& ib = renderContext->indexBuffers[indexBufferID];
 			HR(renderContext->device->SetIndices(ib.buffer));
