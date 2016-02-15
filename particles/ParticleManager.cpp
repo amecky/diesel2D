@@ -270,6 +270,7 @@ namespace ds {
 	}
 
 	void ParticleManager::init(const Descriptor& desc) {
+		LOG << "initializing particlemanager";
 		bufferIndex = renderer::createVertexBuffer(VD_PARTICLE, MAX_PARTICLES * 4, true);
 		indexBufferIndex = renderer::getQuadIndexBufferIndex();
 		descriptorIndex = renderer::addDescriptor(desc);

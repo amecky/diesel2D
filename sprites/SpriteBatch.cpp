@@ -29,7 +29,7 @@ const float VP_ARRAY[] = {
 // ------------------------------------------------------------
 namespace sprites {
 
-	const int MAX_SPRITES = 8192;
+	const int MAX_SPRITES = 16386;
 
 	struct SpriteBatchContext {
 

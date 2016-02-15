@@ -277,7 +277,7 @@ namespace ds {
 			createBasicVertexDeclarations();
 			renderContext->device->GetRenderTarget(0, &renderContext->backBuffer);
 			// create default buffers
-			renderContext->quadIndexBufferIndex = renderer::createQuadIndexBuffer(8192);
+			renderContext->quadIndexBufferIndex = renderer::createQuadIndexBuffer(16386);
 			buildRenderTargetQuad();
 		}
 
@@ -712,10 +712,19 @@ namespace ds {
 		}
 
 		int createVertexBuffer(int vertexDeclaration, int size, bool dynamic) {
+			for (size_t i = 0; i < renderContext->vertexBuffers.size(); ++i) {
+				const VertexBuffer& buffer = renderContext->vertexBuffers[i];
+				if (buffer.vertexDeclaration == vertexDeclaration && buffer.size >= size && buffer.dynamic == dynamic) {
+					LOG << "found matching vertex buffer - id: " << i;
+					return i;
+				}
+			}
 			int id = renderContext->vertexBuffers.size();
 			VertexBuffer vb;
+			vb.dynamic = dynamic;
 			buffer::create(vb, vertexDeclaration, size, dynamic);
 			renderContext->vertexBuffers.add(vb);
+			LOG << "new vertex buffer created - id: " << id;
 			return id;
 		}
 
@@ -736,6 +745,7 @@ namespace ds {
 		int createIndexBuffer(int size, bool dynamic) {
 			int id = renderContext->indexBuffers.size();
 			IndexBuffer ib;
+			ib.dynamic = dynamic;
 			buffer::create(ib, size);
 			renderContext->indexBuffers.add(ib);
 			return id;

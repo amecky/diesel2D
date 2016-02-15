@@ -12,6 +12,8 @@ namespace ds {
 			VDStruct vd = renderer::getVertexDeclaration(vertexType);
 			buffer.vertexSize = vd.vertexSize;
 			buffer.vertexDeclaration = vertexType;
+			buffer.dynamic = dynamic;
+			buffer.size = size;
 			D3DPOOL pool = D3DPOOL_DEFAULT;
 			DWORD usage = D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC;
 			LOG << "creating new vertex buffer - size: " << size << " vd size: " << buffer.vertexSize;

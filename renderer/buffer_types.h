@@ -11,8 +11,9 @@ namespace ds {
 		int size;
 		int vertexSize;
 		int num;
+		bool dynamic;
 
-		VertexBuffer() : buffer(0), size(0), vertexDeclaration(-1) , num(0) {}
+		VertexBuffer() : buffer(0), size(0), vertexDeclaration(-1) , num(0) , dynamic(false) {}
 
 	};
 
@@ -21,6 +22,9 @@ namespace ds {
 		LPDIRECT3DINDEXBUFFER9 buffer;
 		int size;
 		int num;
+		bool dynamic;
+
+		IndexBuffer() : buffer(0), size(0), num(0), dynamic(false) {}
 	};
 
 	namespace buffer {
