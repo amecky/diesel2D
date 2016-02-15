@@ -25,6 +25,14 @@ void VertexDeclaration::addElement(const VDTYPE& type,const VDUSAGE& usage) {
 	m_DecElements.push_back(e);
 }
 
+void VertexDeclaration::create(VDElement* elements) {
+	VDElement* tmp = elements;
+	while (tmp->type != VT_EOL) {
+		addElement(tmp->type, tmp->usage);
+		++tmp;
+	}
+	create();
+}
 
 void VertexDeclaration::create() {
 	if ( m_Decl == 0 ) {

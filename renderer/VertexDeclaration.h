@@ -9,19 +9,22 @@
 namespace ds {
 
 enum VDUSAGE {
-	VDU_POSITION,VDU_NORMAL,VDU_COLOR,VDU_TEXCOORD,VDU_POSITIONT,VDU_BINORMAL,VDU_TANGENT
+	VDU_POSITION,VDU_NORMAL,VDU_COLOR,VDU_TEXCOORD,VDU_POSITIONT,VDU_BINORMAL,VDU_TANGENT,VDU_EOL
 };
 
 enum VDTYPE {
-	VT_FLOAT4,VT_FLOAT3,VT_COLOR,VT_FLOAT2
+	VT_FLOAT4,VT_FLOAT3,VT_COLOR,VT_FLOAT2,VT_EOL
 };
-
-class VertexDeclaration {
 
 struct VDElement {
 	VDTYPE type;
 	VDUSAGE usage;
+
+	VDElement() : type(VT_EOL), usage(VDU_EOL) {}
+	VDElement(VDTYPE t, VDUSAGE u) : type(t), usage(u) {}
 };
+
+class VertexDeclaration {
 
 typedef Array<VDElement> VDElements;
 
@@ -30,6 +33,7 @@ public:
 	VertexDeclaration();
 	~VertexDeclaration(void);
 	void addElement(const VDTYPE& type,const VDUSAGE& usage);
+	void create(VDElement* elements);
 	void create();
 	IDirect3DVertexDeclaration9* get() { 
 		return m_Decl; 

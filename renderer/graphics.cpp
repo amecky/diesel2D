@@ -94,71 +94,73 @@ namespace ds {
 
 	namespace renderer {
 
+		void createVertexDeclaration(int id, VDElement* elements) {
+			VertexDeclaration* vd = new VertexDeclaration;
+			vd->create(elements);
+			renderContext->vertexDeclarations[id] = vd;
+		}
+
 		// -------------------------------------------------------
 		// Create basic vertex declarations
 		// -------------------------------------------------------
 		void createBasicVertexDeclarations() {
 			// transformed texture color
-			VertexDeclaration* vd = new VertexDeclaration;
-			vd->addElement(ds::VT_FLOAT4, ds::VDU_POSITIONT);
-			vd->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD);
-			vd->addElement(ds::VT_FLOAT4, ds::VDU_COLOR);
-			vd->create();
-			renderContext->vertexDeclarations[VD_TTC] = vd;
-			//renderContext->vdStructs[VD_TTC].vertexSize = 40;
-			//renderContext->vdStructs[VD_TTC].declaration = vd;
+			VDElement ttcDef[] = {
+				{ VT_FLOAT4, VDU_POSITIONT },
+				{ VT_FLOAT2, VDU_TEXCOORD },
+				{ VT_FLOAT4, VDU_COLOR },
+				{ VT_EOL, VDU_EOL }
+			};
+			createVertexDeclaration(VD_TTC, ttcDef);
 			// position tangent binormal normal texture coords
-			VertexDeclaration* ptbntVD = new VertexDeclaration;
-			ptbntVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION);
-			ptbntVD->addElement(ds::VT_FLOAT3, ds::VDU_TANGENT);
-			ptbntVD->addElement(ds::VT_FLOAT3, ds::VDU_BINORMAL);
-			ptbntVD->addElement(ds::VT_FLOAT3, ds::VDU_NORMAL);
-			ptbntVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD);
-			ptbntVD->create();
-			//renderContext->vdStructs[VD_PTNBT].vertexSize = 56;
-			//renderContext->vdStructs[VD_PTNBT].declaration = ptbntVD;
-			renderContext->vertexDeclarations[VD_PTNBT] = ptbntVD;
-
-			VertexDeclaration* pntcVD = new VertexDeclaration;
-			pntcVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION);
-			pntcVD->addElement(ds::VT_FLOAT3, ds::VDU_NORMAL);
-			pntcVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD);
-			pntcVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR);
-			pntcVD->create();
-			//renderContext->vdStructs[VD_PNTC].vertexSize = 48;
-			//renderContext->vdStructs[VD_PNTC].declaration = pntcVD;
-			renderContext->vertexDeclarations[VD_PNTC] = pntcVD;
-
-			VertexDeclaration* ptcVD = new VertexDeclaration;
-			ptcVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION);
-			ptcVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD);
-			ptcVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR);
-			ptcVD->create();
-			//renderContext->vdStructs[VD_PTC].vertexSize = 36;
-			//renderContext->vdStructs[VD_PTC].declaration = ptcVD;
-			renderContext->vertexDeclarations[VD_PTC] = ptcVD;
-
-			VertexDeclaration* pncVD = new VertexDeclaration;
-			pncVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION);
-			pncVD->addElement(ds::VT_FLOAT3, ds::VDU_NORMAL);
-			pncVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR);
-			pncVD->create();
-			//renderContext->vdStructs[VD_PNC].vertexSize = 40;
-			//renderContext->vdStructs[VD_PNC].declaration = pncVD;
-			renderContext->vertexDeclarations[VD_PNC] = pncVD;
-
-			VertexDeclaration* quadVD = new VertexDeclaration;
-			quadVD->addElement(ds::VT_FLOAT3, ds::VDU_POSITION); // pos
-			quadVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // uv
-			quadVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // scale
-			quadVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // dimension
-			quadVD->addElement(ds::VT_FLOAT2, ds::VDU_TEXCOORD); // rotation / index	
-			quadVD->addElement(ds::VT_FLOAT4, ds::VDU_COLOR); // color
-			quadVD->create();
-			//renderContext->vdStructs[VD_QUAD].vertexSize = 60;
-			//renderContext->vdStructs[VD_QUAD].declaration = particleVD;
-			renderContext->vertexDeclarations[VD_QUAD] = quadVD;
+			VDElement ptbntDef[] = {
+				{ VT_FLOAT3, VDU_POSITION },
+				{ VT_FLOAT3, VDU_TANGENT },
+				{ VT_FLOAT3, VDU_BINORMAL },
+				{ VT_FLOAT3, VDU_NORMAL },
+				{ VT_FLOAT2, VDU_TEXCOORD },
+				{ VT_EOL, VDU_EOL }
+			};
+			createVertexDeclaration(VD_PTNBT, ptbntDef);
+			// position normal texture color
+			VDElement pntcDef[] = {
+				{ VT_FLOAT3, VDU_POSITION },
+				{ VT_FLOAT3, VDU_NORMAL },
+				{ VT_FLOAT2, VDU_TEXCOORD },
+				{ VT_FLOAT4, VDU_COLOR },
+				{ VT_EOL,VDU_EOL }
+			};
+			createVertexDeclaration(VD_PNTC, pntcDef);
+			// position texture color
+			VDElement ptcDef[] = {
+				{ VT_FLOAT3, VDU_POSITION },
+				{ VT_FLOAT2, VDU_TEXCOORD },
+				{ VT_FLOAT4, VDU_COLOR },
+				{ VT_EOL, VDU_EOL }
+			};
+			createVertexDeclaration(VD_PTC, ptcDef);
+			// position normal color
+			VDElement pncDef[] = {
+				{ VT_FLOAT3, VDU_POSITION },
+				{ VT_FLOAT3, VDU_NORMAL },
+				{ VT_FLOAT4, VDU_COLOR },
+				{ VT_EOL, VDU_EOL }
+			};
+			createVertexDeclaration(VD_PNC, pncDef);
+			// quad
+			VDElement quadDef[] = {
+				{ VT_FLOAT3, VDU_POSITION }, // position
+				{ VT_FLOAT2, VDU_TEXCOORD }, // uv
+				{ VT_FLOAT2, VDU_TEXCOORD }, // scale
+				{ VT_FLOAT2, VDU_TEXCOORD }, // dimension
+				{ VT_FLOAT2, VDU_TEXCOORD }, // rotation / index	
+				{ VT_FLOAT4, VDU_COLOR }, // color
+				{ VT_EOL, VDU_EOL }
+			};
+			createVertexDeclaration(VD_QUAD, quadDef);
 		}
+
+		
 
 		void getRenderStates() {
 			//DWORD value;
