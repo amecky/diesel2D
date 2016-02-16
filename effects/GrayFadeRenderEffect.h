@@ -31,7 +31,7 @@ namespace ds {
 		void render();
 		void onActivation();
 		void setFactor(float f);
-		const DynamicGameSettings* getSettings() const {
+		DynamicGameSettings* getSettings() {
 			return &_settings;
 		}
 	private:

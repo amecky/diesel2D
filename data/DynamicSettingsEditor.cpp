@@ -2,7 +2,12 @@
 
 namespace ds {
 
-DynamicSettingsEditor::DynamicSettingsEditor(DynamicGameSettings* settings) : AssetEditor("DynamicSettingsEditor",settings) , _settings(settings) , _state(1) , _position(10,750) {
+DynamicSettingsEditor::DynamicSettingsEditor(DynamicGameSettings* settings) 
+	: AssetEditor("DynamicSettingsEditor",settings) , _settings(settings) , _state(1) , _position(10,750) , _shortcut("SET") {
+}
+
+DynamicSettingsEditor::DynamicSettingsEditor(const char* shortcut, DynamicGameSettings* settings)
+	: AssetEditor("DynamicSettingsEditor", settings), _settings(settings), _state(1), _position(10, 750), _shortcut(shortcut) {
 }
 
 DynamicSettingsEditor::~DynamicSettingsEditor() {

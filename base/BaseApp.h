@@ -17,7 +17,6 @@ class ParticleManager;
 class SpriteTemplatesEditor;
 class World;
 class GameConsole;
-class AssetEditorManager;
 class BitmapFontsDialog;
 class ParticlesEditState;
 class DialogEditorState;
@@ -130,7 +129,7 @@ protected:
 	ParticleManager* particles;
 	World* world;	
 	GameConsole* console;
-	AssetEditorManager* assetEditors;
+	//AssetEditorManager* assetEditors;
 private:
 	void saveHTMLProfilingReport();
 	void loadSettings();

@@ -29,7 +29,7 @@ namespace ds {
 			_active = false;
 			onDeactivation();
 		}
-		virtual const DynamicGameSettings* getSettings() const = 0;
+		virtual DynamicGameSettings* getSettings() = 0;
 	private:
 		bool _active;
 	};
@@ -60,7 +60,7 @@ namespace ds {
 		void render();
 		void onActivation() {}
 		void setFactor(float f);
-		const DynamicGameSettings* getSettings() const {
+		DynamicGameSettings* getSettings() {
 			return &_settings;
 		}
 	private:

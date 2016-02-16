@@ -49,7 +49,7 @@ public:
 	void start();
 	void render();
 
-	const DynamicGameSettings* getSettings() const {
+	DynamicGameSettings* getSettings() {
 		return &_settings;
 	}
 private:

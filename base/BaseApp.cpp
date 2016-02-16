@@ -66,7 +66,7 @@ BaseApp::BaseApp() {
 	gui = new DialogManager();
 	world = new World();
 	console = new GameConsole();
-	assetEditors = new AssetEditorManager();
+	editor::init();
 	//_templatesEditor = 0;
 	_perfHUDPos = v2(10, 710);
 	_prepared = false;
@@ -94,7 +94,7 @@ BaseApp::~BaseApp() {
 	LOG << "Destructing all elements";
 	sprites::shutdown();
 	repository::shutdown();
-	delete assetEditors;
+	editor::shutdown();
 	if (_bitmapFontEditor != 0) {
 		delete _bitmapFontEditor;
 	}
@@ -215,16 +215,16 @@ void BaseApp::loadSettings() {
 	bool initialize_editor = false;
 	reader.get_bool(root, "initialize_editor", &initialize_editor);
 	if (initialize_editor) {
-		assetEditors->add(_stateMachine);
+		editor::add(_stateMachine);
 		_bitmapFontEditor = new BitmapFontsDialog();
 		_spriteTemplatesEditor = new SpriteTemplatesEditor(renderer::getSpriteTemplates());
 		_particlesEditor = new ParticlesEditState(particles);
 		_dialogEditor = new DialogEditorState(gui);
 
-		assetEditors->add(_bitmapFontEditor);
-		assetEditors->add(_spriteTemplatesEditor);
-		assetEditors->add(_particlesEditor);
-		assetEditors->add(_dialogEditor);
+		editor::add(_bitmapFontEditor);
+		editor::add(_spriteTemplatesEditor);
+		editor::add(_particlesEditor);
+		editor::add(_dialogEditor);
 	}
 
 	loadShaders(reader);
@@ -441,7 +441,7 @@ void BaseApp::buildFrame() {
 		}
 		{
 			ZoneTracker r("RENDER_ASSET_EDITORS");
-			assetEditors->render();
+			editor::render();
 		}
 		if (m_DebugInfo.performanceOverlay) {
 			showPerformceOverlay(&_perfHUDPos);
@@ -565,7 +565,7 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 		m_DebugInfo.performanceOverlay = !m_DebugInfo.performanceOverlay;
 	}
 	else if (virtualKey == VK_F6) {
-		assetEditors->toggle();
+		editor::toggle();
 	}
 	else if (virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
 		m_DebugInfo.debugRenderer = true;
