@@ -62,23 +62,5 @@ namespace ds {
 		void shutdown();
 
 	}
-	/*
-	class AssetEditorManager {
-
-	public:
-		AssetEditorManager();
-		~AssetEditorManager();
-		void add(AssetEditor* editor);
-		void addSettingsEditor(const char* shortcut, DynamicGameSettings* settings);
-		void deactivateAll();
-		void render();
-		void toggle();
-	private:
-		bool _active;
-		int _current;
-		Array<AssetEditor*> _editors;
-		v2 _position;
-	};
-	*/
 
 }

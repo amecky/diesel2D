@@ -53,6 +53,8 @@ public:
 		return &_settings;
 	}
 private:
+	float computeGaussian(float n);
+	void createBlurParameters(float dx, float dy, v2* sampleOffsets, float* weights, int sampleCount);
 	BloomSettings _settings;
 	RTID _baseRT;
 	RTID _bloomRT;
@@ -67,6 +69,13 @@ private:
 	int m_BloomShaderID;
 	int m_BlurHShaderID;
 	int m_BloomCombineShaderID;
+
+	v2 _verticalOffset[15];
+	float _verticalWeights[15];
+
+	v2 _horizonzalOffset[15];
+	float _horizonzalWeights[15];
+
 };
 
 
