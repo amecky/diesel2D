@@ -1171,50 +1171,40 @@ namespace ds {
 		// ---------------------------------------------------------
 		RTID createRenderTarget(const Color& clearColor) {
 			int tid = renderContext->textures.size();
-			if (tid != -1) {
-				RenderTarget rt;// = renderContext->renderTargets[id];				
-				// make sure it is not used so far
-				rt.clearColor = clearColor;
-				HR(D3DXCreateRenderToSurface(renderContext->device, renderContext->viewportWidth, renderContext->viewportHeight, D3DFMT_A8R8G8B8, false, D3DFMT_UNKNOWN, &rt.rts));
-				HR(renderContext->device->CreateTexture(renderContext->viewportWidth,renderContext->viewportHeight,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&rt.texture,NULL));				
-				TextureAsset* t = &renderContext->textures[tid];
-				t->height = renderContext->viewportHeight;
-				t->width = renderContext->viewportWidth;
-				t->texture = rt.texture;
-				rt.texture->GetSurfaceLevel(0, &rt.surface);
-				rt.textureID = tid;
-				int id = renderContext->renderTargets.size();
-				renderContext->renderTargets.add(rt);
-				LOG << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << renderContext->viewportWidth << " height: " << renderContext->viewportHeight;
-				return RTID(tid,id);
-			}
-			else {
-				LOGE << "Cannot create rendertarget - No more texture slots available";
-				return INVALID_RENDER_TARGET;
-			}
+			RenderTarget rt;// = renderContext->renderTargets[id];				
+			// make sure it is not used so far
+			rt.clearColor = clearColor;
+			HR(D3DXCreateRenderToSurface(renderContext->device, renderContext->viewportWidth, renderContext->viewportHeight, D3DFMT_A8R8G8B8, false, D3DFMT_UNKNOWN, &rt.rts));
+			HR(renderContext->device->CreateTexture(renderContext->viewportWidth,renderContext->viewportHeight,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&rt.texture,NULL));				
+			TextureAsset t;
+			t.height = renderContext->viewportHeight;
+			t.width = renderContext->viewportWidth;
+			t.texture = rt.texture;
+			rt.texture->GetSurfaceLevel(0, &rt.surface);
+			rt.textureID = tid;
+			int id = renderContext->renderTargets.size();
+			renderContext->renderTargets.add(rt);
+			renderContext->textures.push_back(t);
+			LOG << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << renderContext->viewportWidth << " height: " << renderContext->viewportHeight;
+			return RTID(tid,id);
 		}
 
 		RTID createRenderTarget(float width, float height, const Color& clearColor) {			
 			int tid = renderContext->textures.size();
-			if ( tid != -1 ) {
-				RenderTarget renderTarget;
-				renderTarget.clearColor = clearColor;
-				D3DXCreateRenderToSurface( renderContext->device,width,height,D3DFMT_A8R8G8B8,false,D3DFMT_UNKNOWN ,&renderTarget.rts);
-				renderContext->device->CreateTexture(width,height,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&renderTarget.texture,NULL);				
-				TextureAsset* t = &renderContext->textures[tid];
-				t->height = height;
-				t->width = width;
-				t->texture = renderTarget.texture;
-				renderTarget.texture->GetSurfaceLevel(0,&renderTarget.surface);
-				int id = renderContext->renderTargets.size();
-				renderContext->renderTargets.add(renderTarget);
-				LOG << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << width << " height: " << height;
-				return RTID(tid, id);
-			}
-			else {
-				LOGE << "Cannot create rendertarget - No more texture slots available";
-				return INVALID_RENDER_TARGET;
-			}			
+			RenderTarget renderTarget;
+			renderTarget.clearColor = clearColor;
+			D3DXCreateRenderToSurface( renderContext->device,width,height,D3DFMT_A8R8G8B8,false,D3DFMT_UNKNOWN ,&renderTarget.rts);
+			renderContext->device->CreateTexture(width,height,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&renderTarget.texture,NULL);				
+			TextureAsset t;
+			t.height = height;
+			t.width = width;
+			t.texture = renderTarget.texture;
+			renderTarget.texture->GetSurfaceLevel(0,&renderTarget.surface);
+			int id = renderContext->renderTargets.size();
+			renderContext->renderTargets.add(renderTarget);
+			renderContext->textures.push_back(t);
+			LOG << "Rendertarget created - id: " << id << " texture id: " << tid << " width: " << width << " height: " << height;
+			return RTID(tid, id);
 		}
 
 		// -------------------------------------------------------
@@ -1282,9 +1272,8 @@ namespace ds {
 		// -------------------------------------------------------
 		int loadTexture(const char* dirName, const char* name) {
 			int id = renderContext->textures.size();
-			XASSERT(id != -1, "No more texture slots available");
-			TextureAsset* tr = &renderContext->textures[id];
-			tr->name = string::murmur_hash(name);
+			TextureAsset tr;
+			tr.name = string::murmur_hash(name);
 			int lw = D3DX_DEFAULT;
 			int lh = D3DX_DEFAULT;
 			D3DXIMAGE_INFO imageInfo;
@@ -1295,13 +1284,14 @@ namespace ds {
 			int fileSize = -1;			
 			char* data = repository::load(fileName,&fileSize, repository::FT_BINARY);
 			assert(fileSize != -1);
-			HR(D3DXCreateTextureFromFileInMemoryEx(renderContext->device, data, fileSize, D3DX_DEFAULT, D3DX_DEFAULT, 1, 0, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
+			HR(D3DXCreateTextureFromFileInMemoryEx(renderContext->device, data, fileSize, D3DX_DEFAULT, D3DX_DEFAULT, 1, 0, D3DFMT_A8B8G8R8, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr.texture));
 			delete[] data;
-			assert(tr->texture != 0);
+			assert(tr.texture != 0);
 			//HR(D3DXCreateTextureFromFileEx(renderContext->device, fileName, 0, 0, 1, 0,
 			//	D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_FILTER_NONE, D3DX_DEFAULT, 0x000000, &imageInfo, NULL, &tr->texture));
-			tr->width = imageInfo.Width;
-			tr->height = imageInfo.Height;
+			tr.width = imageInfo.Width;
+			tr.height = imageInfo.Height;
+			renderContext->textures.push_back(tr);
 			LOG << "ID: " << id << " Width: " << imageInfo.Width << " Height: " << imageInfo.Height << " mip levels " << imageInfo.MipLevels << " Format: " << imageInfo.Format;
 			return id;			
 		}
