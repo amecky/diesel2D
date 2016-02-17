@@ -371,6 +371,13 @@ namespace ds {
 	}
 
 	// -----------------------------------------------------
+	// set type
+	// -----------------------------------------------------
+	void World::setType(SID sid,int type) {
+		return m_Data.setType(sid,type);
+	}
+
+	// -----------------------------------------------------
 	// find by type
 	// -----------------------------------------------------
 	int World::find_by_type(int type, SID* ids, int max) const {

@@ -17,6 +17,7 @@ namespace ds {
 			_max = descriptor.maxItems;
 			_bufferIndex = renderer::createVertexBuffer(descriptor.vertexDeclaration, descriptor.maxItems, true);
 			_descriptorID = descriptor.descriptorID;
+			_index = 0;
 		}
 		~BatchBuffer() {
 			gDefaultMemory->deallocate(_data);

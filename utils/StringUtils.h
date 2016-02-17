@@ -50,6 +50,8 @@ namespace string {
 
 	void formatInt(int value,std::string& str);
 
+	void format_number(int n, char * out, const char delimiter = '.');
+
 	int extract_used_characters(const char* text, char* array, int max);
 
 	void formatTime(int minutes,int seconds,std::string& str);

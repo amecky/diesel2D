@@ -40,6 +40,12 @@ namespace ds {
 			return types[in.index];
 		}
 
+		void setType(SID sid,int type) {
+			SpriteArrayIndex &in = indices[sid];
+			assert(in.index != USHRT_MAX);
+			types[in.index] = type;
+		}
+
 		const bool contains(SID sid) const {
 			SpriteArrayIndex& in = indices[sid];
 			return in.index != USHRT_MAX;

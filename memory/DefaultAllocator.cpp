@@ -1,5 +1,6 @@
 #include "DefaultAllocator.h"
 #include "..\utils\Log.h"
+#include "..\utils\StringUtils.h"
 
 namespace ds {
 
@@ -7,6 +8,7 @@ DefaultAllocator* gDefaultMemory;
 	
 DefaultAllocator::DefaultAllocator(uint32 size) : _capacity(size) {
 	_buffer = (char*)malloc(sizeof(char) * size);
+	LOG << "allocated: " << _capacity;
 	_headers = (Header*)malloc(sizeof(Header) * 32);
 	_num = 0;
 	_header_capacity = 32;
@@ -56,6 +58,7 @@ void* DefaultAllocator::allocate(uint32 size, uint32 align) {
 			_headers = tmp;
 		}
 		_headers[_num++] = h;
+		assert(h.index + size < _capacity);
 		void* p = _buffer + h.index;
 		return p;
 	}
@@ -124,11 +127,17 @@ void DefaultAllocator::debug() {
 	//}
 }
 
+
+
 void DefaultAllocator::save(const ReportWriter& writer) {
 	const char* HEADERS[] = { "Index", "Size", "Original Size", "Block Index", "Used" };
 	writer.startBox("Memory Dump");
 	MemoryInfo info = get_info();
-	//fprintf(f, "<h2>Allocated memory: %d in %d blocks</h2>\n", info.allocated, info.blocks);
+	char nn[64];
+	string::format_number(info.allocated, nn);
+	char buffer[64];
+	sprintf_s(buffer,64, "Allocated memory: %s in %d blocks", nn, info.blocks);
+	writer.addSubHeader(buffer);
 	writer.startTable(HEADERS, 5);
 	for (int i = 0; i < _num; ++i) {
 		const Header& h = _headers[i];

@@ -33,7 +33,7 @@ BaseApp::BaseApp() {
 	_spriteTemplatesEditor = 0;
 	_particlesEditor = 0;
 	_dialogEditor = 0;
-	gDefaultMemory = new DefaultAllocator();
+	gDefaultMemory = new DefaultAllocator(256 * 1024 * 1024);
 	perf::init();
 	repository::initialize(repository::RM_DEBUG);
 	//gBlockMemory = new DataBlockAllocator();

@@ -28,7 +28,7 @@ struct Header {
 class DefaultAllocator : public Allocator {
 
 public:
-	DefaultAllocator(uint32 size = 4 * 1024 * 1024);
+	DefaultAllocator(uint32 size = 256 * 1024 * 1024);
 	~DefaultAllocator();
 	void* allocate(uint32 size, uint32 align = 0 );
 	void deallocate(void *p);

@@ -272,6 +272,25 @@ namespace ds {
 			return formatInt(value, str, length);
 		}
 
+		void format_number(int n, char * out,const char delimiter) {
+			int digit = 0;
+			int out_index = 0;
+			for (int i = n; i != 0; i /= 10) {
+				digit = i % 10;
+
+				if ((out_index + 1) % 4 == 0) {
+					out[out_index++] = delimiter;
+				}
+				out[out_index++] = digit + '0';
+			}
+			out[out_index] = '\0';
+			for (int i = 0; i < out_index / 2; ++i) {
+				char c = out[out_index - i - 1];
+				out[out_index - i - 1] = out[i];
+				out[i] = c;
+			}
+		}
+
 		IdString murmur_hash(const char* text) {
 			return murmur_hash(text, strlen(text), 0);
 		}

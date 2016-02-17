@@ -31,6 +31,7 @@ namespace ds {
 			_systems[i] = 0;
 		}
 		delete[] _systems;
+		delete _particles;
 	}
 
 	NewParticleSystem* ParticleManager::create(int id, const char* name) {
