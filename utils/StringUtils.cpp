@@ -291,6 +291,12 @@ namespace ds {
 			}
 		}
 
+		void file_name(const char* file, char* name) {
+			char n[256];
+			char e[4];
+			_splitpath(file, 0, 0, name, e);
+		}
+
 		IdString murmur_hash(const char* text) {
 			return murmur_hash(text, strlen(text), 0);
 		}

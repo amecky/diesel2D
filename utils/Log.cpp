@@ -13,7 +13,6 @@ void file_name(const char* file, char* name) {
 	char n[256];
 	char e[4];
 	_splitpath(file,0,0,name,e);
-	//sprintf_s(name, 64, "%s%s",n,e);
 }
 
 void ConsoleOutputHandler::write(const char* message) {

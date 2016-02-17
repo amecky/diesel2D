@@ -97,10 +97,12 @@ JSONReader::JSONReader() : _text(0) {
 // -------------------------------------------
 JSONReader::~JSONReader() {
 	if (_category_buffer.data != 0) {
-		gDefaultMemory->deallocate(_category_buffer.data);
+		//gDefaultMemory->deallocate(_category_buffer.data);
+		DEALLOC(_category_buffer.data);
 	}
 	if (_data_buffer.data != 0) {
-		gDefaultMemory->deallocate(_data_buffer.data);
+		//gDefaultMemory->deallocate(_data_buffer.data);
+		DEALLOC(_data_buffer.data);
 	}
 	if (_text != 0) {
 		delete[] _text;

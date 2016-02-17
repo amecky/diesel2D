@@ -56,6 +56,8 @@ namespace string {
 
 	void formatTime(int minutes,int seconds,std::string& str);
 
+	void file_name(const char* file, char* name);
+
 	IdString murmur_hash(const char* text);
 
 	IdString murmur_hash(const void * key, int len, unsigned int seed);

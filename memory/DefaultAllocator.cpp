@@ -30,6 +30,58 @@ DefaultAllocator::~DefaultAllocator() {
 	free(_headers);
 }
 
+void* DefaultAllocator::allocate(uint32 size, const char* file, int line) {
+	char buffer[128];
+	string::file_name(file, buffer);
+	//LOG << "File: " << buffer << " line: " << line << " size: " << size;
+	AllocInfo info;
+	info.line = line;
+	info.size = size;
+	info.reuse = false;
+	sprintf_s(info.name, 48, buffer);
+	uint32 s = size;
+	int idx = -1;
+	for (int i = 0; i < _num; ++i) {
+		const Header& h = _headers[i];
+		if (!h.used && h.size >= s && idx == -1) {
+			idx = i;
+		}
+	}
+	if (idx == -1) {
+		info.reuse = false;
+		Header h;
+		h.used = true;
+		h.size = s;
+		h.originalSize = s;
+		h.index = 0;
+		if (_num > 0) {
+			const Header& last = _headers[_num - 1];
+			h.index = last.index + last.size;
+		}
+		if (_num + 1 > _header_capacity) {
+			int sz = _header_capacity * 2 + 16;
+			Header* tmp = (Header*)malloc(sizeof(Header) * sz);
+			memcpy(tmp, _headers, sizeof(Header) * _num);
+			_header_capacity = sz;
+			free(_headers);
+			_headers = tmp;
+		}
+		_headers[_num++] = h;
+		assert(h.index + size < _capacity);
+		void* p = _buffer + h.index;
+		_infos.push_back(info);
+		return p;
+	}
+	else {
+		info.reuse = true;
+		Header& h = _headers[idx];
+		h.used = true;
+		void* p = _buffer + h.index;
+		_infos.push_back(info);
+		return p;
+	}
+}
+
 void* DefaultAllocator::allocate(uint32 size, uint32 align) {
 	uint32 s = size + align;
 	int idx = -1;
@@ -150,7 +202,23 @@ void DefaultAllocator::save(const ReportWriter& writer) {
 		writer.endRow();
 	}
 	writer.endTable();
+	const char* INFO_HEADERS[] = { "File", "Line", "Size", "Reuse" };
+	writer.startTable(INFO_HEADERS, 4);
+	for (int i = 0; i < _infos.size(); ++i) {
+		const AllocInfo& h = _infos[i];
+		writer.startRow();		
+		writer.addCell(h.name);
+		writer.addCell(h.line);
+		writer.addCell(h.size);
+		writer.addCell(h.reuse);
+		writer.endRow();
+	}
+	writer.endTable();
 	writer.endBox();
+}
+
+void DefaultAllocator::trace(int size, const char* file, int line) {
+	LOG << "File: " << file << " line: " << line << " size: " << size;
 }
 
 }
