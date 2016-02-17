@@ -423,6 +423,9 @@ namespace ds {
 
 		int addDescriptor(const Descriptor& desc);
 
+		//template<class T>
+		//BatchBuffer<T>* createBatchBuffer(const BatchBufferDescriptor& descriptor);
+
 		int createVertexBuffer(int vertexDeclaration, int size, bool dynamic = true);
 
 		VertexBuffer& getVertexBuffer(int index);

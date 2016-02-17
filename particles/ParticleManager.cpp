@@ -196,36 +196,32 @@ namespace ds {
 	void ParticleManager::render() {
 		sprites::flush();
 		int batchSize = 0;
-		begin();
+		_particles->begin();
 		ZoneTracker z("ParticleManager::render");
+		ParticleVertex v;
 		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
 			if (_systems[i] != 0) {
 				const ParticleArray& array = _systems[i]->getArray();
 				const Texture& t = _systems[i]->getTexture();
 				if (array.countAlive > 0) {
 					for (int j = 0; j < array.countAlive; ++j) {
-						if (m_ParticleIndex > MAX_PARTICLES) {
-							flush();
-						}
 						for (int k = 0; k < 4; ++k) {
-							particles[m_ParticleIndex].x = array.position[j].x;
-							particles[m_ParticleIndex].y = array.position[j].y;
-							particles[m_ParticleIndex].z = array.position[j].z;
-							particles[m_ParticleIndex].uv = t.getUV(k);
-							particles[m_ParticleIndex].scale = array.scale[j];
-							particles[m_ParticleIndex].dimension = t.dim;
-							particles[m_ParticleIndex].rotationIndex.x = array.rotation[j];
-							particles[m_ParticleIndex].rotationIndex.y = k;
-							particles[m_ParticleIndex].color = array.color[j];
-							++m_ParticleIndex;
+							v.x = array.position[j].x;
+							v.y = array.position[j].y;
+							v.z = array.position[j].z;
+							v.uv = t.getUV(k);
+							v.scale = array.scale[j];
+							v.dimension = t.dim;
+							v.rotationIndex.x = array.rotation[j];
+							v.rotationIndex.y = k;
+							v.color = array.color[j];
+							_particles->append(v);
 						}
 					}
 				}
 			}
 		}
-		if (m_ParticleIndex > 0) {
-			flush();
-		}
+		_particles->flush();
 		//renderer::setCurrentShader(renderer::getDefaultShaderID());
 	}
 
@@ -241,39 +237,13 @@ namespace ds {
 		}
 	}
 
-	// --------------------------------------------------------------------------
-	// begin rendering
-	// --------------------------------------------------------------------------
-	void ParticleManager::begin() {	
-		m_ParticleIndex = 0;
-	}
-
-	// --------------------------------------------------------------------------
-	// end rendering
-	// --------------------------------------------------------------------------
-	void ParticleManager::end() {
-		if (m_ParticleIndex > 0) {
-			ZoneTracker z("ParticleManager:end");
-			renderer::setWorldMatrix(matrix::m4identity());
-			renderer::fillBuffer(bufferIndex, particles, m_ParticleIndex);
-			renderer::draw(descriptorIndex, bufferIndex,m_ParticleIndex, indexBufferIndex);
-			renderer::drawCounter().particles += m_ParticleIndex;
-		}
-	}
-
-	// --------------------------------------------------------------------------
-	// flush
-	// --------------------------------------------------------------------------
-	void ParticleManager::flush() {
-		end();
-		begin();
-	}
-
 	void ParticleManager::init(const Descriptor& desc) {
 		LOG << "initializing particlemanager";
-		bufferIndex = renderer::createVertexBuffer(VD_QUAD, MAX_PARTICLES * 4, true);
-		indexBufferIndex = renderer::getQuadIndexBufferIndex();
-		descriptorIndex = renderer::addDescriptor(desc);
+		BatchBufferDescriptor descriptor;
+		descriptor.maxItems = MAX_PARTICLES * 4;
+		descriptor.vertexDeclaration = VD_QUAD;
+		descriptor.descriptorID = renderer::addDescriptor(desc);
+		_particles = new BatchBuffer<ParticleVertex>(descriptor);
 	}
 
 	

@@ -3,6 +3,7 @@
 #include "..\renderer\graphics.h"
 #include "..\ui\IMGUI.h"
 #include "ParticleSystemFactory.h"
+#include "..\renderer\BatchBuffer.h"
 
 namespace ds {
 
@@ -47,17 +48,10 @@ public:
 	}
 	virtual bool loadData(const JSONReader& loader);
 private:
-	void end();
-	void flush();
-	void begin();
 	int findGroup(uint32 id);
 	NewParticleSystem** _systems;
 	int m_BlendState;
-	int bufferIndex;
-	int indexBufferIndex;
-	int descriptorIndex;
-	ParticleVertex particles[MAX_PARTICLES * 4];
-	int m_ParticleIndex;
+	BatchBuffer<ParticleVertex>* _particles;
 	ParticleSystemFactory _factory;
 	Array<ParticleSystemGroup> _groups;
 };

@@ -8,21 +8,10 @@
 #include "..\math\GameMath.h"
 #include "..\renderer\VertexDeclaration.h"
 #include "..\renderer\graphics.h"
+#include "..\renderer\BatchBuffer.h"
 #include "..\math\matrix.h"
 
 namespace ds {
-
-const uint32 QUAD_SIZE = 144;
-const uint32 INDEX_SIZE = 4;
-const uint32 PTC_SIZE = 36;
-const uint32 MAX_QUADS = 2048;
-const uint32 MAX_VERTICES = 4 * MAX_QUADS;
-const uint32 MAX_INDICES = 6 * MAX_QUADS;
-
-const float VP_ARRAY[] = {
-	-0.5f,0.5f, 0.5f,0.5f, 
-	0.5f,-0.5f, -0.5f,-0.5f
-};
 
 // ------------------------------------------------------------
 //
@@ -33,18 +22,11 @@ namespace sprites {
 
 	struct SpriteBatchContext {
 
-		int maxSprites;
-		int bufferIndex;
-		int indexBufferIndex;
-		//PTCVertex sprites[MAX_SPRITES * 4];
-		ParticleVertex sprites[MAX_SPRITES * 4];
-		int size;
-		int index;
-		int maxVertices;
+		BatchBuffer<ParticleVertex>* buffer;
 		int descriptorID;
 		BitmapFont* font;
 
-		SpriteBatchContext() : size(0) , font(0) {}
+		SpriteBatchContext() : font(0) {}
 
 		~SpriteBatchContext() {}
 	};
@@ -54,18 +36,17 @@ namespace sprites {
 	void init() {		
 		assert(spriteCtx == 0);
 		spriteCtx = new SpriteBatchContext;
-		spriteCtx->size = 0;
-		spriteCtx->index = 0;
-		spriteCtx->maxVertices = MAX_SPRITES * 4;
-
 		Descriptor desc;
 		desc.shader = shader::createParticleShader();
 		assert(desc.shader != 0);
 		desc.texture = 0;
 		desc.blendState = renderer::getDefaultBlendState();
-		spriteCtx->bufferIndex = renderer::createVertexBuffer(VD_QUAD, MAX_SPRITES * 4, true);
-		spriteCtx->indexBufferIndex = renderer::getQuadIndexBufferIndex();
-		spriteCtx->descriptorID = renderer::addDescriptor(desc);
+		BatchBufferDescriptor descriptor;
+		descriptor.maxItems = MAX_SPRITES * 4;
+		descriptor.descriptorID = renderer::addDescriptor(desc);
+		descriptor.vertexDeclaration = VD_QUAD;
+		spriteCtx->buffer = new BatchBuffer<ParticleVertex>(descriptor);
+		spriteCtx->descriptorID = descriptor.descriptorID;
 	}
 
 	void initializeTextSystem(BitmapFont * font) {
@@ -86,8 +67,7 @@ namespace sprites {
 	}
 
 	void begin() {
-		spriteCtx->size = 0;
-		spriteCtx->index = 0;
+		spriteCtx->buffer->begin();
 	}
 
 	int getCurrentTextureID() {
@@ -106,21 +86,11 @@ namespace sprites {
 	}
 
 	void end(bool count) {
-		if (spriteCtx->size > 0) {
-			ZoneTracker z("sprites:end");
-			renderer::setWorldMatrix(matrix::m4identity());
-			renderer::fillBuffer(spriteCtx->bufferIndex, spriteCtx->sprites, spriteCtx->index);
-			renderer::draw(spriteCtx->descriptorID, spriteCtx->bufferIndex, spriteCtx->index, renderer::getQuadIndexBufferIndex());
-			if (count) {
-				renderer::drawCounter().sprites += spriteCtx->size;
-			}
-		}
+		spriteCtx->buffer->end();
 	}
 
 	void flush(bool count) {
-		ZoneTracker z("sprites:flush");
-		end(count);
-		begin();
+		spriteCtx->buffer->flush();
 	}
 
 	void drawText(int x, int y, const char* text, float scaleX, float scaleY, const Color& color) {
@@ -161,96 +131,60 @@ namespace sprites {
 	}
 
 	void draw(const Vector2f& pos, int textureID, const Vector4f& uv, const Vector2f& dim, float rotation, float scaleX, float scaleY, const Color& color, const Vector2f& center) {
-		int vertexCount = spriteCtx->index;
-		if ((vertexCount + 4) >= spriteCtx->maxVertices) {
-			flush();
-		}
-		int idx = spriteCtx->index;
-		spriteCtx->sprites[idx].uv.x = uv.x;
-		spriteCtx->sprites[idx].uv.y = uv.y;
-		spriteCtx->sprites[idx+1].uv.x = uv.z;
-		spriteCtx->sprites[idx+1].uv.y = uv.y;
-		spriteCtx->sprites[idx+2].uv.x = uv.z;
-		spriteCtx->sprites[idx+2].uv.y = uv.w;
-		spriteCtx->sprites[idx+3].uv.x = uv.x;
-		spriteCtx->sprites[idx+3].uv.y = uv.w;
-
-		Vector2f cor = pos;
-		cor = cor - ds::renderer::getSelectedViewport().getPosition();
-		Vector2f p(0, 0);
+		v2 ar[] = {
+			v2(uv.x, uv.y),
+			v2(uv.z, uv.y),
+			v2(uv.z, uv.w),
+			v2(uv.x, uv.w)
+		};
+		ParticleVertex v;
 		for (int i = 0; i < 4; ++i) {
-			spriteCtx->sprites[idx + i].x = pos.x;
-			spriteCtx->sprites[idx + i].y = pos.y;
-			spriteCtx->sprites[idx + i].z = 0.0f;
-			spriteCtx->sprites[idx + i].scale.x = scaleX;
-			spriteCtx->sprites[idx + i].scale.y = scaleY;
-			spriteCtx->sprites[idx + i].dimension = dim;
-			spriteCtx->sprites[idx + i].rotationIndex.x = rotation;
-			spriteCtx->sprites[idx + i].rotationIndex.y = i;
-			spriteCtx->sprites[idx + i].color = color;
-		}	
-		spriteCtx->index += 4;
-		++spriteCtx->size;
+			v.x = pos.x;
+			v.y = pos.y;
+			v.z = 0.0f;
+			v.uv = ar[i];
+			v.scale.x = scaleX;
+			v.scale.y = scaleY;
+			v.dimension = dim;
+			v.rotationIndex.x = rotation;
+			v.rotationIndex.y = i;
+			v.color = color;
+			spriteCtx->buffer->append(v);
+		}
 	}
 
 	void draw(const Shape& shape, const Texture& tex) {
-		int vertexCount = spriteCtx->index;
-		if ((vertexCount + 4) >= spriteCtx->maxVertices) {
-			renderer::setTexture(tex.textureID);
-			flush();
-		}
-		int idx = spriteCtx->index;
-		spriteCtx->sprites[idx].uv.x = tex.uv.x;
-		spriteCtx->sprites[idx].uv.y = tex.uv.y;
-		spriteCtx->sprites[idx + 1].uv.x = tex.uv.z;
-		spriteCtx->sprites[idx + 1].uv.y = tex.uv.y;
-		spriteCtx->sprites[idx + 2].uv.x = tex.uv.z;
-		spriteCtx->sprites[idx + 2].uv.y = tex.uv.w;
-		spriteCtx->sprites[idx + 3].uv.x = tex.uv.x;
-		spriteCtx->sprites[idx + 3].uv.y = tex.uv.w;
+		ParticleVertex v;
 		for (int i = 0; i < 4; ++i) {
-			spriteCtx->sprites[idx + i].x = shape.v[i].x;
-			spriteCtx->sprites[idx + i].y = shape.v[i].y;
-			spriteCtx->sprites[idx + i].z = 0.0f;
-			spriteCtx->sprites[idx + i].scale.x = 1.0f;
-			spriteCtx->sprites[idx + i].scale.y = 1.0f;
-			spriteCtx->sprites[idx + i].dimension = tex.dim;
-			spriteCtx->sprites[idx + i].rotationIndex.x = 0.0f;
-			spriteCtx->sprites[idx + i].rotationIndex.y = i;
-			spriteCtx->sprites[idx + i].color = shape.color;
+			v.x = shape.v[i].x;
+			v.y = shape.v[i].y;
+			v.z = 0.0f;
+			v.uv = tex.getUV(i);
+			v.scale.x = 1.0f;
+			v.scale.y = 1.0f;
+			v.dimension = tex.dim;
+			v.rotationIndex.x = 0.0f;
+			v.rotationIndex.y = i;
+			v.color = shape.color;
+			spriteCtx->buffer->append(v);
 		}
-		spriteCtx->index += 4;
-		++spriteCtx->size;
 	}
 
 	void draw(const Vector2f& pos, const Texture& tex, float rotation, float scaleX, float scaleY, const Color& color, const Vector2f& center) {
-		int vertexCount = spriteCtx->index;
-		if ((vertexCount + 4) >= spriteCtx->maxVertices  ) {
-			renderer::setTexture(tex.textureID);
-			flush();
-		}
-		int idx = spriteCtx->index;
-		spriteCtx->sprites[idx].uv.x = tex.uv.x;
-		spriteCtx->sprites[idx].uv.y = tex.uv.y;
-		spriteCtx->sprites[idx + 1].uv.x = tex.uv.z;
-		spriteCtx->sprites[idx + 1].uv.y = tex.uv.y;
-		spriteCtx->sprites[idx + 2].uv.x = tex.uv.z;
-		spriteCtx->sprites[idx + 2].uv.y = tex.uv.w;
-		spriteCtx->sprites[idx + 3].uv.x = tex.uv.x;
-		spriteCtx->sprites[idx + 3].uv.y = tex.uv.w;
+		ParticleVertex v;
 		for (int i = 0; i < 4; ++i) {
-			spriteCtx->sprites[idx + i].x = pos.x;
-			spriteCtx->sprites[idx + i].y = pos.y;
-			spriteCtx->sprites[idx + i].z = 0.0f;
-			spriteCtx->sprites[idx + i].scale.x = scaleX;
-			spriteCtx->sprites[idx + i].scale.y = scaleY;
-			spriteCtx->sprites[idx + i].dimension = tex.dim;
-			spriteCtx->sprites[idx + i].rotationIndex.x = rotation;
-			spriteCtx->sprites[idx + i].rotationIndex.y = i;
-			spriteCtx->sprites[idx + i].color = color;
+			v.x = pos.x;
+			v.y = pos.y;
+			v.z = 0.0f;
+			v.uv = tex.getUV(i);
+			v.scale.x = scaleX;
+			v.scale.y = scaleY;
+			v.dimension = tex.dim;
+			v.rotationIndex.x = rotation;
+			v.rotationIndex.y = i;
+			v.color = color;
+			spriteCtx->buffer->append(v);
 		}
-		spriteCtx->index += 4;
-		++spriteCtx->size;
 	}
 
 	void draw(const Sprite& sprite) {
@@ -351,6 +285,8 @@ namespace sprites {
 
 	void shutdown() {
 		assert(spriteCtx != 0);
+		delete spriteCtx->buffer;
+		//gDefaultMemory->deallocate(spriteCtx->sprites);
 		delete spriteCtx;
 	}
 }
