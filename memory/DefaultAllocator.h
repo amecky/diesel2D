@@ -2,7 +2,7 @@
 #include "memory_types.h"
 #include "..\io\ReportWriter.h"
 #include <vector>
-// ds::gDefaultMemory->trace(size,__FILE__,__LINE__);
+
 #ifdef DEBUG
 #define ALLOC(size) ds::gDefaultMemory->allocate(size,__FILE__,__LINE__);
 #else

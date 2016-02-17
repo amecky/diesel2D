@@ -13,14 +13,15 @@ BloomRenderEffect::BloomRenderEffect() : RenderEffect() {
 	m_BloomShader = renderer::getShader(m_BloomShaderID);
 	_blurRT = renderer::createRenderTarget(clr);
 	_blurNextRT = renderer::createRenderTarget(clr);
-	m_BlurHShaderID = shader::createBlurShader(_bloomRT.textureID);
+	//m_BlurHShaderID = shader::createBlurShader(_bloomRT.textureID);
+	m_BlurHShaderID = renderer::loadShader("blur", "BlurTech");
 	m_BlurHShader = renderer::getShader(m_BlurHShaderID);
 
 	m_BlurHShader->setTexture("gTex", _bloomRT.textureID);
 	m_BlurHShader->setFloat("BlurDistance", 1.0f / 1024.0f);
 	// Bloom combine
 	_bloomCombineRT = renderer::createRenderTarget(clr);
-	m_BloomCombineShaderID = shader::createBloomCombineShader(_baseRT.textureID, _blurNextRT.textureID);
+	m_BloomCombineShaderID = shader::createBloomCombineShader(_baseRT.textureID, _blurRT.textureID);
 	m_BloomCombineShader = renderer::getShader(m_BloomCombineShaderID);
 	_settings.load();
 
@@ -42,20 +43,15 @@ void BloomRenderEffect::start() {
 void BloomRenderEffect::render() {
 	if (isActive()) {
 		// first step -> base RT using bloom shader
-		//renderer::setRenderTarget(_bloomRT);
-		//m_BloomShader->setFloat("Threshold", _settings.threshold);
-		//renderer::draw_render_target(_baseRT, m_BloomShaderID);
+		renderer::setRenderTarget(_bloomRT);
+		m_BloomShader->setFloat("Threshold", _settings.threshold);
+		renderer::draw_render_target(_baseRT, m_BloomShaderID);
 		// second step -> blur 
 		renderer::setRenderTarget(_blurRT);
-		m_BlurHShader->setValue("SampleOffsets", _verticalOffset, sizeof(v2) * 15);
-		//m_BlurHShader->setValue("SampleWeights", _verticalWeights, sizeof(float) * 15);
-		renderer::draw_render_target(_baseRT, m_BlurHShaderID);
+		renderer::draw_render_target(_bloomRT, m_BlurHShaderID);
 		// third step -> blur
-		/*
-		renderer::setRenderTarget(_blurNextRT);
-		m_BlurHShader->setValue("SampleOffsets", _horizonzalOffset, sizeof(v2) * 15);
-		m_BlurHShader->setValue("SampleWeights", _horizonzalWeights, sizeof(float) * 15);
-		renderer::draw_render_target(_blurRT, m_BlurHShaderID);
+		//renderer::setRenderTarget(_blurNextRT);
+		//renderer::draw_render_target(_blurRT, m_BlurHShaderID);
 		// fourth step -> combine original and this one		
 		m_BloomCombineShader->setFloat("BloomIntensity", _settings.intensity);
 		m_BloomCombineShader->setFloat("OriginalIntensity", _settings.originalIntensity);
@@ -63,9 +59,8 @@ void BloomRenderEffect::render() {
 		m_BloomCombineShader->setFloat("OriginalSaturation", _settings.originalSaturation);
 		renderer::setRenderTarget(_bloomCombineRT);
 		renderer::draw_render_target(_baseRT, m_BloomCombineShaderID);
-		*/
 		renderer::restoreBackBuffer();
-		renderer::draw_render_target(_blurRT);
+		renderer::draw_render_target(_bloomCombineRT);
 	}
 }
 
@@ -106,8 +101,7 @@ void BloomRenderEffect::createBlurParameters(float dx, float dy, v2* sampleOffse
 	}
 
 	// Normalize the list of sample weightings, so they will always sum to one.
-	for (int i = 0; i < 15; i++)
-	{
+	for (int i = 0; i < 15; i++) {
 		weights[i] /= totalWeights;
 	}
 }
