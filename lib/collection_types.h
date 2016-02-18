@@ -27,7 +27,8 @@ namespace ds {
 		~CharBuffer() {
 			if (data != 0) {
 				//delete[] data;
-				_allocator->deallocate(data);
+				//_allocator->deallocate(data);
+				DEALLOC(data);
 			}
 		}
 
@@ -51,10 +52,12 @@ namespace ds {
 
 		void resize(int newCap) {
 			if (newCap > capacity) {
-				char* tmp = (char*)_allocator->allocate(newCap);
+				//char* tmp = (char*)_allocator->allocate(newCap);
+				char* tmp = (char*)ALLOC(newCap);
 				if (data != 0) {
 					memcpy(tmp, data, capacity);
-					_allocator->deallocate(data);
+					//_allocator->deallocate(data);
+					DEALLOC(data);
 				}
 				capacity = newCap;
 				data = tmp;
@@ -101,7 +104,8 @@ namespace ds {
 			_typeSize = sizeof(T);
 			_constructor = !__has_trivial_constructor(T);
 			_destructor = !__has_trivial_destructor(T);
-			_data = (uchar*)_allocator->allocate(size * _typeSize);
+			//_data = (uchar*)_allocator->allocate(size * _typeSize);
+			_data = (uchar*)ALLOC(size * _typeSize);
 			uchar* ptr = _data;
 			if (_constructor) {
 				for (uint32 i = 0; i < _size; ++i) {
@@ -114,7 +118,8 @@ namespace ds {
 		~Array() {
 			if (_data != 0) {
 				clear();
-				_allocator->deallocate(_data);
+				//_allocator->deallocate(_data);
+				DEALLOC(_data);
 			}
 		}
 
@@ -147,13 +152,15 @@ namespace ds {
 				resize(other._size);
 				_size = other._size;
 				_capacity = other._capacity;
-				_data = (uchar*)_allocator->allocate(_size * _typeSize);
+				//_data = (uchar*)_allocator->allocate(_size * _typeSize);
+				_data = (uchar*)ALLOC(_size * _typeSize);
 				memcpy(_data, other._data, sizeof(T) * _size);
 			}
 			else {
 				_size = other._size;
 				_capacity = other._capacity;
-				_data = (uchar*)_allocator->allocate(_size * _typeSize);
+				//_data = (uchar*)_allocator->allocate(_size * _typeSize);
+				_data = (uchar*)ALLOC(_size * _typeSize);
 				memcpy(_data, other._data, sizeof(T) * _size);
 			}
 			return *this;
@@ -355,12 +362,14 @@ namespace ds {
 					_size = newCapacity;
 				}
 				//uchar* newItems = (uchar*)malloc(newCapacity * _typeSize);
-				uchar* newItems = (uchar*)_allocator->allocate(newCapacity * _typeSize);
+				//uchar* newItems = (uchar*)_allocator->allocate(newCapacity * _typeSize);
+				uchar* newItems = (uchar*)ALLOC(newCapacity * _typeSize);
 				if (_data != 0) {
 					memcpy(newItems, _data, newCapacity * _typeSize);
 				}
 				//free(_data);
-				_allocator->deallocate(_data);
+				//_allocator->deallocate(_data);
+				DEALLOC(_data);
 				_data = newItems;
 				_capacity = newCapacity;
 			}
@@ -369,7 +378,8 @@ namespace ds {
 		void grow(uint32 newCapacity) {
 			if (newCapacity > _capacity) {
 				//uchar* newItems = (uchar*)malloc(newCapacity * _typeSize);
-				uchar* newItems = (uchar*)_allocator->allocate(newCapacity * _typeSize);
+				//uchar* newItems = (uchar*)_allocator->allocate(newCapacity * _typeSize);
+				uchar* newItems = (uchar*)ALLOC(newCapacity * _typeSize);
 				if (_data != 0) {
 					memcpy(newItems, _data, _size * _typeSize);
 				}
@@ -382,7 +392,8 @@ namespace ds {
 				}
 				if (_data != 0) {
 					//free(_data);
-					_allocator->deallocate(_data);
+					//_allocator->deallocate(_data);
+					DEALLOC(_data);
 				}
 				_data = newItems;
 				_capacity = newCapacity;
@@ -394,7 +405,8 @@ namespace ds {
 			_size = other._size;
 			_capacity = other._capacity;
 			//_data = (uchar*)malloc(_size * _typeSize);
-			_data = (uchar*)_allocator->allocate(_size * _typeSize);
+			//_data = (uchar*)_allocator->allocate(_size * _typeSize);
+			_data = (uchar*)ALLOC(_size * _typeSize);
 			memccpy(_data, other._data, sizeof(T) * _size);
 		}
 
@@ -423,7 +435,8 @@ namespace ds {
 		~Stack() {
 			if (_data != 0) {
 				clear();
-				_allocator->deallocate(_data);
+				//_allocator->deallocate(_data);
+				DEALLOC(_data);
 			}
 		}
 
@@ -471,13 +484,15 @@ namespace ds {
 	private:
 		void grow(uint32 newCapacity) {
 			if (newCapacity > _capacity) {
-				uchar* newItems = (uchar*)_allocator->allocate(newCapacity * _typeSize);
+				//uchar* newItems = (uchar*)_allocator->allocate(newCapacity * _typeSize);
+				uchar* newItems = (uchar*)ALLOC(newCapacity * _typeSize);
 				if (_data != 0) {
 					memcpy(newItems, _data, _size * _typeSize);
 				}
 				uchar* ptr = newItems + _size * _typeSize;
 				if (_data != 0) {
-					_allocator->deallocate(_data);
+					//_allocator->deallocate(_data);
+					DEALLOC(_data);
 				}
 				_data = newItems;
 				_capacity = newCapacity;

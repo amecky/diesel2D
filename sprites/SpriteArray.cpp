@@ -158,7 +158,8 @@ namespace ds {
 				SpriteArray sad;
 				int sz = size * (sizeof(SpriteArrayIndex) + sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(float) + sizeof(Texture) + sizeof(Color) + sizeof(float) + sizeof(int) + sizeof(int));
 				//sad.buffer = new char[sz];
-				sad.buffer = (char*)gDefaultMemory->allocate(sz);
+				//sad.buffer = (char*)gDefaultMemory->allocate(sz);
+				sad.buffer = (char*)ALLOC(sz);
 				sad.total = size;
 				sad.num = 0;
 				sad.indices = (SpriteArrayIndex*)(sad.buffer);
@@ -186,7 +187,8 @@ namespace ds {
 					sad.free_enqueue = array.free_enqueue;
 					sad.num = array.num;
 					//delete[] array.buffer;
-					gDefaultMemory->deallocate(array.buffer);
+					//gDefaultMemory->deallocate(array.buffer);
+					DEALLOC(array.buffer);
 				}
 				else {
 					clear(sad);

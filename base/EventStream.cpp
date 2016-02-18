@@ -1,15 +1,18 @@
 #include "EventStream.h"
 #include <string.h>
+#include "..\memory\DefaultAllocator.h"
 
 namespace ds {
 
 EventStream::EventStream() {
-	m_Data = new char[4096];
+	//m_Data = new char[4096];
+	m_Data = (char*)ALLOC(4096);
 	reset();
 }
 
 EventStream::~EventStream() {
-	delete m_Data;
+	//delete m_Data;
+	DEALLOC(m_Data);
 }
 
 void EventStream::reset() {

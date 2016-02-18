@@ -23,7 +23,8 @@ namespace ds {
 
 	void DialogManager::clear() {
 		for (Dialogs::iterator it = _dialogs.begin(), itEnd = _dialogs.end(); it != itEnd; ++it) {
-			delete it->dialog;
+			//delete it->dialog;
+			MAKE_DELETE(GUIDialog,it->dialog);
 		}
 	}
 
@@ -148,7 +149,8 @@ namespace ds {
 		DialogDefinition def;
 		strcpy(def.name, dialogName);
 		def.hash = string::murmur_hash(dialogName);
-		GUIDialog* dialog = new GUIDialog();
+		//GUIDialog* dialog = new GUIDialog();
+		GUIDialog* dialog = MAKE_NEW(GUIDialog);
 		LOG << "Creating new dialog: " << dialogName;
 		def.dialog = dialog;
 		dialog->init(def.name, _index, _font);
@@ -218,7 +220,8 @@ namespace ds {
 			int id = 0;
 			reader.get_int(cats[i],"id",&id);
 			const char* name = reader.get_string(cats[i], "file");
-			GUIDialog* dialog = new GUIDialog();
+			//GUIDialog* dialog = new GUIDialog();
+			GUIDialog* dialog = MAKE_NEW(GUIDialog);
 			LOG << "Creating new dialog: " << name;
 			DialogDefinition def;
 			sprintf_s(def.name, 32, "%s", name);

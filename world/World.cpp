@@ -67,7 +67,8 @@ namespace ds {
 	World::~World(void) {
 		m_Actions.destroy_all();
 		if ( m_Data.buffer != 0 ) {
-			gDefaultMemory->deallocate(m_Data.buffer);
+			//gDefaultMemory->deallocate(m_Data.buffer);
+			DEALLOC(m_Data.buffer);
 		}
 		delete _behaviorDefinitions;
 	}

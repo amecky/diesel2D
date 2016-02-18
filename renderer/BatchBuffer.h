@@ -13,14 +13,16 @@ namespace ds {
 
 	public:
 		BatchBuffer(const BatchBufferDescriptor& descriptor) {
-			_data = (T*)gDefaultMemory->allocate(sizeof(T) * descriptor.maxItems);
+			//_data = (T*)gDefaultMemory->allocate(sizeof(T) * descriptor.maxItems);
+			_data = (T*)ALLOC(sizeof(T) * descriptor.maxItems);
 			_max = descriptor.maxItems;
 			_bufferIndex = renderer::createVertexBuffer(descriptor.vertexDeclaration, descriptor.maxItems, true);
 			_descriptorID = descriptor.descriptorID;
 			_index = 0;
 		}
 		~BatchBuffer() {
-			gDefaultMemory->deallocate(_data);
+			//gDefaultMemory->deallocate(_data);
+			DEALLOC(_data);
 		}
 
 		void begin() {

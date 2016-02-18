@@ -37,8 +37,10 @@ private:
 template<class T>
 inline DataBuffer<T>::DataBuffer(uint32 maxElements) : m_MaxElements(maxElements) , m_Count(0) {
 	m_ElementSize = sizeof(T); 
-	m_Data = new char[m_ElementSize * m_MaxElements];
-	m_Indices = new DataIndex[m_MaxElements];
+	//m_Data = new char[m_ElementSize * m_MaxElements];
+	//m_Indices = new DataIndex[m_MaxElements];
+	m_Data = (char*)ALLOC(m_ElementSize * m_MaxElements);
+	m_Indices = (char*)ALLOC(m_MaxElements);
 	for ( uint32 i = 0; i < m_MaxElements; ++i ) {
 		m_Indices[i].id = i;
 		m_Indices[i].next = i + 1;
@@ -48,8 +50,8 @@ inline DataBuffer<T>::DataBuffer(uint32 maxElements) : m_MaxElements(maxElements
 
 template<class T>
 inline DataBuffer<T>::~DataBuffer() {
-	delete[] m_Indices;
-	delete[] m_Data;
+	DEALLOC(m_Indices);
+	DEALLOC(m_Data);
 }
 
 template<class T>

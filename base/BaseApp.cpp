@@ -116,6 +116,7 @@ BaseApp::~BaseApp() {
 	renderer::shutdown();	
 	gui::shutdown();
 	perf::shutdown();
+	gDefaultMemory->printOpenAllocations();
 	delete gDefaultMemory;
 }
 
