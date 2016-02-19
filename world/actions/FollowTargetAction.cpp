@@ -27,8 +27,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void FollowTargetAction::attach(SID id,SID target,float velocity) {
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_velocities[idx] = velocity;
 		_targets[idx] = target;

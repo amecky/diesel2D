@@ -28,8 +28,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void WaitAction::attach(SID id,float ttl) {
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_timers[idx] = 0.0f;
 		_ttl[idx] = ttl;

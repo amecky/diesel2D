@@ -38,13 +38,13 @@ namespace ds {
 		void attachCollider(SID sid, int type,int layer);
 		void attachBoxCollider(SID sid, int type, int layer);
 		bool hasCollisions() {
-			return m_NumCollisions > 0;
+			return _collisions.size() > 0;
 		}
 		int getNumCollisions() {
-			return m_NumCollisions;
+			return _collisions.size();
 		}
 		const Collision& getCollision(int idx) const {
-			return m_Collisions[idx];
+			return _collisions[idx];
 		}
 		void tick(float dt);
 		void debug();
@@ -61,9 +61,8 @@ namespace ds {
 		bool containsCollision(CID firstID, CID secondID);
 		SpriteArray* m_Sprites;
 		ColliderArray<Vector2f> m_ColliderData;
-		Collision m_Collisions[256];
+		Array<Collision> _collisions;
 		IgnoredCollisions m_Ignored;
-		int m_NumCollisions;
 		Bits _ignoredLayers;
 	};
 

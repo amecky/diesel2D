@@ -31,8 +31,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void ScalingAction::attach(SID id,const Vector2f& startScale,const Vector2f& endScale,float ttl,int mode,const tweening::TweeningType& tweeningType) {
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_startScale[idx] = startScale;
 		_endScale[idx] = endScale;

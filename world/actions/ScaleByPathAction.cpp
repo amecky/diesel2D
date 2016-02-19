@@ -30,8 +30,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void ScaleByPathAction::attach(SpriteArray& array,SID id, Vector2fPath* path, float ttl) {
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_path[idx] = path;
 		v2 s(1, 1);
@@ -43,9 +42,8 @@ namespace ds {
 	}
 
 	void ScaleByPathAction::attach(SID id, AbstractActionDefinition* definition) {
+		int idx = create(id);
 		ScaleByPathDefinition* def = static_cast<ScaleByPathDefinition*>(definition);
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
 		_ids[idx] = id;
 		_path[idx] = &def->path;
 		v2 s(1, 1);

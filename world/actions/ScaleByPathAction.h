@@ -30,10 +30,8 @@ namespace ds {
 		void attach(SpriteArray& array,SID id, Vector2fPath* path, float ttl);
 		void attach(SID id, AbstractActionDefinition* definition);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
-		void clear();
 		void debug();
 		void debug(SID sid) {}
-		void removeByID(SID id);
 		ActionType getActionType() const {
 			return AT_SCALE_BY_PATH;
 		}

@@ -27,8 +27,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void RotateByAction::attach(SID id,float startAngle,float endAngle,float ttl,int mode,const tweening::TweeningType& tweeningType) {
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_startAngles[idx] = startAngle;
 		_endAngles[idx] = endAngle;

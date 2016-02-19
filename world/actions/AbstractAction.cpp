@@ -33,6 +33,19 @@ namespace ds {
 	}
 
 	// -------------------------------------------------------
+	// create new entry
+	// -------------------------------------------------------
+	int AbstractAction::create(SID id) {
+		int idx = find(id);
+		if (idx != -1) {
+			return idx;
+		}
+		else {
+			allocate(_buffer.size + 16);
+			return _buffer.size;
+		}
+	}
+	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
 	void AbstractAction::clear() {

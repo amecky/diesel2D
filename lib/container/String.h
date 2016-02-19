@@ -376,7 +376,7 @@ inline String String::valueOf(bool value) {
 // ------------------------------------------------
 inline String String::valueOf(float value) {
     char buffer[32];
-    sprintf(buffer,"%.2f",value);
+    sprintf(buffer,"%g",value);
     return String(buffer);
 }
 

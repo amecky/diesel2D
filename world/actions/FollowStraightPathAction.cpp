@@ -29,8 +29,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void FollowStraightPathAction::attach(SID id, SpriteArray& array, StraightPath* path, float ttl, int mode) {
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_path[idx] = path;
 		_timers[idx] = 0.0f;

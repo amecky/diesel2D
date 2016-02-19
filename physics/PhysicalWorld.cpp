@@ -4,13 +4,13 @@
 namespace ds {
 
 	PhysicalWorld::PhysicalWorld() {
-		m_NumCollisions = 0;
 	}
 
 
 	PhysicalWorld::~PhysicalWorld() {
 		if (m_ColliderData.buffer != 0) {
-			delete[] m_ColliderData.buffer;
+			//delete[] m_ColliderData.buffer;
+			DEALLOC(m_ColliderData.buffer);
 		}
 	}
 
@@ -57,7 +57,7 @@ namespace ds {
 			++it;
 		}
 		*/
-		m_NumCollisions = 0;
+		_collisions.clear();
 		checkCollisions();
 	}
 
@@ -68,7 +68,8 @@ namespace ds {
 		if (size > m_ColliderData.total) {
 			ColliderArray<Vector2f> ca;
 			int sz = size * (sizeof(ColliderArrayIndex) + sizeof(CID) + sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(int) + sizeof(int) + sizeof(ColliderShape));
-			ca.buffer = new char[sz];
+			//ca.buffer = new char[sz];
+			ca.buffer = (char*)ALLOC(sz);
 			ca.total = size;
 			ca.num = 0;
 			ca.indices = (ColliderArrayIndex*)(ca.buffer);
@@ -92,7 +93,8 @@ namespace ds {
 				ca.free_dequeue = m_ColliderData.free_dequeue;
 				ca.free_enqueue = m_ColliderData.free_enqueue;
 				ca.num = m_ColliderData.num;
-				delete[] m_ColliderData.buffer;
+				//delete[] m_ColliderData.buffer;
+				DEALLOC(m_ColliderData.buffer);
 			}
 			else {
 				ca.clear();
@@ -207,21 +209,21 @@ namespace ds {
 						const Vector2f& p = m_ColliderData.positions[i];
 						const Vector2f& pp = m_ColliderData.previous[i];
 						const Vector2f& e = m_ColliderData.extents[i];
-						if (m_NumCollisions < 256) {
-							CID firstID = m_ColliderData.ids[currentIndex];
-							CID secondID = m_ColliderData.ids[i];
-							if (!containsCollision(firstID, secondID) && !shouldBeIgnored(m_ColliderData.types[currentIndex], m_ColliderData.types[i])) {
-								Vector2f cp = m_ColliderData.previous[currentIndex];
-								Collision& c = m_Collisions[m_NumCollisions++];
-								c.firstPos = pos;
-								c.firstColliderID = m_ColliderData.ids[currentIndex];
-								c.firstSID = m_ColliderData.sids[currentIndex];
-								c.firstType = m_ColliderData.types[currentIndex];
-								c.secondPos = p;
-								c.secondColliderID = m_ColliderData.ids[i];
-								c.secondSID = m_ColliderData.sids[i];
-								c.secondType = m_ColliderData.types[i];
-							}
+						CID firstID = m_ColliderData.ids[currentIndex];
+						CID secondID = m_ColliderData.ids[i];
+						if (!containsCollision(firstID, secondID) && !shouldBeIgnored(m_ColliderData.types[currentIndex], m_ColliderData.types[i])) {
+							Vector2f cp = m_ColliderData.previous[currentIndex];
+							//Collision& c = m_Collisions[m_NumCollisions++];
+							Collision c;
+							c.firstPos = pos;
+							c.firstColliderID = m_ColliderData.ids[currentIndex];
+							c.firstSID = m_ColliderData.sids[currentIndex];
+							c.firstType = m_ColliderData.types[currentIndex];
+							c.secondPos = p;
+							c.secondColliderID = m_ColliderData.ids[i];
+							c.secondSID = m_ColliderData.sids[i];
+							c.secondType = m_ColliderData.types[i];
+							_collisions.push_back(c);
 						}
 					}
 				}
@@ -233,12 +235,11 @@ namespace ds {
 	// contains collision
 	// --------------------------------------------------------------------------
 	bool PhysicalWorld::containsCollision(CID firstID, CID secondID) {
-		for (int i = 0; i < m_NumCollisions; ++i) {
-			Collision& other = m_Collisions[i];
-			if (other.firstColliderID == firstID && other.secondColliderID == secondID) {
+		for (Array<Collision>::iterator it = _collisions.begin(), itEnd = _collisions.end(); it != itEnd; ++it) {
+			if (it->firstColliderID == firstID && it->secondColliderID == secondID) {
 				return true;
 			}
-			if (other.secondColliderID == firstID && other.firstColliderID == secondID) {
+			if (it->secondColliderID == firstID && it->firstColliderID == secondID) {
 				return true;
 			}
 		}

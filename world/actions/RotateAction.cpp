@@ -24,8 +24,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void RotateAction::attach(SID id,float angleVelocity,float ttl,int mode) {
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_angleVelocities[idx] = DEGTORAD(angleVelocity);
 		_timers[idx] = 0.0f;

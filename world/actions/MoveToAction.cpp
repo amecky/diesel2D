@@ -26,8 +26,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void MoveToAction::attach(SID id, SpriteArray& array,const Vector2f& startPos, const Vector2f& endPos, float ttl, int mode, const tweening::TweeningType& tweeningType) {
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_startPositions[idx] = startPos;
 		_endPositions[idx] = endPos;

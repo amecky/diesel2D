@@ -43,6 +43,7 @@ namespace ds {
 				return 0;
 			}
 		protected:
+			int create(SID id);
 			int find(SID id);
 			SID swap(int index);
 			Rect m_BoundingRect;

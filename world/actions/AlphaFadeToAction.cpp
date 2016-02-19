@@ -31,8 +31,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void AlphaFadeToAction::attach(SID id,float startAlpha,float endAlpha,float ttl,int mode,const tweening::TweeningType& tweeningType) {
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_startAlphas[idx] = startAlpha;
 		_endAlphas[idx] = endAlpha;

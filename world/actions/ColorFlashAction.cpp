@@ -31,8 +31,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void ColorFlashAction::attach(SID id, const Color& startColor, const Color& endColor, float ttl, int mode, const tweening::TweeningType& tweeningType) {
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_startColors[idx] = startColor;
 		_endColors[idx] = endColor;
@@ -48,8 +47,7 @@ namespace ds {
 
 	void ColorFlashAction::attach(SID id, AbstractActionDefinition* definition) {
 		ColorFlashDefinition* def = static_cast<ColorFlashDefinition*>(definition);
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_startColors[idx] = def->start;
 		_endColors[idx] = def->end;

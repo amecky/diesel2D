@@ -23,8 +23,7 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	void MoveByAction::attach(SID id,const Vector2f& velocity,bool bounce) {		
-		allocate(_buffer.size + 1);
-		int idx = _buffer.size;
+		int idx = create(id);
 		_ids[idx] = id;
 		_velocities[idx] = velocity;
 		_timers[idx] = 0.0f;
