@@ -28,7 +28,6 @@ namespace ds {
 		_velocities[idx] = velocity;
 		_timers[idx] = 0.0f;
 		_bounce[idx] = bounce;
-		++_buffer.size;
 	}
 
 	void MoveByAction::rotateTo(SpriteArray& array, int index) {

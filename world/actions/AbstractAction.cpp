@@ -37,13 +37,12 @@ namespace ds {
 	// -------------------------------------------------------
 	int AbstractAction::create(SID id) {
 		int idx = find(id);
-		if (idx != -1) {
-			return idx;
-		}
-		else {
+		if (idx == -1) {
 			allocate(_buffer.size + 16);
-			return _buffer.size;
+			idx = _buffer.size;
+			++_buffer.size;
 		}
+		return idx;
 	}
 	// -------------------------------------------------------
 	// 

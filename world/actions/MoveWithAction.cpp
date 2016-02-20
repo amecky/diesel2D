@@ -28,7 +28,6 @@ namespace ds {
 		_timers[idx] = 0.0f;
 		_functions[idx] = function;
 		_ttl[idx] = ttl;
-		++_buffer.size;
 	}
 
 	// -------------------------------------------------------

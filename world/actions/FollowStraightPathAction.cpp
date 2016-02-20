@@ -41,7 +41,6 @@ namespace ds {
 		Vector2f p;
 		path->approx(0.0f, &p);
 		sar::setPosition(array, id, p);
-		++_buffer.size;
 	}
 
 	// -------------------------------------------------------

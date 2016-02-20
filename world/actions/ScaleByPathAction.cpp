@@ -37,8 +37,7 @@ namespace ds {
 		path->get(0.0f, &s);
 		sar::scale(array, id, s);
 		_timers[idx] = 0.0f;
-		_ttl[idx] = ttl;
-		++_buffer.size;
+		_ttl[idx] = ttl;		
 	}
 
 	void ScaleByPathAction::attach(SID id, AbstractActionDefinition* definition) {
@@ -50,8 +49,7 @@ namespace ds {
 		def->path.get(0.0f, &s);
 		//sar::scale(array, id, s);
 		_timers[idx] = 0.0f;
-		_ttl[idx] = def->ttl;
-		++_buffer.size;
+		_ttl[idx] = def->ttl;		
 	}
 
 	// -------------------------------------------------------

@@ -42,7 +42,6 @@ namespace ds {
 		if ( mode > 0 ) {
 			--_modes[idx];
 		}
-		++_buffer.size;
 	}
 
 	void ColorFlashAction::attach(SID id, AbstractActionDefinition* definition) {
@@ -58,7 +57,6 @@ namespace ds {
 		if (def->mode > 0) {
 			--_modes[idx];
 		}
-		++_buffer.size;
 	}
 
 	// -------------------------------------------------------

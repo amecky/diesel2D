@@ -38,7 +38,6 @@ namespace ds {
 			--_modes[idx];
 		}
 		sar::setPosition(array, id, startPos);
-		++_buffer.size;
 	}
 
 	// -------------------------------------------------------

@@ -31,7 +31,6 @@ namespace ds {
 		_ids[idx] = id;
 		_velocities[idx] = velocity;
 		_targets[idx] = target;
-		++_buffer.size;
 	}
 
 	// -------------------------------------------------------
