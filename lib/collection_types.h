@@ -6,6 +6,28 @@
 
 namespace ds {
 
+	template<class T,int SIZE>
+	class NonGrowingPolicy {
+	public:
+		NonGrowingPolicy(int max) : _max(max) {}
+		bool allowed(int size) {
+			if (size >= _max) {
+				return false;
+			}
+			return true;
+		}
+	private:
+		int _max;
+	};
+
+	template<class T>
+	class EndlessGrowingPolicy {
+	public:
+		bool allowed(int size) {
+			return true;
+		}
+	};
+
 	template <typename TYPE> void Construct(void* dest) {
 		new ((TYPE*)dest) TYPE;
 	}
@@ -422,29 +444,35 @@ namespace ds {
 		};
 	};
 
+	// ------------------------------------------------------------
+	// BaseStack
+	// ------------------------------------------------------------
 	template<class T>
-	class Stack {
+	class BaseStack {
 
 	public:
-		Stack(Allocator* allocator = gDefaultMemory) : _allocator(allocator) , _size(0) , _capacity(0) , _data(0) {
+		BaseStack(Allocator* allocator = gDefaultMemory) : _allocator(allocator), _size(0), _capacity(0), _data(0) {
 			_typeSize = sizeof(T);
 			_constructor = !__has_trivial_constructor(T);
 			_destructor = !__has_trivial_destructor(T);
 		}
 
-		~Stack() {
+		virtual ~BaseStack() {
 			if (_data != 0) {
 				clear();
-				//_allocator->deallocate(_data);
 				DEALLOC(_data);
 			}
 		}
 
+		virtual bool allowed(int size) = 0;
+
 		void push(const T& t) {
-			if (_size + 1 > _capacity) {
-				grow(_capacity * 2 + 8);
+			if (allowed(_size)) {
+				if (_size + 1 > _capacity) {
+					grow(_capacity * 2 + 8);
+				}
+				_items[_size++] = t;
 			}
-			_items[_size++] = t;
 		}
 
 		void pop() {
@@ -461,6 +489,14 @@ namespace ds {
 
 		T& top() {
 			return _items[_size - 1];
+		}
+
+		const T& at(int index) const {
+			return _items[_size - index - 1];
+		}
+
+		T& at(int index) {
+			return _items[_size - index - 1];
 		}
 
 		uint32 size() {
@@ -484,14 +520,12 @@ namespace ds {
 	private:
 		void grow(uint32 newCapacity) {
 			if (newCapacity > _capacity) {
-				//uchar* newItems = (uchar*)_allocator->allocate(newCapacity * _typeSize);
 				uchar* newItems = (uchar*)ALLOC(newCapacity * _typeSize);
 				if (_data != 0) {
 					memcpy(newItems, _data, _size * _typeSize);
 				}
 				uchar* ptr = newItems + _size * _typeSize;
 				if (_data != 0) {
-					//_allocator->deallocate(_data);
 					DEALLOC(_data);
 				}
 				_data = newItems;
@@ -509,6 +543,39 @@ namespace ds {
 			T* _items;
 		};
 
+	};
+
+	// ------------------------------------------------------------
+	// Stack
+	// ------------------------------------------------------------
+	template<class T>
+	class Stack : public BaseStack<T> {
+
+	public:
+		Stack(Allocator* allocator = gDefaultMemory) : BaseStack(allocator) {}
+		virtual ~Stack() {}
+		bool allowed(int size) {
+			return true;
+		}
+	};
+
+	// ------------------------------------------------------------
+	// FixedSizeStack
+	// ------------------------------------------------------------
+	template<class T>
+	class FixedSizeStack : public BaseStack<T> {
+
+	public:
+		FixedSizeStack(int max,Allocator* allocator = gDefaultMemory) : BaseStack(allocator) , _max(max) {}
+		virtual ~FixedSizeStack() {}
+		bool allowed(int size) {
+			if (size >= _max) {
+				return false;
+			}
+			return true;
+		}
+	private:
+		int _max;
 	};
 
 }

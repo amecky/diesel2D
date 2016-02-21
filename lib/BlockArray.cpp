@@ -58,18 +58,13 @@ void* BlockArray::get_ptr(int index) {
 }
 
 void BlockArray::remove(int index) {
-	if (index > 1) {
-		int last = size - 1;
-		for (int i = 0; i < _num_blocks; ++i) {
-			char* dest = data + _indices[i] + index * _sizes[i];
-			char* src = data + _indices[i] + last * _sizes[i];
-			memcpy(dest, src, _sizes[i]);
-		}
-		--size;
+	int last = size - 1;
+	for (int i = 0; i < _num_blocks; ++i) {
+		char* dest = data + _indices[i] + index * _sizes[i];
+		char* src = data + _indices[i] + last * _sizes[i];
+		memcpy(dest, src, _sizes[i]);
 	}
-	else if (index == 1) {
-		size = 0;
-	}
+	--size;
 }
 
 namespace ds {
