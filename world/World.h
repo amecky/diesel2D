@@ -245,7 +245,7 @@ namespace ds {
 		const Vector2f& getPosition(SID sid) const {
 			return sar::getPosition(m_Data,sid);
 		}
-		void moveWith(SID sid,const MoveFunc& function,float ttl);
+		void moveWith(SID sid,const MoveFunc& function,float ttl,int mode = 0);
 
 
 		void setRotation(SID sid,float angle);

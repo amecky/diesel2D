@@ -459,7 +459,7 @@ void BaseApp::buildFrame() {
 			ZoneTracker r("DEBUG_RENDER");
 #ifdef DEBUG		
 			if (m_DebugInfo.showDrawCounter) {
-				int y = renderer::getSelectedViewport().getHeight() - 80;
+				int y = renderer::getSelectedViewport().getScreenSize().y - 80;
 				renderer::showDrawCounter(&_perfHUDPos);
 			}
 			if (m_DebugInfo.showProfiler) {

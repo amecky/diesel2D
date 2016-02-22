@@ -519,6 +519,7 @@ namespace ds {
 		int createViewport(int width, int height) {
 			int idx = renderContext->viewPorts.size();
 			Viewport v;
+			v.setID(idx);
 			v.setDimension(width, height);
 			v.setPosition(width / 2, height / 2);
 			renderContext->viewPorts.add(v);
@@ -528,6 +529,7 @@ namespace ds {
 		int createViewport(int screenWidth, int screenHeight, int worldWidth, int worldHeight) {
 			int idx = renderContext->viewPorts.size();
 			Viewport v;
+			v.setID(idx);
 			v.setDimension(screenWidth, screenHeight, worldWidth, worldHeight);
 			v.setPosition(worldWidth / 2, worldHeight / 2);
 			renderContext->viewPorts.add(v);
@@ -875,6 +877,7 @@ namespace ds {
 		void draw(const Descriptor& desc,int size,int numPrimitives) {
 			Shader* shader = renderer::getShader(desc.shader);
 			D3DPRIMITIVETYPE pt = D3DPT_TRIANGLELIST;
+			Viewport vw = renderer::getSelectedViewport();
 			shader->setVector2f("viewportPosition", renderer::getSelectedViewport().getPosition());
 			uint32 numPasses = shader->start();
 			for (UINT p = 0; p < numPasses; ++p) {

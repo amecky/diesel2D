@@ -53,6 +53,10 @@ namespace ds {
 			end(true);
 			begin();
 		}
+
+		int size() const {
+			return _index;
+		}
 	private:
 		T* _data;
 		int _max;

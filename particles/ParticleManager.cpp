@@ -222,7 +222,9 @@ namespace ds {
 				}
 			}
 		}
-		_particles->flush();
+		if (_particles->size() > 0) {
+			_particles->flush();
+		}
 		//renderer::setCurrentShader(renderer::getDefaultShaderID());
 	}
 

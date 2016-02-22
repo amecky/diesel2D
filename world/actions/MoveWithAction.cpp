@@ -7,8 +7,8 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	MoveWithAction::MoveWithAction() : AbstractAction("move_with") {
-		int sizes[] = { sizeof(SID), sizeof(MoveFunc), sizeof(float), sizeof(float) };
-		_buffer.init(sizes, 4);
+		int sizes[] = { sizeof(SID), sizeof(MoveFunc), sizeof(float), sizeof(float) , sizeof(int)};
+		_buffer.init(sizes, 5);
 	}
 
 	void MoveWithAction::allocate(int sz) {
@@ -17,17 +17,19 @@ namespace ds {
 			_functions = (MoveFunc*)_buffer.get_ptr(1);
 			_timers = (float*)_buffer.get_ptr(2);
 			_ttl = (float*)_buffer.get_ptr(3);
+			_modes = (int*)_buffer.get_ptr(4);
 		}
 	}
 	// -------------------------------------------------------
 	// 
 	// -------------------------------------------------------
-	void MoveWithAction::attach(SID id,const MoveFunc& function,float ttl) {
+	void MoveWithAction::attach(SID id,const MoveFunc& function,float ttl,int mode) {
 		int idx = create(id);
 		_ids[idx] = id;
 		_timers[idx] = 0.0f;
 		_functions[idx] = function;
 		_ttl[idx] = ttl;
+		_modes[idx] = mode;
 	}
 
 	// -------------------------------------------------------
@@ -44,11 +46,21 @@ namespace ds {
 				_timers[i] += dt;
 				sar::setPosition(array,_ids[i],p);
 				sar::rotate(array,_ids[i],angle);
-				if ( _timers[i] >= _ttl[i] ) {
-					_functions[i](p,&angle,1.0f);
-					sar::setPosition(array,_ids[i],p);
-					buffer.add(_ids[i], AT_MOVE_WITH, array.getType(_ids[i]));
-					removeByIndex(i);					
+				if (_timers[i] >= _ttl[i]) {
+					if (_modes[i] < 0) {
+						_timers[i] = 0.0f;
+					}
+					else if (_modes[i] == 0) {
+						_functions[i](p, &angle, 1.0f);
+						sar::setPosition(array, _ids[i], p);
+						buffer.add(_ids[i], AT_MOVE_WITH, array.getType(_ids[i]));
+						removeByIndex(i);
+					}
+					else {
+						--_modes[i];
+						_timers[i] = 0.0f;
+
+					}
 				}
 			}
 		}

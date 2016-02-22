@@ -77,6 +77,9 @@ namespace ds {
 		for (int j = 0; j < 32; ++j) {
 			_layers[j].descriptor_id = id;
 		}
+		for (int j = 0; j < 32; ++j) {
+			_layers[j].viewport_id = 0;
+		}
 	}
 	// -----------------------------------------------------
 	// allocate
@@ -233,8 +236,8 @@ namespace ds {
 		m_MoveByAction->bounce(m_Data, sid, direction, dt);
 	}
 
-	void World::moveWith(SID sid,const MoveFunc& function,float ttl) {
-		m_MoveWithAction->attach(sid,function,ttl);
+	void World::moveWith(SID sid,const MoveFunc& function,float ttl,int mode) {
+		m_MoveWithAction->attach(sid,function,ttl,mode);
 	}
 
 	const int World::getMovingNumber() const {

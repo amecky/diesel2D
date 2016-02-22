@@ -14,7 +14,7 @@ namespace ds {
 	public:
 		MoveWithAction();
 		virtual ~MoveWithAction() {}
-		void attach(SID id,const MoveFunc& function,float ttl);
+		void attach(SID id,const MoveFunc& function,float ttl,int mode = 0);
 		void update(SpriteArray& array,float dt,ActionEventBuffer& buffer);
 		void debug();
 		void debug(SID sid) {}
@@ -26,6 +26,7 @@ namespace ds {
 		MoveFunc* _functions;
 		float* _timers;
 		float* _ttl;
+		int* _modes;
 	};
 
 }
