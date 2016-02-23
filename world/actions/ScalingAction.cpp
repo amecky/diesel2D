@@ -59,6 +59,7 @@ namespace ds {
 					}
 					else if ( _modes[i] == 0 ) {
 						sar::scale(array,_ids[i],_endScale[i]);
+						buffer.add(_ids[i], AT_SCALE, array.getType(_ids[i]));
 						removeByIndex(i);
 					}
 					else {

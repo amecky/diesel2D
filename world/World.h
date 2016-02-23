@@ -290,6 +290,9 @@ namespace ds {
 			return m_Buffer;
 		}
 
+		bool hasEvents() const {
+			return m_Buffer.events.size() > 0;
+		}
 		int getType(SID sid) const;
 
 		void setType(SID sid,int type);
