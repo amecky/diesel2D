@@ -3,19 +3,27 @@
 #include "..\utils\Log.h"
 #include "TextCompressor.h"
 #include "..\lib\collection_types.h"
+#include "DataFile.h"
+#include "..\utils\FileUtils.h"
+#include "..\utils\GlobalStringBuffer.h"
 
 namespace ds {
 
-	FileRepository::FileRepository() {
-	}
-
-
-	FileRepository::~FileRepository() {
-	}
-	
-
 	namespace repository {
 
+		// -----------------------------------------------------------
+		// FileInfo
+		// -----------------------------------------------------------
+		struct FileInfo {
+			//char name[256];
+			int nameIndex;
+			DataFile* dataFile;
+			FILETIME filetime;
+		};
+
+		// -----------------------------------------------------------
+		// RepositoryEntry
+		// -----------------------------------------------------------
 		struct RepositoryEntry {
 			char name[256];
 			IdString hash;
@@ -24,13 +32,20 @@ namespace ds {
 			bool encoded;
 		};
 
+		// -----------------------------------------------------------
+		// FileRepo
+		// -----------------------------------------------------------
 		struct FileRepo {
 			RepositoryMode mode;
 			Array<RepositoryEntry> entries;
+			Array<FileInfo> infos;
 		};
 
 		static FileRepo* _repository = 0;
 
+		// -----------------------------------------------------------
+		// intialize
+		// -----------------------------------------------------------
 		void initialize(RepositoryMode mode) {
 			_repository = new FileRepo;
 			_repository->mode = mode;
@@ -53,6 +68,9 @@ namespace ds {
 			}
 		}
 
+		// -----------------------------------------------------------
+		// already loaded
+		// -----------------------------------------------------------
 		bool already_loaded(const char* fileName) {
 			IdString hash = string::murmur_hash(fileName);
 			for (size_t i = 0; i < _repository->entries.size(); ++i) {
@@ -64,6 +82,40 @@ namespace ds {
 			return false;
 		}
 
+		// -----------------------------------------------------------
+		// load and store file info
+		// -----------------------------------------------------------
+		void load(DataFile* file, FileType type) {
+			int size = 0;
+			char buffer[256];
+			if (file->load()) {
+				sprintf_s(buffer, 256, "content\\%s", file->getFileName());
+				FileInfo info;
+				info.dataFile = file;
+				info.nameIndex = gStringBuffer->add(buffer);
+				file::getFileTime(buffer, info.filetime);
+				_repository->infos.push_back(info);
+			}
+		}
+
+		// -----------------------------------------------------------
+		// reload
+		// -----------------------------------------------------------
+		void reload() {
+			for (int i = 0; i < _repository->infos.size(); ++i) {
+				FileInfo& info = _repository->infos[i];
+				const char* name = gStringBuffer->get(info.nameIndex);
+				if (file::compareFileTime(name, info.filetime)) {
+					LOG << "Reloading file: " << name;
+					info.dataFile->load();
+					file::getFileTime(name, info.filetime);
+				}
+			}
+		}
+
+		// -----------------------------------------------------------
+		// load
+		// -----------------------------------------------------------
 		char* load(const char* fileName, int* size, FileType type) {
 			assert(_repository != 0);
 			*size = -1;
@@ -144,6 +196,9 @@ namespace ds {
 			return 0;
 		}
 
+		// -----------------------------------------------------------
+		// read file into char buffer
+		// -----------------------------------------------------------
 		char* read_file(const char* fileName,int* fileSize) {
 			FILE *fp = fopen(fileName, "rb");
 			if (fp) {
@@ -160,6 +215,9 @@ namespace ds {
 			return 0;
 		}
 
+		// -----------------------------------------------------------
+		// shutdown
+		// -----------------------------------------------------------
 		void shutdown() {
 			if (_repository->mode == RM_DEBUG) {
 				LOG << "entries: " << _repository->entries.size();
@@ -226,6 +284,9 @@ namespace ds {
 			delete _repository;
 		}
 
+		// -----------------------------------------------------------
+		// list entries of e.pak
+		// -----------------------------------------------------------
 		void list() {
 			Array<RepositoryEntry> entries;
 			FILE* f = fopen("e.pak", "rb");

@@ -22,6 +22,7 @@
 #include "..\io\ReportWriter.h"
 #include "..\ui\GameConsole.h"
 #include "..\editor\AssetEditor.h"
+#include "..\utils\GlobalStringBuffer.h"
 
 namespace ds {
 
@@ -34,6 +35,7 @@ BaseApp::BaseApp() {
 	_particlesEditor = 0;
 	_dialogEditor = 0;
 	gDefaultMemory = new DefaultAllocator(256 * 1024 * 1024);
+	gStringBuffer = new GlobalStringBuffer();
 	perf::init();
 	repository::initialize(repository::RM_DEBUG);
 	//gBlockMemory = new DataBlockAllocator();
@@ -85,6 +87,7 @@ BaseApp::BaseApp() {
 	else {
 		sprintf_s(_settings.reportingDirectory, "");
 	}
+	_reload_counter = 0;
 }
 
 // -------------------------------------------------------
@@ -116,6 +119,7 @@ BaseApp::~BaseApp() {
 	renderer::shutdown();	
 	gui::shutdown();
 	perf::shutdown();
+	delete gStringBuffer;
 	gDefaultMemory->printOpenAllocations();
 	delete gDefaultMemory;
 }
@@ -367,6 +371,11 @@ void BaseApp::buildFrame() {
 	perf::reset();
 	//PR_START("MAIN")
 	renderer::drawCounter().reset();
+	++_reload_counter;
+	if (_reload_counter >= 60) {
+		_reload_counter -= 60;
+		repository::reload();
+	}
 	// handle key states
 	{
 		ZoneTracker z("INPUT");

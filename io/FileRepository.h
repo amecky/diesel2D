@@ -2,12 +2,7 @@
 
 namespace ds {
 
-	class FileRepository {
-
-	public:
-		FileRepository();
-		~FileRepository();
-	};
+	class DataFile;
 
 	namespace repository {
 
@@ -27,6 +22,10 @@ namespace ds {
 		void shutdown();
 
 		char* load(const char* fileName, int* size, FileType type = FT_TEXT);
+
+		void load(DataFile* file, FileType type = FT_TEXT);
+
+		void reload();
 
 		void list();
 	}

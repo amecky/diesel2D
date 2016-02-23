@@ -165,6 +165,8 @@ private:
 	SpriteTemplatesEditor* _spriteTemplatesEditor;
 	ParticlesEditState* _particlesEditor;
 	DialogEditorState* _dialogEditor;
+
+	int _reload_counter;
 }; 
 
 }
