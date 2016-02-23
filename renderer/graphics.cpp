@@ -547,6 +547,9 @@ namespace ds {
 		void selectViewport(int vw) {
 			assert(vw >= 0);
 			assert(vw < renderContext->viewPorts.size());
+			if (renderContext->selectedViewPort != vw) {
+				sprites::flush();
+			}
 			renderContext->selectedViewPort = vw;
 		}
 

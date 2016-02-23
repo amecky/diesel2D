@@ -98,11 +98,10 @@ namespace ds {
 
 	struct WorldLayer {
 
-		int viewport_id;
 		bool visible;
 		int descriptor_id;
 
-		WorldLayer() : viewport_id(0), visible(true), descriptor_id(0) {}
+		WorldLayer() : visible(true), descriptor_id(0) {}
 	};
 
 	class World {
@@ -348,8 +347,6 @@ namespace ds {
 		void* get_data(SID sid) {
 			return _buffer.get(sid);
 		}
-
-		void attachViewport(int layer, int viewport_id);
 
 		void attach_descriptor(int layer, const char* descName);
 
