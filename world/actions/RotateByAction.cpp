@@ -56,6 +56,7 @@ namespace ds {
 					}
 					else if ( _modes[i] == 0 ) {
 						sar::rotate(array,_ids[i], _endAngles[i]);
+						buffer.add(_ids[i], AT_ROTATE_BY, array.getType(_ids[i]));
 						removeByIndex(i);
 					}
 					else {

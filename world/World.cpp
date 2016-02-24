@@ -245,6 +245,10 @@ namespace ds {
 		m_ScalingAction->attach(sid,startScale,endScale,ttl,mode,tweeningType);
 	}
 
+	float World::getRotation(SID sid) const {
+		return m_Data.getRotation(sid);
+	}
+
 	void World::setRotation(SID sid,float angle) {
 		sar::rotate(m_Data,sid,angle);
 	}

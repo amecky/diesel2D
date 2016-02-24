@@ -69,6 +69,12 @@ namespace ds {
 			return scales[in.index];
 		}
 
+		const float getRotation(SID sid) const {
+			SpriteArrayIndex &in = indices[sid];
+			assert(in.index != USHRT_MAX);
+			return rotations[in.index];
+		}
+
 		const Texture& getTexture(SID sid) const {
 			SpriteArrayIndex &in = indices[sid];
 			assert(in.index != USHRT_MAX);

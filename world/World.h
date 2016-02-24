@@ -247,6 +247,7 @@ namespace ds {
 		void moveWith(SID sid,const MoveFunc& function,float ttl,int mode = 0);
 
 
+		float getRotation(SID sid) const;
 		void setRotation(SID sid,float angle);
 		void setRotation(SID sid, const Vector2f& target);
 		void rotateBy(SID sid,float angle,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
