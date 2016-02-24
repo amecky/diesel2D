@@ -6,12 +6,12 @@
 #include "ParticleManager.h"
 
 namespace ds {
-
+	/*
 	const float VP_ARRAY[] = {
 		-0.5f, 0.5f, 0.5f, 0.5f,
 		0.5f, -0.5f, -0.5f, -0.5f
 	};
-
+	*/
 	NewParticleSystem::NewParticleSystem(int id, const char* name, ParticleSystemFactory* factory) {
 		strcpy_s(m_DebugName, 32, name);
 		sprintf_s(_json_name, 64, "particles\\%s.json", name);
@@ -56,6 +56,9 @@ namespace ds {
 		}
 	}
 
+	// -----------------------------------------------------------
+	// get data
+	// -----------------------------------------------------------
 	ParticleModifierData* NewParticleSystem::getData(const char* modifierName) {
 		for (int i = 0; i < _count_modifiers; ++i) {
 			const ModifierInstance& instance = _modifier_instances[i];
@@ -66,6 +69,9 @@ namespace ds {
 		return 0;
 	}
 
+	// -----------------------------------------------------------
+	// get generator data
+	// -----------------------------------------------------------
 	ParticleGeneratorData* NewParticleSystem::getGeneratorData(const char* generatorName) {
 		for (int i = 0; i < _count_generators; ++i) {
 			const GeneratorInstance& instance = _generator_instances[i];
@@ -142,6 +148,9 @@ namespace ds {
 		}
 	}
 
+	// -----------------------------------------------------------
+	// update
+	// -----------------------------------------------------------
 	void NewParticleSystem::update(float elapsed) {
 		ZoneTracker z("NPS:update");
 		uint32 start = 0;
@@ -157,6 +166,9 @@ namespace ds {
 		}
 	}
 	
+	// -----------------------------------------------------------
+	// clear
+	// -----------------------------------------------------------
 	void NewParticleSystem::clear() {
 		LOG << "clearing particlesystem: " << m_DebugName;
 		for (int i = 0; i < _count_modifiers; ++i) {
@@ -185,6 +197,9 @@ namespace ds {
 		return 0;
 	}
 
+	// -----------------------------------------------------------
+	// save data
+	// -----------------------------------------------------------
 	bool NewParticleSystem::saveData(JSONWriter& writer) {
 		writer.startCategory("particlesystem");
 		writer.write("max", 1024);
@@ -220,6 +235,9 @@ namespace ds {
 		return true;
 	}
 
+	// -----------------------------------------------------------
+	// load data
+	// -----------------------------------------------------------
 	bool NewParticleSystem::loadData(const JSONReader& reader) {
 		LOG << "importing data";
 		clear();
@@ -280,6 +298,9 @@ namespace ds {
 		return true;
 	}
 
+	// -----------------------------------------------------------
+	// prepare vertices
+	// -----------------------------------------------------------
 	void NewParticleSystem::prepareVertices() {
 		for (int i = 0; i < MAX_PARTICLES; ++i) {
 			m_Array.vertices[i * 4].uv.x = _system_data.texture.uv.x;
@@ -293,27 +314,9 @@ namespace ds {
 		}
 	}
 
-	void NewParticleSystem::buildVertices() {
-		ZoneTracker z("NPS:buildVertices");
-		Vector3f p(0, 0 , 0);
-		Vector3f dp(0, 0, 0);
-		for (uint32 i = 0; i < m_Array.countAlive; ++i) {
-			Vector3f cor = m_Array.position[i];
-			//cor = cor - ds::renderer::getSelectedViewport().getPosition();
-		
-			for (int j = 0; j < 4; ++j) {
-				p.x = VP_ARRAY[j * 2] * _system_data.texture.dim.x;
-				p.y = VP_ARRAY[j * 2 + 1] * _system_data.texture.dim.y;
-				//vector::srt(cor, p, m_Array.scale[i], m_Array.rotation[i], &dp);
-				dp = vector::srt(cor, p, m_Array.scale[i].x, m_Array.scale[i].y, m_Array.rotation[i]);
-				m_Array.vertices[i * 4 + j].x = dp.x;
-				m_Array.vertices[i * 4 + j].y = dp.y;
-				m_Array.vertices[i * 4 + j].z = dp.z;
-				m_Array.vertices[i * 4 + j].color = m_Array.color[i];
-			}
-		}
-	}
-
+	// -----------------------------------------------------------
+	// init emitter data
+	// -----------------------------------------------------------
 	void NewParticleSystem::initEmitterData() {
 		float total = static_cast<float>(_emitter_data.count);
 		LOG << "--> total: " << total;
@@ -339,6 +342,9 @@ namespace ds {
 		LOG << "--> frequency: " << _emitter_data.frequency;
 	}
 
+	// -----------------------------------------------------------
+	//  get modifier names
+	// -----------------------------------------------------------
 	void NewParticleSystem::getModifierNames(Array<const char*>& names) {
 		names.clear();
 		for (int i = 0; i < _count_modifiers; ++i) {
@@ -346,6 +352,9 @@ namespace ds {
 		}
 	}
 
+	// -----------------------------------------------------------
+	// get generator names
+	// -----------------------------------------------------------
 	void NewParticleSystem::getGeneratorNames(Array<const char*>& names) {
 		names.clear();
 		for (int i = 0; i < _count_generators; ++i) {

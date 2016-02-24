@@ -13,6 +13,9 @@ namespace ds {
 	SpriteTemplates::~SpriteTemplates() {
 	}
 
+	// -----------------------------------------------------------
+	// get index by id
+	// -----------------------------------------------------------
 	const int SpriteTemplates::getIndex(int id) const {
 		for (size_t i = 0; i < _map.size(); ++i) {
 			if (_map[i].sprite.id == id) {
@@ -22,6 +25,9 @@ namespace ds {
 		return -1;
 	}
 
+	// -----------------------------------------------------------
+	// get index by hash
+	// -----------------------------------------------------------
 	const int SpriteTemplates::getIndex(IdString hash) const {
 		for (size_t i = 0; i < _map.size(); ++i) {
 			if (_map[i].hash == hash) {
@@ -31,6 +37,9 @@ namespace ds {
 		return -1;
 	}
 
+	// -----------------------------------------------------------
+	// create empty template
+	// -----------------------------------------------------------
 	int SpriteTemplates::createEmptyTemplate(const char* name) {
 		MappingEntry entry;
 		strcpy(entry.name, name);
@@ -46,18 +55,30 @@ namespace ds {
 		return entry.sprite.id;
 	}
 
+	// -----------------------------------------------------------
+	// contains
+	// -----------------------------------------------------------
 	const bool SpriteTemplates::contains(int id) const {
 		return getIndex(id) != -1;
 	}
 
+	// -----------------------------------------------------------
+	// get by index
+	// -----------------------------------------------------------
 	Sprite& SpriteTemplates::get(int index) {
 		return _map[index].sprite;
 	}
 
+	// -----------------------------------------------------------
+	// get by index
+	// -----------------------------------------------------------
 	const Sprite& SpriteTemplates::get(int index) const {
 		return _map[index].sprite;
 	}
 
+	// -----------------------------------------------------------
+	// get by name
+	// -----------------------------------------------------------
 	bool SpriteTemplates::get(const char* name, Sprite* sprite) {
 		IdString hash = string::murmur_hash(name);
 		int idx = getIndex(hash);
@@ -84,24 +105,10 @@ namespace ds {
 		return true;
 
 	}
-	/*
-	bool SpriteTemplates::saveData(JSONWriter& writer) {
-		for (size_t i = 0; i < _map.size(); ++i) {
-			const MappingEntry& entry = _map[i];
-			writer.startCategory("sprite");
-			writer.write("name", entry.name);
-			writer.write("texture_id", entry.sprite.texture.textureID);
-			writer.write("position", entry.sprite.position);
-			writer.write("rect", entry.sprite.texture.rect);
-			writer.write("scale", entry.sprite.scale);
-			writer.write("rotation", entry.sprite.rotation);
-			writer.write("color", entry.sprite.color);
-			writer.write("type", entry.sprite.type);
-			writer.endCategory();
-		}
-		return true;
-	}
-	*/
+
+	// -----------------------------------------------------------
+	// save data
+	// -----------------------------------------------------------
 	bool SpriteTemplates::saveData(JSONWriter& writer) {
 		for (size_t i = 0; i < _map.size(); ++i) {
 			const MappingEntry& entry = _map[i];
@@ -119,8 +126,13 @@ namespace ds {
 		return true;
 	}
 
+
+	// -----------------------------------------------------------
+	//  load data
+	// -----------------------------------------------------------
 	bool SpriteTemplates::loadData(const JSONReader& loader) {
 		int cats[256];
+		_map.clear();
 		int num = loader.get_categories(cats, 256);
 		for (int i = 0; i < num; ++i) {
 			MappingEntry entry;

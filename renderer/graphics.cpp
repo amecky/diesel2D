@@ -1580,7 +1580,8 @@ namespace ds {
 		}
 
 		void loadSpriteTemplates() {
-			renderContext->spriteTemplates.load();
+			repository::load(&renderContext->spriteTemplates);
+			//renderContext->spriteTemplates.load();
 		}
 
 		bool getSpriteTemplate(const char* name,Sprite* sprite) {

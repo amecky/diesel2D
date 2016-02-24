@@ -21,6 +21,7 @@
 #include "..\utils\Profiler.h"
 #include "..\utils\Log.h"
 #include "BehaviorDefinitions.h"
+#include "..\io\FileRepository.h"
 
 namespace ds {
 
@@ -527,7 +528,8 @@ namespace ds {
 	}
 
 	void World::loadBehaviors() {
-		_behaviorDefinitions->load();
+		repository::load(_behaviorDefinitions);
+		//_behaviorDefinitions->load();
 	}
 
 	AbstractAction* World::find_action(const char* name) const {

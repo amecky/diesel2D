@@ -1,19 +1,3 @@
-# World
-- [ ] MoveByAction: add ttl and if used send event
+# Repository
 
-# Editor
-
-- [ ] HUD / game states / GUI / sprite templates / Settings / particles / world
-- [ ] GUI -> show all dialogs
-- [ ] GUI -> activate / deactivate dialog 
-- [ ] GUI -> only one should be active - keep activated dialog
-- [ ] GUIDialog -> list all elements and put it into model
-- [ ] GUIDialog -> add detail panels for every item
-- [ ] HUD -> save binary format
-- [ ] HUD -> load binary file / check if file is there and then load it
-- [ ] HUD -> auto load of HUD in BaseApp - use fixed name
-- [ ] Asset Compiler - remove HUD
-
-## 30.10.2015
-
-- [x] build a constant.h which contains IMGUI dialog IDs
+- [ ] marked files that were saved by editor as alreday loaded - repository does not need to reload

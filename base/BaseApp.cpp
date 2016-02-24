@@ -217,6 +217,15 @@ void BaseApp::loadSettings() {
 	else {
 		LOG << "Not loading sprite templates";
 	}
+	// load behaviors
+	bool load_behaviors = false;
+	reader.get_bool(root, "load_behaviors", &load_behaviors);
+	if (load_behaviors) {
+		world->loadBehaviors();
+	}
+	else {
+		LOG << "Not loading sprite templates";
+	}
 	bool initialize_editor = false;
 	reader.get_bool(root, "initialize_editor", &initialize_editor);
 	if (initialize_editor) {
@@ -371,11 +380,13 @@ void BaseApp::buildFrame() {
 	perf::reset();
 	//PR_START("MAIN")
 	renderer::drawCounter().reset();
+#ifdef DEBUG
 	++_reload_counter;
 	if (_reload_counter >= 60) {
 		_reload_counter -= 60;
 		repository::reload();
 	}
+#endif
 	// handle key states
 	{
 		ZoneTracker z("INPUT");

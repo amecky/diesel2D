@@ -114,7 +114,6 @@ private:
 	void emittParticles(ParticleEmitterInstance& instance, float dt, uint32* start, uint32* end);
 	void emittParticles(const ParticleEmitterInstance& instance, int count, uint32* start, uint32* end, float dt);
 	void prepareVertices();
-	void buildVertices();
 
 	ParticleSystemData _system_data;
 	ParticleEmitterData _emitter_data;

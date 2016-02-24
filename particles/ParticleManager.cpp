@@ -5,6 +5,7 @@
 #include "..\renderer\graphics.h"
 #include "..\sprites\SpriteBatch.h"
 #include "..\utils\Log.h"
+#include "..\io\FileRepository.h"
 
 namespace ds {
 
@@ -162,7 +163,8 @@ namespace ds {
 				if (id != -1) {
 					NewParticleSystem* system = create(id, name);
 					LOG << "id: " << id << " name: " << name;
-					system->load();
+					//system->load();
+					repository::load(system);
 					_systems[id] = system;
 				}
 			}
