@@ -8,7 +8,7 @@ namespace ds {
 
 	CubicBezierPath::~CubicBezierPath()	{}
 
-	void CubicBezierPath::create(const Vector2f& p0,const Vector2f& p1,const Vector2f& p2,const Vector2f& p3) {
+	void CubicBezierPath::create(const v2& p0,const v2& p1,const v2& p2,const v2& p3) {
 		m_Elements.clear();
 		BezierCurve be;
 		be.p0 = p0;
@@ -18,7 +18,7 @@ namespace ds {
 		m_Elements.push_back(be);
 	}
 
-	void CubicBezierPath::add(const Vector2f& p1,const Vector2f& p2,const Vector2f& p3) {
+	void CubicBezierPath::add(const v2& p1,const v2& p2,const v2& p3) {
 		assert(m_Elements.size() > 0);
 		BezierCurve be;
 		be.p0 = m_Elements[m_Elements.size()-1].p3;
@@ -32,8 +32,8 @@ namespace ds {
 		assert(m_Elements.size() > 0);
 		m_ArcLength[0] = 0.0f;
 		
-		Vector2f p;
-		Vector2f previous;
+		v2 p;
+		v2 previous;
 		m_TotalLength = 0.0f;
 		for (int i = 0; i <= MAX_CBP_STEPS; ++i) {
 			float t = (float)i / static_cast<float>(MAX_CBP_STEPS);
@@ -55,7 +55,7 @@ namespace ds {
 		}
 	}
 
-	void CubicBezierPath::approx(float u, Vector2f* p) {
+	void CubicBezierPath::approx(float u, v2* p) {
 		assert(u >= 0.0f && u <= 1.0f);
 		float t = find(u);
 		get(t, p);
@@ -90,7 +90,7 @@ namespace ds {
 		}
 	}
 
-	void CubicBezierPath::tanget(float u, Vector2f* tangent) {
+	void CubicBezierPath::tanget(float u, v2* tangent) {
 		assert(u >= 0.0f && u <= 1.0f);
 		float t = find(u);
 		float ds = 1.0f / m_Elements.size();
@@ -105,7 +105,7 @@ namespace ds {
 		}
 	}
 
-	void CubicBezierPath::get(float t,Vector2f* p) {
+	void CubicBezierPath::get(float t,v2* p) {
 		float ds = 1.0f / m_Elements.size();
 		int idx = t * m_Elements.size();
 		if ( idx == m_Elements.size() ) {
@@ -120,7 +120,7 @@ namespace ds {
 	/*
 	void CubicBezierPath::load(BinaryLoader* loader) {
 		m_Elements.clear();
-		Vector2f p0,p1,p2,p3;
+		v2 p0,p1,p2,p3;
 		while ( loader->openChunk() == 0 ) {		
 			if ( loader->getChunkID() == 1 ) {						
 				loader->read(&p0);

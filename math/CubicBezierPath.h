@@ -14,12 +14,12 @@ namespace ds {
 	public:
 		CubicBezierPath();
 		~CubicBezierPath();
-		void create(const Vector2f& p0,const Vector2f& p1,const Vector2f& p2,const Vector2f& p3);
-		void add(const Vector2f& p1,const Vector2f& p2,const Vector2f& p3);	
+		void create(const v2& p0,const v2& p1,const v2& p2,const v2& p3);
+		void add(const v2& p1,const v2& p2,const v2& p3);	
 		void build();
-		void get(float t,Vector2f* p);
-		void approx(float u, Vector2f* p);
-		void tanget(float u, Vector2f* tangent);
+		void get(float t,v2* p);
+		void approx(float u, v2* p);
+		void tanget(float u, v2* tangent);
 		const int size() const {
 			return m_Elements.size();
 		}
