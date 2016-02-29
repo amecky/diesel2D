@@ -18,8 +18,8 @@ namespace ds {
 	void ParticleSystemEditor::setSystem(int id) {
 		_system = _particles->getParticleSystem(id);
 		if (_system != 0) {
-			_system->getGeneratorNames(_generator_names);
-			_system->getModifierNames(_modifier_names);
+			//_system->getGeneratorNames(_generator_names);
+			_system->getModuleNames(_module_names);
 		}
 		reset();
 	}
@@ -45,8 +45,9 @@ namespace ds {
 	// render generator selection
 	// --------------------------------------------
 	void ParticleSystemEditor::renderGeneratorSelection() {
+		/*
 		gui::Header("Generators");
-		gui::ComboBox(_generator_names, &_generator_selection, &_generator_offset);
+		gui::ComboBox(_module_names, &_generator_selection, &_generator_offset);
 		gui::beginGroup();
 		if (gui::Button("Add")) {
 			_show_add_generator = true;
@@ -60,13 +61,11 @@ namespace ds {
 			gui::beginGroup();
 			if (gui::Button("Add")) {
 				if (_add_generator_selection != -1) {
-					/*
 					ParticleGenerator* generator = generator::create_by_name(_available_generators[_add_generator_state].c_str());
 					if (generator != 0) {
 					emitter.add(generator);
 					_modifier_names.push_back(_available_generators[_add_generator_state]);
 					}
-					*/
 					_show_add_generator = false;
 				}
 			}
@@ -75,12 +74,14 @@ namespace ds {
 			}
 			gui::endGroup();
 		}
+		*/
 	}
 
 	// --------------------------------------------
 	// render generator settings
 	// --------------------------------------------
 	void ParticleSystemEditor::renderGeneratorSettings() {
+		/*
 		if (_generator_selection != -1 && _system != 0) {
 			const GeneratorInstance& instance = _system->getGeneratorInstance(_generator_selection);
 			if (instance.generator->getType() == PGT_LIFETIME) {
@@ -131,6 +132,7 @@ namespace ds {
 				gui::InputFloat("Variance", &data->variance);
 			}
 		}
+		*/
 		// Point
 		// Circle
 	}
@@ -139,6 +141,7 @@ namespace ds {
 	// render modifier selection
 	// --------------------------------------------
 	void ParticleSystemEditor::renderModifierSelection() {
+		/*
 		gui::Header("Modifiers");
 		gui::ComboBox(_modifier_names, &_modifier_selection, &_modifier_offset);
 		gui::beginGroup();
@@ -167,12 +170,14 @@ namespace ds {
 			}
 			gui::endGroup();
 		}
+		*/
 	}
 
 	// --------------------------------------------
 	// render modifier settings
 	// --------------------------------------------
 	void ParticleSystemEditor::renderModifierSettings() {
+		/*
 		if (_modifier_selection != -1 && _system != 0) {
 			const ModifierInstance& instance = _system->getModifierInstance(_modifier_selection);
 			if (instance.modifier != 0) {
@@ -201,6 +206,7 @@ namespace ds {
 				}
 			}
 		}
+		*/
 	}
 
 	// --------------------------------------------
@@ -209,6 +215,7 @@ namespace ds {
 	void ParticleSystemEditor::renderEmitterSettings() {
 		if (_system != 0) {
 			gui::Header("System");
+			/*
 			ParticleEmitterData& data = _system->getEmitterData();
 			ParticleSystemData& system_data = _system->getParticleData();
 			char buffer[32];
@@ -221,7 +228,44 @@ namespace ds {
 			ds::Rect r = system_data.texture.rect;
 			gui::InputRect("TextureRect", &r);
 			system_data.texture = math::buildTexture(r);
+			*/
 		}
+	}
+
+	// --------------------------------------------
+	// render generator selection
+	// --------------------------------------------
+	void ParticleSystemEditor::renderModules() {
+		gui::Header("Modules");
+		gui::ComboBox(_module_names, &_generator_selection, &_generator_offset);
+		gui::beginGroup();
+		if (gui::Button("Add")) {
+		_show_add_generator = true;
+		}
+		else if (gui::Button("Remove")) {
+		}
+		gui::endGroup();
+		/*
+		if (_show_add_generator) {
+		gui::Header("Add generator");
+		gui::ComboBox(_particles->getFactory().getGeneratorNames(), &_add_generator_selection, &_add_generator_offset);
+		gui::beginGroup();
+		if (gui::Button("Add")) {
+		if (_add_generator_selection != -1) {
+		ParticleGenerator* generator = generator::create_by_name(_available_generators[_add_generator_state].c_str());
+		if (generator != 0) {
+		emitter.add(generator);
+		_modifier_names.push_back(_available_generators[_add_generator_state]);
+		}
+		_show_add_generator = false;
+		}
+		}
+		else if (gui::Button("Cancel")) {
+		_show_add_generator = false;
+		}
+		gui::endGroup();
+		}
+		*/
 	}
 
 	void ParticleSystemEditor::render() {
@@ -247,6 +291,8 @@ namespace ds {
 				_system->save();
 			}
 			gui::endGroup();
+			renderModules();
+
 			if (_part_selection == 1) {
 				renderEmitterSettings();
 			}

@@ -86,6 +86,14 @@ namespace ds {
 		// -------------------------------------------------------
 		int random(int min,int max);
 		// -------------------------------------------------------
+		// Get random float between value - variance and value + variance
+		// -------------------------------------------------------
+		float randomRange(float value, float variance);
+		// -------------------------------------------------------
+		// Get random v2 between value - variance and value + variance
+		// -------------------------------------------------------
+		v2 randomRange(const v2& value, const v2& variance);
+		// -------------------------------------------------------
 		// get random between 0 - 100 and returns true if below min
 		// -------------------------------------------------------
 		bool chanceRoll(int min);

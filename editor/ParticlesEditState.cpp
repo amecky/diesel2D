@@ -46,7 +46,7 @@ namespace ds {
 		if (_showAdd) {
 			int ret = _dialog.showEmbedded("Please provide a name", "Name");
 			if (ret == 1) {
-				NewParticleSystem* system = _particles->create(_dialog.getText());
+				ParticleSystem* system = _particles->create(_dialog.getText());
 				if (system != 0) {
 					char buffer[64];
 					sprintf_s(buffer, 64, "%s (%d)", system->getDebugName(), system->getID());

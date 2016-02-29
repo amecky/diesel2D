@@ -1,39 +1,39 @@
 #pragma once
 #include "Particle.h"
-#include "ParticleGenerator.h"
 
 namespace ds {
 
-// -------------------------------------------------------
-// Particle emitter data
-// -------------------------------------------------------
-struct ParticleEmitterData {
+	const int MAX_SPAWNERS = 1024;
+	// -------------------------------------------------------
+	// Particle spawner
+	// -------------------------------------------------------
+	struct ParticleSpawner {
+		
+		float duration;
+		int rate;
+		int loop;
+		float loopDelay;
+		float frequency;
+		bool sendEvents;
+	};
 
-	uint32 ejectionPeriod;
-	uint32 ejectionVariance;
-	uint32 ejectionCounter;
-	uint32 count;
-	float duration; // seconds
-	int loops; // how many ticks to run
-	bool burst;
-	bool endless;
-	float frequency;
+	// -------------------------------------------------------
+	// Particle spawner instance
+	// -------------------------------------------------------
+	struct ParticleSpawnerInstance {
+		ID id;
+		float timer;
+		float accumulated;
+		v2 pos;
+		int loop;
+		float loopDelay;
+		float loopTimer;
+		float ttl;
 
-	ParticleEmitterData() : ejectionPeriod(0), ejectionVariance(0), ejectionCounter(0), count(1) , duration(0.0f) {}
+		ParticleSpawnerInstance() : id(INVALID_ID), timer(0.0f), accumulated(0.0f), pos(0, 0), loop(0), ttl(0.0f) , loopTimer(0.0f) {}
+	};
 
-};
-
-struct ParticleEmitterInstance {
-
-	ID id;
-	v3 pos;
-	float timer;
-	float accumulated;
-	float ttl;
-
-};
-
-typedef DataArray<ParticleEmitterInstance, 64> EmitterInstances;
+	typedef DataArray<ParticleSpawnerInstance, MAX_SPAWNERS> SpawnerInstances;
 
 }
 

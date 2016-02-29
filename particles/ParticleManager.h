@@ -14,6 +14,8 @@ struct ParticleSystemGroup {
 	char name[20];
 	Array<int> systems;
 };
+
+struct ParticleEvent;
 	
 class ParticleManager : public DataFile {
 
@@ -21,21 +23,21 @@ public:
 	ParticleManager();
 	~ParticleManager();
 	void init(const Descriptor& desc);
-	void start(uint32 id,const Vector3f& pos);
-	void startGroup(uint32 id, const Vector3f& pos);
+	void start(uint32 id,const v2& pos);
+	void startGroup(uint32 id, const v2& pos);
 	void stop(uint32 id);
 	void setBlendState(int blendState) {
 		m_BlendState = blendState;
 	}
-	NewParticleSystem* getParticleSystem(uint32 id) {
+	ParticleSystem* getParticleSystem(uint32 id) {
 		assert(_systems[id] != 0);
 		return _systems[id];
 	}
 	void update(float elapsed);
 	void render();
 
-	NewParticleSystem* create(int id, const char* name);
-	NewParticleSystem* create(const char* name);
+	ParticleSystem* create(int id, const char* name);
+	ParticleSystem* create(const char* name);
 	void removeSystem(int id);
 	void debug();
 	void fillModel(gui::ComponentModel<int>* model);
@@ -47,13 +49,23 @@ public:
 		return _factory;
 	}
 	virtual bool loadData(const JSONReader& loader);
+	bool hasEvents() const {
+		return _events.size() > 0;
+	}
+	int getEventsCount() const {
+		return _events.size();
+	}
+	const ParticleEvent& getEvent(int index) {
+		return _events[index];
+	}
 private:
 	int findGroup(uint32 id);
-	NewParticleSystem** _systems;
+	ParticleSystem** _systems;
 	int m_BlendState;
 	BatchBuffer<ParticleVertex>* _particles;
 	ParticleSystemFactory _factory;
 	Array<ParticleSystemGroup> _groups;
+	Array<ParticleEvent> _events;
 };
 
 }

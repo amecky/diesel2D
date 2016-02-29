@@ -82,9 +82,6 @@
     <ClCompile Include="base\EventStream.cpp">
       <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="renderer\Camera2D.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="memory\DataBlockAllocator.cpp">
       <Filter>memory</Filter>
     </ClCompile>
@@ -96,9 +93,6 @@
     </ClCompile>
     <ClCompile Include="particles\ParticleManager.cpp">
       <Filter>particles</Filter>
-    </ClCompile>
-    <ClCompile Include="objects\BloomComponent.cpp">
-      <Filter>objects</Filter>
     </ClCompile>
     <ClCompile Include="sprites\SpriteBatch.cpp">
       <Filter>sprites</Filter>
@@ -226,13 +220,7 @@
     <ClCompile Include="editor\ParticlesEditState.cpp">
       <Filter>editor</Filter>
     </ClCompile>
-    <ClCompile Include="particles\ParticleModifier.cpp">
-      <Filter>particles</Filter>
-    </ClCompile>
     <ClCompile Include="particles\ParticleSystemFactory.cpp">
-      <Filter>particles</Filter>
-    </ClCompile>
-    <ClCompile Include="particles\ParticleGenerator.cpp">
       <Filter>particles</Filter>
     </ClCompile>
     <ClCompile Include="editor\ParticleSystemEditor.cpp">
@@ -267,6 +255,54 @@
     </ClCompile>
     <ClCompile Include="world\actions\ColorFlashAction.cpp">
       <Filter>world\actions</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\SparkleEffect.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="io\ReportWriter.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Scenes.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Camera2D.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\GameConsole.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\AssetEditor.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="world\BehaviorDefinitions.cpp">
+      <Filter>world</Filter>
+    </ClCompile>
+    <ClCompile Include="data\DynamicSettingsEditor.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="effects\BloomRenderEffect.cpp">
+      <Filter>effects</Filter>
+    </ClCompile>
+    <ClCompile Include="effects\GrayFadeRenderEffect.cpp">
+      <Filter>effects</Filter>
+    </ClCompile>
+    <ClCompile Include="effects\RenderEffect.cpp">
+      <Filter>effects</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\CallStackTracer.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="effects\AlphaFadeRenderEffect.cpp">
+      <Filter>effects</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\GlobalStringBuffer.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="effects\LightningRenderEffect.cpp">
+      <Filter>effects</Filter>
+    </ClCompile>
+    <ClCompile Include="particles\ParticleModule.cpp">
+      <Filter>particles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -422,9 +458,6 @@
     <ClInclude Include="lib\container\dVector.h">
       <Filter>lib\container</Filter>
     </ClInclude>
-    <ClInclude Include="objects\BloomComponent.h">
-      <Filter>objects</Filter>
-    </ClInclude>
     <ClInclude Include="sprites\SpriteBatch.h">
       <Filter>sprites</Filter>
     </ClInclude>
@@ -451,9 +484,6 @@
     </ClInclude>
     <ClInclude Include="collision\SpatialHashingBroadPhaseDetector.h">
       <Filter>collision</Filter>
-    </ClInclude>
-    <ClInclude Include="particles\ParticleModifier.h">
-      <Filter>particles</Filter>
     </ClInclude>
     <ClInclude Include="particles\ParticleEmitter.h">
       <Filter>particles</Filter>
@@ -594,9 +624,6 @@
     <ClInclude Include="particles\ParticleSystemData.h">
       <Filter>particles</Filter>
     </ClInclude>
-    <ClInclude Include="particles\ParticleGenerator.h">
-      <Filter>particles</Filter>
-    </ClInclude>
     <ClInclude Include="editor\ParticleSystemEditor.h">
       <Filter>editor</Filter>
     </ClInclude>
@@ -632,6 +659,48 @@
     </ClInclude>
     <ClInclude Include="world\actions\ColorFlashAction.h">
       <Filter>world\actions</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\SparkleEffect.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="io\ReportWriter.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Scenes.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\GameConsole.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="world\BehaviorDefinitions.h">
+      <Filter>world</Filter>
+    </ClInclude>
+    <ClInclude Include="data\DynamicSettingsEditor.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="effects\BloomRenderEffect.h">
+      <Filter>effects</Filter>
+    </ClInclude>
+    <ClInclude Include="effects\GrayFadeRenderEffect.h">
+      <Filter>effects</Filter>
+    </ClInclude>
+    <ClInclude Include="effects\RenderEffect.h">
+      <Filter>effects</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\CallStackTracer.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="effects\AlphaFadeRenderEffect.h">
+      <Filter>effects</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\GlobalStringBuffer.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="effects\LightningRenderEffect.h">
+      <Filter>effects</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\ParticleModule.h">
+      <Filter>particles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -684,15 +753,6 @@
     <Filter Include="sprites">
       <UniqueIdentifier>{8d172883-66db-4af1-bda9-faab2ac576f2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="objects">
-      <UniqueIdentifier>{154b76ff-d046-4d98-9f4f-5b6a10fd3864}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="compiler">
-      <UniqueIdentifier>{fcbfebaa-fe95-4080-a20b-7f0f2d6b1828}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ecs">
-      <UniqueIdentifier>{78a42f98-d454-4702-8275-944d42677625}</UniqueIdentifier>
-    </Filter>
     <Filter Include="collision">
       <UniqueIdentifier>{1492ec9b-a315-4461-848e-c935a447e4e4}</UniqueIdentifier>
     </Filter>
@@ -710,6 +770,9 @@
     </Filter>
     <Filter Include="editor">
       <UniqueIdentifier>{6dc399db-de5a-407c-b7a2-d9de1e03b21b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="effects">
+      <UniqueIdentifier>{e7080657-1fd8-4b5b-9a44-842058ffd1cc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

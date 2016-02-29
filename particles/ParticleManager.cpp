@@ -15,7 +15,7 @@ namespace ds {
 	// constructor
 	// --------------------------------------------------------------------------
 	ParticleManager::ParticleManager() {		
-		_systems = new NewParticleSystem*[MAX_PARTICLE_SYSTEMS];
+		_systems = new ParticleSystem*[MAX_PARTICLE_SYSTEMS];
 		for (int i = 0; i < 128; ++i) {
 			_systems[i] = 0;
 		}
@@ -35,12 +35,12 @@ namespace ds {
 		delete _particles;
 	}
 
-	NewParticleSystem* ParticleManager::create(int id, const char* name) {
-		NewParticleSystem* system = new NewParticleSystem(id, name, &_factory);
+	ParticleSystem* ParticleManager::create(int id, const char* name) {
+		ParticleSystem* system = new ParticleSystem(id, name, &_factory);
 		return system;
 	}
 
-	NewParticleSystem* ParticleManager::create(const char* name) {
+	ParticleSystem* ParticleManager::create(const char* name) {
 		int idx = -1;
 		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
 			if (_systems[i] == 0 && idx == -1) {
@@ -48,7 +48,7 @@ namespace ds {
 			}
 		}
 		if (idx != -1) {
-			NewParticleSystem* system = new NewParticleSystem(idx, name, &_factory);
+			ParticleSystem* system = new ParticleSystem(idx, name, &_factory);
 			_systems[idx] = system;
 			return system;
 		}
@@ -58,9 +58,9 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	// start specific particlesystem
 	// --------------------------------------------------------------------------
-	void ParticleManager::start(uint32 id,const Vector3f& pos) {	
+	void ParticleManager::start(uint32 id,const v2& pos) {	
 		ZoneTracker z("ParticleManager::start");
-		NewParticleSystem* system = _systems[id];
+		ParticleSystem* system = _systems[id];
 		assert(system != 0);
 		system->start(pos);
 	}
@@ -76,13 +76,13 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	// start specific particlesystem
 	// --------------------------------------------------------------------------
-	void ParticleManager::startGroup(uint32 id, const Vector3f& pos) {
+	void ParticleManager::startGroup(uint32 id, const v2& pos) {
 		ZoneTracker z("ParticleManager::start");
 		int idx = findGroup(id);
 		if (idx != -1) {
 			const ParticleSystemGroup& group = _groups[idx];
 			for (int i = 0; i < group.systems.size(); ++i) {
-				NewParticleSystem* system = _systems[group.systems[i]];
+				ParticleSystem* system = _systems[group.systems[i]];
 				assert(system != 0);
 				system->start(pos);
 			}
@@ -160,10 +160,16 @@ namespace ds {
 				const char* name = reader.get_string(cats[i], "file");
 				int id = -1;
 				reader.get_int(cats[i], "id", &id);
+				bool se = false;
+				if (reader.contains_property(cats[i], "send_events")) {
+					reader.get_bool(cats[i], "send_events", &se);
+				}
 				if (id != -1) {
-					NewParticleSystem* system = create(id, name);
+					ParticleSystem* system = create(id, name);
+					if (se) {
+						system->activateEvents();
+					}
 					LOG << "id: " << id << " name: " << name;
-					//system->load();
 					repository::load(system);
 					_systems[id] = system;
 				}
@@ -174,7 +180,7 @@ namespace ds {
 
 	void  ParticleManager::removeSystem(int id) {
 		assert(_systems[id] != 0);
-		NewParticleSystem* system = _systems[id];
+		ParticleSystem* system = _systems[id];
 		delete system;
 		_systems[id] = 0;
 	}
@@ -184,10 +190,11 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	void ParticleManager::update(float elapsed) {
 		ZoneTracker z("ParticleManager::update");
+		_events.clear();
 		for (int i = 0; i < MAX_PARTICLE_SYSTEMS; ++i) {
 			if (_systems[i] != 0) {
-				if (_systems[i]->getCountAlive() > 0) {
-					_systems[i]->update(elapsed);
+				if (_systems[i]->isAlive()) {
+					_systems[i]->update(elapsed, _events);
 				}
 			}
 		}

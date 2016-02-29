@@ -28,7 +28,7 @@ namespace ds {
 
 		ParticleSystemEditor* _editor;
 		ParticleManager* _particles;
-		NewParticleSystem* _current_system;
+		ParticleSystem* _current_system;
 		gui::ComponentModel<int> _model;
 		gui::InputDialog _dialog;
 		v2 _dialogPos;

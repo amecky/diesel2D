@@ -1,130 +1,58 @@
 #include "ParticleSystemFactory.h"
 #include "ParticleSystem.h"
+#include "..\utils\GlobalStringBuffer.h"
 
 namespace ds {
 
 	ParticleSystemFactory::ParticleSystemFactory() {
-		_count_modifiers = 0;
-		_known_modifiers = new ParticleModifier*[32];
-		_known_generators = new ParticleGenerator*[32];
-		_known_modifiers[_count_modifiers++] = new ParticleTimeModifier();
-		_known_modifiers[_count_modifiers++] = new ParticlePositionModifier();
-		_known_modifiers[_count_modifiers++] = new DampingVelocityModifier();
-		_known_modifiers[_count_modifiers++] = new ColorPathModifier();
-		_known_modifiers[_count_modifiers++] = new VelocityRotationModifier();
-		_known_modifiers[_count_modifiers++] = new LinearSizeModifier();
-		_known_modifiers[_count_modifiers++] = new LinearAlphaModifier();
-		_known_modifiers[_count_modifiers++] = new AlphaPathModifier();
-		_known_modifiers[_count_modifiers++] = new LinearColorModifier();
-		_known_modifiers[_count_modifiers++] = new SizePathModifier();
-		_known_modifiers[_count_modifiers++] = new RotationModifier();
-		for (int i = 0; i < _count_modifiers; ++i) {
-			_known_modifier_names.push_back(_known_modifiers[i]->getName());
-		}
-		_count_generators = 0;
-		_known_generators[_count_generators++] = new RingGenerator();
-		_known_generators[_count_generators++] = new RadialVelocityGenerator();
-		_known_generators[_count_generators++] = new LifetimeGenerator();
-		_known_generators[_count_generators++] = new SizeGenerator();
-		_known_generators[_count_generators++] = new ColorGenerator();
-		_known_generators[_count_generators++] = new HSVColorGenerator();
-		_known_generators[_count_generators++] = new RotationVelocityGenerator();
-		_known_generators[_count_generators++] = new BoxGenerator();
-		for (int i = 0; i < _count_generators; ++i) {
-			_known_generator_names.push_back(_known_generators[i]->getName());
+		_count_modules = 0;
+		_known_modules = new ParticleModule*[64];
+		_known_modules[_count_modules++] = new RingLocationModule();
+		_known_modules[_count_modules++] = new ParticleTimeModule();
+		_known_modules[_count_modules++] = new LinearColorModule();
+		_known_modules[_count_modules++] = new SizeModule();
+		_known_modules[_count_modules++] = new RadialVelocityModule();
+		_known_modules[_count_modules++] = new DampingVelocityModule();
+		_known_modules[_count_modules++] = new ColorModule();
+		_known_modules[_count_modules++] = new AlphaModule();
+		_known_modules[_count_modules++] = new RotationModule();
+		_known_modules[_count_modules++] = new VelocityModule();
+		for (int i = 0; i < _count_modules; ++i) {
+			_known_module_names.push_back(gStringBuffer->add(_known_modules[i]->getName()));
 		}
 	}
 
 
 	ParticleSystemFactory::~ParticleSystemFactory()	{
-		for (int i = 0; i < _count_modifiers; ++i) {
-			delete _known_modifiers[i];
+		for (int i = 0; i < _count_modules; ++i) {
+			delete _known_modules[i];
 		}
-		delete[] _known_modifiers;
-		for (int i = 0; i < _count_generators; ++i) {
-			delete _known_generators[i];
-		}
-		delete[] _known_generators;
+		delete[] _known_modules;
 	}
-
-	bool ParticleSystemFactory::addModifier(NewParticleSystem* system, ParticleModifierType type) {
-		for (int i = 0; i < _count_modifiers; ++i) {
-			if (_known_modifiers[i]->getType() == type) {
-				ParticleModifierData* data = createData(type);
-				system->addModifier(_known_modifiers[i],data);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool ParticleSystemFactory::addModifier(NewParticleSystem* system, const char* modifierName) const {
-		for (int i = 0; i < _count_modifiers; ++i) {
-			if (strcmp(_known_modifiers[i]->getName(),modifierName) == 0) {
-				ParticleModifierData* data = createData(_known_modifiers[i]->getType());
-				system->addModifier(_known_modifiers[i],data);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	ParticleModifierData* ParticleSystemFactory::addModifier(NewParticleSystem* system, int chunkID) {
-		for (int i = 0; i < _count_modifiers; ++i) {
-			if (_known_modifiers[i]->getChunkID() == chunkID ) {
-				ParticleModifierData* data = createData(_known_modifiers[i]->getType());
-				system->addModifier(_known_modifiers[i], data);
+	
+	ParticleModuleData* ParticleSystemFactory::addModule(ParticleSystem* system, const char* moduleName) {
+		for (int i = 0; i < _count_modules; ++i) {
+			if (strcmp(_known_modules[i]->getName(),moduleName) == 0) {
+				ParticleModuleData* data = createData(_known_modules[i]->getType());
+				system->addModule(_known_modules[i], data);
 				return data;
 			}
 		}
 		return 0;
 	}
-
-	bool ParticleSystemFactory::addGenerator(NewParticleSystem* system, const char* generatorName) {
-		for (int i = 0; i < _count_generators; ++i) {
-			if (strcmp(_known_generators[i]->getName(), generatorName) == 0) {
-				ParticleGeneratorData* data = createData(_known_generators[i]->getType());
-				system->addGenerator(_known_generators[i], data);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	ParticleGeneratorData* ParticleSystemFactory::addGenerator(NewParticleSystem* system, int chunkID) {
-		for (int i = 0; i < _count_generators; ++i) {
-			if (_known_generators[i]->getChunkID() == chunkID) {
-				ParticleGeneratorData* data = createData(_known_generators[i]->getType());
-				system->addGenerator(_known_generators[i], data);
-				return data;
-			}
-		}
-		return 0;
-	}
-
-	ParticleGeneratorData* ParticleSystemFactory::createData(ParticleGeneratorType type) {
+	
+	ParticleModuleData* ParticleSystemFactory::createData(ParticleModuleType type) const {
 		switch (type) {
-			case PGT_RING: return new RingGeneratorData(); break;
-			case PGT_RADIAL_VELOCITY: return new RadialVelocityGeneratorData(); break;
-			case PGT_LIFETIME: return new LifetimeGeneratorData(); break;
-			case PGT_SIZE: return new SizeGeneratorData(); break;
-			case PGT_COLOR: return new ColorGeneratorData(); break;
-			case PGT_HSV_COLOR: return new HSVColorGeneratorData(); break;
-			case PGT_ROTATION_VELOCITY: return new RotationVelocityGeneratorData(); break;
-			case PGT_BOX: return new BoxGeneratorData(); break;
-		}
-		return 0;
-	}
-
-	ParticleModifierData* ParticleSystemFactory::createData(ParticleModifierType type) const {
-		switch (type) {
-			case PMT_DAMPING_VELOCITY: return new DampingVelocityModifierData(); break;
-			case PMT_LINEAR_SIZE: return new LinearSizeModifierData(); break;
-			case PMT_COLOR_PATH: return new ColorPathModifierData(); break;
-			case PMT_LINEAR_COLOR: return new LinearColorModifierData(); break;
-			case PMT_LINEAR_ALPHA: return new LinearAlphaModifierData(); break;
-			case PMT_ALPHA_PATH: return new AlphaPathModifierData(); break;
-			case PMT_SIZE_PATH: return new SizePathModifierData(); break;
+			case PM_LIFECYCLE: return new LifetimeModuleData(); break;
+			case PM_RING: return new RingLocationModuleData(); break;
+			case PM_LINEAR_COLOR: return new LinearColorModuleData(); break;
+			case PM_SIZE: return new SizeModuleData(); break;
+			case PM_RADIAL_VELOCITY: return new RadialVelocityModuleData(); break;
+			case PM_DAMPING_VELOCITY: return new DampingVelocityModuleData(); break;
+			case PM_COLOR: return new ColorModuleData(); break;
+			case PM_ALPHA: return new AlphaModuleData(); break;
+			case PM_ROTATION: return new RotationModuleData(); break;
+			case PM_VELOCITY: return new VelocityModuleData(); break;
 		}
 		return 0;
 	}

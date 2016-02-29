@@ -12,7 +12,7 @@ namespace ds {
 
 		v3* position;
 		v3* velocity;
-		v3* acceleration;
+		v3* forces;
 		v3* normal;
 		v2* scale;
 		v2* baseScale;
@@ -35,17 +35,17 @@ namespace ds {
 		}
 
 		void initialize(unsigned int maxParticles) {
-			int size = maxParticles * ( sizeof(v3) * 4 + sizeof(v2) * 2 + sizeof(float) * 2 + sizeof(v3) + sizeof(Color) + 4 * sizeof(PTCVertex));
+			int size = maxParticles * ( sizeof(v3) * 2 + sizeof(v3) + sizeof(v3) + sizeof(v2) * 2 + sizeof(float) * 2 + sizeof(v3) + sizeof(Color) + 4 * sizeof(PTCVertex));
 			buffer = new char[size];
-			position = (Vector3f*)(buffer);
-			velocity = (Vector3f*)(position + maxParticles);
-			acceleration = (Vector3f*)(velocity + maxParticles);
-			normal = (Vector3f*)(acceleration + maxParticles);
+			position = (v3*)(buffer);
+			velocity = (v3*)(position + maxParticles);
+			forces = (v3*)(velocity + maxParticles);
+			normal = (v3*)(forces + maxParticles);
 			scale = (Vector2f*)(normal + maxParticles);
 			baseScale = (v2*)(scale + maxParticles);
 			rotation = (float*)(baseScale + maxParticles);
 			rotationVelocity = (float*)(rotation + maxParticles);
-			timer = (Vector3f*)(rotationVelocity + maxParticles);
+			timer = (v3*)(rotationVelocity + maxParticles);
 			color = (Color*)(timer + maxParticles);
 			vertices = (PTCVertex*)(color + maxParticles);
 			count = maxParticles;
@@ -56,7 +56,7 @@ namespace ds {
 			if ( a != b ) {
 				position[a] = position[b];
 				velocity[a] = velocity[b];
-				acceleration[a] = acceleration[b];
+				forces[a] = forces[b];
 				normal[a] = normal[b];
 				scale[a] = scale[b];
 				baseScale[a] = baseScale[b];

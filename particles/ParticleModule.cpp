@@ -1,0 +1,292 @@
+#include "ParticleModule.h"
+#include "..\utils\Profiler.h"
+
+namespace ds {
+
+	// -------------------------------------------------------
+	// ParticleTimeModule
+	// -------------------------------------------------------
+	void ParticleTimeModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
+		uint32 count = end - start;
+		const LifetimeModuleData* my_data = static_cast<const LifetimeModuleData*>(data);
+		for (uint32 i = 0; i < count; ++i) {
+			float ttl = ds::math::random(my_data->ttl - my_data->variance, my_data->ttl + my_data->variance);
+			array->timer[start + i] = Vector3f(0.0f, 0.0f, ttl);
+		}
+	}
+
+	void  ParticleTimeModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
+		for (uint32 i = 0; i < array->countAlive; ++i) {
+			array->timer[i].x += dt;
+			array->timer[i].y = array->timer[i].x / array->timer[i].z;
+		}
+		/*
+		uint32 cnt = 0;
+		while (cnt < array->countAlive) {
+			if (array->timer[cnt].x > array->timer[cnt].z) {
+				array->kill(cnt);
+			}
+			++cnt;
+		}
+		*/
+	}
+
+	// -------------------------------------------------------
+	// Ring Location Module
+	// -------------------------------------------------------
+	void RingLocationModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
+		ZoneTracker z("RingLocationModule:generate");
+		uint32 count = end - start;
+		//float angle = 0.0f;
+		const RingLocationModuleData* my_data = static_cast<const RingLocationModuleData*>(data);
+		float angleVariance = DEGTORAD(my_data->angleVariance);
+		float step = TWO_PI / static_cast<float>(count);
+		if (my_data->step != 0.0f) {
+			step = DEGTORAD(my_data->step);
+		}
+		for (uint32 i = 0; i < count; ++i) {
+			float myAngle = m_Angle + ds::math::random(-angleVariance, angleVariance);
+			float rad = ds::math::random(my_data->radius - my_data->variance, my_data->radius + my_data->variance);
+			array->position[start + i].x = array->position[start + i].x + rad * math::fastCos(myAngle);
+			array->position[start + i].y = array->position[start + i].y + rad * math::fastSin(myAngle);
+			array->position[start + i].z = array->position[start + i].z;
+			array->rotation[start + i] = myAngle;
+			m_Angle += step;
+		}
+	}
+
+	// -------------------------------------------------------
+	// Linear color Module
+	// -------------------------------------------------------
+	void LinearColorModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
+		assert(data != 0);
+		const LinearColorModuleData* my_data = static_cast<const LinearColorModuleData*>(data);
+		for (uint32 i = 0; i < array->countAlive; ++i) {
+			array->color[i] = color::lerp(my_data->startColor, my_data->endColor, array->timer[i].y);
+		}
+	}
+	void LinearColorModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
+		assert(data != 0);
+		const LinearColorModuleData* my_data = static_cast<const LinearColorModuleData*>(data);
+		for (uint32 i = start; i < end; ++i) {
+			array->color[i] = my_data->startColor;
+		}
+	}
+
+	// -------------------------------------------------------
+	// Linear size Module
+	// -------------------------------------------------------
+	void SizeModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
+		assert(data != 0);
+		const SizeModuleData* my_data = static_cast<const SizeModuleData*>(data);
+		if (my_data->modifier != SMM_NONE) {			
+			for (uint32 i = 0; i < array->countAlive; ++i) {
+				if (my_data->modifier == SMM_PATH) {
+					for (uint32 i = 0; i < array->countAlive; ++i) {
+						my_data->path.get(array->timer[i].y, &array->scale[i]);
+						array->scale[i].x *= array->baseScale[i].x;
+						array->scale[i].y *= array->baseScale[i].y;
+					}
+				}
+				else {
+					array->scale[i] = lerp(my_data->minScale, my_data->maxScale, array->timer[i].y);
+					array->scale[i].x *= array->baseScale[i].x;
+					array->scale[i].y *= array->baseScale[i].y;
+				}
+			}
+		}
+	}
+
+	void SizeModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
+		assert(data != 0);
+		const SizeModuleData* my_data = static_cast<const SizeModuleData*>(data);
+		for (uint32 i = start; i < end; ++i) {
+			v2 s = math::randomRange(my_data->initial, my_data->variance);
+			if (s.x < 0.1f) {
+				s.x = 0.1f;
+			}
+			if (s.y < 0.1f) {
+				s.y = 0.1f;
+			}
+			array->scale[i] = s;
+			array->baseScale[i] = s;
+		}
+	}
+
+	// -------------------------------------------------------
+	// RadialVelocityModule
+	// -------------------------------------------------------
+	void RadialVelocityModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
+		assert(data != 0);
+		uint32 count = end - start;
+		const RadialVelocityModuleData* my_data = static_cast<const RadialVelocityModuleData*>(data);
+		for (uint32 i = 0; i < count; ++i) {
+			float v = ds::math::random(my_data->velocity - my_data->variance, my_data->velocity + my_data->variance);
+			array->velocity[start + i] = vector::getRadialVelocity(array->rotation[start + i], v);
+		}
+	}
+
+	void RadialVelocityModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
+		for (uint32 i = 0; i < array->countAlive; ++i) {
+			//array->velocity[i] += array->acceleration[i] * dt;
+			//array->position[i] += array->velocity[i] * dt;
+			array->forces[i] += array->velocity[i];
+		}
+	}
+
+	// -------------------------------------------------------
+	// Damping Velocity Module
+	// -------------------------------------------------------
+	void DampingVelocityModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
+		assert(data != 0);
+		const DampingVelocityModuleData* my_data = static_cast<const DampingVelocityModuleData*>(data);
+		float d = my_data->damping * 0.01f;
+		for (uint32 i = 0; i < array->countAlive; ++i) {
+			Vector3f v = array->velocity[i] * d;
+			array->velocity[i] -= v * dt;
+		}
+	}
+
+	// -------------------------------------------------------
+	// Color Module
+	// -------------------------------------------------------
+	void ColorModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
+		assert(data != 0);
+		uint32 count = end - start;
+		const ColorModuleData* my_data = static_cast<const ColorModuleData*>(data);
+		if (my_data->useColor) {
+			for (uint32 i = 0; i < count; ++i) {
+				array->color[start + i] = my_data->color;
+			}
+		}
+		else {
+			for (uint32 i = 0; i < count; ++i) {
+				float hv = ds::math::random(-my_data->hueVariance, my_data->hueVariance);
+				float h = math::clamp(my_data->hsv.x + hv, 0.0f, 360.0f);
+				float sv = ds::math::random(-my_data->saturationVariance, my_data->saturationVariance);
+				float s = math::clamp(my_data->hsv.y + sv, 0.0f, 100.0f);
+				float vv = ds::math::random(-my_data->valueVariance, my_data->valueVariance);
+				float v = math::clamp(my_data->hsv.z + vv, 0.0f, 100.0f);
+				Color c = color::hsvToColor(h, s, v);
+				if (my_data->alpha > 1.0f) {
+					c.a = my_data->alpha / 255.0f;
+				}
+				else {
+					c.a = my_data->alpha;
+				}
+				array->color[start + i] = c;
+			}
+		}
+	}
+
+	// -------------------------------------------------------
+	// Alpha Module
+	// -------------------------------------------------------
+	void AlphaModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
+		assert(data != 0);
+		const AlphaModuleData* my_data = static_cast<const AlphaModuleData*>(data);
+		if (my_data->modifier != SMM_NONE) {
+			if (my_data->modifier == SMM_LINEAR) {
+				for (uint32 i = 0; i < array->countAlive; ++i) {
+					array->color[i].a = tweening::interpolate(tweening::linear, my_data->startAlpha, my_data->endAlpha, array->timer[i].x, array->timer[i].z);
+				}
+			}
+			else {
+				float a = 0.0f;
+				for (uint32 i = 0; i < array->countAlive; ++i) {
+					my_data->path.get(array->timer[i].x / array->timer[i].z, &a);
+					array->color[i].a = math::clamp(a, 0.0f, 1.0f);
+				}
+			}
+		}
+	}
+
+	void AlphaModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
+		assert(data != 0);
+		const AlphaModuleData* my_data = static_cast<const AlphaModuleData*>(data);
+		for (uint32 i = start; i < end; ++i) {
+			array->color[i].a = math::clamp(math::randomRange(my_data->initial,my_data->variance),0.0f,1.0f);
+		}
+	}
+
+	// -------------------------------------------------------
+	// Rotation Velocity Module
+	// -------------------------------------------------------
+	void RotationModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
+		assert(data != 0);
+		uint32 count = end - start;
+		const RotationModuleData* my_data = static_cast<const RotationModuleData*>(data);
+		for (uint32 i = start; i < end; ++i) {
+			array->rotationVelocity[i] = math::randomRange(my_data->velocity, my_data->variance);
+		}
+	}
+
+	void RotationModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
+		assert(data != 0);
+		const RotationModuleData* my_data = static_cast<const RotationModuleData*>(data);
+		for (uint32 i = 0; i < array->countAlive; ++i) {
+			array->rotation[i] += array->rotationVelocity[i] * dt;
+		}
+	}
+
+	// -------------------------------------------------------
+	// Acceleration Module
+	// -------------------------------------------------------
+	void AccelerationModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
+		assert(data != 0);
+		uint32 count = end - start;
+		const AccelerationModuleData* my_data = static_cast<const AccelerationModuleData*>(data);
+		for (uint32 i = 0; i < count; ++i) {
+			float v = ds::math::randomRange(my_data->radial, my_data->radialVariance);
+			array->velocity[start + i] = vector::getRadialVelocity(array->rotation[start + i], v);
+		}
+	}
+
+	void AccelerationModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
+		assert(data != 0);
+		const AccelerationModuleData* my_data = static_cast<const AccelerationModuleData*>(data);
+		for (uint32 i = 0; i < array->countAlive; ++i) {
+			array->forces[i] += v3(my_data->acceleration * dt * dt);
+		}
+	}
+
+	// -------------------------------------------------------
+	// VelocityModule
+	// -------------------------------------------------------
+	void VelocityModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
+		assert(data != 0);
+		uint32 count = end - start;
+		const VelocityModuleData* my_data = static_cast<const VelocityModuleData*>(data);
+		if (my_data->type == VelocityModuleData::VT_RADIAL) {
+			for (uint32 i = 0; i < count; ++i) {
+				float v = math::randomRange(my_data->radial, my_data->radialVariance);
+				array->velocity[start + i] = vector::getRadialVelocity(array->rotation[start + i], v);
+			}
+		}
+		else {
+			for (uint32 i = 0; i < count; ++i) {
+				v2 v = math::randomRange(my_data->velocity, my_data->variance);
+				array->velocity[start + i] = v;
+			}
+		}
+	}
+
+	void VelocityModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
+		assert(data != 0);
+		const VelocityModuleData* my_data = static_cast<const VelocityModuleData*>(data);
+		if (my_data->useDistribution) {
+			v2 dist;
+			for (uint32 i = 0; i < array->countAlive; ++i) {
+				my_data->distribution.get(array->timer[i].x / array->timer[i].z, &dist);
+				float vx = array->velocity[i].x * dist.x;
+				float vy = array->velocity[i].y * dist.y;
+				array->forces[i] += v3(vx,vy,0.0f);
+			}
+		}
+		else {
+			for (uint32 i = 0; i < array->countAlive; ++i) {
+				array->forces[i] += array->velocity[i];
+			}
+		}
+	}
+}

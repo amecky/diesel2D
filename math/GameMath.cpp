@@ -612,12 +612,25 @@ namespace ds {
 			return min + (max - min)* (float)rand();
 		}
 
+		float randomRange(float value, float variance) {
+			return random(value - variance, value + variance);
+		}
+
 		// -------------------------------------------------------
 		// random v2
 		// -------------------------------------------------------
 		v2 random(const v2& min, const v2& max) {
 			float x = random(min.x, max.x);
 			float y = random(min.y, max.y);
+			return v2(x, y);
+		}
+
+		// -------------------------------------------------------
+		// random v2 range
+		// -------------------------------------------------------
+		v2 randomRange(const v2& value, const v2& variance) {
+			float x = randomRange(value.x, variance.x);
+			float y = randomRange(value.y, variance.y);
 			return v2(x, y);
 		}
 		// -------------------------------------------------------
