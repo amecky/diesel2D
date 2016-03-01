@@ -54,13 +54,6 @@ size {
     path : 0.0,1.0,1.0,0.4,0.8,0.8,0.8,1.4,1.4,1.0,1.0,1.0
 }
 
-## Radial velocity module 
-
-radial_velocity {
-	velocity : 40
-	variance : 20
-}
-
 ## Damping velocity module
 
 damping_velocity {
@@ -118,11 +111,11 @@ velocity {
 
 velocity {
 	radial : 140
-	radialVariance : 20
+	radial_variance : 20
 }
 
 velocity {
 	radial : 140
-	radialVariance : 20
+	radial_variance : 20
 	distribution : 0.0,1.0,1.0,0.5,-0.5,-0.5,1.0,0.0,0.0
 }

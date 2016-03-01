@@ -20,15 +20,6 @@ namespace ds {
 			array->timer[i].x += dt;
 			array->timer[i].y = array->timer[i].x / array->timer[i].z;
 		}
-		/*
-		uint32 cnt = 0;
-		while (cnt < array->countAlive) {
-			if (array->timer[cnt].x > array->timer[cnt].z) {
-				array->kill(cnt);
-			}
-			++cnt;
-		}
-		*/
 	}
 
 	// -------------------------------------------------------
@@ -37,7 +28,6 @@ namespace ds {
 	void RingLocationModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
 		ZoneTracker z("RingLocationModule:generate");
 		uint32 count = end - start;
-		//float angle = 0.0f;
 		const RingLocationModuleData* my_data = static_cast<const RingLocationModuleData*>(data);
 		float angleVariance = DEGTORAD(my_data->angleVariance);
 		float step = TWO_PI / static_cast<float>(count);
@@ -54,34 +44,16 @@ namespace ds {
 			m_Angle += step;
 		}
 	}
-
+	
 	// -------------------------------------------------------
-	// Linear color Module
-	// -------------------------------------------------------
-	void LinearColorModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
-		assert(data != 0);
-		const LinearColorModuleData* my_data = static_cast<const LinearColorModuleData*>(data);
-		for (uint32 i = 0; i < array->countAlive; ++i) {
-			array->color[i] = color::lerp(my_data->startColor, my_data->endColor, array->timer[i].y);
-		}
-	}
-	void LinearColorModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
-		assert(data != 0);
-		const LinearColorModuleData* my_data = static_cast<const LinearColorModuleData*>(data);
-		for (uint32 i = start; i < end; ++i) {
-			array->color[i] = my_data->startColor;
-		}
-	}
-
-	// -------------------------------------------------------
-	// Linear size Module
+	// Size Module
 	// -------------------------------------------------------
 	void SizeModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
 		assert(data != 0);
 		const SizeModuleData* my_data = static_cast<const SizeModuleData*>(data);
-		if (my_data->modifier != SMM_NONE) {			
+		if (my_data->modifier != MMT_NONE) {			
 			for (uint32 i = 0; i < array->countAlive; ++i) {
-				if (my_data->modifier == SMM_PATH) {
+				if (my_data->modifier == MMT_PATH) {
 					for (uint32 i = 0; i < array->countAlive; ++i) {
 						my_data->path.get(array->timer[i].y, &array->scale[i]);
 						array->scale[i].x *= array->baseScale[i].x;
@@ -110,27 +82,6 @@ namespace ds {
 			}
 			array->scale[i] = s;
 			array->baseScale[i] = s;
-		}
-	}
-
-	// -------------------------------------------------------
-	// RadialVelocityModule
-	// -------------------------------------------------------
-	void RadialVelocityModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
-		assert(data != 0);
-		uint32 count = end - start;
-		const RadialVelocityModuleData* my_data = static_cast<const RadialVelocityModuleData*>(data);
-		for (uint32 i = 0; i < count; ++i) {
-			float v = ds::math::random(my_data->velocity - my_data->variance, my_data->velocity + my_data->variance);
-			array->velocity[start + i] = vector::getRadialVelocity(array->rotation[start + i], v);
-		}
-	}
-
-	void RadialVelocityModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
-		for (uint32 i = 0; i < array->countAlive; ++i) {
-			//array->velocity[i] += array->acceleration[i] * dt;
-			//array->position[i] += array->velocity[i] * dt;
-			array->forces[i] += array->velocity[i];
 		}
 	}
 
@@ -179,14 +130,24 @@ namespace ds {
 		}
 	}
 
+	void ColorModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
+		assert(data != 0);
+		const ColorModuleData* my_data = static_cast<const ColorModuleData*>(data);
+		if (my_data->modifier == MMT_LINEAR) {
+			for (uint32 i = 0; i < array->countAlive; ++i) {
+				array->color[i] = color::lerp(my_data->startColor, my_data->endColor, array->timer[i].y);
+			}
+		}
+	}
+
 	// -------------------------------------------------------
 	// Alpha Module
 	// -------------------------------------------------------
 	void AlphaModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
 		assert(data != 0);
 		const AlphaModuleData* my_data = static_cast<const AlphaModuleData*>(data);
-		if (my_data->modifier != SMM_NONE) {
-			if (my_data->modifier == SMM_LINEAR) {
+		if (my_data->modifier != MMT_NONE) {
+			if (my_data->modifier == MMT_LINEAR) {
 				for (uint32 i = 0; i < array->countAlive; ++i) {
 					array->color[i].a = tweening::interpolate(tweening::linear, my_data->startAlpha, my_data->endAlpha, array->timer[i].x, array->timer[i].z);
 				}

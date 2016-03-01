@@ -76,7 +76,8 @@ namespace sprites {
 
 	void setTexture(int textureID) {
 		flush();		
-		renderer::getDescriptorData()->textures[spriteCtx->descriptorID] = textureID;
+		spriteCtx->buffer->setTextureID(textureID);
+		//renderer::getDescriptorData()->textures[spriteCtx->descriptorID] = textureID;
 	}
 
 	void setShaderID(int shader) {

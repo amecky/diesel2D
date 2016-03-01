@@ -57,6 +57,9 @@ namespace ds {
 		int size() const {
 			return _index;
 		}
+		void setTextureID(int textureID) {
+			renderer::getDescriptorData()->textures[_descriptorID] = textureID;
+		}
 	private:
 		T* _data;
 		int _max;

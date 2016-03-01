@@ -1199,13 +1199,14 @@ namespace ds {
 			int tid = renderContext->textures.size();
 			RenderTarget renderTarget;
 			renderTarget.clearColor = clearColor;
-			D3DXCreateRenderToSurface( renderContext->device,width,height,D3DFMT_A8R8G8B8,false,D3DFMT_UNKNOWN ,&renderTarget.rts);
-			renderContext->device->CreateTexture(width,height,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&renderTarget.texture,NULL);				
+			HR(D3DXCreateRenderToSurface( renderContext->device,width,height,D3DFMT_A8R8G8B8,false,D3DFMT_UNKNOWN ,&renderTarget.rts));
+			HR(renderContext->device->CreateTexture(width,height,1,D3DUSAGE_RENDERTARGET,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&renderTarget.texture,NULL));				
 			TextureAsset t;
 			t.height = height;
 			t.width = width;
 			t.texture = renderTarget.texture;
 			renderTarget.texture->GetSurfaceLevel(0,&renderTarget.surface);
+			renderTarget.textureID = tid;
 			int id = renderContext->renderTargets.size();
 			renderContext->renderTargets.add(renderTarget);
 			renderContext->textures.push_back(t);

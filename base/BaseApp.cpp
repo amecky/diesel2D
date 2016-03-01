@@ -392,38 +392,46 @@ void BaseApp::buildFrame() {
 		ZoneTracker z("INPUT");
 		if (m_KeyStates.keyDown) {
 			m_KeyStates.keyDown = false;
-			_stateMachine->onKeyDown(m_KeyStates.keyPressed);
-			OnKeyDown(m_KeyStates.keyPressed);
+			if (m_Running) {
+				_stateMachine->onKeyDown(m_KeyStates.keyPressed);
+				OnKeyDown(m_KeyStates.keyPressed);
+			}
 		}
 		if (m_KeyStates.keyUp) {
 			m_KeyStates.keyUp = false;
-			_stateMachine->onKeyUp(m_KeyStates.keyReleased);
-			OnKeyUp(m_KeyStates.keyReleased);
+			if (m_Running) {
+				_stateMachine->onKeyUp(m_KeyStates.keyReleased);
+				OnKeyUp(m_KeyStates.keyReleased);
+			}
 		}
 		if (m_KeyStates.onChar) {
 			m_KeyStates.onChar = false;
-			if (m_KeyStates.ascii >= 0 && m_KeyStates.ascii < 256) {
-				_stateMachine->onChar(m_KeyStates.ascii);
-				OnChar(m_KeyStates.ascii, 0);
+			if (m_Running) {
+				if (m_KeyStates.ascii >= 0 && m_KeyStates.ascii < 256) {
+					_stateMachine->onChar(m_KeyStates.ascii);
+					OnChar(m_KeyStates.ascii, 0);
+				}
 			}
 		}
 	}
 	if ( !m_ButtonState.processed ) {
 		m_ButtonState.processed = true;
-		if ( m_ButtonState.down ) {
-			_stateMachine->onButtonDown(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
-			OnButtonDown(m_ButtonState.button,m_ButtonState.x,m_ButtonState.y);			
-		}
-		else {
-			DialogID did;
-			int selected;
-			if (gui->onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y, &did, &selected)) {
-				onGUIButton(did, selected);
-				_stateMachine->onGUIButton(did, selected);
+		if (m_Running) {
+			if (m_ButtonState.down) {
+				_stateMachine->onButtonDown(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
+				OnButtonDown(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
 			}
 			else {
-				_stateMachine->onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
-				OnButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
+				DialogID did;
+				int selected;
+				if (gui->onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y, &did, &selected)) {
+					onGUIButton(did, selected);
+					_stateMachine->onGUIButton(did, selected);
+				}
+				else {
+					_stateMachine->onButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
+					OnButtonUp(m_ButtonState.button, m_ButtonState.x, m_ButtonState.y);
+				}
 			}
 		}
 	}
@@ -557,7 +565,9 @@ void BaseApp::sendButton(int button,int x,int y,bool down) {
 void BaseApp::sendOnChar(char ascii,unsigned int state) {
 	m_KeyStates.ascii = ascii;
 	m_KeyStates.onChar = true;
-	gui::sendKey(ascii);
+	if (editor::isActive()) {
+		gui::sendKey(ascii);
+	}
 }
 
 // -------------------------------------------------------
@@ -586,7 +596,8 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 		m_DebugInfo.performanceOverlay = !m_DebugInfo.performanceOverlay;
 	}
 	else if (virtualKey == VK_F6) {
-		editor::toggle();
+		bool ret = editor::toggle();
+		m_Running = !ret;
 	}
 	else if (virtualKey == VK_F7 && !m_DebugInfo.debugRenderer) {
 		m_DebugInfo.debugRenderer = true;
@@ -612,7 +623,9 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 void BaseApp::sendKeyUp(WPARAM virtualKey) {
 	m_KeyStates.keyUp = true;
 	m_KeyStates.keyReleased = virtualKey;
-	gui::sendSpecialKey(virtualKey);
+	if (editor::isActive()) {
+		gui::sendSpecialKey(virtualKey);
+	}
 }
 
 // -------------------------------------------------------

@@ -33,7 +33,11 @@ namespace ds {
 			add(new DynamicSettingsEditor(shortcut, settings));
 		}
 
-		void toggle() {
+		bool isActive() {
+			return _editorContext->active;
+		}
+
+		bool toggle() {
 			_editorContext->active = !_editorContext->active;
 			if (_editorContext->active) {
 				_editorContext->position.x = 10.0f;
@@ -42,6 +46,7 @@ namespace ds {
 			else {
 				deactivateAll();
 			}
+			return _editorContext->active;
 		}
 
 		void deactivateAll() {

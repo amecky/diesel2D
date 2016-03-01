@@ -57,7 +57,9 @@ namespace ds {
 
 		void render();
 
-		void toggle();
+		bool toggle();
+
+		bool isActive();
 
 		void shutdown();
 

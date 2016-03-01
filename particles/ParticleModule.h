@@ -12,13 +12,19 @@ namespace ds {
 		PM_LIFECYCLE,
 		PM_LINEAR_COLOR,
 		PM_SIZE,
-		PM_RADIAL_VELOCITY,
 		PM_DAMPING_VELOCITY,
 		PM_COLOR,
 		PM_ALPHA,
 		PM_ROTATION,
 		PM_VELOCITY,
 		PM_ACCELERATION
+	};
+
+	enum ModuleModifierType {
+		MMT_NONE,
+		MMT_PATH,
+		MMT_LINEAR,
+		MMT_EOL
 	};
 
 	// -------------------------------------------------------
@@ -131,52 +137,8 @@ namespace ds {
 	};
 
 	// -------------------------------------------------------
-	// Linear color Module
-	// -------------------------------------------------------
-	struct LinearColorModuleData : ParticleModuleData {
-
-		Color startColor;
-		Color endColor;
-
-		LinearColorModuleData() : startColor(255, 255, 255, 255), endColor(0, 0, 0, 0) {}
-
-		void save(JSONWriter& writer) {
-			writer.write("start_color", startColor);
-			writer.write("end_color", endColor);
-		}
-
-		void read(const JSONReader& reader, int category) {
-			reader.get_color(category, "start_color", &startColor);
-			reader.get_color(category, "end_color", &endColor);
-		}
-	};
-
-	class LinearColorModule : public ParticleModule {
-
-	public:
-		LinearColorModule() : ParticleModule() {
-		}
-		virtual ~LinearColorModule() {}
-		void update(ParticleArray* array, const ParticleModuleData* data, float dt);
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end);
-		const ParticleModuleType getType() const {
-			return PM_LINEAR_COLOR;
-		}
-		const char* getName() const {
-			return "linear_color";
-		}
-	};
-
-	// -------------------------------------------------------
 	// Size Module
-	// -------------------------------------------------------
-	enum SizeModuleModifier {
-		SMM_NONE,
-		SMM_PATH,
-		SMM_LINEAR,
-		SMM_EOL
-	};
-
+	// -------------------------------------------------------	
 	struct SizeModuleData : ParticleModuleData {
 
 		v2 initial;
@@ -184,34 +146,34 @@ namespace ds {
 		v2 minScale;
 		v2 maxScale;
 		Vector2fPath path;
-		SizeModuleModifier modifier;
+		ModuleModifierType modifier;
 
-		SizeModuleData() : initial(1,1) , variance(0,0), minScale(0, 0), maxScale(1, 1) , modifier(SMM_NONE) {}
+		SizeModuleData() : initial(1,1) , variance(0,0), minScale(0, 0), maxScale(1, 1) , modifier(MMT_NONE) {}
 
 		void save(JSONWriter& writer) {
 			writer.write("initial", initial);
 			writer.write("variance", variance);			
-			if (modifier == SMM_PATH) {
+			if (modifier == MMT_PATH) {
 				writer.write("path", path);
 			}
-			else if (modifier == SMM_LINEAR) {
+			else if (modifier == MMT_LINEAR) {
 				writer.write("min", minScale);
 				writer.write("max", maxScale);
 			}
 		}
 
 		void read(const JSONReader& reader, int category) {
-			modifier = SMM_NONE;
+			modifier = MMT_NONE;
 			reader.get_vec2(category, "initial", &initial);
 			reader.get_vec2(category, "variance", &variance);			
 			if (reader.contains_property(category, "path")) {
 				reader.get_vec2_path(category, "path", &path);
-				modifier = SMM_PATH;
+				modifier = MMT_PATH;
 			}
 			else if (reader.contains_property(category, "min")) {
 				reader.get_vec2(category, "min", &minScale);
 				reader.get_vec2(category, "max", &maxScale);
-				modifier = SMM_LINEAR;
+				modifier = MMT_LINEAR;
 			}
 		}
 	};
@@ -228,42 +190,6 @@ namespace ds {
 		}
 		const char* getName() const {
 			return "size";
-		}
-	};
-
-	// -------------------------------------------------------
-	// RadialVelocityModule
-	// -------------------------------------------------------
-	struct RadialVelocityModuleData : ParticleModuleData {
-
-		float velocity;
-		float variance;
-
-		RadialVelocityModuleData() : velocity(0.0f), variance(0.0f) {}
-
-		void save(JSONWriter& writer) {
-			writer.write("velocity", velocity);
-			writer.write("variance", variance);
-		}
-
-		void read(const JSONReader& reader, int category) {
-			reader.get_float(category, "velocity", &velocity);
-			reader.get_float(category, "variance", &variance);
-		}
-	};
-
-	class RadialVelocityModule : public ParticleModule {
-
-	public:
-		RadialVelocityModule() : ParticleModule() {}
-		virtual ~RadialVelocityModule() {}
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end);
-		void update(ParticleArray* array, const ParticleModuleData* data, float dt);
-		const char* getName() const {
-			return "radial_velocity";
-		}
-		const ParticleModuleType getType() const {
-			return PM_RADIAL_VELOCITY;
 		}
 	};
 
@@ -314,8 +240,12 @@ namespace ds {
 		float saturationVariance;
 		float valueVariance;
 		float alpha;
+		Color startColor;
+		Color endColor;
+		ModuleModifierType modifier;
 
-		ColorModuleData() : color(Color::WHITE), useColor(true), hsv(360, 100, 100), hueVariance(0.0f), saturationVariance(0.0f), valueVariance(0.0f), alpha(255.0f) {}
+		ColorModuleData() : color(Color::WHITE), useColor(true), hsv(360, 100, 100), hueVariance(0.0f), saturationVariance(0.0f), 
+			valueVariance(0.0f), alpha(255.0f) , startColor(255,255,255,255) , endColor(0,0,0,0) , modifier(MMT_NONE) {}
 
 		void save(JSONWriter& writer) {
 			if (useColor) {
@@ -327,10 +257,12 @@ namespace ds {
 				writer.write("hue_variance", hueVariance);
 				writer.write("saturation_variance", saturationVariance);
 				writer.write("value_variance", valueVariance);
+				
 			}
 		}
 
 		void read(const JSONReader& reader, int category) {
+			modifier = MMT_NONE;
 			if (reader.contains_property(category, "color")) {
 				useColor = true;
 				reader.get_color(category, "color", &color);
@@ -343,6 +275,14 @@ namespace ds {
 				reader.get_float(category, "saturation_variance", &saturationVariance);
 				reader.get_float(category, "value_variance", &valueVariance);
 			}
+			if (reader.contains_property(category, "start")) {
+				modifier = MMT_LINEAR;
+				reader.get_color(category, "start", &startColor);
+				reader.get_color(category, "end", &endColor);
+			}
+			if (reader.contains_property(category, "path")) {
+				modifier = MMT_PATH;
+			}
 		}
 
 	};
@@ -354,7 +294,7 @@ namespace ds {
 		}
 		virtual ~ColorModule() {}
 		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end);
-		void update(ParticleArray* array, const ParticleModuleData* data, float dt) {}
+		void update(ParticleArray* array, const ParticleModuleData* data, float dt);
 		const ParticleModuleType getType() const {
 			return PM_COLOR;
 		}
@@ -372,33 +312,33 @@ namespace ds {
 		float variance;
 		float startAlpha;
 		float endAlpha;
-		SizeModuleModifier modifier;
+		ModuleModifierType modifier;
 		FloatPath path;
 
-		AlphaModuleData() : initial(1.0f) , variance(0.0f) , startAlpha(1.0f), endAlpha(0.0f) , modifier(SMM_NONE) {}
+		AlphaModuleData() : initial(1.0f) , variance(0.0f) , startAlpha(1.0f), endAlpha(0.0f) , modifier(MMT_NONE) {}
 
 		void save(JSONWriter& writer) {
 			writer.write("initial", initial);
 			writer.write("variance", variance);
-			if (modifier == SMM_LINEAR) {
+			if (modifier == MMT_LINEAR) {
 				writer.write("min", startAlpha);
 				writer.write("max", endAlpha);
 			}
-			else if (modifier == SMM_PATH) {
+			else if (modifier == MMT_PATH) {
 				writer.write("path", path);
 			}
 		}
 
 		void read(const JSONReader& reader, int category) {
-			modifier = SMM_NONE;
+			modifier = MMT_NONE;
 			reader.get_float(category, "initial", &initial);
 			reader.get_float(category, "variance", &variance);
 			if (reader.contains_property(category, "path")) {
-				modifier = SMM_PATH;
+				modifier = MMT_PATH;
 				reader.get_float_path(category, "path", &path);
 			}
 			else if (reader.contains_property(category, "min")) {
-				modifier = SMM_LINEAR;
+				modifier = MMT_LINEAR;
 				reader.get_float(category, "min", &startAlpha);
 				reader.get_float(category, "max", &endAlpha);
 			}

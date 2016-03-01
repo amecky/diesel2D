@@ -9,9 +9,7 @@ namespace ds {
 		_known_modules = new ParticleModule*[64];
 		_known_modules[_count_modules++] = new RingLocationModule();
 		_known_modules[_count_modules++] = new ParticleTimeModule();
-		_known_modules[_count_modules++] = new LinearColorModule();
 		_known_modules[_count_modules++] = new SizeModule();
-		_known_modules[_count_modules++] = new RadialVelocityModule();
 		_known_modules[_count_modules++] = new DampingVelocityModule();
 		_known_modules[_count_modules++] = new ColorModule();
 		_known_modules[_count_modules++] = new AlphaModule();
@@ -45,9 +43,7 @@ namespace ds {
 		switch (type) {
 			case PM_LIFECYCLE: return new LifetimeModuleData(); break;
 			case PM_RING: return new RingLocationModuleData(); break;
-			case PM_LINEAR_COLOR: return new LinearColorModuleData(); break;
 			case PM_SIZE: return new SizeModuleData(); break;
-			case PM_RADIAL_VELOCITY: return new RadialVelocityModuleData(); break;
 			case PM_DAMPING_VELOCITY: return new DampingVelocityModuleData(); break;
 			case PM_COLOR: return new ColorModuleData(); break;
 			case PM_ALPHA: return new AlphaModuleData(); break;

@@ -12,7 +12,7 @@ namespace ds {
 		strcpy_s(m_DebugName, 32, name);
 		sprintf_s(_json_name, 64, "particles\\%s.json", name);
 		_id = id;
-		m_Array.initialize(128);
+		m_Array.initialize(1024);
 		_count_modules = 0;
 		_factory = factory;
 
@@ -44,6 +44,7 @@ namespace ds {
 			return id;
 		}
 		else {
+			LOG << "No more instances available";
 			return INVALID_ID;
 		}
 	}
