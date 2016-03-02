@@ -86,46 +86,45 @@ namespace ds {
 	}
 
 	// -------------------------------------------------------
-	// Damping Velocity Module
-	// -------------------------------------------------------
-	void DampingVelocityModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
-		assert(data != 0);
-		const DampingVelocityModuleData* my_data = static_cast<const DampingVelocityModuleData*>(data);
-		float d = my_data->damping * 0.01f;
-		for (uint32 i = 0; i < array->countAlive; ++i) {
-			Vector3f v = array->velocity[i] * d;
-			array->velocity[i] -= v * dt;
-		}
-	}
-
-	// -------------------------------------------------------
 	// Color Module
 	// -------------------------------------------------------
 	void ColorModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
 		assert(data != 0);
 		uint32 count = end - start;
 		const ColorModuleData* my_data = static_cast<const ColorModuleData*>(data);
-		if (my_data->useColor) {
+		if (my_data->modifier == MMT_LINEAR) {
 			for (uint32 i = 0; i < count; ++i) {
-				array->color[start + i] = my_data->color;
+				array->color[start + i] = my_data->startColor;
+			}
+		}
+		else if (my_data->modifier == MMT_PATH) {
+			for (uint32 i = 0; i < count; ++i) {
+				array->color[start + i] = my_data->path.value(0);
 			}
 		}
 		else {
-			for (uint32 i = 0; i < count; ++i) {
-				float hv = ds::math::random(-my_data->hueVariance, my_data->hueVariance);
-				float h = math::clamp(my_data->hsv.x + hv, 0.0f, 360.0f);
-				float sv = ds::math::random(-my_data->saturationVariance, my_data->saturationVariance);
-				float s = math::clamp(my_data->hsv.y + sv, 0.0f, 100.0f);
-				float vv = ds::math::random(-my_data->valueVariance, my_data->valueVariance);
-				float v = math::clamp(my_data->hsv.z + vv, 0.0f, 100.0f);
-				Color c = color::hsvToColor(h, s, v);
-				if (my_data->alpha > 1.0f) {
-					c.a = my_data->alpha / 255.0f;
+			if (my_data->useColor) {
+				for (uint32 i = 0; i < count; ++i) {
+					array->color[start + i] = my_data->color;
 				}
-				else {
-					c.a = my_data->alpha;
+			}
+			else {
+				for (uint32 i = 0; i < count; ++i) {
+					float hv = ds::math::random(-my_data->hueVariance, my_data->hueVariance);
+					float h = math::clamp(my_data->hsv.x + hv, 0.0f, 360.0f);
+					float sv = ds::math::random(-my_data->saturationVariance, my_data->saturationVariance);
+					float s = math::clamp(my_data->hsv.y + sv, 0.0f, 100.0f);
+					float vv = ds::math::random(-my_data->valueVariance, my_data->valueVariance);
+					float v = math::clamp(my_data->hsv.z + vv, 0.0f, 100.0f);
+					Color c = color::hsvToColor(h, s, v);
+					if (my_data->alpha > 1.0f) {
+						c.a = my_data->alpha / 255.0f;
+					}
+					else {
+						c.a = my_data->alpha;
+					}
+					array->color[start + i] = c;
 				}
-				array->color[start + i] = c;
 			}
 		}
 	}
@@ -136,6 +135,11 @@ namespace ds {
 		if (my_data->modifier == MMT_LINEAR) {
 			for (uint32 i = 0; i < array->countAlive; ++i) {
 				array->color[i] = color::lerp(my_data->startColor, my_data->endColor, array->timer[i].y);
+			}
+		}
+		else if (my_data->modifier == MMT_PATH) {
+			for (uint32 i = 0; i < array->countAlive; ++i) {
+				my_data->path.get(array->timer[i].y, &array->color[i]);
 			}
 		}
 	}

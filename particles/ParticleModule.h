@@ -12,7 +12,6 @@ namespace ds {
 		PM_LIFECYCLE,
 		PM_LINEAR_COLOR,
 		PM_SIZE,
-		PM_DAMPING_VELOCITY,
 		PM_COLOR,
 		PM_ALPHA,
 		PM_ROTATION,
@@ -194,41 +193,6 @@ namespace ds {
 	};
 
 	// -------------------------------------------------------
-	// Damping Velocity Module
-	// -------------------------------------------------------
-	struct DampingVelocityModuleData : ParticleModuleData {
-
-		float damping;
-
-		DampingVelocityModuleData() : damping(0.0f) {}
-
-		void save(JSONWriter& writer) {
-			writer.write("damping", damping);
-		}
-
-		void read(const JSONReader& reader, int category) {
-			reader.get_float(category, "damping", &damping);
-		}
-
-	};
-
-	class DampingVelocityModule : public ParticleModule {
-
-	public:
-		DampingVelocityModule() : ParticleModule() {
-		}
-		virtual ~DampingVelocityModule() {}
-		void update(ParticleArray* array, const ParticleModuleData* data, float dt);
-		void generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {}
-		const ParticleModuleType getType() const {
-			return PM_DAMPING_VELOCITY;
-		}
-		const char* getName() const {
-			return "damping_velocity";
-		}
-	};
-
-	// -------------------------------------------------------
 	// Color Module
 	// -------------------------------------------------------
 	struct ColorModuleData : ParticleModuleData {
@@ -242,6 +206,7 @@ namespace ds {
 		float alpha;
 		Color startColor;
 		Color endColor;
+		ColorPath path;
 		ModuleModifierType modifier;
 
 		ColorModuleData() : color(Color::WHITE), useColor(true), hsv(360, 100, 100), hueVariance(0.0f), saturationVariance(0.0f), 
@@ -282,6 +247,7 @@ namespace ds {
 			}
 			if (reader.contains_property(category, "path")) {
 				modifier = MMT_PATH;
+				reader.get_color_path(category, "path", &path);
 			}
 		}
 
