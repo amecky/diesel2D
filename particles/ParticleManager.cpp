@@ -14,7 +14,7 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	// constructor
 	// --------------------------------------------------------------------------
-	ParticleManager::ParticleManager() {		
+	ParticleManager::ParticleManager() : _particles(0) {		
 		_systems = new ParticleSystem*[MAX_PARTICLE_SYSTEMS];
 		for (int i = 0; i < 128; ++i) {
 			_systems[i] = 0;
@@ -32,7 +32,9 @@ namespace ds {
 			_systems[i] = 0;
 		}
 		delete[] _systems;
-		delete _particles;
+		if (_particles != 0) {
+			delete _particles;
+		}
 	}
 
 	ParticleSystem* ParticleManager::create(int id, const char* name) {
