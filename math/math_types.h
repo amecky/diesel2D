@@ -190,4 +190,100 @@ struct Circle {
 	Circle(const Vector2f& p,float r) : pos(p) , radius(r) {}
 };
 
+struct Point {
+	int x;
+	int y;
+
+	Point() : x(0), y(0) {}
+	explicit Point(int v) : x(v), y(v) {}
+	Point(const Point& other) : x(other.x), y(other.y) {}
+	Point(int _x, int _y) : x(_x), y(_y) {}
+
+	Point& operator = (const Point& other) {
+		x = other.x;
+		y = other.y;
+		return *this;
+	}
+};
+
+}
+
+inline bool operator==(const ds::Point& first, const ds::Point& second) {
+	return first.x == second.x && first.y == second.y;
+}
+
+inline bool operator!=(const ds::Point& first, const ds::Point& second) {
+	return first.x != second.x || first.y != second.y;
+}
+
+inline ds::Point operator - (const ds::Point& v) {
+	ds::Point ret;
+	ret.x = -v.x;
+	ret.y = -v.y;
+	return ret;
+}
+
+inline ds::Point operator += (ds::Point& u, const ds::Point& v) {
+	u.x += v.x;
+	u.y += v.y;
+	return u;
+}
+
+inline ds::Point operator += (const ds::Point& u, const ds::Point& v) {
+	ds:: Point r;
+	r.x = u.x + v.x;
+	r.y = u.y + v.y;
+	return r;
+}
+
+inline ds::Point operator *= (ds::Point& u, int other) {
+	u.x *= other;
+	u.y *= other;
+	return u;
+}
+
+inline ds::Point& operator /= (ds::Point& u, int other) {
+	if (other != 0) {
+		u.x /= other;
+		u.y /= other;
+	}
+	return u;
+}
+
+inline ds::Point& operator -= (ds::Point& u, const ds::Point& v) {
+	u.x -= v.x;
+	u.y -= v.y;
+	return u;
+}
+
+inline ds::Point operator -= (const ds::Point& u, const ds::Point& v) {
+	ds::Point r;
+	r.x = u.x - v.x;
+	r.y = u.y - v.y;
+	return r;
+}
+
+inline ds::Point operator + (const ds::Point& u, const ds::Point& v) {
+	ds::Point ret = u;
+	return ret += v;
+}
+
+inline ds::Point operator - (const ds::Point& u, const ds::Point& v) {
+	ds::Point ret = u;
+	return ret -= v;
+}
+
+inline ds::Point operator * (const ds::Point& u, int v) {
+	ds::Point ret = u;
+	return ret *= v;
+}
+
+inline ds::Point operator * (int v, const ds::Point& u) {
+	ds::Point ret = u;
+	return ret *= v;
+}
+
+inline ds::Point operator / (const ds::Point& u, int v) {
+	ds::Point ret = u;
+	return ret /= v;
 }
