@@ -23,6 +23,7 @@
 #include "..\ui\GameConsole.h"
 #include "..\editor\AssetEditor.h"
 #include "..\utils\GlobalStringBuffer.h"
+#include "..\net\GameServer.h"
 
 namespace ds {
 
@@ -34,6 +35,7 @@ BaseApp::BaseApp() {
 	_spriteTemplatesEditor = 0;
 	_particlesEditor = 0;
 	_dialogEditor = 0;
+	_gameServer = 0;
 	gDefaultMemory = new DefaultAllocator(256 * 1024 * 1024);
 	gStringBuffer = new GlobalStringBuffer();
 	perf::init();
@@ -95,6 +97,10 @@ BaseApp::BaseApp() {
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
 	LOG << "Destructing all elements";
+	if (_gameServer != 0 ) {
+		_gameServer->close();
+		delete _gameServer;
+	}
 	sprites::shutdown();
 	repository::shutdown();
 	editor::shutdown();
@@ -240,6 +246,21 @@ void BaseApp::loadSettings() {
 		editor::add(_particlesEditor);
 		editor::add(_dialogEditor);
 	}
+	bool start_server = false;
+	reader.get_bool(root, "start_server", &start_server);
+	if (start_server) {
+		int port = -1;
+		if (!reader.get_int(root, "server_port", &port)) {
+			port = 9000;
+		}
+		_gameServer = new GameServer(127, 0, 0, 1, port);
+		if (_gameServer->connect(this)) {
+			LOG << "GameServer started and listening on port: " << port;
+		}
+		else {
+			LOGE << "Error while trying to start server";
+		}
+	}
 
 	loadShaders(reader);
 
@@ -259,6 +280,7 @@ void BaseApp::prepare() {
 	profiler::init();
 	sprites::init();
 	world->setDefaultDescriptor(sprites::getDescriptorID());
+
 	loadSettings();
 	LOG << "---> Start loading content <---";
 	loadContent();	
@@ -371,6 +393,9 @@ void BaseApp::updateTime() {
 	m_GameTime.totalTime += m_GameTime.elapsed;
 }
 
+void BaseApp::get(const HTTPRequest& request, HTTPResponse* response) {
+	LOG << "GET called!!!!!!!!!!";
+}
 // -------------------------------------------------------
 // Build frame
 // -------------------------------------------------------
@@ -387,6 +412,9 @@ void BaseApp::buildFrame() {
 		repository::reload();
 	}
 #endif
+	if (_gameServer != 0) {
+		_gameServer->poll();
+	}
 	// handle key states
 	{
 		ZoneTracker z("INPUT");

@@ -7,6 +7,7 @@
 #include "Settings.h"
 #include "..\editor\BitmapFontsDialog.h"
 #include "..\utils\Profiler.h"
+#include "..\net\GameServer.h"
 
 namespace ds {
 
@@ -27,7 +28,7 @@ struct GameTime {
 	float totalTime;
 };
 
-class BaseApp {
+class BaseApp : public HTTPCallback {
 
 struct DebugInfo {
 	bool showProfiler;
@@ -110,7 +111,7 @@ public:
 	void addGameState(GameState* gameState);
 	void activate(const char* name);
 	void connectGameStates(const char* firstStateName, int outcome, const char* secondStateName);
-
+	void get(const HTTPRequest& request, HTTPResponse* response);
 protected:
 	void activateMonitoring(float threshold);
 	void loadSprites();
@@ -167,6 +168,8 @@ private:
 	DialogEditorState* _dialogEditor;
 
 	int _reload_counter;
+
+	GameServer* _gameServer;
 }; 
 
 }
