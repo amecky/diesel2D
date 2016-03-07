@@ -23,6 +23,12 @@ namespace ds {
 
 	};
 
+	struct DebugMessage {
+		v2 pos;
+		Color color;
+		int index;
+	};
+
 	const int MAX_RT = 16;
 	// -------------------------------------------------------
 	// RenderContext
@@ -84,6 +90,8 @@ namespace ds {
 		dVector<MeshData> meshData;
 		MeshArray meshes;
 		Vector2f mousePosition;
+		Array<DebugMessage> messages;
+		CharBuffer debugBuffer;
 
 		RenderContext() : initialized(false), selectedViewPort(0), numBlendStates(0) {
 			drawCounter.reset();
@@ -1865,6 +1873,29 @@ namespace ds {
 			writer.endRow();
 			writer.endTable();
 			writer.endBox();
+		}
+
+		void resetDebugMessages() {
+			renderContext->debugBuffer.size = 0;
+			renderContext->messages.clear();
+		}
+
+		void print(const v2& pos, const char* message, const Color color) {
+#ifdef DEBUG
+			DebugMessage msg;
+			msg.color = color;
+			msg.pos = pos;
+			msg.index = renderContext->debugBuffer.size;
+			renderContext->debugBuffer.append(message);
+			renderContext->messages.push_back(msg);
+#endif
+		}
+
+		void renderDebugMessages() {
+			for (int i = 0; i < renderContext->messages.size(); ++i) {
+				const DebugMessage& msg = renderContext->messages[i];
+				sprites::drawText(msg.pos.x, msg.pos.y, renderContext->debugBuffer.data + msg.index, 1.0f, 1.0f, msg.color);
+			}
 		}
 
 	}

@@ -317,13 +317,6 @@ namespace ds {
 
 	class VertexDeclaration;
 
-	//struct VDStruct {
-		//int vertexSize;
-		//VertexDeclaration* declaration;
-	//};
-
-	
-
 	namespace renderer {
 
 		void initialize(HWND hWnd, const Settings& settings);
@@ -552,6 +545,12 @@ namespace ds {
 		void saveDrawCounter(FILE* f);
 
 		void saveDrawCounter(const ReportWriter& writer);
+
+		void resetDebugMessages();
+
+		void print(const v2& pos, const char* message, const Color color = Color::WHITE);
+
+		void renderDebugMessages();
 	}
 
 }

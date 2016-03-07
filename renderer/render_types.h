@@ -314,16 +314,6 @@ namespace ds {
 		int vertexType;
 
 	};
-	// -------------------------------------------------------
-	// Debug message
-	// -------------------------------------------------------
-	struct DebugMessage {
-		std::string message;
-		int x;
-		int y;
-		Color color;
-		DebugMessage() : message("") , x(0) , y(0) , color(1.0f,1.0f,1.0f,1.0f) {}
-	};
 
 	struct Polygon {
 

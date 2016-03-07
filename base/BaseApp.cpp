@@ -407,6 +407,7 @@ void BaseApp::buildFrame() {
 	//PR_START("MAIN")
 	renderer::drawCounter().reset();
 #ifdef DEBUG
+	renderer::resetDebugMessages();
 	++_reload_counter;
 	if (_reload_counter >= 60) {
 		_reload_counter -= 60;
@@ -507,6 +508,9 @@ void BaseApp::buildFrame() {
 		if (m_DebugInfo.showConsole) {
 			console->show();
 		}
+#ifdef DEBUG
+		renderer::renderDebugMessages();
+#endif
 		{
 			ZoneTracker r("RENDER_FLUSH");
 			sprites::flush();

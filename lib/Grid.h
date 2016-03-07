@@ -8,11 +8,12 @@ namespace ds {
 // -------------------------------------------------------
 // Dropped Cell
 // -------------------------------------------------------
+template<class T>
 struct DroppedCell {
 
 	Point from;
 	Point to;
-
+	T data;
 };
 // ------------------------------------------------
 // Grid
@@ -44,7 +45,7 @@ public:
 	T& get(const Point& p);
     void set(int x,int y,const T& t);
     bool remove(int x,int y);    
-    void remove(const Array<Point>& points);  
+    void remove(const Array<Point>& points,bool shift);  
     const int width() const {
         return m_Width;
     }
@@ -71,7 +72,7 @@ public:
 	bool isColumnEmpty(int col);
     void dropRow(int x);
     void dropCell(int x,int y);
-	void dropCells(Array<DroppedCell>& droppedCells);
+	void dropCells(Array<DroppedCell<T>>& droppedCells);
 	void swap(const Point& first, const Point& second);
 protected:
     virtual bool isMatch(const T& first,const T& right) = 0;
@@ -457,17 +458,17 @@ inline void Grid<T>::dropCell(int x, int y) {
 // Drop cells - remove empty cells in between
 // -------------------------------------------------------
 template<class T>
-inline void Grid<T>::dropCells(Array<DroppedCell>& droppedCells) {
+inline void Grid<T>::dropCells(Array<DroppedCell<T>>& droppedCells) {
 	for ( int x = 0; x < m_Width; ++x ) {
-		for ( int y = 0 ; y < m_Height -1; ++y ) {
+		for ( int y = 0 ; y < m_Height - 1; ++y ) {
 			if ( isFree(x,y) ) {
 				int sy = y + 1;
-				while ( isFree(x,sy) && sy < m_Height -1 ) {
+				while ( isFree(x,sy) && sy < m_Height - 1 ) {
 					++sy;
 				}			
 				if ( !isFree(x,sy)) {
-					LOG << "dropping cell from: " << x << " " << sy << " to " << x << " " << y;
-					DroppedCell dc;
+					DroppedCell<T> dc;
+					dc.data = get(x, sy);
 					dc.from = Point(x,sy);
 					dc.to = Point(x,y);
 					droppedCells.push_back(dc);
@@ -497,15 +498,17 @@ bool Grid<T>::isColumnEmpty(int col) {
 // Remove grid points
 // ------------------------------------------------
 template<class T>
-inline void Grid<T>::remove(const Array<Point>& points) {
+inline void Grid<T>::remove(const Array<Point>& points,bool shift) {
     for ( std::size_t i = 0; i < points.size(); ++i ) {
         Point gp = points[i];
         remove(gp.x,gp.y);
     }
-	int moved = 0;
-	for ( int i = 0; i < m_Width ; ++i ) {
-		if ( isColumnEmpty(i)) {
-			shiftColumns(i+1);
+	if (shift) {
+		int moved = 0;
+		for (int i = 0; i < m_Width; ++i) {
+			if (isColumnEmpty(i)) {
+				shiftColumns(i + 1);
+			}
 		}
 	}
 }
