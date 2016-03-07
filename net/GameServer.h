@@ -18,7 +18,8 @@ namespace ds {
 
 	struct HTTPRequest {
 		HTTPMethod method;
-		char path[256];
+		char path[128];
+		char* host;
 		char data[1024];
 		int size;
 	};
@@ -46,7 +47,7 @@ namespace ds {
 		bool send(const char* line);
 		void close();
 	private:
-
+		void parseHeader(const char* data);
 		HTTPRequest _request;
 		HTTPResponse _response;
 		char _data[1024];
@@ -55,7 +56,6 @@ namespace ds {
 		int _socket;
 		unsigned short _port;
 		unsigned int _address;
-		HANDLE _handle;
 		HTTPCallback* _callback;
 	};
 

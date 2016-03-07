@@ -1,6 +1,7 @@
 #pragma once
 #include "..\lib\collection_types.h"
 #include "..\math\math_types.h"
+#include "..\utils\Log.h"
 
 namespace ds {
 
@@ -465,6 +466,7 @@ inline void Grid<T>::dropCells(Array<DroppedCell>& droppedCells) {
 					++sy;
 				}			
 				if ( !isFree(x,sy)) {
+					LOG << "dropping cell from: " << x << " " << sy << " to " << x << " " << y;
 					DroppedCell dc;
 					dc.from = Point(x,sy);
 					dc.to = Point(x,y);

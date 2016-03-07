@@ -394,7 +394,8 @@ void BaseApp::updateTime() {
 }
 
 void BaseApp::get(const HTTPRequest& request, HTTPResponse* response) {
-	LOG << "GET called!!!!!!!!!!";
+	LOG << "==> GET called - path: " << request.path;
+
 }
 // -------------------------------------------------------
 // Build frame

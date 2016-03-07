@@ -1,23 +1,16 @@
 #include "GameServer.h"
-//#include <winsock2.h>
-//#include <ws2tcpip.h>
 #include "..\utils\Log.h"
-//#include <fcntl.h>
 
 namespace ds  {
 
 	GameServer::GameServer(unsigned char a, unsigned char b, unsigned char c, unsigned char d, unsigned short port) : _connected(false), _socket(0) , _port(port) , _callback(0) {
 		_address = (a << 24) | (b << 16) | (c << 8) | d;
-
-		
 	}
-
 
 	GameServer::~GameServer() {
 		if (_connected) {
 			WSACleanup();
 		}
-		CloseHandle(_handle);
 	}
 
 	bool GameServer::connect(HTTPCallback* callback) {
@@ -73,50 +66,6 @@ namespace ds  {
 				WSACleanup();
 				return false;
 			}
-
-			//_socket = ListenSocket;
-			/*
-			// Accept a client socket
-			_socket = accept(ListenSocket, NULL, NULL);
-			if (_socket == INVALID_SOCKET) {
-			LOGE << "socket failed with error: " << WSAGetLastError();
-			closesocket(ListenSocket);
-			WSACleanup();
-			return false;
-			}
-			//fcntl(_socket, F_SETFL, O_NONBLOCK);
-			// No longer need server socket
-			closesocket(ListenSocket);
-			char buffer[1024];
-			do {
-
-			result = recv(_socket, buffer, 1024, 0);
-			if (result > 0) {
-			LOG << "Bytes received: " << result;
-			LOG << "message : '" << buffer << "'";
-
-			// Echo the buffer back to the sender
-			sprintf(buffer, "HTTP/1.1 ");
-			int SendResult = ::send(_socket, buffer, strlen(buffer), 0);
-			if (SendResult == SOCKET_ERROR) {
-			printf("send failed with error: %d\n", WSAGetLastError());
-			closesocket(_socket);
-			WSACleanup();
-			return 1;
-			}
-			printf("Bytes sent: %d\n", SendResult);
-			}
-			else if (result == 0)
-			LOG << "Connection closing...\n";
-			else  {
-			LOGE << "recv failed with error: " << WSAGetLastError();
-			closesocket(_socket);
-			WSACleanup();
-			return false;
-			}
-
-			} while (result > 0);
-			*/
 		}
 		return true;
 	}
@@ -144,6 +93,7 @@ namespace ds  {
 						LOG << "==> Bytes received: " << result;
 						LOG << "==> message : '" << _request.data << "'";
 						// GET /report
+						parseHeader(_request.data);
 						// extract method
 						// extract path
 					}
@@ -163,6 +113,28 @@ namespace ds  {
 			}
 		}
 		return _request;
+	}
+
+	void GameServer::parseHeader(const char* data) {
+		// first is method
+		const char* tmp = data;
+		if (strncmp(tmp, "GET", 3) == 0) {
+			_request.method = HTTP_GET;
+			tmp += 4;
+		}
+		else if (strncmp(tmp, "POST", 4) == 0) {
+			_request.method = HTTP_GET;
+			tmp += 5;
+		}
+		// next stop is path
+		const char* p = tmp;
+		int l = 0;
+		while (*p != ' ') {
+			++p;
+			++l;
+		}
+		strncpy(_request.path, tmp, p - tmp);
+		_request.path[l] = '\0';
 	}
 	
 	bool GameServer::send(const char* line) {

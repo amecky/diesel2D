@@ -229,7 +229,7 @@ namespace ds {
 		void scale(int index,float sx,float sy) {
 			m_Data.scales[index] = Vector2f(sx,sy);
 		}
-		void scaleTo(SID sid,const Vector2f& startScale,const Vector2f& endScale,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+		void scaleTo(SID sid, const Vector2f& startScale, const Vector2f& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void scaleByPath(SID id, Vector2fPath* path, float ttl);
 		void clear();
 
@@ -237,7 +237,7 @@ namespace ds {
 			return m_Data.num;
 		}
 
-		void moveTo(SID sid,const Vector2f& startPos,const Vector2f& endPos,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+		void moveTo(SID sid,const Vector2f& startPos,const Vector2f& endPos,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::linear);
 		const int getMovingNumber() const;
 		void moveBy(SID sid,const Vector2f& velocity,bool bounce = false);
 		void bounce(SID sid, BounceDirection direction,float dt);
@@ -250,9 +250,9 @@ namespace ds {
 		float getRotation(SID sid) const;
 		void setRotation(SID sid,float angle);
 		void setRotation(SID sid, const Vector2f& target);
-		void rotateBy(SID sid,float angle,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
-		void rotateTo(SID sid,float angle,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
-		void rotateTo(SID sid, const Vector2f& target, float ttl, const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+		void rotateBy(SID sid, float angle, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
+		void rotateTo(SID sid, float angle, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
+		void rotateTo(SID sid, const Vector2f& target, float ttl, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void rotate(SID sid, float angleVelocity, float ttl,int mode = 0);
 
 		void removeAfter(SID sid, float ttl);
@@ -271,11 +271,11 @@ namespace ds {
 
 		void followTarget(SID sid,SID target, float velocity);
 
-		void fadeAlphaTo(SID sid,float startAlpha,float endAlpha,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+		void fadeAlphaTo(SID sid, float startAlpha, float endAlpha, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 
-		void fadeColorTo(SID sid, const Color& startColor, const Color& endColor, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+		void fadeColorTo(SID sid, const Color& startColor, const Color& endColor, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 
-		void flashColor(SID sid, const Color& startColor, const Color& endColor, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::easeOutQuad);
+		void flashColor(SID sid, const Color& startColor, const Color& endColor, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		
 		void wait(SID sid,float ttl);
 
