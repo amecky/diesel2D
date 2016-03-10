@@ -4,6 +4,22 @@
 
 namespace ds {
 
+	bool SpriteArray::verifySID(SID sid) {
+		SpriteArrayIndex &in = indices[sid];
+		if (in.index != USHRT_MAX) {
+			return true;
+		}
+		LOG << "SID: " << sid << " is NOT valid - no valid index found";
+	}
+
+	void SpriteArray::assertSID(SID sid) const {
+		SpriteArrayIndex &in = indices[sid];
+		if (in.index == USHRT_MAX) {
+			LOG << "SID: " << sid << " is NOT valid - no valid index found";
+		}
+		assert(in.index != USHRT_MAX);
+	}
+
 	namespace sar {
 
 		void clear(SpriteArray& array) {
@@ -20,43 +36,43 @@ namespace ds {
 
 		void setPosition(SpriteArray& array,SID sid,const Vector2f& pos) {
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			array.positions[in.index] = pos;
 		}
 
 		const Vector2f& getPosition(const SpriteArray& array,SID sid) {
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			return array.positions[in.index];
 		}
 
 		void setScale(SpriteArray& array,SID sid,float sx,float sy) {
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			array.scales[in.index] = Vector2f(sx,sy);
 		}
 
 		void scale(SpriteArray& array,SID sid,const Vector2f& scale) {
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			array.scales[in.index] = scale;
 		}
 
 		void setColor(SpriteArray& array,SID sid,const Color& clr) {
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			array.colors[in.index] = clr;
 		}
 
 		void setAlpha(SpriteArray& array,SID sid,float alpha) {
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			array.colors[in.index].a = alpha;
 		}
 
 		void rotate(SpriteArray& array,SID sid,float angle) {
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			if ( angle > TWO_PI ) {
 				angle -= TWO_PI;
 			}
@@ -65,14 +81,14 @@ namespace ds {
 
 		float getRotation(SpriteArray& array,SID sid) {
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			return array.rotations[in.index];
 		}
 
 		Sprite get(SpriteArray& array,SID sid) {
 			Sprite sprite;
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			sprite.id = sid;
 			sprite.position = array.positions[in.index];
 			sprite.scale = array.scales[in.index];
@@ -86,7 +102,7 @@ namespace ds {
 
 		void set(SpriteArray& array,SID sid,const Sprite& sprite) {
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			array.ids[in.index] = sid;
 			array.positions[in.index] = sprite.position;
 			array.scales[in.index] = sprite.scale;
@@ -115,7 +131,7 @@ namespace ds {
 
 		void remove(SpriteArray& array,SID id) {
 			SpriteArrayIndex &in = array.indices[id & INDEX_MASK];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(id);
 			ID currentID = array.ids[array.num - 1];
 			SpriteArrayIndex& next = array.indices[currentID & INDEX_MASK];
 			array.ids[in.index] = array.ids[next.index];
@@ -142,7 +158,7 @@ namespace ds {
 
 		void debug(SpriteArray& array,SID sid) {
 			SpriteArrayIndex &in = array.indices[sid];
-			assert(in.index != USHRT_MAX);
+			array.assertSID(sid);
 			LOG << "id      : " << sid;
 			LOG << "index   : " << in.index;
 			LOG << "position: " << DBG_V2(array.positions[in.index]);
@@ -157,8 +173,6 @@ namespace ds {
 			if (size > array.total) {
 				SpriteArray sad;
 				int sz = size * (sizeof(SpriteArrayIndex) + sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(float) + sizeof(Texture) + sizeof(Color) + sizeof(float) + sizeof(int) + sizeof(int));
-				//sad.buffer = new char[sz];
-				//sad.buffer = (char*)gDefaultMemory->allocate(sz);
 				sad.buffer = (char*)ALLOC(sz);
 				sad.total = size;
 				sad.num = 0;
@@ -186,8 +200,6 @@ namespace ds {
 					sad.free_dequeue = array.free_dequeue;
 					sad.free_enqueue = array.free_enqueue;
 					sad.num = array.num;
-					//delete[] array.buffer;
-					//gDefaultMemory->deallocate(array.buffer);
 					DEALLOC(array.buffer);
 				}
 				else {

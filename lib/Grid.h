@@ -501,7 +501,9 @@ template<class T>
 inline void Grid<T>::remove(const Array<Point>& points,bool shift) {
     for ( std::size_t i = 0; i < points.size(); ++i ) {
         Point gp = points[i];
-        remove(gp.x,gp.y);
+		if (!remove(gp.x, gp.y)) {
+			LOG << "cannot remove cell at " << gp.x << " " << gp.y;
+		}
     }
 	if (shift) {
 		int moved = 0;

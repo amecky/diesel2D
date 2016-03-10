@@ -34,6 +34,10 @@ namespace ds {
 		SpriteArray() : num(0) , total(0) , buffer(0) {								
 		}
 
+		bool verifySID(SID sid);
+
+		void assertSID(SID sid) const;
+
 		const int getType(SID sid) const {
 			SpriteArrayIndex &in = indices[sid];
 			assert(in.index != USHRT_MAX);
@@ -42,7 +46,7 @@ namespace ds {
 
 		void setType(SID sid,int type) {
 			SpriteArrayIndex &in = indices[sid];
-			assert(in.index != USHRT_MAX);
+			assertSID(sid);
 			types[in.index] = type;
 		}
 
@@ -53,31 +57,31 @@ namespace ds {
 
 		const int getIndex(SID sid) const {
 			SpriteArrayIndex &in = indices[sid];
-			assert(in.index != USHRT_MAX);
+			assertSID(sid);
 			return in.index;
 		}
 
 		const Vector2f& getPosition(SID sid) const {
 			SpriteArrayIndex &in = indices[sid];
-			assert(in.index != USHRT_MAX);
+			assertSID(sid);
 			return positions[in.index];
 		}
 
 		const Vector2f& getScale(SID sid) const {
 			SpriteArrayIndex &in = indices[sid];
-			assert(in.index != USHRT_MAX);
+			assertSID(sid);
 			return scales[in.index];
 		}
 
 		const float getRotation(SID sid) const {
 			SpriteArrayIndex &in = indices[sid];
-			assert(in.index != USHRT_MAX);
+			assertSID(sid);
 			return rotations[in.index];
 		}
 
 		const Texture& getTexture(SID sid) const {
 			SpriteArrayIndex &in = indices[sid];
-			assert(in.index != USHRT_MAX);
+			assertSID(sid);
 			return textures[in.index];
 		}
 
