@@ -53,10 +53,7 @@ public:
         return m_Height;
     }
 	bool isValid(int x, int y) const {
-		if (x >= 0 && x < m_Width && y >= 0 && y < m_Height) {
-			return true;
-		}
-		return false;
+		return getIndex(x, y) != -1;
 	}
 	void findMatchingNeighbours(int x, int y, Array<Point>& entries);
 	void findMatchingNeighbours(int x, int y, const T& node, Array<Point>& entries);
@@ -69,11 +66,16 @@ public:
     T& operator() (int x,int y);    
 	const T& operator() (int x, int y) const;
     const bool isFree(int x,int y) const;
-	bool isColumnEmpty(int col);
+	bool isColumnEmpty(int col) const;
+	bool isRowEmpty(int row) const;
     void dropRow(int x);
     void dropCell(int x,int y);
 	void dropCells(Array<DroppedCell<T>>& droppedCells);
 	void swap(const Point& first, const Point& second);
+	bool isValid(const Point& p) const {
+		return getIndex(p) != -1;
+	}
+	int getMaxColumn() const;
 protected:
     virtual bool isMatch(const T& first,const T& right) = 0;
 private:
@@ -473,7 +475,9 @@ inline void Grid<T>::dropCells(Array<DroppedCell<T>>& droppedCells) {
 					dc.to = Point(x,y);
 					droppedCells.push_back(dc);
 					set(x,y,get(x,sy));
-					remove(x,sy);							
+					if (!remove(x, sy)) {
+						LOGE << "Cannot remove at " << x << " " << sy;
+					}
 				}
 			}
 		}
@@ -484,10 +488,24 @@ inline void Grid<T>::dropCells(Array<DroppedCell<T>>& droppedCells) {
 // Is column empty
 // -------------------------------------------------------
 template<class T>
-bool Grid<T>::isColumnEmpty(int col) {
+bool Grid<T>::isColumnEmpty(int col) const {
 	int count = 0;
 	for (int i = 0; i < m_Height; ++i ) {
 		if ( !isFree(col,i)) {
+			++count;
+		}
+	}
+	return count == 0;
+}
+
+// -------------------------------------------------------
+// Is row empty
+// -------------------------------------------------------
+template<class T>
+bool Grid<T>::isRowEmpty(int row) const {
+	int count = 0;
+	for (int i = 0; i < m_Width; ++i) {
+		if (!isFree(i, row)) {
 			++count;
 		}
 	}
@@ -522,6 +540,16 @@ inline void Grid<T>::swap(const Point& first, const Point& second) {
 	GridNode n = m_Data[fi];
 	m_Data[fi] = m_Data[si];
 	m_Data[si] = n;
+}
+
+template<class T>
+inline int Grid<T>::getMaxColumn() const {
+	for (int y = m_Height - 1; y >= 0; --y) {
+		if (!isRowEmpty(y)) {
+			return y;
+		}
+	}
+	return 0;
 }
 
 }

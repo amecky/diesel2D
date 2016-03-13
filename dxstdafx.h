@@ -105,7 +105,11 @@ typedef unsigned short ushort;
 #endif
 
 #ifndef DBG_TEX
-#define DBG_TEX(v) "dim.x: " << v.dim.x << " dim.y: " << v.dim.y << " u1: " << v.uv.x << " v1: " << v.uv.y << " u2: " << v.uv.z << " v2: " << v.uv.w;
+#define DBG_TEX(v) "dim.x: " << v.dim.x << " dim.y: " << v.dim.y << " u1: " << v.uv.x << " v1: " << v.uv.y << " u2: " << v.uv.z << " v2: " << v.uv.w
+#endif
+
+#ifndef DBG_PNT
+#define DBG_PNT(v) "x: " << v.x << " y: " << v.y
 #endif
 
 #ifndef BM_NEW

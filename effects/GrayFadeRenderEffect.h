@@ -35,6 +35,7 @@ namespace ds {
 			return &_settings;
 		}
 	private:
+		Shader* createShader();
 		float _timer;
 		RTID _rtID;
 		Shader* _shader;

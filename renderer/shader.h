@@ -66,8 +66,6 @@ namespace ds {
 
 		int createCombineLightShader(int lightTextureID, int colorTextureID);
 
-		Shader* createFadeToGrayShader(int textureID);
-
 		int createParticleShader();
 		
 		//bool setFloat(Shader& shader,const char* name,float value);

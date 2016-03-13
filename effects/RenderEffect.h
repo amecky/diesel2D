@@ -34,41 +34,7 @@ namespace ds {
 		bool _active;
 	};
 
-	// -----------------------------------------
-	// gray scale effect
-	// -----------------------------------------
-	struct GrayScaleEffectSettings : public DynamicGameSettings {
-
-		float factor;
-
-		GrayScaleEffectSettings() {
-			addFloat("factor", &factor, 1.0f);
-		}
-
-		const char* getFileName() const {
-			return "grayscale.json";
-		}
-	};
-
-	class GrayScaleEffect : public RenderEffect {
-
-	public:
-		GrayScaleEffect();
-		~GrayScaleEffect();
-		void start();
-		void tick(float dt) {}
-		void render();
-		void onActivation() {}
-		void setFactor(float f);
-		DynamicGameSettings* getSettings() {
-			return &_settings;
-		}
-	private:
-		RTID _rtID;
-		Shader* _shader;
-		GrayScaleEffectSettings _settings;
-
-	};
+	
 
 }
 

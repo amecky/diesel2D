@@ -1,72 +1,61 @@
-#include "GrayFadeRenderEffect.h"
+#include "ScreenShakeEffect.h"
 
 namespace ds {
 
 	// ------------------------------------------
 	// gray fade effect
 	// ------------------------------------------
-	GrayFadeEffect::GrayFadeEffect() {
-		// create render target
+	ScreenShakeEffect::ScreenShakeEffect() {
 		_rtID = renderer::createRenderTarget(Color(0, 0, 0, 0));
-		// load shader
 		_shader = createShader();
 		_settings.load();
 	}
 
-	GrayFadeEffect::~GrayFadeEffect() {
+	ScreenShakeEffect::~ScreenShakeEffect() {
 
 	}
 
-	void GrayFadeEffect::start() {
+	void ScreenShakeEffect::start() {
 		if (isActive()) {
-			// set render target
 			renderer::setRenderTarget(_rtID);
 		}
 	}
 
-	void GrayFadeEffect::onActivation() {
+	void ScreenShakeEffect::onActivation() {
 		_timer = 0.0f;
 	}
 
-	void GrayFadeEffect::tick(float dt) {
+	void ScreenShakeEffect::tick(float dt) {
 		if (isActive()) {
 			_timer += dt;
 			if (_timer >= _settings.ttl) {
-				if (_settings.mode < 0) {
-					_timer = 0.0f;
-				}
-				else if (_settings.mode == 0) {
-					_timer = _settings.ttl;
-				}
-				else {
-					--_settings.mode;
-					_timer = 0.0f;
-
-				}
+				deactivate();
 			}
 		}
 	}
 
-	void GrayFadeEffect::render() {
+	void ScreenShakeEffect::render() {
 		if (isActive()) {
 			// restore backbuffer
-			renderer::restoreBackBuffer();
+			renderer::restoreBackBuffer();			
 			// draw rendertarget
 			float n = _timer / _settings.ttl;
 			n = math::clamp(n, 0.0f, 1.0f);
-			tweening::TweeningType tweening = tweening::get_by_index(_settings.tweeningType);
-			float v = tweening::interpolate(tweening, 0.0f, 1.0f, _timer, _settings.ttl);
-			_shader->setFloat("timer", v);
+			_shader->setFloat("timer", n * PI);
+			_shader->setFloat("frequency", _settings.frequency);
+			float amp = _settings.amplitude / renderer::getScreenWidth();
+			_shader->setFloat("amplitude", amp);
 			renderer::draw_render_target(_rtID, _shader->getID());
 		}
 	}
 
-	Shader* GrayFadeEffect::createShader() {
+	Shader* ScreenShakeEffect::createShader() {
 		const char* g_strBuffer =
 			"uniform extern float4x4 gWVP;\r\n"
 			"uniform extern texture gTex;\r\n"
 			"float timer = 1.0f; \r\n"
-			"float4 grayscale = float4(0.2125, 0.7154, 0.0721, 1.0); \r\n"
+			"float frequency = 1.0f; \r\n"
+			"float amplitude = 1.0f; \r\n"
 			"sampler TexS = sampler_state {\r\n"
 			"	Texture = <gTex>;\r\n"
 			"	MinFilter = LINEAR;\r\n"
@@ -80,26 +69,24 @@ namespace ds {
 			"	float2 tex0   : TEXCOORD0;\r\n"
 			"	float4 color0 : COLOR0;\r\n"
 			"};\r\n"
-			"OutputVS BasicVS(float3 posL : POSITION0,float2 tex0 : TEXCOORD0 , float4 color : COLOR0) {\r\n"
+			"OutputVS ShakeVS(float3 posL : POSITION0,float2 tex0 : TEXCOORD0 , float4 color : COLOR0) {\r\n"
 			"	OutputVS outVS = (OutputVS)0;	\r\n"
 			"	outVS.posH = mul(float4(posL, 1.0f), gWVP);		\r\n"
+			"	outVS.posH.x += cos(3.14 * timer * frequency) * amplitude;\r\n"
 			"	outVS.tex0 = tex0;\r\n"
 			"	outVS.color0 = color;\r\n"
 			"	return outVS;\r\n"
 			"}\r\n"
-			"float4 BasicPS(OutputVS input) : COLOR {\r\n"
-			"	float4 clr = tex2D(TexS, input.tex0);\r\n"
-			"	float3 greyscale = dot(clr.rgb, float3(0.30, 0.59, 0.11)); \r\n"
-			"	float3 rgb = lerp(clr.rgb, greyscale, timer); \r\n"
-			"	return float4(rgb, clr.a);\r\n"
+			"float4 ShakePS(OutputVS input) : COLOR {\r\n"
+			"	return tex2D(TexS, input.tex0);\r\n"
 			"}\r\n"
-			"technique FadeTech {\r\n"
+			"technique ShakeTech {\r\n"
 			"	pass P0 {\r\n"
-			"		vertexShader = compile vs_2_0 BasicVS();\r\n"
-			"		pixelShader  = compile ps_2_0 BasicPS();\r\n"
+			"		vertexShader = compile vs_2_0 ShakeVS();\r\n"
+			"		pixelShader  = compile ps_2_0 ShakePS();\r\n"
 			"	}\r\n"
 			"}\r\n";
-		int ret = ds::renderer::createShaderFromText(g_strBuffer, "FadeTech");
+		int ret = ds::renderer::createShaderFromText(g_strBuffer, "ShakeTech");
 		Shader* s = ds::renderer::getShader(ret);
 		return s;
 	}
