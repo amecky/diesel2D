@@ -4,7 +4,12 @@
 
 namespace ds {
 
-
+	enum EffectTypes {
+		ET_SCREEN_SHAKE,
+		ET_GRAY_FADE,
+		ET_BLUR,
+		ET_PIXELATE
+	};
 	// -----------------------------------------
 	// Render effect
 	// -----------------------------------------

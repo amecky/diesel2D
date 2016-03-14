@@ -87,7 +87,7 @@ namespace ds {
 		RenderTargetQuad renderTargetQuad;
 		SpriteTemplates spriteTemplates;
 		SpriteGroupContainer spriteGroudContainer;
-		dVector<MeshData> meshData;
+		Array<MeshData> meshData;
 		MeshArray meshes;
 		Vector2f mousePosition;
 		Array<DebugMessage> messages;
@@ -1624,15 +1624,15 @@ namespace ds {
 			sprintf(fileName, "content\\data\\%s.bin", file);
 			sprintf(srcFileName, "content\\data\\%s.obj", file);
 			ObjLoader ml;
-			if (!file::fileExists(fileName) || file::isOlder(fileName, srcFileName)) {
+			//if (!file::fileExists(fileName) || file::isOlder(fileName, srcFileName)) {
 				LOG << "obj fileName: " << srcFileName;
 				ml.parse(srcFileName, md);
-				ml.save(fileName, md);
-			}
-			if (file::fileExists(fileName)) {
-				LOG << "reading binary file";
-				ml.read(fileName, md);
-			}			
+				//ml.save(fileName, md);
+			//}
+			//if (file::fileExists(fileName)) {
+				//LOG << "reading binary file";
+				//ml.read(fileName, md);
+			//}			
 			return id;
 		}
 
@@ -1643,7 +1643,7 @@ namespace ds {
 			data.id = static_cast<ID>(s);
 			LOG << "create meshdata - name: " << name << " id: " << data.id << " hash: " << data.hash;
 			data.size = 0;
-			renderContext->meshData.add(data);
+			renderContext->meshData.push_back(data);
 			return data.id;
 		}
 

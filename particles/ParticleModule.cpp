@@ -82,6 +82,10 @@ namespace ds {
 			}
 			array->scale[i] = s;
 			array->baseScale[i] = s;
+			if (my_data->modifier == MMT_LINEAR) {
+				array->scale[i].x = s.x * my_data->minScale.x;
+				array->scale[i].y = s.y * my_data->minScale.y;
+			}
 		}
 	}
 
