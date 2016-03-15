@@ -197,13 +197,19 @@ namespace ds {
 	void World::tick(float dt) {
 		ZoneTracker z("World:tick");
 		m_Buffer.reset();
-		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
-			m_Actions[i]->update(m_Data, dt, m_Buffer);
+		{
+			ZoneTracker z1("World:tick:actions");
+			for (size_t i = 0; i < m_Actions.size(); ++i) {
+				m_Actions[i]->update(m_Data, dt, m_Buffer);
+			}
 		}
-		for (int i = 0; i < m_Buffer.events.size(); ++i) {
-			const ActionEvent& e = m_Buffer.events[i];
-			if (e.type == AT_KILL) {
-				remove(e.sid);
+		{
+			ZoneTracker z2("World:tick:kill");
+			for (int i = 0; i < m_Buffer.events.size(); ++i) {
+				const ActionEvent& e = m_Buffer.events[i];
+				if (e.type == AT_KILL) {
+					remove(e.sid);
+				}
 			}
 		}
 		m_Physics.tick(dt);

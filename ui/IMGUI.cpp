@@ -1369,9 +1369,11 @@ namespace gui {
 			v2 p = startPos;
 			if (guiContext->modal) {
 				p = v2(512, 384);
-			}
+			}			
 			p.x = startPos.x - 10.0f;
-			p.y = startPos.y - BOX_HEIGHT * 0.5f;
+			if (guiContext->useHeader) {
+				p.y = startPos.y - BOX_HEIGHT * 0.5f;
+			}
 			ds::sprites::drawTiledXY(p, dim, guiContext->textures[ICN_PANEL_BACKGROUND], 10.0f);
 
 

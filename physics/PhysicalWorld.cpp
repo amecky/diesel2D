@@ -1,8 +1,74 @@
 #include "PhysicalWorld.h"
 #include "..\utils\Log.h"
+#include "..\utils\Profiler.h"
 
 namespace ds {
 
+	// --------------------------------------------------------------------------
+	// PotentialColliders
+	// --------------------------------------------------------------------------
+	void PotentialColliders::reset() {
+		//_colliders.clear();
+		num = 0;
+	}
+
+	void PotentialColliders::add(int firstIndex, CID first, int firstType,int secondIndex, CID second, int secondType) {
+		if (!shouldBeIgnored(firstType, secondType)) {
+			if (!contains(first, second)) {
+				//PotentialCollider pc;
+				PotentialCollider& pc = _colliders[num++];
+				pc.firstIndex = firstIndex;
+				pc.first = first;
+				pc.secondIndex = secondIndex;
+				pc.second = second;
+				//_colliders.push_back(pc);
+			}
+		}
+	}
+
+	int PotentialColliders::size() const {
+		//return _colliders.size();
+		return num;
+	}
+
+	const PotentialCollider& PotentialColliders::get(int index) const {
+		return _colliders[index];
+	}
+
+	bool PotentialColliders::contains(CID first, CID second) const {
+		//for (int i = 0; i < _colliders.size(); ++i) {
+		for (int i = 0; i < num; ++i) {
+			if (_colliders[i].first == first && _colliders[i].second == second) {
+				return true;
+			}
+			if (_colliders[i].first == second && _colliders[i].second == first) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool PotentialColliders::shouldBeIgnored(int firstType, int secondType) {
+		for (size_t i = 0; i < _ignored.size(); ++i) {
+			IgnoredCollision& ic = _ignored[i];
+			if (ic.matches(firstType, secondType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void PotentialColliders::ignore(int firstType, int secondType) {
+		if (!shouldBeIgnored(firstType, secondType)) {
+			IgnoredCollision c;
+			c.firstType = firstType;
+			c.secondType = secondType;
+			_ignored.push_back(c);
+		}
+	}
+	// --------------------------------------------------------------------------
+	// PhysicalWorld
+	// --------------------------------------------------------------------------
 	PhysicalWorld::PhysicalWorld() {
 	}
 
@@ -25,6 +91,7 @@ namespace ds {
 	// remove by SID
 	// --------------------------------------------------------------------------
 	void PhysicalWorld::remove(SID id) {
+		ZoneTracker z("PhysicalWorld::remove");
 		for (int i = 0; i < m_ColliderData.num; ++i) {
 			if (m_ColliderData.sids[i] == id) {
 				m_ColliderData.remove(m_ColliderData.ids[i]);
@@ -45,6 +112,7 @@ namespace ds {
 	// tick
 	// --------------------------------------------------------------------------
 	void PhysicalWorld::tick(float dt) {
+		ZoneTracker z("PhysicalWorld::tick");
 		for (int i = 0; i < m_ColliderData.num; ++i) {
 			m_ColliderData.moveTo(m_ColliderData.ids[i], m_Sprites->getPosition(m_ColliderData.sids[i]));
 		}
@@ -66,8 +134,8 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	void PhysicalWorld::allocateCollider(int size) {
 		if (size > m_ColliderData.total) {
-			ColliderArray<Vector2f> ca;
-			int sz = size * (sizeof(ColliderArrayIndex) + sizeof(CID) + sizeof(SID) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(Vector2f) + sizeof(int) + sizeof(int) + sizeof(ColliderShape));
+			ColliderArray<v2> ca;
+			int sz = size * (sizeof(ColliderArrayIndex) + sizeof(CID) + sizeof(SID) + sizeof(v2) + sizeof(v2) + sizeof(v2) + sizeof(int) + sizeof(int) + sizeof(ColliderShape));
 			//ca.buffer = new char[sz];
 			ca.buffer = (char*)ALLOC(sz);
 			ca.total = size;
@@ -75,18 +143,18 @@ namespace ds {
 			ca.indices = (ColliderArrayIndex*)(ca.buffer);
 			ca.ids = (CID*)(ca.indices + size);
 			ca.sids = (SID*)(ca.ids + size);
-			ca.positions = (Vector2f*)(ca.sids + size);
-			ca.previous = (Vector2f*)(ca.positions + size);
-			ca.extents = (Vector2f*)(ca.previous + size);
+			ca.positions = (v2*)(ca.sids + size);
+			ca.previous = (v2*)(ca.positions + size);
+			ca.extents = (v2*)(ca.previous + size);
 			ca.types = (int*)(ca.extents + size);
 			ca.layers = (int*)(ca.types + size);
 			ca.shapeTypes = (ColliderShape*)(ca.layers + size);
 			if (m_ColliderData.buffer != 0) {
 				memcpy(ca.indices, m_ColliderData.indices, m_ColliderData.num * sizeof(ColliderArrayIndex));
 				memcpy(ca.ids, m_ColliderData.ids, m_ColliderData.num * sizeof(CID));
-				memcpy(ca.positions, m_ColliderData.positions, m_ColliderData.num * sizeof(Vector2f));
-				memcpy(ca.previous, m_ColliderData.previous, m_ColliderData.num * sizeof(Vector2f));
-				memcpy(ca.extents, m_ColliderData.extents, m_ColliderData.num * sizeof(Vector2f));
+				memcpy(ca.positions, m_ColliderData.positions, m_ColliderData.num * sizeof(v2));
+				memcpy(ca.previous, m_ColliderData.previous, m_ColliderData.num * sizeof(v2));
+				memcpy(ca.extents, m_ColliderData.extents, m_ColliderData.num * sizeof(v2));
 				memcpy(ca.types, m_ColliderData.types, m_ColliderData.num * sizeof(int));
 				memcpy(ca.layers, m_ColliderData.layers, m_ColliderData.num * sizeof(int));
 				memcpy(ca.shapeTypes, m_ColliderData.shapeTypes, m_ColliderData.num * sizeof(ColliderShape));
@@ -115,14 +183,14 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	// attach collider
 	// --------------------------------------------------------------------------
-	void PhysicalWorld::attachCollider(SID sid, const Vector2f& extent, int type,int layer) {
+	void PhysicalWorld::attachCollider(SID sid, const v2& extent, int type,int layer) {
 		if (m_ColliderData.total == 0) {
 			allocateCollider(256);
 		}
 		if (m_ColliderData.num >= m_ColliderData.total) {
 			allocateCollider(m_ColliderData.total * 2);
 		}
-		const Vector2f& p = m_Sprites->getPosition(sid);
+		const v2& p = m_Sprites->getPosition(sid);
 		CID cid = m_ColliderData.create(sid, p, extent, type,layer);
 		//m_ColliderMap[sid] = cid;
 	}
@@ -137,7 +205,7 @@ namespace ds {
 		if (m_ColliderData.num >= m_ColliderData.total) {
 			allocateCollider(m_ColliderData.total * 2);
 		}
-		const Vector2f& p = m_Sprites->getPosition(sid);
+		const v2& p = m_Sprites->getPosition(sid);
 		const Texture& t = m_Sprites->getTexture(sid);
 		CID cid = m_ColliderData.create(sid, p, t.dim, type,layer);
 		//m_ColliderMap[sid] = cid;
@@ -160,9 +228,42 @@ namespace ds {
 	// check collisions
 	// --------------------------------------------------------------------------
 	void PhysicalWorld::checkCollisions() {
-		for (int i = 0; i < m_ColliderData.num; ++i) {
-			if (!_ignoredLayers.isSet(m_ColliderData.layers[i])) {
-				checkCollisions(i, m_ColliderData.positions[i], m_ColliderData.extents[i]);
+		ZoneTracker z("PhysicalWorld::checkCollisions");
+		{
+			ZoneTracker z1("PhysicalWorld::potentials");
+			_potentialColliders.reset();
+			for (int i = 0; i < m_ColliderData.num; ++i) {
+				if (!_ignoredLayers.isSet(m_ColliderData.layers[i])) {
+					for (int j = 0; j < m_ColliderData.num; ++j) {
+						if (!_ignoredLayers.isSet(m_ColliderData.layers[j])) {
+							if (i != j) {
+								_potentialColliders.add(i, m_ColliderData.ids[i], m_ColliderData.types[i], j, m_ColliderData.ids[j], m_ColliderData.types[j]);
+							}
+						}
+					}
+				}
+			}
+		}
+		{
+			ZoneTracker z2("PhysicalWorld::check");
+			for (int x = 0; x < _potentialColliders.size(); ++x){
+				const PotentialCollider& pc = _potentialColliders.get(x);
+				if (intersects(pc.firstIndex, pc.secondIndex)) {
+					CID firstID = m_ColliderData.ids[pc.firstIndex];
+					CID secondID = m_ColliderData.ids[pc.secondIndex];
+					if (!containsCollision(firstID, secondID)) {
+						Collision c;
+						c.firstPos = m_ColliderData.positions[pc.firstIndex];
+						c.firstColliderID = m_ColliderData.ids[pc.firstIndex];
+						c.firstSID = m_ColliderData.sids[pc.firstIndex];
+						c.firstType = m_ColliderData.types[pc.firstIndex];
+						c.secondPos = m_ColliderData.positions[pc.secondIndex];
+						c.secondColliderID = m_ColliderData.ids[pc.secondIndex];
+						c.secondSID = m_ColliderData.sids[pc.secondIndex];
+						c.secondType = m_ColliderData.types[pc.secondIndex];
+						_collisions.push_back(c);
+					}
+				}
 			}
 		}
 	}
@@ -173,12 +274,12 @@ namespace ds {
 	bool PhysicalWorld::intersects(int firstIndex, int secondIndex) {
 		ColliderShape firstShape = m_ColliderData.shapeTypes[firstIndex];
 		ColliderShape secondShape = m_ColliderData.shapeTypes[secondIndex];
-		const Vector2f& fp = m_ColliderData.positions[firstIndex];
-		const Vector2f& fpp = m_ColliderData.previous[firstIndex];
-		const Vector2f& fe = m_ColliderData.extents[firstIndex];
-		const Vector2f& sp = m_ColliderData.positions[secondIndex];
-		const Vector2f& spp = m_ColliderData.previous[secondIndex];
-		const Vector2f& se = m_ColliderData.extents[secondIndex];
+		const v2& fp = m_ColliderData.positions[firstIndex];
+		const v2& fpp = m_ColliderData.previous[firstIndex];
+		const v2& fe = m_ColliderData.extents[firstIndex];
+		const v2& sp = m_ColliderData.positions[secondIndex];
+		const v2& spp = m_ColliderData.previous[secondIndex];
+		const v2& se = m_ColliderData.extents[secondIndex];
 		if (firstShape == CS_CIRCLE && secondShape == CS_CIRCLE)  {
 			// FIXME: calculate radius based on scale of sprite
 			float r1 = fe.x * 0.5f;
@@ -200,19 +301,19 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	// check collision
 	// --------------------------------------------------------------------------
-	void PhysicalWorld::checkCollisions(int currentIndex, const Vector2f& pos, const Vector2f& extent) {
+	void PhysicalWorld::checkCollisions(int currentIndex, const v2& pos, const v2& extent) {
 		
 		for (int i = 0; i < m_ColliderData.num; ++i) {
 			if (!_ignoredLayers.isSet(m_ColliderData.layers[i])) {
 				if (i != currentIndex) {
 					if (intersects(currentIndex, i)) {
-						const Vector2f& p = m_ColliderData.positions[i];
-						const Vector2f& pp = m_ColliderData.previous[i];
-						const Vector2f& e = m_ColliderData.extents[i];
+						const v2& p = m_ColliderData.positions[i];
+						const v2& pp = m_ColliderData.previous[i];
+						const v2& e = m_ColliderData.extents[i];
 						CID firstID = m_ColliderData.ids[currentIndex];
 						CID secondID = m_ColliderData.ids[i];
-						if (!containsCollision(firstID, secondID) && !shouldBeIgnored(m_ColliderData.types[currentIndex], m_ColliderData.types[i])) {
-							Vector2f cp = m_ColliderData.previous[currentIndex];
+						if (!containsCollision(firstID, secondID) ) {
+							v2 cp = m_ColliderData.previous[currentIndex];
 							//Collision& c = m_Collisions[m_NumCollisions++];
 							Collision c;
 							c.firstPos = pos;
@@ -297,6 +398,7 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	// should be ignored
 	// --------------------------------------------------------------------------
+	/*
 	bool PhysicalWorld::shouldBeIgnored(int firstType, int secondType) {
 		for (size_t i = 0; i < m_Ignored.size(); ++i) {
 			IgnoredCollision& ic = m_Ignored[i];
@@ -306,17 +408,20 @@ namespace ds {
 		}
 		return false;
 	}
-
+	*/
 	// --------------------------------------------------------------------------
 	// ignore
 	// --------------------------------------------------------------------------
 	void PhysicalWorld::ignore(int firstType, int secondType) {
+		_potentialColliders.ignore(firstType, secondType);
+		/*
 		if (!shouldBeIgnored(firstType, secondType)) {
 			IgnoredCollision c;
 			c.firstType = firstType;
 			c.secondType = secondType;
 			m_Ignored.push_back(c);
 		}
+		*/
 	}
 
 	// --------------------------------------------------------------------------
@@ -324,8 +429,8 @@ namespace ds {
 	// --------------------------------------------------------------------------
 	void PhysicalWorld::drawColliders(const Texture& texture) {
 		for (int i = 0; i < m_ColliderData.num; ++i) {
-			Vector2f& e = m_ColliderData.extents[i];
-			const Vector2f& scale = m_Sprites->getScale(m_ColliderData.sids[i]);
+			v2& e = m_ColliderData.extents[i];
+			const v2& scale = m_Sprites->getScale(m_ColliderData.sids[i]);
 			float sx = e.x / texture.dim.x * scale.x;
 			float sy = e.y / texture.dim.y * scale.y;
 			sprites::draw(m_ColliderData.positions[i], texture, 0.0f, sx, sy);

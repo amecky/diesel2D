@@ -8,8 +8,6 @@
 
 namespace ds {
 
-	class PhysicalWorld {
-
 	struct IgnoredCollision {
 
 		int firstType;
@@ -27,7 +25,35 @@ namespace ds {
 	};
 
 	typedef Array<IgnoredCollision> IgnoredCollisions;
-	
+
+	struct PotentialCollider {
+		CID first;
+		CID second;
+		int firstIndex;
+		int secondIndex;
+	};
+
+	class PotentialColliders {
+
+	public:
+		PotentialColliders() {}
+		~PotentialColliders() {}
+		void reset();
+		void add(int firstIndex,CID first, int firstType,int secondIndex, CID second, int secondType);
+		int size() const;
+		void ignore(int firstType, int secondType);
+		const PotentialCollider& get(int index) const;
+	private:
+		bool contains(CID first, CID second) const;
+		bool shouldBeIgnored(int firstType, int secondType);
+		//Array<PotentialCollider> _colliders;
+		PotentialCollider _colliders[4096];
+		int num;
+		IgnoredCollisions _ignored;
+	};
+
+	class PhysicalWorld {
+
 	public:
 		PhysicalWorld();
 		~PhysicalWorld();
@@ -54,7 +80,7 @@ namespace ds {
 		void drawColliders(const Texture& texture);
 	private:
 		bool intersects(int firstIndex, int secondIndex);
-		bool shouldBeIgnored(int firstType, int secondType);
+		//bool shouldBeIgnored(int firstType, int secondType);
 		void allocateCollider(int size);
 		void checkCollisions();
 		void checkCollisions(int currentIndex, const Vector2f& pos, const Vector2f& extent);
@@ -64,6 +90,7 @@ namespace ds {
 		Array<Collision> _collisions;
 		IgnoredCollisions m_Ignored;
 		Bits _ignoredLayers;
+		PotentialColliders _potentialColliders;
 	};
 
 }
