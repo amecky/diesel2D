@@ -224,6 +224,7 @@ namespace gui {
 		int caretPos;
 		v2 position;
 		const char* header;
+		bool useHeader;
 		v2 startPosition;
 		ds::Texture textures[16];
 		ds::Color colors[16];
@@ -240,6 +241,7 @@ namespace gui {
 			editorMode = false;
 			keyInput.num = 0;
 			modal = false;
+			useHeader = true;
 		}
 
 		void reset() {
@@ -250,6 +252,7 @@ namespace gui {
 			window.reset();
 			hot = -1;
 			modal = false;
+			useHeader = true;
 		}
 
 		void addBox(const v2& position, const v2& size, const ds::Color& color) {
@@ -490,6 +493,17 @@ namespace gui {
 			}
 		}
 	}
+
+	// -------------------------------------------------------
+	// begin panel
+	// -------------------------------------------------------
+	void begin() {
+		guiContext->reset();
+		guiContext->useHeader = false;
+		guiContext->visible = true;
+		guiContext->nextPosition();
+	}
+
 	// -------------------------------------------------------
 	// begin panel
 	// -------------------------------------------------------
@@ -1131,6 +1145,18 @@ namespace gui {
 		return isBoxSelected(id, p, v2(width, BUTTON_HEIGHT));
 	}
 
+	int ButtonBar(const ds::Array<const char*>& entries) {
+		int ret = -1;
+		beginGroup();
+		for (int i = 0; i < entries.size(); ++i) {
+			if (Button(entries[i])) {
+				ret = i;
+			}
+		}
+		endGroup();
+		return ret;
+	}
+
 	// -------------------------------------------------------
 	// Histogram
 	// -------------------------------------------------------	
@@ -1290,10 +1316,12 @@ namespace gui {
 				dim.y = endY;
 			}
 		}
-		v2 hd = getTextSize(guiContext->header);
-		hd.x += guiContext->startPosition.x;
-		if (hd.x > dim.x) {
-			dim.x = hd.x;
+		if (guiContext->useHeader) {
+			v2 hd = getTextSize(guiContext->header);
+			hd.x += guiContext->startPosition.x;
+			if (hd.x > dim.x) {
+				dim.x = hd.x;
+			}
 		}
 		dim.x = dim.x - start.x;
 		dim.y = start.y - dim.y - BOX_HEIGHT;		
@@ -1318,22 +1346,23 @@ namespace gui {
 		// draw header box
 		v2 p = guiContext->startPosition;
 		v2 startPos = guiContext->startPosition;
-		p.x -= 10.0f;
-		ds::sprites::drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 16.0f);
-		// draw text
-		p.y -= 7.0f;
-		p.x = startPos.x + 10.0f;
-		ds::sprites::drawText(guiContext->font, p.x, p.y, guiContext->header, 2);
-		// draw icon
-		p.x = startPos.x;// +.0f;
-		p.y = startPos.y;
-		if (guiContext->visible) {
-			ds::sprites::draw(p, guiContext->textures[ICN_ARROW_DOWN]);
+		if (guiContext->useHeader) {			
+			p.x -= 10.0f;
+			ds::sprites::drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 16.0f);
+			// draw text
+			p.y -= 7.0f;
+			p.x = startPos.x + 10.0f;
+			ds::sprites::drawText(guiContext->font, p.x, p.y, guiContext->header, 2);
+			// draw icon
+			p.x = startPos.x;// +.0f;
+			p.y = startPos.y;
+			if (guiContext->visible) {
+				ds::sprites::draw(p, guiContext->textures[ICN_ARROW_DOWN]);
+			}
+			else {
+				ds::sprites::draw(p, guiContext->textures[ICN_ARROW_RIGHT]);
+			}
 		}
-		else {
-			ds::sprites::draw(p, guiContext->textures[ICN_ARROW_RIGHT]);
-		}
-
 		// draw panel background
 		if (guiContext->visible) {
 					

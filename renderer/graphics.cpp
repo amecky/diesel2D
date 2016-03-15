@@ -1222,6 +1222,11 @@ namespace ds {
 			return RTID(tid, id);
 		}
 
+		void setClearColor(RTID rtid, const Color& color) {
+			RenderTarget* rt = &renderContext->renderTargets[rtid.rtID];
+			rt->clearColor = color;
+		}
+
 		// -------------------------------------------------------
 		// Set render target
 		// -------------------------------------------------------

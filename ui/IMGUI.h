@@ -93,6 +93,8 @@ namespace gui {
 
 	void start(int id,v2* startPos);
 
+	void begin();
+
 	bool begin(const char* header, int* state);
 
 	void beginModal(const char* header);
@@ -106,6 +108,8 @@ namespace gui {
 	void endGroup();
 
 	bool Button(const char* label);
+
+	int ButtonBar(const ds::Array<const char*>& entries);
 
 	void CheckBox(const char* label,bool* selected);
 

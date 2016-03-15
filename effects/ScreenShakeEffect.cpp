@@ -9,6 +9,7 @@ namespace ds {
 		_rtID = renderer::createRenderTarget(Color(0, 0, 0, 0));
 		_shader = createShader();
 		_settings.load();
+		renderer::setClearColor(_rtID, _settings.clearColor);
 	}
 
 	ScreenShakeEffect::~ScreenShakeEffect() {

@@ -467,6 +467,8 @@ namespace ds {
 
 		void setRenderTarget(RTID rtid);
 
+		void setClearColor(RTID rtid,const Color& color);
+
 		void restoreBackBuffer();
 
 		int createTexture(int width, int height);

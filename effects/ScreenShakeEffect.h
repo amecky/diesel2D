@@ -8,11 +8,13 @@ namespace ds {
 		float ttl;
 		float frequency;
 		float amplitude;
+		Color clearColor;
 
 		ScreenShakeEffectSettings() {
 			addFloat("ttl", &ttl, 1.0f);
 			addFloat("frequency", &frequency, 1.0f);
 			addFloat("amplitude", &amplitude, 1.0f);
+			addColor("clear_color", &clearColor, Color(0, 0, 0, 0));
 		}
 
 		const char* getFileName() const {
