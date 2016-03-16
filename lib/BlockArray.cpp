@@ -23,6 +23,7 @@ void BlockArray::init(int* sizes, int num) {
 
 bool BlockArray::resize(int new_size) {
 	if (new_size > capacity) {
+		new_size = capacity * 2 + new_size;
 		int total = 0;
 		for (int i = 0; i < _num_blocks; ++i) {
 			total += _sizes[i];

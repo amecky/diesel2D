@@ -18,20 +18,37 @@ namespace ds {
 		int total;
 		SpriteArrayIndex* indices;
 		SID* ids;
-		Vector2f* positions;
-		Vector2f* scales;
+		v2* positions;
+		v2* scales;
 		float* rotations;
 		Texture* textures;
 		Color* colors;
 		float* timers;
 		int* types;
 		int* layers;
+		// physical
+		v2* previous;
+		v2* extents;
+		SpriteShapeType* shapeTypes;
+
 		char* buffer;
 
 		unsigned short free_enqueue;
 		unsigned short free_dequeue;
 
 		SpriteArray() : num(0) , total(0) , buffer(0) {								
+		}
+
+		void clear() {
+			if (buffer != 0) {
+				for (unsigned short i = 0; i < total; ++i) {
+					indices[i].id = i;
+					indices[i].next = i + 1;
+				}
+				num = 0;
+				free_dequeue = 0;
+				free_enqueue = total - 1;
+			}
 		}
 
 		bool verifySID(SID sid);
@@ -61,13 +78,13 @@ namespace ds {
 			return in.index;
 		}
 
-		const Vector2f& getPosition(SID sid) const {
+		const v2& getPosition(SID sid) const {
 			SpriteArrayIndex &in = indices[sid];
 			assertSID(sid);
 			return positions[in.index];
 		}
 
-		const Vector2f& getScale(SID sid) const {
+		const v2& getScale(SID sid) const {
 			SpriteArrayIndex &in = indices[sid];
 			assertSID(sid);
 			return scales[in.index];
@@ -85,20 +102,18 @@ namespace ds {
 			return textures[in.index];
 		}
 
-		SID create(const Vector2f& pos, const Texture& r,float rotation = 0.0f,float scaleX = 1.0f,float scaleY = 1.0f,const Color& color = Color::WHITE, int type = -1, int layer = 0) {
-			SpriteArrayIndex &in = indices[free_dequeue];
-			free_dequeue = in.next;
-			in.index = num++;
-			ids[in.index] = in.id;
-			positions[in.index] = pos;
-			scales[in.index] = v2(scaleX, scaleY);
-			rotations[in.index] = rotation;
-			textures[in.index] = r;
-			colors[in.index] = color;
-			timers[in.index] = 0.0f;
-			types[in.index] = type;
-			layers[in.index] = layer;
-			return in.id;
+		SID create(const v2& pos, const Texture& r, float rotation = 0.0f, float scaleX = 1.0f, float scaleY = 1.0f, const Color& color = Color::WHITE, int type = -1, int layer = 0);
+
+		void attachCollider(SID sid, const v2& extent, SpriteShapeType shape = SST_CIRCLE) {
+			SpriteArrayIndex &in = indices[sid];
+			assertSID(sid);
+			shapeTypes[in.index] = shape;
+			extents[in.index] = extent;
+		}
+
+		void attachCollider(SID sid, SpriteShapeType shape = SST_CIRCLE) {
+			const Texture& t = getTexture(sid);
+			attachCollider(sid, t.dim, shape);
 		}
 	};
 
@@ -106,13 +121,13 @@ namespace ds {
 
 		void clear(SpriteArray& array);
 
-		void setPosition(SpriteArray& array,SID sid,const Vector2f& pos);
+		void setPosition(SpriteArray& array,SID sid,const v2& pos);
 
-		const Vector2f& getPosition(const SpriteArray& array,SID sid);
+		const v2& getPosition(const SpriteArray& array,SID sid);
 
 		void setScale(SpriteArray& array,SID sid,float sx,float sy);
 
-		void scale(SpriteArray& array,SID sid,const Vector2f& scale);
+		void scale(SpriteArray& array,SID sid,const v2& scale);
 
 		void setColor(SpriteArray& array,SID sid,const Color& clr);
 
@@ -126,7 +141,7 @@ namespace ds {
 
 		void set(SpriteArray& array,SID sid,const Sprite& sprite);
 
-		SID create(SpriteArray& array,const Vector2f& pos,const Texture& r,int type = 0,int layer = 0);
+		//SID create(SpriteArray& array,const v2& pos,const Texture& r,int type = 0,int layer = 0);
 
 		void remove(SpriteArray& array,SID id);
 

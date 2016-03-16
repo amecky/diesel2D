@@ -27,29 +27,47 @@ namespace ds {
 	typedef Array<IgnoredCollision> IgnoredCollisions;
 
 	struct PotentialCollider {
-		CID first;
-		CID second;
+		SID first;
+		SID second;
 		int firstIndex;
 		int secondIndex;
 	};
 
-	class PotentialColliders {
+	class PotentialCollisionDetector {
 
 	public:
-		PotentialColliders() {}
-		~PotentialColliders() {}
+		PotentialCollisionDetector() {}
+		virtual ~PotentialCollisionDetector() {}
 		void reset();
-		void add(int firstIndex,CID first, int firstType,int secondIndex, CID second, int secondType);
+		virtual void add(int firstIndex, SID first, int firstType, int secondIndex, SID second, int secondType) = 0;
 		int size() const;
 		void ignore(int firstType, int secondType);
 		const PotentialCollider& get(int index) const;
-	private:
-		bool contains(CID first, CID second) const;
+	protected:
+		bool contains(SID first, SID second) const;
 		bool shouldBeIgnored(int firstType, int secondType);
 		//Array<PotentialCollider> _colliders;
 		PotentialCollider _colliders[4096];
 		int num;
 		IgnoredCollisions _ignored;
+	};
+
+	class BruteForceCollisionDetector : public PotentialCollisionDetector {
+
+	public:
+		BruteForceCollisionDetector() {}
+		virtual ~BruteForceCollisionDetector() {}
+		void add(int firstIndex,SID first, int firstType,int secondIndex, SID second, int secondType);
+	};
+
+	class SpatialGridCollisionDetector : public PotentialCollisionDetector {
+
+	public:
+		SpatialGridCollisionDetector(const Point& gridSize) : PotentialCollisionDetector() , _gridSize(gridSize) {}
+		virtual ~SpatialGridCollisionDetector() {}
+		void add(int firstIndex, SID first, int firstType, int secondIndex, SID second, int secondType);
+	private:
+		Point _gridSize;
 	};
 
 	class PhysicalWorld {
@@ -59,10 +77,6 @@ namespace ds {
 		~PhysicalWorld();
 		void ignore(int firstType, int secondType);
 		void ignoreLayer(int layer);
-		void setDataPtr(SpriteArray* sprites);
-		void attachCollider(SID sid, const Vector2f& extent, int type,int layer);
-		void attachCollider(SID sid, int type,int layer);
-		void attachBoxCollider(SID sid, int type, int layer);
 		bool hasCollisions() {
 			return _collisions.size() > 0;
 		}
@@ -72,25 +86,20 @@ namespace ds {
 		const Collision& getCollision(int idx) const {
 			return _collisions[idx];
 		}
-		void tick(float dt);
+		void tick(SpriteArray* sprites,float dt);
 		void debug();
 		void debug(SID sid);
 		void save(const ReportWriter& writer);
-		void remove(SID id);
 		void drawColliders(const Texture& texture);
 	private:
-		bool intersects(int firstIndex, int secondIndex);
-		//bool shouldBeIgnored(int firstType, int secondType);
-		void allocateCollider(int size);
-		void checkCollisions();
-		void checkCollisions(int currentIndex, const Vector2f& pos, const Vector2f& extent);
-		bool containsCollision(CID firstID, CID secondID);
-		SpriteArray* m_Sprites;
-		ColliderArray<Vector2f> m_ColliderData;
+		bool intersects(SpriteArray* sprites,int firstIndex, int secondIndex);
+		void checkCollisions(SpriteArray* sprites);
+		//void checkCollisions(int currentIndex, const v2& pos, const v2& extent);
+		bool containsCollision(const Collision& c);
 		Array<Collision> _collisions;
 		IgnoredCollisions m_Ignored;
 		Bits _ignoredLayers;
-		PotentialColliders _potentialColliders;
+		PotentialCollisionDetector* _potentialColliders;
 	};
 
 }

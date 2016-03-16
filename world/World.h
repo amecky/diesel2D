@@ -68,7 +68,7 @@ namespace ds {
 	class ColorFlashAction;
 	class BehaviorDefinitions;
 
-	typedef void (*MoveFunc)(Vector2f&,float*,float);
+	typedef void (*MoveFunc)(v2&,float*,float);
 
 	struct ActionEvent {
 
@@ -193,9 +193,9 @@ namespace ds {
 	public:
 		World();
 		~World(void);
-		SID create(const Vector2f& pos, const Texture& r, int type = -1, int layer = 0);
-		SID create(const Vector2f& pos, const char* templateName, int layer = 0);
-		SID create(const Vector2f& pos, const Texture& r,float rotation, float scaleX, float scaleY,const Color& color = Color::WHITE,int type = -1, int layer = 0);
+		SID create(const v2& pos, const Texture& r, int type = -1, int layer = 0);
+		SID create(const v2& pos, const char* templateName, int layer = 0);
+		SID create(const v2& pos, const Texture& r,float rotation, float scaleX, float scaleY,const Color& color = Color::WHITE,int type = -1, int layer = 0);
 		void remove(SID sid);
 		void render();
 		void renderLayers(int* layers,int num_layers);
@@ -209,7 +209,7 @@ namespace ds {
 		void tick(float dt);
 
 		//
-		void setPosition(SID sid,const Vector2f& pos) {
+		void setPosition(SID sid,const v2& pos) {
 			sar::setPosition(m_Data,sid,pos);
 		}
 		void setTexture(SID sid,const Texture& t) {
@@ -227,9 +227,9 @@ namespace ds {
 			sar::setScale(m_Data,sid,sx,sy);
 		}
 		void scale(int index,float sx,float sy) {
-			m_Data.scales[index] = Vector2f(sx,sy);
+			m_Data.scales[index] = v2(sx,sy);
 		}
-		void scaleTo(SID sid, const Vector2f& startScale, const Vector2f& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
+		void scaleTo(SID sid, const v2& startScale, const v2& endScale, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void scaleByPath(SID id, Vector2fPath* path, float ttl);
 		void clear();
 
@@ -237,11 +237,11 @@ namespace ds {
 			return m_Data.num;
 		}
 
-		void moveTo(SID sid,const Vector2f& startPos,const Vector2f& endPos,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::linear);
+		void moveTo(SID sid,const v2& startPos,const v2& endPos,float ttl,int mode = 0,const tweening::TweeningType& tweeningType = &tweening::linear);
 		const int getMovingNumber() const;
-		void moveBy(SID sid,const Vector2f& velocity,bool bounce = false);
+		void moveBy(SID sid,const v2& velocity,bool bounce = false);
 		void bounce(SID sid, BounceDirection direction,float dt);
-		const Vector2f& getPosition(SID sid) const {
+		const v2& getPosition(SID sid) const {
 			return sar::getPosition(m_Data,sid);
 		}
 		void moveWith(SID sid,const MoveFunc& function,float ttl,int mode = 0);
@@ -249,10 +249,10 @@ namespace ds {
 
 		float getRotation(SID sid) const;
 		void setRotation(SID sid,float angle);
-		void setRotation(SID sid, const Vector2f& target);
+		void setRotation(SID sid, const v2& target);
 		void rotateBy(SID sid, float angle, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void rotateTo(SID sid, float angle, float ttl, int mode = 0, const tweening::TweeningType& tweeningType = &tweening::linear);
-		void rotateTo(SID sid, const Vector2f& target, float ttl, const tweening::TweeningType& tweeningType = &tweening::linear);
+		void rotateTo(SID sid, const v2& target, float ttl, const tweening::TweeningType& tweeningType = &tweening::linear);
 		void rotate(SID sid, float angleVelocity, float ttl,int mode = 0);
 
 		void removeAfter(SID sid, float ttl);
@@ -304,16 +304,16 @@ namespace ds {
 
 		int get_count(int type);
 
-		void attachCollider(SID sid, const Vector2f& extent, int type,int layer) {
-			m_Physics.attachCollider(sid, extent, type,layer);
+		void attachCollider(SID sid, const v2& extent) {
+			m_Data.attachCollider(sid, extent);
 		}
 
-		void attachCollider(SID sid, int type, int layer){
-			m_Physics.attachCollider(sid, type, layer);
+		void attachCollider(SID sid){
+			m_Data.attachCollider(sid);
 		}
 
-		void attachBoxCollider(SID sid, int type, int layer){
-			m_Physics.attachBoxCollider(sid, type, layer);
+		void attachBoxCollider(SID sid){
+			m_Data.attachCollider(sid, SST_BOX);
 		}
 
 		void ignoreCollisions(int firstType, int secondType) {
@@ -338,7 +338,7 @@ namespace ds {
 			m_Physics.drawColliders(texture);
 		}
 
-		SID pick(const Vector2f& pos);
+		SID pick(const v2& pos);
 
 		const SpriteArray& getSpriteArray() const {
 			return m_Data;
@@ -364,6 +364,9 @@ namespace ds {
 
 		void startBehavior(SID id, const char* name);
 
+		void enableCollisionChecks() {
+			_checkCollisions = true;
+		}
 	private:
 		ActionEventBuffer m_Buffer;
 		void allocate(int size);
@@ -373,7 +376,7 @@ namespace ds {
 
 		SpriteArray m_Data;
 		AdditionalData _buffer;
-
+		bool _checkCollisions;
 		PhysicalWorld m_Physics;
 
 		MoveToAction* m_MoveToAction;	

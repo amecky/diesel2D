@@ -25,7 +25,7 @@ namespace ds {
 		bool isOutOfBounds(const Vector2f& pos, const Vector2f& v);
 
 		v2* _velocities;
-		float* _timers;
+		//float* _timers;
 		bool* _bounce;
 	};
 

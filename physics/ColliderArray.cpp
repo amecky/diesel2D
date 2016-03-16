@@ -4,34 +4,10 @@
 namespace ds {
 
 	namespace physics {
-		/*
-		void clear(ColliderArray& array) {
-			if ( array.buffer != 0 ) {
-				for ( unsigned short i = 0; i < array.total; ++i ) {
-					array.indices[i].id = i;
-					array.indices[i].next = i + 1;
-				}
-				array.num = 0;
-				array.free_dequeue = 0;
-				array.free_enqueue = array.total - 1;
-			}
-		}
-		*/
-		void debug(ColliderArray<Vector2f>& array) {
-			for ( int i = 0; i < array.num; ++i ) {
-				LOG << i << " : id: " << array.ids[i] << " pos: " << DBG_V2(array.positions[i]);
-			}
-		}
-
-		void debug(ColliderArray<Vector3f>& array) {
-			for (int i = 0; i < array.num; ++i) {
-				LOG << i << " : id: " << array.ids[i] << " pos: " << DBG_V3(array.positions[i]);
-			}
-		}
 
 		void debug(const Collision& c) {
-			LOG << "first  - id: " << c.firstColliderID << " sid: " << c.firstSID << " type: " << c.firstType << " pos: " << DBG_V2(c.firstPos);
-			LOG << "second - id: " << c.secondColliderID << " sid: " << c.secondSID << " type: " << c.secondType << " pos: " << DBG_V2(c.secondPos);
+			LOG << "first  - id: " << c.firstSID << " type: " << c.firstType << " pos: " << DBG_V2(c.firstPos);
+			LOG << "second - id: " << c.secondSID << " type: " << c.secondType << " pos: " << DBG_V2(c.secondPos);
 		}
 
 		// Given three colinear points p, q, r, the function checks if

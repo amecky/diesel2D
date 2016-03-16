@@ -28,7 +28,7 @@ namespace ds {
 	// -----------------------------------------------------
 	// World
 	// -----------------------------------------------------
-	World::World(void) {
+	World::World(void) : _checkCollisions(false) {
 		_behaviorDefinitions = new BehaviorDefinitions(this);
 		m_MoveToAction = new MoveToAction;
 		m_Actions.push_back(m_MoveToAction);
@@ -83,9 +83,7 @@ namespace ds {
 	// allocate
 	// -----------------------------------------------------
 	void World::allocate(int size) {
-		if (sar::allocate(m_Data, size)) {
-			m_Physics.setDataPtr(&m_Data);
-		}
+		sar::allocate(m_Data, size);
 	}
 
 	// -----------------------------------------------------
@@ -141,7 +139,6 @@ namespace ds {
 		if (_buffer.contains(id)) {
 			_buffer.remove(id);
 		}
-		m_Physics.remove(id);		
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->removeByID(id);
 		}		
@@ -212,7 +209,9 @@ namespace ds {
 				}
 			}
 		}
-		m_Physics.tick(dt);
+		if (_checkCollisions) {
+			m_Physics.tick(&m_Data, dt);
+		}
 	}
 
 	void World::stopAction(SID sid, ActionType type) {

@@ -7,16 +7,16 @@ namespace ds {
 	// 
 	// -------------------------------------------------------
 	MoveByAction::MoveByAction() : AbstractAction("move_by") {
-		int sizes[] = { sizeof(SID), sizeof(v2), sizeof(float), sizeof(bool) };
-		_buffer.init(sizes, 4);
+		int sizes[] = { sizeof(SID), sizeof(v2), sizeof(bool) };
+		_buffer.init(sizes, 3);
 	}
 
 	void MoveByAction::allocate(int sz) {
 		if (_buffer.resize(sz)) {
+			LOG << "buffer resizing by: " << sz << " to: " << _buffer.capacity;
 			_ids = (SID*)_buffer.get_ptr(0);
 			_velocities = (v2*)_buffer.get_ptr(1);
-			_timers = (float*)_buffer.get_ptr(2);
-			_bounce = (bool*)_buffer.get_ptr(3);
+			_bounce = (bool*)_buffer.get_ptr(2);
 		}
 	}
 	// -------------------------------------------------------
@@ -26,7 +26,6 @@ namespace ds {
 		int idx = create(id);
 		_ids[idx] = id;
 		_velocities[idx] = velocity;
-		_timers[idx] = 0.0f;
 		_bounce[idx] = bounce;
 	}
 
@@ -85,17 +84,13 @@ namespace ds {
 							_velocities[i].x *= -1.0f;
 						}
 						rotateTo(array, i);
-						p += _velocities[i] * dt;
-						sar::setPosition(array, _ids[i], p);
+						p += _velocities[i] * dt * 1.5f;
 					}
 					else {
 						buffer.add(_ids[i], AT_MOVE_BY, array.getType(_ids[i]));
 					}
 				}
-				else {
-					sar::setPosition(array, _ids[i], p);
-				}				
-				_timers[i] += dt;
+				sar::setPosition(array, _ids[i], p);
 			}
 		}
 	}
@@ -106,7 +101,7 @@ namespace ds {
 	void MoveByAction::debug() {
 		LOG << "------- MoveByAction -------";
 		for (int i = 0; i < _buffer.size; ++i) {
-			LOG << i << " id: " << _ids[i] << " velocity: " << DBG_V2(_velocities[i]) << " timer: " << _timers[i];
+			LOG << i << " id: " << _ids[i] << " velocity: " << DBG_V2(_velocities[i]);
 		}		
 	}
 
@@ -116,7 +111,7 @@ namespace ds {
 	void MoveByAction::debug(SID sid) {
 		int i = find(sid);
 		if (i != -1) {
-			LOG << "MoveByAction - id: " << _ids[i] << " velocity: " << DBG_V2(_velocities[i]) << " timer: " << _timers[i];
+			LOG << "MoveByAction - id: " << _ids[i] << " velocity: " << DBG_V2(_velocities[i]);
 		}
 	}
 
@@ -126,14 +121,13 @@ namespace ds {
 	void MoveByAction::save(const ReportWriter& writer) {
 		if (_buffer.size > 0) {
 			writer.addSubHeader("MoveByAction");
-			const char* HEADERS[] = { "Index", "ID", "Velocity", "Timer" ,"Bounce"};
+			const char* HEADERS[] = { "Index", "ID", "Velocity", "Bounce"};
 			writer.startTable(HEADERS, 5);
 			for (int i = 0; i < _buffer.size; ++i) {
 				writer.startRow();
 				writer.addCell(i);
 				writer.addCell(_ids[i]);
 				writer.addCell(_velocities[i]);
-				writer.addCell(_timers[i]);
 				writer.addCell(_bounce[i]);
 				writer.endRow();
 			}

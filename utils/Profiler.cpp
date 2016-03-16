@@ -401,24 +401,38 @@ namespace perf {
 
 	}
 
+	int findHash(IdString hash) {
+		for (int i = 0; i < zoneTrackerCtx->events.size(); ++i) {
+			if (zoneTrackerCtx->events[i].hash == hash) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	int start(const char* name) {
 		// create event
 		ZoneTrackerEvent event;
 		event.parent = zoneTrackerCtx->current_parent;
 		QueryPerformanceCounter(&event.started);
 		event.ident = zoneTrackerCtx->ident++;
-		event.name_index = zoneTrackerCtx->names.size;
 		event.hash = ds::string::murmur_hash(name);
-		int l = strlen(name);
-		if (zoneTrackerCtx->names.size + l > zoneTrackerCtx->names.capacity) {
-			zoneTrackerCtx->names.resize(zoneTrackerCtx->names.capacity + 256);
+		int idx = findHash(event.hash);
+		if (idx == -1) {
+			event.name_index = zoneTrackerCtx->names.size;
+			int l = strlen(name);
+			if (zoneTrackerCtx->names.size + l > zoneTrackerCtx->names.capacity) {
+				zoneTrackerCtx->names.resize(zoneTrackerCtx->names.capacity + 256);
+			}
+			zoneTrackerCtx->names.append(name, l);
 		}
-		zoneTrackerCtx->names.append(name, l);
-
-		int idx = zoneTrackerCtx->events.size();
+		else {
+			event.name_index = zoneTrackerCtx->events[idx].name_index;
+		}
+		int eventIndex = zoneTrackerCtx->events.size();
 		zoneTrackerCtx->events.push_back(event);
-		zoneTrackerCtx->current_parent = idx;
-		return idx;
+		zoneTrackerCtx->current_parent = eventIndex;
+		return eventIndex;
 	}
 
 	void end(int index) {
