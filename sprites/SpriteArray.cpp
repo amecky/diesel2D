@@ -38,7 +38,6 @@ namespace ds {
 		}
 		SpriteArrayIndex &in = indices[id];
 		in.index = num++;
-		LOG << "creating: " << in.id << " at: " << in.index;
 		ids[in.index] = in.id;
 		positions[in.index] = pos;
 		scales[in.index] = v2(scaleX, scaleY);
@@ -101,7 +100,6 @@ namespace ds {
 			previous = (v2*)(layers + size);
 			extents = (v2*)(previous + size);
 			shapeTypes = (SpriteShapeType*)(extents + size);
-			//sad.clear();
 			if (buffer != 0) {
 				memcpy(indices, buffer, num * sizeof(SpriteArrayIndex));
 				int index = num * sizeof(SpriteArrayIndex);
