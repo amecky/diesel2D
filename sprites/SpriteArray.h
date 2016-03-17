@@ -125,31 +125,27 @@ namespace ds {
 		void debug();
 
 		void debug(SID id);
+
+		void setPosition(SID sid, const v2& pos);
+
+		const v2& getPosition(SID sid);
+
+		void setScale(SID sid, float sx, float sy);
+
+		void scale(SID sid, const v2& scale);
+
+		void setColor(SID sid, const Color& clr);
+
+		void setAlpha(SID sid, float alpha);
+
+		void rotate(SID sid, float angle);
+
+		float getRotation(SID sid);
+
+		bool get(SID sid,Sprite* ret);
+
+		void set(SID sid, const Sprite& sprite);
 	};
 
-	namespace sar {
-
-		void setPosition(SpriteArray& array,SID sid,const v2& pos);
-
-		const v2& getPosition(const SpriteArray& array,SID sid);
-
-		void setScale(SpriteArray& array,SID sid,float sx,float sy);
-
-		void scale(SpriteArray& array,SID sid,const v2& scale);
-
-		void setColor(SpriteArray& array,SID sid,const Color& clr);
-
-		void setAlpha(SpriteArray& array,SID sid,float alpha);
-
-		void rotate(SpriteArray& array,SID sid,float angle);
-
-		float getRotation(SpriteArray& array,SID sid);
-
-		Sprite get(SpriteArray& array,SID sid);
-
-		void set(SpriteArray& array,SID sid,const Sprite& sprite);
-
-		
-	}
 
 }

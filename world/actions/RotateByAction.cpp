@@ -48,19 +48,19 @@ namespace ds {
 		if (_buffer.size > 0) {
 			// move
 			for (int i = 0; i < _buffer.size; ++i) {
-				sar::rotate(array, _ids[i], tweening::interpolate(_tweeningTypes[i], _startAngles[i], _endAngles[i], _timers[i], _ttl[i]));
+				array.rotate(_ids[i], tweening::interpolate(_tweeningTypes[i], _startAngles[i], _endAngles[i], _timers[i], _ttl[i]));
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						sar::rotate(array,_ids[i], _endAngles[i]);
+						array.rotate(_ids[i], _endAngles[i]);
 						buffer.add(_ids[i], AT_ROTATE_BY, array.getType(_ids[i]));
 						removeByIndex(i);
 					}
 					else {
-						float current = sar::getRotation(array,_ids[i]);
+						float current = array.getRotation(_ids[i]);
 						_startAngles[i] = current;
 						_endAngles[i] = current + _steps[i];
 						--_modes[i];

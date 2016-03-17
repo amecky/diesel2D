@@ -41,16 +41,16 @@ namespace ds {
 			for (int i = 0; i <_buffer.size; ++i) {
 				SID targetID = _targets[i];
 				if (array.contains(targetID)) {
-					v2 p = sar::getPosition(array, _ids[i]);
-					v2 targetPos = sar::getPosition(array, targetID);
+					v2 p = array.getPosition(_ids[i]);
+					v2 targetPos = array.getPosition(targetID);
 					v2 diff = targetPos - p;
 					if (sqr_length(diff) > 100.0f) {
 						v2 n = normalize(diff);
 						n *= _velocities[i] * dt;
 						p += n;
-						sar::setPosition(array, _ids[i], p);
+						array.setPosition(_ids[i], p);
 						float angle = vector::calculateRotation(n);
-						sar::rotate(array, _ids[i], angle);
+						array.rotate(_ids[i], angle);
 					}
 				}
 				else {

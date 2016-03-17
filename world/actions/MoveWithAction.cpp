@@ -44,15 +44,15 @@ namespace ds {
 				float norm = _timers[i] / _ttl[i];				
 				_functions[i](p,&angle,norm);
 				_timers[i] += dt;
-				sar::setPosition(array,_ids[i],p);
-				sar::rotate(array,_ids[i],angle);
+				array.setPosition(_ids[i], p);
+				array.rotate(_ids[i], angle);
 				if (_timers[i] >= _ttl[i]) {
 					if (_modes[i] < 0) {
 						_timers[i] = 0.0f;
 					}
 					else if (_modes[i] == 0) {
 						_functions[i](p, &angle, 1.0f);
-						sar::setPosition(array, _ids[i], p);
+						array.setPosition(_ids[i], p);
 						buffer.add(_ids[i], AT_MOVE_WITH, array.getType(_ids[i]));
 						removeByIndex(i);
 					}

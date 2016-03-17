@@ -83,7 +83,7 @@ namespace ds {
 	// allocate
 	// -----------------------------------------------------
 	//void World::allocate(int size) {
-		//sar::allocate(m_Data, size);
+		//m_Data.allocate(m_Data, size);
 	//}
 
 	// -----------------------------------------------------
@@ -98,7 +98,7 @@ namespace ds {
 			allocate(m_Data.capacity * 2);
 		}
 		*/
-		//return sar::create(m_Data,pos,r,type,layer);		
+		//return m_Data.create(m_Data,pos,r,type,layer);		
 		return m_Data.create(pos, r, 0.0f, 1.0f, 1.0f, Color::WHITE, type, layer);
 	}
 
@@ -131,7 +131,7 @@ namespace ds {
 		*/
 		Sprite sp;
 		if (renderer::getSpriteTemplate(templateName, &sp)) {
-			//return sar::create(m_Data, pos, sp.texture, sp.type, layer);
+			//return m_Data.create(m_Data, pos, sp.texture, sp.type, layer);
 			return m_Data.create(pos, sp.texture, sp.rotation, sp.scale.x, sp.scale.y, sp.color, sp.type, layer);
 			
 		}
@@ -148,7 +148,7 @@ namespace ds {
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->removeByID(id);
 		}		
-		//sar::remove(m_Data,id);
+		//m_Data.remove(m_Data,id);
 		m_Data.remove(id);
 	}
 
@@ -262,16 +262,16 @@ namespace ds {
 	}
 
 	void World::setRotation(SID sid,float angle) {
-		sar::rotate(m_Data,sid,angle);
+		m_Data.rotate(sid,angle);
 	}
 
 	void World::setRotation(SID sid, const Vector2f& target) {
 		float angle = vector::calculateRotation(target);
-		sar::rotate(m_Data, sid, angle);
+		m_Data.rotate(sid, angle);
 	}
 
 	void World::rotateBy(SID sid,float angle,float ttl,int mode,const tweening::TweeningType& tweeningType) {
-		float currentAngle = sar::getRotation(m_Data,sid);
+		float currentAngle = m_Data.getRotation(sid);
 		m_RotateByAction->attach(sid,currentAngle,currentAngle + angle,ttl,mode,tweeningType);
 	}
 
@@ -280,7 +280,7 @@ namespace ds {
 	}
 
 	void World::rotateTo(SID sid,float angle,float ttl,int mode,const tweening::TweeningType& tweeningType) {
-		float currentAngle = sar::getRotation(m_Data,sid);
+		float currentAngle = m_Data.getRotation(sid);
 		float diff = angle - currentAngle;
 		// FIXME: build dot product to check which direction
 		//LOG << "rotateTo - current angle: " << RADTODEG(currentAngle) << " diff: " << RADTODEG(diff);
@@ -370,7 +370,7 @@ namespace ds {
 	// clear
 	// -----------------------------------------------------
 	void World::clear() {
-		//sar::clear(m_Data);
+		//m_Data.clear(m_Data);
 		m_Data.clear();
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->clear();

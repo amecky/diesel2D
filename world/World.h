@@ -210,7 +210,7 @@ namespace ds {
 
 		//
 		void setPosition(SID sid,const v2& pos) {
-			sar::setPosition(m_Data,sid,pos);
+			m_Data.setPosition(sid,pos);
 		}
 		void setTexture(SID sid,const Texture& t) {
 			SpriteArrayIndex &in = m_Data.indices[sid];
@@ -224,7 +224,7 @@ namespace ds {
 		}
 		// scaling
 		void scale(SID sid,float sx,float sy) {
-			sar::setScale(m_Data,sid,sx,sy);
+			m_Data.setScale(sid,sx,sy);
 		}
 		void scale(int index,float sx,float sy) {
 			m_Data.scales[index] = v2(sx,sy);
@@ -242,7 +242,7 @@ namespace ds {
 		void moveBy(SID sid,const v2& velocity,bool bounce = false);
 		void bounce(SID sid, BounceDirection direction,float dt);
 		const v2& getPosition(SID sid) const {
-			return sar::getPosition(m_Data,sid);
+			return m_Data.getPosition(sid);
 		}
 		void moveWith(SID sid,const MoveFunc& function,float ttl,int mode = 0);
 
@@ -260,7 +260,7 @@ namespace ds {
 		void attachTo(SID sid, SID parent);
 
 		void setColor(SID sid,const Color& clr) {
-			sar::setColor(m_Data,sid,clr);
+			m_Data.setColor(sid,clr);
 		}
 
 		void followPath(SID sid,CubicBezierPath* path,float ttl,int mode = 0);

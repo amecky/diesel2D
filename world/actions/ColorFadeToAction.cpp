@@ -51,14 +51,14 @@ namespace ds {
 		if ( _buffer.size > 0 ) {				
 			// move
 			for ( int i = 0; i < _buffer.size; ++i ) {
-				sar::setColor(array, _ids[i], tweening::interpolate(_tweeningTypes[i], _startColors[i], _endColors[i], _timers[i], _ttl[i]));
+				array.setColor(_ids[i], tweening::interpolate(_tweeningTypes[i], _startColors[i], _endColors[i], _timers[i], _ttl[i]));
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						sar::setColor(array, _ids[i], _endColors[i]);
+						array.setColor(_ids[i], _endColors[i]);
 						removeByIndex(i);
 					}
 					else {

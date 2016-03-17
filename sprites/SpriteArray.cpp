@@ -15,6 +15,9 @@ namespace ds {
 
 	void SpriteArray::assertSID(SID sid) const {
 		SpriteArrayIndex &in = indices[sid];
+		if (sid > capacity) {
+			LOG << "SID: " << sid << " is NOT valid - greather than capacity";
+		}
 		if (in.index == USHRT_MAX) {
 			LOG << "SID: " << sid << " is NOT valid - no valid index found";
 		}
@@ -156,127 +159,83 @@ namespace ds {
 		LOG << "extents : " << DBG_V2(extents[in.index]);
 		LOG << "shape   : " << shapeTypes[in.index];
 	}
-
-	namespace sar {
-		/*
-		void clear(SpriteArray& array) {
-			if ( array.buffer != 0 ) {
-				for ( unsigned short i = 0; i < array.total; ++i ) {
-					array.indices[i].id = i;
-					array.indices[i].next = i + 1;
-				}
-				array.num = 0;
-				array.free_dequeue = 0;
-				array.free_enqueue = array.total - 1;
-			}
-		}
-		*/
-		void setPosition(SpriteArray& array,SID sid,const v2& pos) {
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			array.positions[in.index] = pos;
-		}
-
-		const v2& getPosition(const SpriteArray& array,SID sid) {
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			return array.positions[in.index];
-		}
-
-		void setScale(SpriteArray& array,SID sid,float sx,float sy) {
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			array.scales[in.index] = v2(sx,sy);
-		}
-
-		void scale(SpriteArray& array,SID sid,const v2& scale) {
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			array.scales[in.index] = scale;
-		}
-
-		void setColor(SpriteArray& array,SID sid,const Color& clr) {
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			array.colors[in.index] = clr;
-		}
-
-		void setAlpha(SpriteArray& array,SID sid,float alpha) {
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			array.colors[in.index].a = alpha;
-		}
-
-		void rotate(SpriteArray& array,SID sid,float angle) {
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			if ( angle > TWO_PI ) {
-				angle -= TWO_PI;
-			}
-			array.rotations[in.index] = angle;
-		}
-
-		float getRotation(SpriteArray& array,SID sid) {
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			return array.rotations[in.index];
-		}
-
-		Sprite get(SpriteArray& array,SID sid) {
-			Sprite sprite;
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			sprite.id = sid;
-			sprite.position = array.positions[in.index];
-			sprite.scale = array.scales[in.index];
-			sprite.rotation = array.rotations[in.index];
-			sprite.texture = array.textures[in.index];
-			sprite.color = array.colors[in.index];
-			sprite.type = array.types[in.index];
-			sprite.layer = array.layers[in.index];
-			return sprite;
-		}
-
-		void set(SpriteArray& array,SID sid,const Sprite& sprite) {
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			array.ids[in.index] = sid;
-			array.positions[in.index] = sprite.position;
-			array.scales[in.index] = sprite.scale;
-			array.rotations[in.index] = sprite.rotation;
-			array.textures[in.index] = sprite.texture;
-			array.colors[in.index] = sprite.color;
-			array.types[in.index] = sprite.type;
-			array.layers[in.index] = sprite.layer;
-		}
-		/*
-		SID create(SpriteArray& array,const v2& pos,const Texture& r,int type,int layer) {
-			SpriteArrayIndex &in = array.indices[array.free_dequeue];
-			array.free_dequeue = in.next;
-			in.index = array.num++;
-			LOG << "creating: " << in.id;
-			array.ids[in.index] = in.id;
-			array.positions[in.index] = pos;
-			array.scales[in.index] = v2(1,1);
-			array.rotations[in.index] = 0.0f;
-			array.textures[in.index] = r;
-			array.colors[in.index] = Color::WHITE;
-			array.timers[in.index] = 0.0f;
-			array.types[in.index] = type;
-			array.layers[in.index] = layer;
-			array.previous[in.index] = pos;
-			array.extents[in.index] = v2(0,0);
-			array.shapeTypes[in.index] = SST_NONE;
-			return in.id;
-		}
-		*/
-		
-
-		
-
-		
-
-		
-
+	
+	void SpriteArray::setPosition(SID sid, const v2& pos) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		positions[in.index] = pos;
 	}
+
+	const v2& SpriteArray::getPosition(SID sid) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		return positions[in.index];
+	}
+
+	void SpriteArray::setScale(SID sid, float sx, float sy) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		scales[in.index] = v2(sx,sy);
+	}
+
+	void SpriteArray::scale(SID sid, const v2& scale) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		scales[in.index] = scale;
+	}
+
+	void SpriteArray::setColor(SID sid, const Color& clr) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		colors[in.index] = clr;
+	}
+
+	void SpriteArray::setAlpha(SID sid, float alpha) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		colors[in.index].a = alpha;
+	}
+
+	void SpriteArray::rotate(SID sid, float angle) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		if ( angle > TWO_PI ) {
+			angle -= TWO_PI;
+		}
+		rotations[in.index] = angle;
+	}
+
+	float SpriteArray::getRotation(SID sid) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		return rotations[in.index];
+	}
+
+	bool SpriteArray::get(SID sid,Sprite* ret) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		ret->id = sid;
+		ret->position = positions[in.index];
+		ret->scale = scales[in.index];
+		ret->rotation = rotations[in.index];
+		ret->texture = textures[in.index];
+		ret->color = colors[in.index];
+		ret->type = types[in.index];
+		ret->layer = layers[in.index];
+		return true;
+	}
+
+	void SpriteArray::set(SID sid, const Sprite& sprite) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		ids[in.index] = sid;
+		positions[in.index] = sprite.position;
+		scales[in.index] = sprite.scale;
+		rotations[in.index] = sprite.rotation;
+		textures[in.index] = sprite.texture;
+		colors[in.index] = sprite.color;
+		types[in.index] = sprite.type;
+		layers[in.index] = sprite.layer;
+	}
+		
 }

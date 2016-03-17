@@ -51,14 +51,14 @@ namespace ds {
 		if (_buffer.size > 0) {
 			// move
 			for (int i = 0; i < _buffer.size; ++i) {
-				sar::scale(array, _ids[i], tweening::interpolate(_tweeningTypes[i], _startScale[i], _endScale[i], _timers[i], _ttl[i]));
+				array.scale(_ids[i], tweening::interpolate(_tweeningTypes[i], _startScale[i], _endScale[i], _timers[i], _ttl[i]));
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						sar::scale(array,_ids[i],_endScale[i]);
+						array.scale(_ids[i],_endScale[i]);
 						buffer.add(_ids[i], AT_SCALE, array.getType(_ids[i]));
 						removeByIndex(i);
 					}

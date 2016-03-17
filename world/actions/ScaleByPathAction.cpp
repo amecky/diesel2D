@@ -35,7 +35,7 @@ namespace ds {
 		_path[idx] = path;
 		v2 s(1, 1);
 		path->get(0.0f, &s);
-		sar::scale(array, id, s);
+		array.scale(id, s);
 		_timers[idx] = 0.0f;
 		_ttl[idx] = ttl;		
 	}
@@ -62,11 +62,11 @@ namespace ds {
 			for (int i = 0; i < _buffer.size; ++i) {
 				float norm = math::norm(_timers[i], _ttl[i]);
 				_path[i]->get(norm, &scale);
-				sar::scale(array, _ids[i], scale);
+				array.scale(_ids[i], scale);
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					_path[i]->get(1.0f, &scale);
-					sar::scale(array, _ids[i], scale);
+					array.scale(_ids[i], scale);
 					buffer.add(_ids[i], AT_SCALE_BY_PATH, array.getType(_ids[i]));
 					removeByIndex(i);
 				}

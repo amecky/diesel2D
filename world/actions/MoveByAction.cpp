@@ -31,7 +31,7 @@ namespace ds {
 
 	void MoveByAction::rotateTo(SpriteArray& array, int index) {
 		float angle = vector::calculateRotation(_velocities[index]);
-		sar::rotate(array, _ids[index], angle);
+		array.rotate(_ids[index], angle);
 	}
 
 	bool MoveByAction::isOutOfBounds(const Vector2f& pos, const Vector2f& v) {
@@ -60,10 +60,10 @@ namespace ds {
 					_velocities[i].x *= -1.0f;
 				}
 				float angle = vector::calculateRotation(_velocities[i]);
-				sar::rotate(array, _ids[i], angle);
-				Vector2f p = sar::getPosition(array, _ids[i]);
+				array.rotate(_ids[i], angle);
+				Vector2f p = array.getPosition(_ids[i]);
 				p += _velocities[i] * dt;
-				sar::setPosition(array, _ids[i], p);
+				array.setPosition(_ids[i], p);
 			}
 		}
 	}
@@ -73,7 +73,7 @@ namespace ds {
 	void MoveByAction::update(SpriteArray& array,float dt,ActionEventBuffer& buffer) {	
 		if (_buffer.size > 0) {
 			for (int i = 0; i < _buffer.size; ++i) {
-				Vector2f p = sar::getPosition(array, _ids[i]);
+				Vector2f p = array.getPosition(_ids[i]);
 				p += _velocities[i] * dt;
 				if (isOutOfBounds(p, _velocities[i])) {
 					if (_bounce[i]) {
@@ -90,7 +90,7 @@ namespace ds {
 						buffer.add(_ids[i], AT_MOVE_BY, array.getType(_ids[i]));
 					}
 				}
-				sar::setPosition(array, _ids[i], p);
+				array.setPosition(_ids[i], p);
 			}
 		}
 	}

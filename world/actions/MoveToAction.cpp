@@ -37,7 +37,7 @@ namespace ds {
 		if ( mode > 0 ) {
 			--_modes[idx];
 		}
-		sar::setPosition(array, id, startPos);
+		array.setPosition(id, startPos);
 	}
 
 	// -------------------------------------------------------
@@ -47,14 +47,14 @@ namespace ds {
 		if (_buffer.size > 0) {
 			// move
 			for (int i = 0; i < _buffer.size; ++i) {
-				sar::setPosition(array, _ids[i], tweening::interpolate(_tweeningTypes[i], _startPositions[i], _endPositions[i], _timers[i], _ttl[i]));
+				array.setPosition(_ids[i], tweening::interpolate(_tweeningTypes[i], _startPositions[i], _endPositions[i], _timers[i], _ttl[i]));
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						sar::setPosition(array,_ids[i],_endPositions[i]);
+						array.setPosition(_ids[i], _endPositions[i]);
 						buffer.add(_ids[i], AT_MOVE_TO, array.getType(_ids[i]));
 						removeByIndex(i);
 					}

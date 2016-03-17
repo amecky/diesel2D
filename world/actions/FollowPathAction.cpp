@@ -54,8 +54,8 @@ namespace ds {
 
 				_path[i]->tanget(norm, &t);
 				float a = vector::calculateRotation(t);
-				sar::rotate(array, _ids[i], a);
-				sar::setPosition(array,_ids[i],p);
+				array.rotate(_ids[i], a);
+				array.setPosition(_ids[i],p);
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
@@ -63,7 +63,7 @@ namespace ds {
 					}
 					else if ( _modes[i] == 0 ) {
 						_path[i]->get(1.0f,&p);
-						sar::setPosition(array,_ids[i],p);						
+						array.setPosition(_ids[i],p);						
 						buffer.add(_ids[i], AT_FOLLOW_PATH, array.getType(_ids[i]));
 						removeByIndex(i);
 					}

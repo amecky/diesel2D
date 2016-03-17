@@ -42,9 +42,9 @@ namespace ds {
 		if (_buffer.size > 0) {
 			// move
 			for (int i = 0; i < _buffer.size; ++i) {
-				float angle = sar::getRotation(array,_ids[i]);
+				float angle = array.getRotation(_ids[i]);
 				angle += _angleVelocities[i] * dt;
-				sar::rotate(array, _ids[i], angle);
+				array.rotate(_ids[i], angle);
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
@@ -54,7 +54,7 @@ namespace ds {
 						removeByIndex(i);
 					}
 					else {
-						float current = sar::getRotation(array,_ids[i]);
+						float current = array.getRotation(_ids[i]);
 						--_modes[i];
 						_timers[i] = 0.0f;
 

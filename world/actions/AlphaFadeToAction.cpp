@@ -52,14 +52,14 @@ namespace ds {
 			// move
 			for ( int i = 0; i < _buffer.size; ++i ) {
 				float alpha = tweening::interpolate(_tweeningTypes[i], _startAlphas[i], _endAlphas[i], _timers[i], _ttl[i]);
-				sar::setAlpha(array,_ids[i],alpha);
+				array.setAlpha(_ids[i],alpha);
 				_timers[i] += dt;
 				if ( _timers[i] >= _ttl[i] ) {
 					if ( _modes[i] < 0 ) {
 						_timers[i] = 0.0f;
 					}
 					else if ( _modes[i] == 0 ) {
-						sar::setAlpha(array,_ids[i], _endAlphas[i]);
+						array.setAlpha(_ids[i], _endAlphas[i]);
 						removeByIndex(i);
 					}
 					else {
