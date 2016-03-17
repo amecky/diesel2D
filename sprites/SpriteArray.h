@@ -3,19 +3,20 @@
 #include "..\utils\Color.h"
 #include "..\renderer\render_types.h"
 #include "Sprite.h"
+#include "..\lib\collection_types.h"
+#include <stdint.h>
 
 namespace ds {
 
 	struct SpriteArrayIndex {
 		SID id;
-		unsigned short index;
-		unsigned short next;
+		uint16_t index;
 	};
 
 	struct SpriteArray {
 
-		int num;
-		int total;
+		uint16_t num;
+		uint16_t capacity;
 		SpriteArrayIndex* indices;
 		SID* ids;
 		v2* positions;
@@ -24,30 +25,31 @@ namespace ds {
 		Texture* textures;
 		Color* colors;
 		float* timers;
-		int* types;
-		int* layers;
+		uint16_t* types;
+		uint16_t* layers;
 		// physical
 		v2* previous;
 		v2* extents;
 		SpriteShapeType* shapeTypes;
-
 		char* buffer;
 
-		unsigned short free_enqueue;
-		unsigned short free_dequeue;
+		ID current;
+		Array<ID> freeList;
 
-		SpriteArray() : num(0) , total(0) , buffer(0) {								
+		SpriteArray() : num(0) , capacity(0) , buffer(0) , current(0) {			
+			allocate(256);
+			clear();
 		}
 
 		void clear() {
 			if (buffer != 0) {
-				for (unsigned short i = 0; i < total; ++i) {
+				for (unsigned short i = 0; i < capacity; ++i) {
 					indices[i].id = i;
-					indices[i].next = i + 1;
+					indices[i].index = UINT16_MAX;
 				}
 				num = 0;
-				free_dequeue = 0;
-				free_enqueue = total - 1;
+				current = 0;
+				freeList.clear();
 			}
 		}
 
@@ -115,11 +117,17 @@ namespace ds {
 			const Texture& t = getTexture(sid);
 			attachCollider(sid, t.dim, shape);
 		}
+
+		void remove(SID id);
+
+		void allocate(uint16_t size);
+
+		void debug();
+
+		void debug(SID id);
 	};
 
 	namespace sar {
-
-		void clear(SpriteArray& array);
 
 		void setPosition(SpriteArray& array,SID sid,const v2& pos);
 
@@ -141,15 +149,6 @@ namespace ds {
 
 		void set(SpriteArray& array,SID sid,const Sprite& sprite);
 
-		//SID create(SpriteArray& array,const v2& pos,const Texture& r,int type = 0,int layer = 0);
-
-		void remove(SpriteArray& array,SID id);
-
-		void debug(SpriteArray& array);
-
-		void debug(SpriteArray& array,SID sid);
-
-		bool allocate(SpriteArray& array, int size);
 		
 	}
 

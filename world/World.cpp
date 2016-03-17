@@ -82,20 +82,22 @@ namespace ds {
 	// -----------------------------------------------------
 	// allocate
 	// -----------------------------------------------------
-	void World::allocate(int size) {
-		sar::allocate(m_Data, size);
-	}
+	//void World::allocate(int size) {
+		//sar::allocate(m_Data, size);
+	//}
 
 	// -----------------------------------------------------
 	// create
 	// -----------------------------------------------------
 	SID World::create(const Vector2f& pos,const Texture& r,int type,int layer) {
-		if ( m_Data.total == 0 ) {
+		/*
+		if ( m_Data.capacity == 0 ) {
 			allocate(256);
 		}
-		if ( m_Data.num >= m_Data.total ) {
-			allocate(m_Data.total * 2);
+		if (m_Data.num >= m_Data.capacity) {
+			allocate(m_Data.capacity * 2);
 		}
+		*/
 		//return sar::create(m_Data,pos,r,type,layer);		
 		return m_Data.create(pos, r, 0.0f, 1.0f, 1.0f, Color::WHITE, type, layer);
 	}
@@ -104,12 +106,14 @@ namespace ds {
 	// create with all options
 	// -----------------------------------------------------
 	SID  World::create(const Vector2f& pos, const Texture& r, float rotation, float scaleX, float scaleY, const Color& color, int type, int layer) {
+		/*
 		if (m_Data.total == 0) {
 			allocate(256);
 		}
 		if (m_Data.num >= m_Data.total) {
 			allocate(m_Data.total * 2);
 		}
+		*/
 		return m_Data.create(pos, r, rotation, scaleX, scaleY, color, type, layer);
 	}
 
@@ -117,12 +121,14 @@ namespace ds {
 	// create with template name
 	// -----------------------------------------------------
 	SID World::create(const Vector2f& pos, const char* templateName,int layer) {
+		/*
 		if (m_Data.total == 0) {
 			allocate(256);
 		}
 		if (m_Data.num >= m_Data.total) {
 			allocate(m_Data.total * 2);
 		}
+		*/
 		Sprite sp;
 		if (renderer::getSpriteTemplate(templateName, &sp)) {
 			//return sar::create(m_Data, pos, sp.texture, sp.type, layer);
@@ -142,7 +148,8 @@ namespace ds {
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->removeByID(id);
 		}		
-		sar::remove(m_Data,id);
+		//sar::remove(m_Data,id);
+		m_Data.remove(id);
 	}
 
 	// -----------------------------------------------------
@@ -363,7 +370,8 @@ namespace ds {
 	// clear
 	// -----------------------------------------------------
 	void World::clear() {
-		sar::clear(m_Data);
+		//sar::clear(m_Data);
+		m_Data.clear();
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->clear();
 		}		
@@ -447,7 +455,7 @@ namespace ds {
 		LOG << "       World";
 		LOG << "--------------------------";
 		LOG << "-------- Sprites ---------";
-		sar::debug(m_Data);
+		m_Data.debug();
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->debug();
 		}
@@ -458,8 +466,10 @@ namespace ds {
 	// save report
 	// -----------------------------------------------------
 	void World::save(const ReportWriter& writer) {
-		writer.startBox("Sprites");
-		const char* HEADERS[] = { "Index", "ID", "Type", "Position", "Rotation", "Scale" };
+		char buffer[128];
+		sprintf_s(buffer, 128, "Sprites (%d)", m_Data.num);
+		writer.startBox(buffer);
+		const char* HEADERS[] = { "Index", "ID", "Type", "Position", "Rotation", "Scale", "Extents", "Shape" };
 		writer.startTable(HEADERS, 6);
 		for (int i = 0; i < m_Data.num; ++i) {
 			writer.startRow();
@@ -469,6 +479,8 @@ namespace ds {
 			writer.addCell(m_Data.positions[i]);
 			writer.addCell(RADTODEG(m_Data.rotations[i]));
 			writer.addCell(m_Data.scales[i]);
+			writer.addCell(m_Data.extents[i]);
+			writer.addCell(m_Data.shapeTypes[i]);
 			writer.endRow();
 		}
 		writer.endTable();
@@ -478,15 +490,13 @@ namespace ds {
 			m_Actions[i]->save(writer);
 		}
 		writer.endBox();
-		m_Physics.save(writer);
 	}
 
 	void World::debug(SID sid) {		
-		sar::debug(m_Data, sid);
+		m_Data.debug(sid);
 		if (_buffer.contains(sid)) {
 			LOG << "Additional data found";
 		}
-		m_Physics.debug(sid);
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			if ( m_Actions[i]->contains(sid)) {
 				m_Actions[i]->debug(sid);

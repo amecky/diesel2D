@@ -87,14 +87,10 @@ namespace ds {
 			return _collisions[idx];
 		}
 		void tick(SpriteArray* sprites,float dt);
-		void debug();
-		void debug(SID sid);
-		void save(const ReportWriter& writer);
 		void drawColliders(const Texture& texture);
 	private:
 		bool intersects(SpriteArray* sprites,int firstIndex, int secondIndex);
 		void checkCollisions(SpriteArray* sprites);
-		//void checkCollisions(int currentIndex, const v2& pos, const v2& extent);
 		bool containsCollision(const Collision& c);
 		Array<Collision> _collisions;
 		IgnoredCollisions m_Ignored;

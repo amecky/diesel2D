@@ -369,7 +369,7 @@ namespace ds {
 		}
 	private:
 		ActionEventBuffer m_Buffer;
-		void allocate(int size);
+		//void allocate(int size);
 		AbstractAction* find_action(ActionType type) const;
 
 		WorldLayer _layers[32];

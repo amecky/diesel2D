@@ -231,58 +231,6 @@ namespace ds {
 	}
 	
 	// --------------------------------------------------------------------------
-	// debug
-	// --------------------------------------------------------------------------
-	void PhysicalWorld::debug() {
-		LOG << "------- Colliders --------";
-		//for (int i = 0; i < m_ColliderData.num; ++i) {
-			//LOG << i << " sid: " << m_ColliderData.sids[i] << " cid: " << m_ColliderData.ids[i] << " type: " << m_ColliderData.types[i] << " pos: " << DBG_V2(m_ColliderData.positions[i]) << " extent: " << DBG_V2(m_ColliderData.extents[i]);
-		//}
-	}
-
-	// --------------------------------------------------------------------------
-	// debug
-	// --------------------------------------------------------------------------
-	void PhysicalWorld::debug(SID sid) {
-		/*
-		int idx = -1;
-		for (int i = 0; i < m_ColliderData.num; ++i) {
-			if (m_ColliderData.sids[i] == sid) {
-				idx = i;
-			}
-		}
-		if (idx != -1) {
-			LOG << "Physical object:";
-			LOG << "sid   : " << m_ColliderData.sids[idx];
-			LOG << "cid   : " << m_ColliderData.ids[idx];
-			LOG << "type  : " << m_ColliderData.types[idx];
-			LOG << "pos   : " << DBG_V2(m_ColliderData.positions[idx]);
-			LOG << "extent: " << DBG_V2(m_ColliderData.extents[idx]);
-		}
-		*/
-	}
-
-	void PhysicalWorld::save(const ReportWriter& writer) {
-		writer.startBox("Colliders");
-		const char* HEADERS[] = { "Index", "SID", "CID", "Type", "Position", "Extent" };
-		writer.startTable(HEADERS, 6);
-		/*
-		for (int i = 0; i < m_ColliderData.num; ++i) {
-			writer.startRow();
-			writer.addCell(i);
-			writer.addCell(m_ColliderData.sids[i]);
-			writer.addCell(m_ColliderData.ids[i]);
-			writer.addCell(m_ColliderData.types[i]);
-			writer.addCell(m_ColliderData.positions[i]);
-			writer.addCell(m_ColliderData.extents[i]);
-			writer.endRow();
-		}
-		*/
-		writer.endTable();
-		writer.endBox();
-	}
-	
-	// --------------------------------------------------------------------------
 	// ignore
 	// --------------------------------------------------------------------------
 	void PhysicalWorld::ignore(int firstType, int secondType) {

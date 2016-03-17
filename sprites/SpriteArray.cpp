@@ -22,8 +22,18 @@ namespace ds {
 	}
 
 	SID SpriteArray::create(const v2& pos, const Texture& r, float rotation, float scaleX, float scaleY, const Color& color, int type, int layer) {
-		SpriteArrayIndex &in = indices[free_dequeue];
-		free_dequeue = in.next;
+		if (num + 1 > capacity) {
+			allocate(capacity * 2 + 8);
+		}
+		ID id = 0;
+		if (freeList.empty()) {
+			id = current++;
+		}
+		else {
+			id = freeList.back();
+			freeList.pop_back();
+		}
+		SpriteArrayIndex &in = indices[id];
 		in.index = num++;
 		LOG << "creating: " << in.id << " at: " << in.index;
 		ids[in.index] = in.id;
@@ -41,8 +51,114 @@ namespace ds {
 		return in.id;
 	}
 
-	namespace sar {
+	void SpriteArray::remove(SID id) {
+		SpriteArrayIndex& in = indices[id];
+		assert(in.index != UINT16_MAX);
+		assert(id < capacity);
+		if (num > 1) {
+			int last = num - 1;
+			ID lastID = ids[last];
+			SpriteArrayIndex& lastIn = indices[lastID];
+			if (last != in.index) {
+				ids[in.index] = ids[last];
+				positions[in.index] = positions[last];
+				scales[in.index] = scales[last];
+				rotations[in.index] = rotations[last];
+				textures[in.index] = textures[last];
+				colors[in.index] = colors[last];
+				timers[in.index] = timers[last];
+				types[in.index] = types[last];
+				layers[in.index] = layers[last];
+				previous[in.index] = previous[last];
+				extents[in.index] = extents[last];
+				shapeTypes[in.index] = shapeTypes[last];
+			}
+			lastIn.index = in.index;
+		}
+		in.index = UINT16_MAX;
+		freeList.push_back(id);
+		--num;
+	}
 
+	void SpriteArray::allocate(uint16_t size) {
+		if (size > capacity) {
+			int sz = size * (sizeof(SpriteArrayIndex) + sizeof(SID) + sizeof(v2) + sizeof(v2) + sizeof(float) + sizeof(Texture) + sizeof(Color) + sizeof(float) + sizeof(uint16_t) + sizeof(uint16_t) + 2 * sizeof(v2) + sizeof(SpriteShapeType));
+			char* b = (char*)ALLOC(sz);
+			capacity = size;
+			indices = (SpriteArrayIndex*)b;
+			ids = (SID*)(indices + size);
+			positions = (v2*)(ids + size);
+			scales = (v2*)(positions + size);
+			rotations = (float*)(scales + size);
+			textures = (ds::Texture*)(rotations + size);
+			colors = (ds::Color*)(textures + size);
+			timers = (float*)(colors + size);
+			types = (uint16_t*)(timers + size);
+			layers = (uint16_t*)(types + size);
+			previous = (v2*)(layers + size);
+			extents = (v2*)(previous + size);
+			shapeTypes = (SpriteShapeType*)(extents + size);
+			//sad.clear();
+			if (buffer != 0) {
+				memcpy(indices, buffer, num * sizeof(SpriteArrayIndex));
+				int index = num * sizeof(SpriteArrayIndex);
+				memcpy(ids, buffer + index, num * sizeof(SID));
+				index += num * sizeof(SID);
+				memcpy(positions, buffer + index, num * sizeof(v2));
+				index += num * sizeof(v2);
+				memcpy(scales, buffer + index, num * sizeof(v2));
+				index += num * sizeof(v2);
+				memcpy(rotations, buffer + index, num * sizeof(float));
+				index += num * sizeof(float);
+				memcpy(textures, buffer + index, num * sizeof(Texture));
+				index += num * sizeof(Texture);
+				memcpy(colors, buffer + index, num * sizeof(Color));
+				index += num * sizeof(Color);
+				memcpy(timers, buffer + index, num * sizeof(float));
+				index += num * sizeof(float);
+				memcpy(types, buffer + index, num * sizeof(uint16_t));
+				index += num * sizeof(uint16_t);
+				memcpy(layers, buffer + index, num * sizeof(uint16_t));
+				index += num * sizeof(uint16_t);
+				memcpy(previous, buffer + index, num * sizeof(v2));
+				index += num * sizeof(v2);
+				memcpy(extents, buffer + index, num * sizeof(v2));
+				index += num * sizeof(v2);
+				memcpy(shapeTypes, buffer + index, num * sizeof(SpriteShapeType));
+				for (int i = num; i < capacity; ++i) {
+					indices[i].id = i;
+					indices[i].index = UINT16_MAX;
+				}
+				DEALLOC(buffer);
+			}
+			buffer = b;
+		}
+	}
+
+	void SpriteArray::debug() {
+		for (int i = 0; i < num; ++i) {
+			LOG << i << " : id: " << ids[i] << " type: " << types[i] << " pos: " << DBG_V2(positions[i]);
+		}
+	}
+
+	void SpriteArray::debug(SID sid) {
+		SpriteArrayIndex &in = indices[sid];
+		assertSID(sid);
+		LOG << "id      : " << sid;
+		LOG << "index   : " << in.index;
+		LOG << "position: " << DBG_V2(positions[in.index]);
+		LOG << "scale   : " << DBG_V2(scales[in.index]);
+		LOG << "rotation: " << RADTODEG(rotations[in.index]);
+		LOG << "color   : " << DBG_CLR(colors[in.index]);
+		LOG << "type    : " << types[in.index];
+		LOG << "layer   : " << layers[in.index];
+		LOG << "previous: " << DBG_V2(previous[in.index]);
+		LOG << "extents : " << DBG_V2(extents[in.index]);
+		LOG << "shape   : " << shapeTypes[in.index];
+	}
+
+	namespace sar {
+		/*
 		void clear(SpriteArray& array) {
 			if ( array.buffer != 0 ) {
 				for ( unsigned short i = 0; i < array.total; ++i ) {
@@ -54,7 +170,7 @@ namespace ds {
 				array.free_enqueue = array.total - 1;
 			}
 		}
-
+		*/
 		void setPosition(SpriteArray& array,SID sid,const v2& pos) {
 			SpriteArrayIndex &in = array.indices[sid];
 			array.assertSID(sid);
@@ -154,103 +270,13 @@ namespace ds {
 			return in.id;
 		}
 		*/
-		void remove(SpriteArray& array,SID id) {
-			SpriteArrayIndex &in = array.indices[id & INDEX_MASK];
-			array.assertSID(id);
-			SID currentID = array.ids[array.num - 1];			
-			SpriteArrayIndex& next = array.indices[currentID & INDEX_MASK];
-			LOG << "removing: " << id << " at " << in.index << " and moving: " << currentID << " at: " << next.index;
-			array.ids[in.index] = array.ids[next.index];
-			array.positions[in.index] = array.positions[next.index];
-			array.scales[in.index] = array.scales[next.index];
-			array.rotations[in.index] = array.rotations[next.index];
-			array.textures[in.index] = array.textures[next.index];
-			array.colors[in.index] = array.colors[next.index];
-			array.timers[in.index] = array.timers[next.index];
-			array.types[in.index] = array.types[next.index];
-			array.layers[in.index] = array.layers[next.index];
-			array.previous[in.index] = array.previous[next.index];
-			array.extents[in.index] = array.extents[next.index];
-			array.shapeTypes[in.index] = array.shapeTypes[next.index];
-			--array.num;
-			array.indices[currentID & INDEX_MASK].index = in.index;
-			in.index = USHRT_MAX;
-			array.indices[array.free_enqueue].next = id & INDEX_MASK;
-			array.free_enqueue = id & INDEX_MASK;
-			LOG << "free_enqueue: " << id;
-		}
+		
 
-		void debug(SpriteArray& array) {
-			for ( int i = 0; i < array.num; ++i ) {
-				LOG << i << " : id: " << array.ids[i] << " type: " << array.types[i] << " pos: " << DBG_V2(array.positions[i]);
-			}
-		}
+		
 
-		void debug(SpriteArray& array,SID sid) {
-			SpriteArrayIndex &in = array.indices[sid];
-			array.assertSID(sid);
-			LOG << "id      : " << sid;
-			LOG << "index   : " << in.index;
-			LOG << "position: " << DBG_V2(array.positions[in.index]);
-			LOG << "scale   : " << DBG_V2(array.scales[in.index]);
-			LOG << "rotation: " << RADTODEG(array.rotations[in.index]);
-			LOG << "color   : " << DBG_CLR(array.colors[in.index]);
-			LOG << "type    : " << array.types[in.index];
-			LOG << "layer   : " << array.layers[in.index];
-			LOG << "previous: " << DBG_V2(array.previous[in.index]);
-			LOG << "extents : " << DBG_V2(array.extents[in.index]);
-			LOG << "shape   : " << array.shapeTypes[in.index];
-		}
+		
 
-		bool allocate(SpriteArray& array,int size) {
-			if (size > array.total) {
-				SpriteArray sad;
-				int sz = size * (sizeof(SpriteArrayIndex) + sizeof(SID) + sizeof(v2) + sizeof(v2) + sizeof(float) + sizeof(Texture) + sizeof(Color) + sizeof(float) + sizeof(int) + sizeof(int) + 2 * sizeof(v2) + sizeof(SpriteShapeType));
-				sad.buffer = (char*)ALLOC(sz);
-				sad.total = size;
-				sad.num = 0;
-				sad.indices = (SpriteArrayIndex*)(sad.buffer);
-				sad.ids = (SID*)(sad.indices + size);
-				sad.positions = (v2*)(sad.ids + size);
-				sad.scales = (v2*)(sad.positions + size);
-				sad.rotations = (float*)(sad.scales + size);
-				sad.textures = (ds::Texture*)(sad.rotations + size);
-				sad.colors = (ds::Color*)(sad.textures + size);
-				sad.timers = (float*)(sad.colors + size);
-				sad.types = (int*)(sad.timers + size);
-				sad.layers = (int*)(sad.types + size);
-				sad.previous = (v2*)(sad.layers + size);
-				sad.extents = (v2*)(sad.previous + size);
-				sad.shapeTypes = (SpriteShapeType*)(sad.extents + size);
-				clear(sad);
-				if (array.buffer != 0) {
-					memcpy(sad.indices, array.indices, array.num * sizeof(SpriteArrayIndex));
-					memcpy(sad.ids, array.ids, array.num * sizeof(SID));
-					memcpy(sad.positions, array.positions, array.num * sizeof(v2));
-					memcpy(sad.scales, array.scales, array.num * sizeof(v2));
-					memcpy(sad.rotations, array.rotations, array.num * sizeof(float));
-					memcpy(sad.textures, array.textures, array.num * sizeof(Texture));
-					memcpy(sad.colors, array.colors, array.num * sizeof(Color));
-					memcpy(sad.timers, array.timers, array.num * sizeof(float));
-					memcpy(sad.types, array.types, array.num * sizeof(int));
-					memcpy(sad.layers, array.layers, array.num * sizeof(int));
-					memcpy(sad.previous, array.previous, array.num * sizeof(v2));
-					memcpy(sad.extents, array.extents, array.num * sizeof(v2));
-					memcpy(sad.shapeTypes, array.shapeTypes, array.num * sizeof(SpriteShapeType));
-					sad.free_dequeue = array.free_dequeue;
-					sad.free_enqueue = array.free_enqueue;
-					// FIXME: fill indices like clear
-					sad.num = array.num;
-					DEALLOC(array.buffer);
-				}
-				//else {
-					//clear(sad);
-				//}
-				array = sad;
-				return true;
-			}
-			return false;
-		}
+		
 
 	}
 }
