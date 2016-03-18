@@ -104,7 +104,7 @@ namespace ds {
 	// -------------------------------------------------------
 	GUID GUIDialog::addNumber(int id, const v2& position, int value, int length, float scale, const Color& color, bool centered) {
 		GUID& gid = _ids[_idIndex++];
-		assert(gid.id == -1);
+		XASSERT(gid.id == -1, "The id %d is already in use", id);
 		gid.id = id;
 		// add entry
 		Vector2f p = position;
@@ -120,7 +120,7 @@ namespace ds {
 	void GUIDialog::setNumber(int id, int value) {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
-		assert(gid.id != -1);
+		XASSERT(gid.id != -1,"No matching GUI item for %d",id);
 		GUINumber& number = _numbers[gid.index];
 		number.value = value;
 	}
@@ -130,7 +130,7 @@ namespace ds {
 	// -------------------------------------------------------
 	GUID GUIDialog::addImage(int id, int x, int y, const Rect& textureRect,float scale, bool centered) {
 		GUID& gid = _ids[_idIndex++];
-		assert(gid.id == -1);
+		XASSERT(gid.id == -1, "The id %d is already in use", id);
 		gid.id = id;
 		// add entry
 		Vector2f p = v2(x,y);
@@ -148,8 +148,9 @@ namespace ds {
 	void GUIDialog::updateImage(int id, int x, int y, const Rect& textureRect, bool centered) {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
+		XASSERT(gid.id != -1, "No matching GUI item for %d", id);
 		GUIItem& item = m_Items[gid.entryIndex];
-		assert(item.type == GIT_IMAGE);
+		XASSERT(item.type == GIT_IMAGE,"This is not an image");
 		GUIImage& image = _images[gid.index];
 		item.centered = centered;
 		item.pos = v2(x, y);
@@ -161,7 +162,7 @@ namespace ds {
 	// -------------------------------------------------------
 	GUID GUIDialog::addImageButton(int id,int x,int y,const Rect& textureRect,bool centered) {
 		GUID& gid = _ids[_idIndex++];
-		assert(gid.id == -1);
+		XASSERT(gid.id == -1, "The id %d is already in use", id);
 		gid.id = id;
 		// add entry
 		Vector2f p = v2(x, y);
@@ -181,7 +182,7 @@ namespace ds {
 	// -------------------------------------------------------
 	GUID GUIDialog::addTimer(int id,int x, int y, float scale, const Color& color, bool centered) {
 		GUID& gid = _ids[_idIndex++];
-		assert(gid.id == -1);
+		XASSERT(gid.id == -1, "The id %d is already in use", id);
 		gid.id = id;
 		Vector2f p = v2(x, y);
 		gid.entryIndex = createItem(p, GIT_TIMER, scale, centered, color);
@@ -196,7 +197,7 @@ namespace ds {
 	// -------------------------------------------------------
 	GUID GUIDialog::addText(int id,int x,int y,const char* text,const Color& color,float scale,bool centered) {
 		GUID& gid = _ids[_idIndex++];
-		assert(gid.id == -1);
+		XASSERT(gid.id == -1, "The id %d is already in use", id);
 		gid.id = id;
 		Vector2f p = v2(x,y);
 		gid.entryIndex = createItem(p, GIT_TEXT, scale, centered, color);
@@ -211,7 +212,7 @@ namespace ds {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
 		GUIItem& item = m_Items[gid.entryIndex];
-		assert(item.type == GIT_TIMER);
+		XASSERT(item.type == GIT_TIMER,"The GUI item %d is not a number",id);
 		_timers[gid.index].reset();
 	}
 
@@ -219,7 +220,7 @@ namespace ds {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
 		GUIItem& item = m_Items[gid.entryIndex];
-		assert(item.type == GIT_TIMER);
+		XASSERT(item.type == GIT_TIMER, "The GUI item %d is not a number", id);
 		_timers[gid.index].start();
 	}
 
@@ -227,7 +228,7 @@ namespace ds {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
 		GUIItem& item = m_Items[gid.entryIndex];
-		assert(item.type == GIT_TIMER);
+		XASSERT(item.type == GIT_TIMER, "The GUI item %d is not a number", id);
 		return &_timers[gid.index];
 	}
 	// -------------------------------------------------------
@@ -237,7 +238,7 @@ namespace ds {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
 		GUIItem& item = m_Items[gid.entryIndex];
-		assert(item.type == GIT_TEXT);
+		XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
 		GUIText& txt = _texts[gid.index];
 		item.centered = centered;
 		item.color = color;
@@ -253,7 +254,7 @@ namespace ds {
 		int idx = getIndexByID(id);
 		const GUID& gid = _ids[idx];
 		GUIItem& item = m_Items[gid.entryIndex];
-		assert(item.type == GIT_TEXT);
+		XASSERT(item.type == GIT_TEXT, "The GUI item %d is not a text item", id);
 		GUIText& txt = _texts[gid.index];
 		strcpy(txt.text, text);
 	}
@@ -263,7 +264,7 @@ namespace ds {
 	// -------------------------------------------------------
 	v2 GUIDialog::getTextSize(int id) {
 		GUIItem* item = findByID(id);
-		assert(item != 0);
+		XASSERT(item != 0,"Cannot find text item");
 		return item->size;
 	}
 
@@ -317,7 +318,7 @@ namespace ds {
 	// -------------------------------------------------------
 	GUID GUIDialog::addButton(int id,float x,float y, const char* text, const Rect& textureRect, const Color& textColor, float textScale, bool centered) {
 		GUID& gid = _ids[_idIndex++];
-		assert(gid.id == -1);
+		XASSERT(gid.id == -1, "The id %d is already in use", id);
 		gid.id = id;
 		// add entry
 		Vector2f p = v2(x, y);
@@ -619,7 +620,7 @@ namespace ds {
 				if (gui::Button("OK")) {
 					if (_selectedElement != -1) {
 						int id = getNextID();
-						assert(id != -1);
+						XASSERT(id != -1, "Cannot get a next ID");
 						if (_selectedElement == 0) {
 							GUID gid = addImage(id, 512, 384, Rect(0,0,50,50), true);
 							addToModel(gid.id, GIT_IMAGE, "Image");

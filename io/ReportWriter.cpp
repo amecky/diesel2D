@@ -1,5 +1,5 @@
 #include "ReportWriter.h"
-
+#include "..\utils\Log.h"
 /*
 body{padding-top:20px;padding-bottom:20px;font:Verdana 10px}h1,h2{font-family:Verdana}#box-table-a th,.panel .panel-heading h1,h1,h2{font-weight:700}h1{font-size:18px}
 h2{font-size:15px}#box-table-a{font-family:Verdana,"Lucida Sans Unicode","Lucida Grande",Sans-Serif;font-size:12px;margin:5px;min-width:300px;text-align:left;
@@ -25,27 +25,27 @@ ReportWriter::~ReportWriter() {
 	}
 }
 void ReportWriter::addHeader(const char* header) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "<h1>%s</h1>\n",header);
 }
 
 void ReportWriter::startBox(const char* header) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "<div class = 'panel'>\n<div class = 'panel-heading'><h1>%s</h1></div>\n", header);
 }
 
 void ReportWriter::endBox() const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "</div>\n");
 }
 
 void ReportWriter::addSubHeader(const char* header) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "<h2>%s</h2>\n", header);
 }
 
 void ReportWriter::startTable(const char** columnNames, int num) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "<table id = 'box-table-a'><thead>  <tr>");
 	for (int i = 0; i < num; ++i) {
 		fprintf(_file, "    <th scope='col'>%s</th>\n", columnNames[i]);
@@ -54,37 +54,37 @@ void ReportWriter::startTable(const char** columnNames, int num) const {
 }
 
 void ReportWriter::startRow() const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "  <tr>\n");
 }
 
 void ReportWriter::addCell(int v) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "    <td>%d</td>\n",v);
 }
 
 void ReportWriter::addCell(uint32 v) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "    <td>%d</td>\n", v);
 }
 
 void ReportWriter::addCell(const v2& v) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "    <td>x: %g  y: %g</td>\n", v.x,v.y);
 }
 
 void ReportWriter::addCell(float v) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "    <td>%g</td>\n", v);
 }
 
 void ReportWriter::addCell(const char* v) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "    <td>%s</td>\n", v);
 }
 
 void ReportWriter::addCell(int ident,const char* v) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "    <td>");
 	for (int i = 0; i < ident; ++i) {
 		fprintf(_file, "&nbsp;");
@@ -93,7 +93,7 @@ void ReportWriter::addCell(int ident,const char* v) const {
 }
 
 void ReportWriter::addCell(bool v) const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	if (v) {
 		fprintf(_file, "    <td>true</td>\n");
 	}
@@ -103,11 +103,11 @@ void ReportWriter::addCell(bool v) const {
 }
 
 void ReportWriter::endRow() const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "  </tr>\n");
 }
 
 void ReportWriter::endTable() const {
-	assert(_open);
+	XASSERT(_open, "The report file has not been opened yet");
 	fprintf(_file, "</tbody>\n</table>\n");
 }

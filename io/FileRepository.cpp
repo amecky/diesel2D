@@ -117,7 +117,7 @@ namespace ds {
 		// load
 		// -----------------------------------------------------------
 		char* load(const char* fileName, int* size, FileType type) {
-			assert(_repository != 0);
+			XASSERT(_repository != 0,"No repository created yet");
 			*size = -1;
 			if (_repository->mode == RM_DEBUG) {
 				FILE *fp = fopen(fileName, "rb");

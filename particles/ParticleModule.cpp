@@ -49,7 +49,7 @@ namespace ds {
 	// Size Module
 	// -------------------------------------------------------
 	void SizeModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		const SizeModuleData* my_data = static_cast<const SizeModuleData*>(data);
 		if (my_data->modifier != MMT_NONE) {			
 			for (uint32 i = 0; i < array->countAlive; ++i) {
@@ -70,7 +70,7 @@ namespace ds {
 	}
 
 	void SizeModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		const SizeModuleData* my_data = static_cast<const SizeModuleData*>(data);
 		for (uint32 i = start; i < end; ++i) {
 			v2 s = math::randomRange(my_data->initial, my_data->variance);
@@ -93,7 +93,7 @@ namespace ds {
 	// Color Module
 	// -------------------------------------------------------
 	void ColorModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		uint32 count = end - start;
 		const ColorModuleData* my_data = static_cast<const ColorModuleData*>(data);
 		if (my_data->modifier == MMT_LINEAR) {
@@ -134,7 +134,7 @@ namespace ds {
 	}
 
 	void ColorModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		const ColorModuleData* my_data = static_cast<const ColorModuleData*>(data);
 		if (my_data->modifier == MMT_LINEAR) {
 			for (uint32 i = 0; i < array->countAlive; ++i) {
@@ -152,7 +152,7 @@ namespace ds {
 	// Alpha Module
 	// -------------------------------------------------------
 	void AlphaModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		const AlphaModuleData* my_data = static_cast<const AlphaModuleData*>(data);
 		if (my_data->modifier != MMT_NONE) {
 			if (my_data->modifier == MMT_LINEAR) {
@@ -171,7 +171,7 @@ namespace ds {
 	}
 
 	void AlphaModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		const AlphaModuleData* my_data = static_cast<const AlphaModuleData*>(data);
 		for (uint32 i = start; i < end; ++i) {
 			array->color[i].a = math::clamp(math::randomRange(my_data->initial,my_data->variance),0.0f,1.0f);
@@ -182,7 +182,7 @@ namespace ds {
 	// Rotation Velocity Module
 	// -------------------------------------------------------
 	void RotationModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		uint32 count = end - start;
 		const RotationModuleData* my_data = static_cast<const RotationModuleData*>(data);
 		for (uint32 i = start; i < end; ++i) {
@@ -191,7 +191,7 @@ namespace ds {
 	}
 
 	void RotationModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		const RotationModuleData* my_data = static_cast<const RotationModuleData*>(data);
 		for (uint32 i = 0; i < array->countAlive; ++i) {
 			array->rotation[i] += array->rotationVelocity[i] * dt;
@@ -202,7 +202,7 @@ namespace ds {
 	// Acceleration Module
 	// -------------------------------------------------------
 	void AccelerationModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		uint32 count = end - start;
 		const AccelerationModuleData* my_data = static_cast<const AccelerationModuleData*>(data);
 		for (uint32 i = 0; i < count; ++i) {
@@ -212,7 +212,7 @@ namespace ds {
 	}
 
 	void AccelerationModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		const AccelerationModuleData* my_data = static_cast<const AccelerationModuleData*>(data);
 		for (uint32 i = 0; i < array->countAlive; ++i) {
 			array->forces[i] += v3(my_data->acceleration * dt * dt);
@@ -223,7 +223,7 @@ namespace ds {
 	// VelocityModule
 	// -------------------------------------------------------
 	void VelocityModule::generate(ParticleArray* array, const ParticleModuleData* data, float dt, uint32 start, uint32 end) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		uint32 count = end - start;
 		const VelocityModuleData* my_data = static_cast<const VelocityModuleData*>(data);
 		if (my_data->type == VelocityModuleData::VT_RADIAL) {
@@ -241,7 +241,7 @@ namespace ds {
 	}
 
 	void VelocityModule::update(ParticleArray* array, const ParticleModuleData* data, float dt) {
-		assert(data != 0);
+		XASSERT(data != 0, "Required data not found");
 		const VelocityModuleData* my_data = static_cast<const VelocityModuleData*>(data);
 		if (my_data->useDistribution) {
 			v2 dist;

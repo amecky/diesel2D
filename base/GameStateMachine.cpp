@@ -30,7 +30,7 @@ namespace ds {
 	}
 	void GameStateMachine::activate(const char* name) {
 		int idx = find(name);
-		assert(idx != -1);
+		XASSERT(idx != -1,"Cannot find matching gamestate for %s",name);
 		if (idx != -1) {
 			switchState(idx);
 		}
@@ -98,12 +98,12 @@ namespace ds {
 	}
 
 	void GameStateMachine::connect(const char* firstStateName, int outcome, const char* secondStateName) {
-		assert(outcome != 0);
+		XASSERT(outcome != 0, "You need to define an outcome");
 		FSMConnection connection;
 		connection.firstStateIndex = find(firstStateName);
-		assert(connection.firstStateIndex != -1);
+		XASSERT(connection.firstStateIndex != -1,"Cannot find matching first state");
 		connection.secondStateIndex = find(secondStateName);
-		assert(connection.secondStateIndex != -1);
+		XASSERT(connection.secondStateIndex != -1,"Cannot find matching second state");		
 		connection.outcome = outcome;
 		_connections.push_back(connection);
 	}

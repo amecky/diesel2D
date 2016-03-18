@@ -67,14 +67,14 @@ typedef unsigned short ushort;
 //const uint32 UINT32_MAX = 0xffffffffu;
 
 #if defined(RELEASE) 
-	#ifndef HR
+#ifndef HR
 #define HR(x) { HRESULT hr = x;	if ( FAILED(hr) ) { DXTraceA(__FILE__ ,__LINE__ ,hr,#x,true); 	}} 
-	#endif
+#endif
 #else
-	#ifndef HR
-		//#define HR(x) x;
+#ifndef HR
+//#define HR(x) x;
 #define HR(x) { HRESULT hr = x ; if ( FAILED(hr) ) { char desc[1024]; sprintf_s(desc,1024, "(DX) %s - %s",DXGetErrorString(hr),DXGetErrorDescription(hr));	char buf[2048];	sprintf_s(buf,"%s(%d) : Error: %s\n", __FILE__, __LINE__, desc);LOGE << buf; }}
-	#endif
+#endif
 #endif
 
 #ifndef XASSERT
