@@ -79,26 +79,11 @@ namespace ds {
 			_layers[j].descriptor_id = id;
 		}
 	}
-	// -----------------------------------------------------
-	// allocate
-	// -----------------------------------------------------
-	//void World::allocate(int size) {
-		//m_Data.allocate(m_Data, size);
-	//}
 
 	// -----------------------------------------------------
 	// create
 	// -----------------------------------------------------
-	SID World::create(const Vector2f& pos,const Texture& r,int type,int layer) {
-		/*
-		if ( m_Data.capacity == 0 ) {
-			allocate(256);
-		}
-		if (m_Data.num >= m_Data.capacity) {
-			allocate(m_Data.capacity * 2);
-		}
-		*/
-		//return m_Data.create(m_Data,pos,r,type,layer);		
+	SID World::create(const Vector2f& pos,const Texture& r,int type,int layer) {	
 		return m_Data.create(pos, r, 0.0f, 1.0f, 1.0f, Color::WHITE, type, layer);
 	}
 
@@ -106,14 +91,6 @@ namespace ds {
 	// create with all options
 	// -----------------------------------------------------
 	SID  World::create(const Vector2f& pos, const Texture& r, float rotation, float scaleX, float scaleY, const Color& color, int type, int layer) {
-		/*
-		if (m_Data.total == 0) {
-			allocate(256);
-		}
-		if (m_Data.num >= m_Data.total) {
-			allocate(m_Data.total * 2);
-		}
-		*/
 		return m_Data.create(pos, r, rotation, scaleX, scaleY, color, type, layer);
 	}
 
@@ -121,17 +98,8 @@ namespace ds {
 	// create with template name
 	// -----------------------------------------------------
 	SID World::create(const Vector2f& pos, const char* templateName,int layer) {
-		/*
-		if (m_Data.total == 0) {
-			allocate(256);
-		}
-		if (m_Data.num >= m_Data.total) {
-			allocate(m_Data.total * 2);
-		}
-		*/
 		Sprite sp;
 		if (renderer::getSpriteTemplate(templateName, &sp)) {
-			//return m_Data.create(m_Data, pos, sp.texture, sp.type, layer);
 			return m_Data.create(pos, sp.texture, sp.rotation, sp.scale.x, sp.scale.y, sp.color, sp.type, layer);
 			
 		}
@@ -148,7 +116,7 @@ namespace ds {
 		for ( size_t i = 0; i < m_Actions.size(); ++i ) {
 			m_Actions[i]->removeByID(id);
 		}		
-		//m_Data.remove(m_Data,id);
+		
 		m_Data.remove(id);
 	}
 
@@ -490,6 +458,7 @@ namespace ds {
 			m_Actions[i]->save(writer);
 		}
 		writer.endBox();
+		_buffer.save(writer);
 	}
 
 	void World::debug(SID sid) {		

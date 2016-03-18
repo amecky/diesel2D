@@ -178,6 +178,8 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 		ErrorExit("RegisterClass");
 		return 0;
 	}
+	ds::gCrashDump = new ds::CrashDump();
+	ds::gCrashDump->attach(app);
 	app->setInstance(hThisInst);
 	app->createWindow();
 	app->prepare();
@@ -208,6 +210,7 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
     }
 	
 	delete app;
+	delete ds::gCrashDump;
 	//_CrtDumpMemoryLeaks();
 	return (int) msg.wParam;
 }

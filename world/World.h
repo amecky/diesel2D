@@ -13,6 +13,7 @@
 #include "..\math\StraightPath.h"
 #include "..\math\FloatArray.h"
 #include "..\io\DataFile.h"
+#include "AdditionalData.h"
 
 namespace ds {
 
@@ -105,88 +106,6 @@ namespace ds {
 	};
 
 	class World {
-
-		struct AdditionalDataHeader {
-			int index;
-			int size;
-			bool used;
-			SID sid;
-		};
-
-		struct AdditionalData {
-
-			void* attach(SID sid, int size) {
-				int idx = find_free_header(size);
-				if (idx == -1) {
-					AdditionalDataHeader header;
-					header.sid = sid;
-					header.size = size;
-					header.index = data.size;
-					header.used = true;
-					headers.push_back(header);
-					return data.alloc(size);
-				}
-				else {
-					AdditionalDataHeader& header = headers[idx];
-					header.used = true;
-					header.sid = sid;
-					return data.data + header.index;
-				}
-			}
-
-			void remove(SID sid) {
-				int idx = find_header(sid);
-				if (idx != -1) {
-					AdditionalDataHeader& header = headers[idx];
-					if (header.used) {
-						header.used = false;
-					}
-				}
-			}
-
-			void* get(SID sid) {
-				int idx = find_header(sid);
-				if (idx != -1) {
-					AdditionalDataHeader& header = headers[idx];
-					if (header.used) {
-						return data.data + header.index;
-					}
-				}
-				return 0;
-			}
-
-			int find_free_header(int size) {
-				for (uint32 i = 0; i < headers.size(); ++i) {
-					const AdditionalDataHeader& h = headers[i];
-					if (h.size == size && !h.used) {
-						return i;
-					}
-				}
-				return -1;
-			}
-
-			int find_header(SID sid) {
-				for (uint32 i = 0; i < headers.size(); ++i) {
-					const AdditionalDataHeader& h = headers[i];
-					if (h.sid == sid) {
-						return i;
-					}
-				}
-				return -1;
-			}
-
-			bool contains(SID sid) {
-				int idx = find_header(sid);
-				if (idx != -1) {
-					AdditionalDataHeader& header = headers[idx];
-					return header.used;
-				}
-				return false;
-			}
-
-			CharBuffer data;
-			Array<AdditionalDataHeader> headers;
-		};
 
 	typedef Array<AbstractAction*> Actions;
 
@@ -344,13 +263,14 @@ namespace ds {
 			return m_Data;
 		}
 
-		void* attach_data(SID sid,int size) {
-			return _buffer.attach(sid, size);
+		void* attach_data(SID sid,int size, int identifier) {
+			return _buffer.attach(sid, size, identifier);
 		}
 
 		void* get_data(SID sid) {
 			return _buffer.get(sid);
 		}
+
 
 		void attach_descriptor(int layer, const char* descName);
 

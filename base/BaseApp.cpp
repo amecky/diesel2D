@@ -25,8 +25,10 @@
 #include "..\utils\GlobalStringBuffer.h"
 #include "..\net\GameServer.h"
 
+
 namespace ds {
 
+	
 // -------------------------------------------------------
 // Constructing new BaseApp
 // -------------------------------------------------------	
@@ -829,6 +831,19 @@ void BaseApp::loadViewports(const JSONReader& reader) {
 	else {
 		LOG << "No descriptors defined";
 	}
+}
+
+void BaseApp::saveReport() {
+	char timeFormat[255];
+	time_t now;
+	time(&now);
+	tm *now_tm = localtime(&now);
+	strftime(timeFormat, 255, "%Y%m%d_%H%M%S", now_tm);
+	char filename[255];
+	sprintf_s(filename, "%sCrashReport_%s.html", _settings.reportingDirectory, timeFormat);
+	ReportWriter rw(filename);
+	world->save(rw);
+	gDefaultMemory->save(rw);
 }
 
 }

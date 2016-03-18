@@ -22,13 +22,15 @@ class BitmapFontsDialog;
 class ParticlesEditState;
 class DialogEditorState;
 
+
+
 struct GameTime {
 	float elapsed;
 	uint32 elapsedMillis;
 	float totalTime;
 };
 
-class BaseApp : public HTTPCallback {
+class BaseApp : public HTTPCallback , public CrashReporter {
 
 struct DebugInfo {
 	bool showProfiler;
@@ -112,6 +114,7 @@ public:
 	void activate(const char* name);
 	void connectGameStates(const char* firstStateName, int outcome, const char* secondStateName);
 	void get(const HTTPRequest& request, HTTPResponse* response);
+	void saveReport();
 protected:
 	void activateMonitoring(float threshold);
 	void loadSprites();

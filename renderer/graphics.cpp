@@ -9,6 +9,7 @@
 #include "..\sprites\SpriteBatch.h"
 #include "..\DialogResources.h"
 #include "..\io\FileRepository.h"
+#include "..\base\BaseApp.h"
 
 namespace ds {
 
