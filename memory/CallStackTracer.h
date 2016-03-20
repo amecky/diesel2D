@@ -29,5 +29,11 @@ namespace ds {
 		Array<CallStack> _callStacks;
 	};
 
+
+	namespace stacktrace {
+
+		void logStackTrace();
+
+	}
 }
 

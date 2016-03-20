@@ -9,6 +9,32 @@
 
 namespace ds {
 
+	namespace stacktrace {
+
+		void logStackTrace() {
+			char buf[255];
+			CallStack cs;
+			cs.num = 0;
+
+			SymSetOptions(SYMOPT_DEFERRED_LOADS | SYMOPT_INCLUDE_32BIT_MODULES | SYMOPT_UNDNAME);
+			HANDLE hProc = GetCurrentProcess();
+			SymInitialize(hProc, buf, TRUE);
+			PVOID addrs[25] = { 0 };
+
+			USHORT frames = CaptureStackBackTrace(2, 25, addrs, NULL);
+			for (USHORT i = 0; i < frames; i++) {
+				ULONG64 buffer[(sizeof(SYMBOL_INFO) + 1024 + sizeof(ULONG64) - 1) / sizeof(ULONG64)] = { 0 };
+				SYMBOL_INFO *info = (SYMBOL_INFO *)buffer;
+				info->SizeOfStruct = sizeof(SYMBOL_INFO);
+				info->MaxNameLen = 255;
+				DWORD64 displacement = 0;
+				if (::SymFromAddr(::GetCurrentProcess(), (DWORD64)addrs[i], &displacement, info)) {
+					LOG << info->Name;
+				}
+			}
+		}
+	}
+
 	CallStackTracer::CallStackTracer() {
 	}
 
@@ -70,8 +96,8 @@ namespace ds {
 	void CallStackTracer::print(int index) {
 		char name[255];
 		const CallStack& cs = _callStacks[index];
-		for (int i = 0; i < cs.num; ++i) {
-			const Callee& c = _callees[cs.entries[i]];
+		for (int i = 0; i < cs.num ; ++i) {
+			const Callee& c = _callees[i];// cs.entries[i]];
 			strncpy(name, _names.data + c.index, c.length);
 			name[c.length] = '\0';
 			LOG << name;

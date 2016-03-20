@@ -6,6 +6,7 @@ namespace ds {
 
 	public:
 		virtual void saveReport() = 0;
+		virtual void shutdown() = 0;
 	};
 
 	class CrashDump {
@@ -14,6 +15,7 @@ namespace ds {
 		CrashDump() {}
 		void attach(CrashReporter* reporter);
 		void dump();
+		void exit();
 	private:
 		CrashReporter* _reporter;
 	};

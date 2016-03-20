@@ -178,6 +178,7 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 		ErrorExit("RegisterClass");
 		return 0;
 	}
+	MSG msg;
 	ds::gCrashDump = new ds::CrashDump();
 	ds::gCrashDump->attach(app);
 	app->setInstance(hThisInst);
@@ -191,24 +192,23 @@ int WINAPI WinMain(HINSTANCE hThisInst, HINSTANCE hLastInst, LPSTR lpszCmdLine, 
 		on the different CPUs (contrary to what it's supposed to do), which can cause negative frame times
 		if the thread is scheduled on the other CPU in the next frame. This can cause very jerky behavior and
 		appear as if frames return out of order.
-	*/
+		*/
 	SetThreadAffinityMask(GetCurrentThread(), 1);
-	MSG msg;
-    while ( !app->isDone() ) {
-        // Did we receive a message, or are we idling ?
-        if ( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) )  {
-            if ( msg.message == WM_QUIT) {
-                break;
-            }
-            TranslateMessage( &msg );
-            DispatchMessage ( &msg );
-        } 
-        else  {						
-			app->updateTime();            
-			app->buildFrame();        
-        } 
-    }
-	
+		
+	while (!app->isDone()) {
+		// Did we receive a message, or are we idling ?
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))  {
+			if (msg.message == WM_QUIT) {
+				break;
+			}
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else  {
+			app->updateTime();
+			app->buildFrame();
+		}
+	}
 	delete app;
 	delete ds::gCrashDump;
 	//_CrtDumpMemoryLeaks();
