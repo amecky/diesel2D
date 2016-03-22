@@ -13,15 +13,10 @@ namespace ds {
 		return false;
 	}
 
-	void SpriteArray::assertSID(SID sid) const {
+	void SpriteArray::assertSID(SID sid) const {		
+		XASSERT(sid < capacity, "ID %d out of range %d", sid, capacity);
 		SpriteArrayIndex &in = indices[sid];
-		if (sid > capacity) {
-			LOG << "SID: " << sid << " is NOT valid - greather than capacity";
-		}
-		if (in.index == USHRT_MAX) {
-			LOG << "SID: " << sid << " is NOT valid - no valid index found";
-		}
-		assert(in.index != USHRT_MAX);
+		XASSERT(in.index != UINT16_MAX, "Invalid index for %d", sid);
 	}
 
 	SID SpriteArray::create(const v2& pos, const Texture& r, float rotation, float scaleX, float scaleY, const Color& color, int type, int layer) {
@@ -55,8 +50,8 @@ namespace ds {
 
 	void SpriteArray::remove(SID id) {
 		SpriteArrayIndex& in = indices[id];
-		assert(in.index != UINT16_MAX);
-		assert(id < capacity);
+		XASSERT(in.index != UINT16_MAX,"Invalid index for %d",id);
+		XASSERT(id < capacity,"ID %d out of range %d",id,capacity);
 		if (num > 1) {
 			int last = num - 1;
 			ID lastID = ids[last];
