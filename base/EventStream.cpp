@@ -1,60 +1,51 @@
 #include "EventStream.h"
-#include <string.h>
+#include "..\utils\Log.h"
 #include "..\memory\DefaultAllocator.h"
 
 namespace ds {
 
 EventStream::EventStream() {
-	//m_Data = new char[4096];
 	m_Data = (char*)ALLOC(4096);
 	reset();
 }
 
 EventStream::~EventStream() {
-	//delete m_Data;
 	DEALLOC(m_Data);
 }
 
 void EventStream::reset() {
-	m_Index = 0;
-	m_Count = 0;
+	_mappings.clear();
+	_index = 0;
 }
 
-void EventStream::add(int type,void* p, size_t size) {
-	if ( m_Count < MAX_EVENTS) {
-		EventHeader header;
-		header.id = m_Count;
-		header.size = size;
-		header.type = type;
-		char* data = m_Data + m_Index;
-		memcpy(data,&header,EVENT_HEADER_SIZE);
-		data += EVENT_HEADER_SIZE;
-		memcpy(data,p,size);
-		m_Mapping[m_Count] = m_Index;
-		m_Index += EVENT_HEADER_SIZE + size;
-		++m_Count;
-	}
+void EventStream::add(uint32_t type, void* p, size_t size) {
+	addHeader(type, size);	
+	char* data = m_Data + _index + EVENT_HEADER_SIZE;
+	memcpy(data,p,size);
+	_mappings.push_back(_index);
+	_index += EVENT_HEADER_SIZE + size;
 }
 
-void EventStream::add(int type) {
-	if ( m_Count < MAX_EVENTS) {
-		EventHeader header;
-		header.id = m_Count;
-		header.size = 0;
-		header.type = type;
-		char* data = m_Data + m_Index;
-		memcpy(data,&header,EVENT_HEADER_SIZE);		
-		m_Mapping[m_Count] = m_Index;
-		m_Index += EVENT_HEADER_SIZE;
-		++m_Count;
-	}
+void EventStream::add(uint32_t type) {
+	addHeader(type, 0);
+	char* data = m_Data + _index;
+	_mappings.push_back(_index);
+	_index += EVENT_HEADER_SIZE;
 }
 
-const bool EventStream::get(int index,void* p) const {
-	if ( index < 0 || index >= m_Count ) {
-		return false;
-	}
-	int lookup = m_Mapping[index];
+void EventStream::addHeader(uint32_t type, size_t size) {
+	LOG << "creating event - type: " << type << " size: " << size;
+	EventHeader header;
+	header.id = _mappings.size();;
+	header.size = 0;
+	header.type = type;
+	char* data = m_Data + _index;
+	memcpy(data, &header, EVENT_HEADER_SIZE);
+}
+
+const bool EventStream::get(uint32_t index, void* p) const {
+	XASSERT(index < _mappings.size(), "Index out of range");
+	int lookup = _mappings[index];
 	char* data = m_Data + lookup;
 	EventHeader* header = (EventHeader*)data;
 	data += EVENT_HEADER_SIZE;
@@ -62,18 +53,16 @@ const bool EventStream::get(int index,void* p) const {
 	return true;
 }
 
-const int EventStream::getType(int index) const {
-	if ( index < 0 || index >= m_Count ) {
-		return -1;
-	}
-	int lookup = m_Mapping[index];
+const int EventStream::getType(uint32_t index) const {
+	XASSERT(index < _mappings.size(), "Index out of range");
+	int lookup = _mappings[index];
 	char* data = m_Data + lookup;
 	EventHeader* header = (EventHeader*)data;
 	return header->type;
 }
 
-const bool EventStream::containsType(int type) const {
-	for ( int i = 0; i < m_Count; ++i ) {
+const bool EventStream::containsType(uint32_t type) const {
+	for (int i = 0; i < _mappings.size(); ++i) {
 		if ( getType(i) == type ) {
 			return true;
 		}
