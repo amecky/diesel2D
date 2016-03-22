@@ -673,7 +673,7 @@ namespace ds {
 	// show dialog
 	// -------------------------------------------------------
 	void GUIDialog::showDialog() {
-		if (gui::begin("GUI Dialog", &_state)) {
+		if (gui::begin(_name, &_state)) {
 			gui::ComboBox(&_model, &_offset);
 			gui::beginGroup();
 			if (gui::Button("Save")) {

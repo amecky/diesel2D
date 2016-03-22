@@ -646,7 +646,7 @@ namespace gui {
 		ZoneTracker z("IMGUI::InputScalar-I");
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
-		p.x += (width + 10.0f) * index;
+		p.x += (width + 10.0f) * index + 80.0f;
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT),width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
 		if (selected) {			
@@ -680,7 +680,7 @@ namespace gui {
 		ZoneTracker z("IMGUI::InputScalar-F");
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
-		p.x += (width + 10.0f) * index;
+		p.x += (width + 10.0f) * index + 80.0f;
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT), width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
 		if ( selected) {
@@ -715,7 +715,7 @@ namespace gui {
 		int new_id = id + 1024 * index;
 		bool ret = false;
 		v2 p = guiContext->position;
-		p.x += (width + 10.0f) * index;
+		p.x += (width + 10.0f) * index + 80.0f;
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT), width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
 		if (selected) {
@@ -749,10 +749,9 @@ namespace gui {
 	// -------------------------------------------------------
 	bool Input(const char* label, char* str, int maxLength) {
 		HashedId id = HashPointer(str);
-		bool ret = InputScalar(id, 0, str, maxLength,400.0f);
 		v2 p = guiContext->position;
-		p.x += 410.0f;
 		guiContext->addText(p, label);
+		bool ret = InputScalar(id, 0, str, maxLength,300.0f);		
 		guiContext->nextPosition();
 		return ret;
 	}
@@ -762,7 +761,7 @@ namespace gui {
 	// -------------------------------------------------------
 	bool Input(char* str, int maxLength) {
 		HashedId id = HashPointer(str);
-		bool ret = InputScalar(id, 0, str, maxLength, 400.0f);
+		bool ret = InputScalar(id, 0, str, maxLength, 300.0f);
 		v2 p = guiContext->position;
 		guiContext->nextPosition();
 		return ret;
@@ -773,10 +772,9 @@ namespace gui {
 	// -------------------------------------------------------
 	void InputFloat(const char* label, float* v) {
 		HashedId id = HashPointer(v);
-		InputScalar(id, 0, v);
-		v2 p = guiContext->position;
-		p.x += INPUT_BOX_WIDTH + 10.0f;
+		v2 p = guiContext->position;		
 		guiContext->addText(p, label);
+		InputScalar(id, 0, v);		
 		guiContext->nextPosition();
 	}
 
@@ -785,10 +783,9 @@ namespace gui {
 	// -------------------------------------------------------
 	void InputInt(const char* label, int* v) {		
 		HashedId id = HashPointer(v);
-		InputScalar(id, 0, v);
 		v2 p = guiContext->position;
-		p.x += INPUT_BOX_WIDTH + 10.0f;
 		guiContext->addText(p, label);
+		InputScalar(id, 0, v);		
 		guiContext->nextPosition();
 	}
 
@@ -800,7 +797,6 @@ namespace gui {
 		int tmp = *v;
 		InputScalar(id, 0, &tmp);
 		v2 p = guiContext->position;
-		p.x += INPUT_BOX_WIDTH + 10.0f;
 		guiContext->addText(p, label);
 		guiContext->nextPosition();
 		*v = tmp;
@@ -881,11 +877,10 @@ namespace gui {
 	// -------------------------------------------------------
 	void InputVec2(const char* label, v2* v) {
 		HashedId id = HashPointer(v);
+		v2 p = guiContext->position;
+		guiContext->addText(p, label);
 		InputScalar(id, 0, &v->x);
 		InputScalar(id, 1, &v->y);	
-		v2 p = guiContext->position;
-		p.x += (INPUT_BOX_WIDTH + 10.0f) * 2.0f;
-		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
 
@@ -897,17 +892,16 @@ namespace gui {
 		int g = v->g * 255.0f;
 		int b = v->b * 255.0f;
 		int a = v->a * 255.0f;
+		v2 p = guiContext->position;
+		guiContext->addText(p, label);
 		HashedId hash = HashPointer(v);
 		InputScalar(hash, 0, &r, 40.0f);
 		InputScalar(hash, 1, &g, 40.0f);
 		InputScalar(hash, 2, &b, 40.0f);
 		InputScalar(hash, 3, &a, 40.0f);
 		*v = ds::Color(r, g, b, a);
-		v2 p = guiContext->position;
-		p.x += 200.0f;
+		p.x += 290.0f;
 		guiContext->addBox(p, v2(BOX_HEIGHT, BOX_HEIGHT), *v);
-		p.x += BOX_HEIGHT;
-		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
 
@@ -916,12 +910,11 @@ namespace gui {
 	// -------------------------------------------------------
 	void InputVec3(const char* label, v3* v) {
 		HashedId id = HashPointer(v);
+		v2 p = guiContext->position;
+		guiContext->addText(p, label);
 		InputScalar(id, 0, &v->x);
 		InputScalar(id, 1, &v->y);
-		InputScalar(id, 2, &v->z);
-		v2 p = guiContext->position;
-		p.x += (INPUT_BOX_WIDTH + 10.0f) * 3.0f;
-		guiContext->addText(p, label);
+		InputScalar(id, 2, &v->z);		
 		guiContext->nextPosition();
 	}
 
@@ -930,6 +923,8 @@ namespace gui {
 	// -------------------------------------------------------
 	void InputRect(const char* label, ds::Rect* v) {
 		HashedId id = HashPointer(v);
+		v2 p = guiContext->position;
+		guiContext->addText(p, label);
 		int top = v->top;
 		int left = v->left;
 		int width = v->width();
@@ -938,10 +933,7 @@ namespace gui {
 		InputScalar(id, 1, &left);
 		InputScalar(id, 2, &width);
 		InputScalar(id, 3, &height);
-		*v = ds::Rect(top, left, width, height);
-		v2 p = guiContext->position;
-		p.x += (INPUT_BOX_WIDTH + 10.0f) * 4.0f;
-		guiContext->addText(p, label);
+		*v = ds::Rect(top, left, width, height);		
 		guiContext->nextPosition();
 	}
 
@@ -1112,6 +1104,8 @@ namespace gui {
 	void CheckBox(const char* label, bool* selected) {
 		HashedId id = HashId(label);
 		v2 p = guiContext->position;
+		guiContext->addText(p, label);
+		p.x += 80.0f;
 		if (*selected) {
 			guiContext->addImage(p, guiContext->textures[ICN_CHECKBOX_SELECTED], BOX_HEIGHT * 0.5f);			
 		}
@@ -1124,8 +1118,6 @@ namespace gui {
 		v2 textDim = getTextSize(label);
 		textDim.x += BOX_HEIGHT;
 		bool hot = isHot(id, p, textDim,textDim.x * 0.5f);
-		p.x += BOX_HEIGHT;		
-		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
 	
@@ -1259,7 +1251,7 @@ namespace gui {
 		guiContext->textures[ICN_BUTTON] = ds::math::buildTexture(105.0f, 155.0f, 150.0f, 24.0f);
 		guiContext->textures[ICN_INPUT] = ds::math::buildTexture(160.0f, 0.0f, 150.0f, BOX_HEIGHT);
 		guiContext->textures[ICN_INPUT_ACTIVE] = ds::math::buildTexture(160.0f, 160.0f, 150.0f, BOX_HEIGHT);
-		guiContext->textures[ICN_HEADER_BOX] = ds::math::buildTexture(140.0, 0.0f, 150.0f, 16.0f);
+		guiContext->textures[ICN_HEADER_BOX] = ds::math::buildTexture(140.0, 0.0f, 150.0f, 18.0f);
 		guiContext->textures[ICN_PANEL_BACKGROUND] = ds::math::buildTexture(30.0, 370.0f, 100.0f, 100.0f);
 		guiContext->textures[ICN_BOX_BACKGROUND] = ds::math::buildTexture(30.0f, 500.0f, 100.0f, 100.0f);
 		guiContext->colors[CLR_PANEL_BACKGROUND] = ds::Color(32, 32, 32, 255);
@@ -1348,11 +1340,12 @@ namespace gui {
 		v2 startPos = guiContext->startPosition;
 		if (guiContext->useHeader) {			
 			p.x -= 10.0f;
-			ds::sprites::drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 16.0f);
+			ds::sprites::drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 18.0f);
 			// draw text
-			p.y -= 7.0f;
+			p.y -= 8.0f;
 			p.x = startPos.x + 10.0f;
 			ds::sprites::drawText(guiContext->font, p.x, p.y, guiContext->header, 2);
+			/*
 			// draw icon
 			p.x = startPos.x;// +.0f;
 			p.y = startPos.y;
@@ -1362,6 +1355,7 @@ namespace gui {
 			else {
 				ds::sprites::draw(p, guiContext->textures[ICN_ARROW_RIGHT]);
 			}
+			*/
 		}
 		// draw panel background
 		if (guiContext->visible) {
@@ -1413,10 +1407,10 @@ namespace gui {
 			}
 		}
 		ds::sprites::setTexture(current);
-		guiContext->position.y -= 4.0f;
-		if (!guiContext->editorMode) {
-			guiContext->position.y -= 6.0f;
-		}
+		guiContext->position.y -= 2.0f;
+		//if (!guiContext->editorMode) {
+			//guiContext->position.y -= 6.0f;
+		//}
 	}
 
 	// -------------------------------------------

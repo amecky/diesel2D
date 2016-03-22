@@ -29,68 +29,70 @@ namespace ds {
 	// --------------------------------------------
 	void DialogEditorState::showDialog() {
 		gui::start(280, &_dialogPos);
-		if (gui::begin("Dialogs", &_dialogState)) {
-			gui::ComboBox(&_model, &_offset);
-			gui::beginGroup();
-			if (gui::Button("Activate")) {
-				if (_model.hasSelection()) {
-					const char* name = _model.getSelectedValue();
-					_manager->activate(name);
-				}
-			}
-			else if (gui::Button("Deactivate")) {
-				if (_model.hasSelection()) {
-					const char* name = _model.getSelectedValue();
-					_manager->deactivate(name);
-				}
-			}
-			gui::endGroup();
-			gui::beginGroup();
-			if (gui::Button("Add")) {
-				_showAdd = true;
-			}
-			if (gui::Button("Load")) {
-				const char* name = _model.getSelectedValue();
-				GUIDialog* dlg = _manager->get(name);
-				if (dlg != 0) {
-					dlg->load();
-				}
-				init();
-			}
-			if (gui::Button("Save")) {
-				const char* name = _model.getSelectedValue();
-				GUIDialog* dlg = _manager->get(name);
-				if (dlg != 0) {
-					dlg->save();
-				}
-			}
-			gui::endGroup();
-			gui::beginGroup();
-			if (gui::Button("Remove")) {
-				if (_model.hasSelection()) {
-					const char* name = _model.getSelectedValue();
-					if (_manager->remove(name)) {
-						_model.remove(_model.getSelection());
-						_model.select(-1);
+		if (!_model.hasSelection()) {
+			if (gui::begin("Dialogs", &_dialogState)) {
+				gui::ComboBox(&_model, &_offset);
+				gui::beginGroup();
+				if (gui::Button("Activate")) {
+					if (_model.hasSelection()) {
+						const char* name = _model.getSelectedValue();
+						_manager->activate(name);
 					}
 				}
-			}
-			gui::endGroup();
-		}
-		gui::end();
-		if (_showAdd) {
-			int ret = _dialog.show("Please provide a name", "Name");
-			if (ret == 1) {
-				DialogDefinition def;
-				strcpy(def.name, _dialog.getText());
-				if (_manager->contains(def.name) == 0) {
-					GUIDialog* dialog = _manager->create(def.name);
-					_model.add(def.name, dialog->getName());
+				else if (gui::Button("Deactivate")) {
+					if (_model.hasSelection()) {
+						const char* name = _model.getSelectedValue();
+						_manager->deactivate(name);
+					}
 				}
-				_showAdd = false;
+				gui::endGroup();
+				gui::beginGroup();
+				if (gui::Button("Add")) {
+					_showAdd = true;
+				}
+				if (gui::Button("Load")) {
+					const char* name = _model.getSelectedValue();
+					GUIDialog* dlg = _manager->get(name);
+					if (dlg != 0) {
+						dlg->load();
+					}
+					init();
+				}
+				if (gui::Button("Save")) {
+					const char* name = _model.getSelectedValue();
+					GUIDialog* dlg = _manager->get(name);
+					if (dlg != 0) {
+						dlg->save();
+					}
+				}
+				gui::endGroup();
+				gui::beginGroup();
+				if (gui::Button("Remove")) {
+					if (_model.hasSelection()) {
+						const char* name = _model.getSelectedValue();
+						if (_manager->remove(name)) {
+							_model.remove(_model.getSelection());
+							_model.select(-1);
+						}
+					}
+				}
+				gui::endGroup();
 			}
-			if (ret == 2) {
-				_showAdd = false;
+			gui::end();
+			if (_showAdd) {
+				int ret = _dialog.show("Please provide a name", "Name");
+				if (ret == 1) {
+					DialogDefinition def;
+					strcpy(def.name, _dialog.getText());
+					if (_manager->contains(def.name) == 0) {
+						GUIDialog* dialog = _manager->create(def.name);
+						_model.add(def.name, dialog->getName());
+					}
+					_showAdd = false;
+				}
+				if (ret == 2) {
+					_showAdd = false;
+				}
 			}
 		}
 		if (_model.hasSelection()) {
