@@ -5,13 +5,20 @@
 
 namespace ds {
 
+	enum StateBehavior {
+		SB_TRANSIENT,
+		SB_PERMANENT,
+		SB_ONETIME,
+		SB_EOL
+	};
 	// -------------------------------------------------------
 	// State type
 	// -------------------------------------------------------
-	struct StateType {
-		const char* name;
-		int type;
-	};
+	//struct StateType {
+		//const char* name;
+		//int type;
+		//StateBehavior behavior;
+	//};
 
 	// -------------------------------------------------------
 	// State context
@@ -20,6 +27,7 @@ namespace ds {
 
 	};
 
+	
 	// -------------------------------------------------------
 	// Base State
 	// -------------------------------------------------------
@@ -49,10 +57,21 @@ namespace ds {
 		void sendEvent(uint32_t type) {
 			_events->add(type);
 		}
+		virtual StateBehavior getBehavior() const = 0;
+		float getTimer() const {
+			return _timer;
+		}
+		void resetTimer() {
+			_timer = 0.0f;
+		}
+		void tickTimer(float dt) {
+			_timer += dt;
+		}
 	protected:
-		StateContext* _ctx;
+		StateContext* _ctx;		
 	private:
 		EventStream* _events;
+		float _timer;
 	};
 
 	// -------------------------------------------------------
@@ -69,6 +88,8 @@ namespace ds {
 	// -------------------------------------------------------
 	class StateManager {
 
+		
+
 	public:
 		StateManager(StateContext* ctx) : _current(-1) , _next(-1) {
 			_context = ctx;
@@ -82,7 +103,7 @@ namespace ds {
 			_states[t->getMode()] = t;
 			return t;
 		}
-		void addTransition(int from, int outcome, int to, float ttl);
+		void addTransition(int from, int outcome, int to, float ttl = 0.0f);
 		void activate(int mode);
 		void tick(float dt);
 		void stop();
@@ -104,8 +125,6 @@ namespace ds {
 		EventStream _events;
 		int _current;
 		int _next;
-		float _timer;
 		float _ttl;
-		bool _transient;
 	};
 }

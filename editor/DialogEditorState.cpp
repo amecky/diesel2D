@@ -29,7 +29,7 @@ namespace ds {
 	// --------------------------------------------
 	void DialogEditorState::showDialog() {
 		gui::start(280, &_dialogPos);
-		if (!_model.hasSelection()) {
+		//if (!_model.hasSelection()) {
 			if (gui::begin("Dialogs", &_dialogState)) {
 				gui::ComboBox(&_model, &_offset);
 				gui::beginGroup();
@@ -94,7 +94,7 @@ namespace ds {
 					_showAdd = false;
 				}
 			}
-		}
+		//}
 		if (_model.hasSelection()) {
 			const char* name = _model.getSelectedValue();
 			GUIDialog* dlg = _manager->get(name);

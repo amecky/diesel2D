@@ -78,23 +78,15 @@ namespace ds {
 				_current = _next;
 			}
 			if (_current != -1) {
-				_timer = 0.0f;
+				_states[_current]->resetTimer();
 				outcome = _states[_current]->activate();
 				LOG << "activating: " << _states[_current]->getName() << " outcome: " << outcome;
-				if (outcome != 0) {
-					int idx = findTransition(_current, outcome);
-					if (idx != -1) {
-						activate(_transitions[idx].to);
-					}
+				int idx = findTransition(_current, outcome);
+				if (outcome != 0 && idx != -1) {
+					activate(_transitions[idx].to);
 				}
-				int idx = findTransition(_current, 0);
-				if (idx != -1 && _transitions[idx].ttl > 0.0f) {
-					LOG << "setting transient state";
-					_transient = true;
+				if (_states[_current]->getBehavior() == SB_TRANSIENT) {
 					_ttl = _transitions[idx].ttl;
-				}
-				else {
-					_transient = false;
 				}
 			}
 			else {
@@ -114,9 +106,9 @@ namespace ds {
 			if (_current != -1) {			
 				// update current state
 				int outcome = _states[_current]->update(dt);
-				if (_transient) {
-					_timer += dt;
-					if (_timer >= _ttl) {
+				if (_states[_current]->getBehavior() == SB_TRANSIENT) {
+					_states[_current]->tickTimer(dt);
+					if (_states[_current]->getTimer() >= _ttl) {
 						LOG << "timer expired";
 						int idx = findTransition(_current, outcome);
 						if (idx != -1) {
@@ -127,6 +119,12 @@ namespace ds {
 							LOG << "no next state";
 							_current = -1;
 						}
+					}
+				}
+				else if (_states[_current]->getBehavior() == SB_ONETIME) {
+					int idx = findTransition(_current, outcome);
+					if (idx != -1) {
+						activate(_transitions[idx].to);
 					}
 				}
 				if (outcome != 0) {
