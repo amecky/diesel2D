@@ -37,7 +37,7 @@ void EventStream::addHeader(uint32_t type, size_t size) {
 	LOG << "creating event - type: " << type << " size: " << size;
 	EventHeader header;
 	header.id = _mappings.size();;
-	header.size = 0;
+	header.size = size;
 	header.type = type;
 	char* data = m_Data + _index;
 	memcpy(data, &header, EVENT_HEADER_SIZE);

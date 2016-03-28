@@ -11,15 +11,7 @@ namespace ds {
 		SB_ONETIME,
 		SB_EOL
 	};
-	// -------------------------------------------------------
-	// State type
-	// -------------------------------------------------------
-	//struct StateType {
-		//const char* name;
-		//int type;
-		//StateBehavior behavior;
-	//};
-
+	
 	// -------------------------------------------------------
 	// State context
 	// -------------------------------------------------------
@@ -57,6 +49,9 @@ namespace ds {
 		void sendEvent(uint32_t type) {
 			_events->add(type);
 		}
+		void sendEvent(uint32_t type, void* data, int size) {
+			_events->add(type, data, size);
+		}
 		virtual StateBehavior getBehavior() const = 0;
 		float getTimer() const {
 			return _timer;
@@ -88,8 +83,6 @@ namespace ds {
 	// -------------------------------------------------------
 	class StateManager {
 
-		
-
 	public:
 		StateManager(StateContext* ctx) : _current(-1) , _next(-1) {
 			_context = ctx;
@@ -118,6 +111,7 @@ namespace ds {
 		}
 	private:
 		bool switchState();
+		int deactivateState(int index, bool checkOutcome = true);
 		int findTransition(int from, int outcome);
 		StateContext* _context;
 		std::map<int, State*> _states;

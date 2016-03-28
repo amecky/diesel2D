@@ -119,8 +119,8 @@ namespace ds {
 
 	void GUIDialog::setNumber(int id, int value) {
 		int idx = getIndexByID(id);
-		const GUID& gid = _ids[idx];
-		XASSERT(gid.id != -1,"No matching GUI item for %d",id);
+		XASSERT(idx != -1, "No matching GUI item for id: %d", id);
+		const GUID& gid = _ids[idx];		
 		GUINumber& number = _numbers[gid.index];
 		number.value = value;
 	}

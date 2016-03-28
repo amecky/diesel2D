@@ -52,47 +52,51 @@ namespace ds {
 		_next = mode;
 	}
 
+	int StateManager::deactivateState(int index, bool checkOutcome) {
+		if (index != -1) {
+			//LOG << "deactivating: " << _states[index]->getName();
+			int outcome = _states[index]->deactivate();
+			//LOG << "outcome: " << outcome;
+			if (outcome != 0 && checkOutcome ) {
+				return findTransition(index, outcome);
+			}
+		}
+		return -1;
+	}
+
 	// -------------------------------------------------------
 	// switch state
 	// -------------------------------------------------------
 	bool StateManager::switchState() { 
 		if (_next != -1 && _next != _current) {
+			//LOG << "switching from " << _current << " to " << _next;
 			int outcome = 0;
-			if (_current != -1) {
-				outcome = _states[_current]->deactivate();
-				LOG << "deactivating: " << _states[_current]->getName() << " outcome: " << outcome;
-				if (outcome != 0) {
-					int idx = findTransition(_current, outcome);
-					if (idx != -1) {
-						_current = _transitions[idx].to;
-					}
-					else {
-						_current = -1;
-					}
+			if (_next != -1) {
+				if (_current != -1) {
+					deactivateState(_current, false);
 				}
-				else {
-					_current = _next;
-				}
-			}
-			else {
 				_current = _next;
-			}
-			if (_current != -1) {
 				_states[_current]->resetTimer();
+				//LOG << "activating: " << _states[_current]->getName();
 				outcome = _states[_current]->activate();
-				LOG << "activating: " << _states[_current]->getName() << " outcome: " << outcome;
+				//LOG << "outcome: " << outcome;
 				int idx = findTransition(_current, outcome);
 				if (outcome != 0 && idx != -1) {
 					activate(_transitions[idx].to);
 				}
+				else {
+					_next = -1;
+				}
 				if (_states[_current]->getBehavior() == SB_TRANSIENT) {
 					_ttl = _transitions[idx].ttl;
+
 				}
+				else {
+					_ttl = 0.0f;
+				}
+				//LOG << "TTL: " << _ttl;				
+				return true;
 			}
-			else {
-				LOG << "No active state!";
-			}
-			_next = -1;
 		}
 		return false;
 	}
@@ -104,27 +108,35 @@ namespace ds {
 		_events.reset();
 		if (!switchState()) {
 			if (_current != -1) {			
-				// update current state
 				int outcome = _states[_current]->update(dt);
 				if (_states[_current]->getBehavior() == SB_TRANSIENT) {
 					_states[_current]->tickTimer(dt);
 					if (_states[_current]->getTimer() >= _ttl) {
-						LOG << "timer expired";
+						//LOG << "timer expired";
+						int ret = deactivateState(_current, true);
 						int idx = findTransition(_current, outcome);
 						if (idx != -1) {
 							StateTransition t = _transitions[idx];
 							activate(t.to);
 						}
+						else if (ret != -1) {
+							StateTransition t = _transitions[ret];
+							activate(t.to);
+						}
 						else {
-							LOG << "no next state";
+							//LOG << "no next state";
 							_current = -1;
 						}
 					}
 				}
 				else if (_states[_current]->getBehavior() == SB_ONETIME) {
+					int ret = deactivateState(_current, false);
 					int idx = findTransition(_current, outcome);
 					if (idx != -1) {
 						activate(_transitions[idx].to);
+					}
+					if (ret != -1) {
+						activate(_transitions[ret].to);
 					}
 				}
 				if (outcome != 0) {

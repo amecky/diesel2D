@@ -279,7 +279,7 @@ namespace ds {
 		Texture ret;		
 		Rect r(top, left, width, height);
 		ret.rect = r;
-		ret.uv = getTextureCoordinates(r,textureWidth,textureHeight);
+		ret.uv = getTextureCoordinates(r, textureWidth, textureHeight, useHalfTexel);
 		ret.textureID = 0;
 		ret.dim = Vector2f(width ,height);
 		ret.textureSize.x = textureWidth;
