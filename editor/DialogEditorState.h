@@ -24,6 +24,7 @@ namespace ds {
 		v2 _dialogPos;
 		int _dialogState;
 		int _offset;
+		int _dropDownState;
 		gui::InputDialog _dialog;
 		bool _showAdd;
 	};

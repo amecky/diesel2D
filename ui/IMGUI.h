@@ -147,6 +147,8 @@ namespace gui {
 
 	void DropDownBox(const char** entries,int num, int* selected, int* state);
 
+	void DropDownBox(AbstractComponentModel* model, int* state);
+
 	void Histogram(float* values, int num, float minValue, float maxValue, float step);
 
 	void Separator();
@@ -162,6 +164,9 @@ namespace gui {
 	void Value(const char* label, const v3& v);
 
 	void Value(const char* label, const ds::Color& v);
+
+	// Slider
+	void Slider(const char* label, float* v, float minValue, float maxValue, float step);
 
 	void sendKey(unsigned char c);
 

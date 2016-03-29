@@ -197,7 +197,8 @@ namespace gui {
 		ICN_HEADER_BOX,
 		ICN_PANEL_BACKGROUND,
 		ICN_BOX_BACKGROUND,
-		ICN_SEPARATOR
+		ICN_SEPARATOR,
+		ICN_STEP_INPUT
 	};
 
 	enum GUIColor {
@@ -234,7 +235,7 @@ namespace gui {
 		const char* header;
 		bool useHeader;
 		v2 startPosition;
-		ds::Texture textures[16];
+		ds::Texture textures[32];
 		ds::Color colors[16];
 		bool ready;
 		int dragging;
@@ -440,6 +441,18 @@ namespace gui {
 				}
 				return true;
 			}
+		}
+		return false;
+	}
+
+	// -------------------------------------------------------
+	// is box selected
+	// -------------------------------------------------------
+	bool isDragging(const v2& pos, const v2& size) {
+		if (guiContext->buttonPressed) {
+			v2 p = pos;
+			p.x += size.x * 0.5f;
+			return isCursorInside(p, size);
 		}
 		return false;
 	}
@@ -869,14 +882,27 @@ namespace gui {
 	void InputFloat(const char* label, float* v, float minValue, float maxValue, float step) {
 		HashedId id = HashPointer(v);
 		v2 p = guiContext->position;
+		guiContext->addText(p, label);
+		p.x += LABEL_SIZE;
+
 		guiContext->addImage(p, guiContext->textures[ICN_MINUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
 			*v -= step;			
 		}
-		float width = INPUT_BOX_WIDTH;
-		p.x += BOX_HEIGHT;
-		guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
-		p.x += INPUT_BOX_WIDTH;
+		float width = 100.0f;
+		p.x += BOX_HEIGHT + 50.0f;
+		guiContext->addImage(p, guiContext->textures[ICN_STEP_INPUT]);
+		p.x -= 50.0f;
+		if (isDragging(p, v2(100.0f, BOX_HEIGHT))) {
+			int dx = (guiContext->cursorPosition.x - p.x) / 10;
+			if (dx > 0) {
+				*v = minValue + (maxValue - minValue) / step * ((float)dx / 10.0f);
+			}
+			else {
+				*v = minValue;
+			}
+		}
+		p.x += 100.0f;
 		guiContext->addImage(p, guiContext->textures[ICN_PLUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
 			*v += step;			
@@ -887,14 +913,11 @@ namespace gui {
 		if (*v > maxValue) {
 			*v = maxValue;
 		}
-		sprintf_s(guiContext->tempBuffer, 64, "%.2f", *v);
+		sprintf_s(guiContext->tempBuffer, 64, "%g", *v);
 		v2 dim = getTextSize(guiContext->tempBuffer);
 		p = guiContext->position;
-		p.x += BOX_HEIGHT + (INPUT_BOX_WIDTH - dim.x) * 0.5f;
+		p.x += BOX_HEIGHT + (100.0f - dim.x) * 0.5f + LABEL_SIZE;
 		guiContext->addText(p, guiContext->tempBuffer);
-		p = guiContext->position;
-		p.x += INPUT_BOX_WIDTH + BOX_HEIGHT * 2.0f + 10.0f;
-		guiContext->addText(p, label);
 		guiContext->nextPosition();
 	}
 
@@ -1107,7 +1130,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// prepare drop down box
 	// -------------------------------------------------------	
-	void prepareDropDownBox(HashedId id,int max,int* selected,int* state,const char* selection) {
+	void prepareDropDownBox(HashedId id,int max,int* state,const char* selection) {
 		float width = 200.0f;
 		v2 p = guiContext->position;
 		bool hot = isHot(id, p, v2(width, BOX_HEIGHT), width * 0.5f);
@@ -1127,7 +1150,6 @@ namespace gui {
 		else {
 			guiContext->addImage(p, guiContext->textures[ICN_ARROW_DOWN], 8.0f);
 		}
-		int idx = *selected;
 		v2 tp = p;
 		tp.x += 16.0f;
 		guiContext->addText(tp, selection);
@@ -1142,13 +1164,40 @@ namespace gui {
 	// -------------------------------------------------------
 	// drop down box
 	// -------------------------------------------------------	
+	void DropDownBox(AbstractComponentModel* model, int* state) {
+		HashedId id = HashPointer("model");
+		if (!model->hasSelection()) {
+			prepareDropDownBox(id, model->size(), state, EMPTY_SELECTION);
+		}
+		else {
+			prepareDropDownBox(id, model->size(), state, model->getLabel(model->getSelection()));
+		}
+		if (*state == 1) {
+			float height = model->size() * BOX_HEIGHT;
+			v2 p = guiContext->position;
+			p.y -= BOX_HEIGHT;
+			for (size_t i = 0; i < model->size(); ++i) {
+				if (isBoxSelected(id, p, v2(200.0f, BOX_HEIGHT), false)) {
+					model->select(i);
+					*state = 0;
+				}
+				guiContext->addText(p, model->getLabel(i));
+				p.y -= BOX_HEIGHT;
+			}
+			guiContext->position.y -= height;
+			guiContext->position.y -= BOX_HEIGHT * 0.5f;
+		}
+		guiContext->nextPosition();
+	}
+
+
 	void DropDownBox(const char** entries, int num, int* selected, int* state) {
 		HashedId id = HashPointer(&entries);
 		if (*selected < 0 || *selected >= num) {
-			prepareDropDownBox(id, num, selected, state, EMPTY_SELECTION);
+			prepareDropDownBox(id, num, state, EMPTY_SELECTION);
 		}
 		else {
-			prepareDropDownBox(id, num, selected, state, entries[*selected]);
+			prepareDropDownBox(id, num, state, entries[*selected]);
 		}
 		if (*state == 1) {
 			float height = num * BOX_HEIGHT;
@@ -1175,10 +1224,10 @@ namespace gui {
 		HashedId id = HashPointer(&entries);
 		int num = entries.size();
 		if (*selected < 0 || *selected >= num) {
-			prepareDropDownBox(id, num, selected, state, EMPTY_SELECTION);
+			prepareDropDownBox(id, num, state, EMPTY_SELECTION);
 		}
 		else {
-			prepareDropDownBox(id, num, selected, state, entries[*selected]);
+			prepareDropDownBox(id, num, state, entries[*selected]);
 		}
 		if (*state == 1) {
 			float height = num * BOX_HEIGHT;
@@ -1195,6 +1244,35 @@ namespace gui {
 			guiContext->position.y -= height;
 			guiContext->position.y -= BOX_HEIGHT * 0.5f;
 		}
+		guiContext->nextPosition();
+	}
+
+	// -------------------------------------------------------
+	// Slider using steps
+	// -------------------------------------------------------
+	void Slider(const char* label, float* v, float minValue, float maxValue, float step) {
+		HashedId id = HashPointer(v);
+		v2 p = guiContext->position;
+		guiContext->addText(p, label);
+		p.x += LABEL_SIZE;
+		float width = 100.0f;
+		p.x += 50.0f;
+		guiContext->addImage(p, guiContext->textures[ICN_STEP_INPUT]);
+		p.x -= 50.0f;
+		if (isDragging(p, v2(100.0f, BOX_HEIGHT))) {
+			int dx = (guiContext->cursorPosition.x - p.x) / 10;
+			if (dx > 0) {
+				*v = minValue + (maxValue - minValue) / step * ((float)dx / 10.0f);
+			}
+			else {
+				*v = minValue;
+			}
+		}
+		sprintf_s(guiContext->tempBuffer, 64, "%g", *v);
+		v2 dim = getTextSize(guiContext->tempBuffer);
+		p = guiContext->position;
+		p.x += BOX_HEIGHT + (100.0f - dim.x) * 0.5f + LABEL_SIZE;
+		guiContext->addText(p, guiContext->tempBuffer);
 		guiContext->nextPosition();
 	}
 
@@ -1349,22 +1427,23 @@ namespace gui {
 		guiContext->hot = -1;
 		guiContext->dragging = false;
 		// some pre build icons / textures
-		guiContext->textures[ICN_ARROW_RIGHT] = ds::math::buildTexture(0.0f, 256.0f, 16.0f, 16.0f);
-		guiContext->textures[ICN_ARROW_DOWN] = ds::math::buildTexture(0.0f, 272.0f, 16.0f, 16.0f);
-		guiContext->textures[ICN_ARROW_LEFT] = ds::math::buildTexture(0.0f, 288.0f, 16.0f, 16.0f);
-		guiContext->textures[ICN_ARROW_UP] = ds::math::buildTexture(0.0f, 304.0f, 16.0f, 16.0f);
-		guiContext->textures[ICN_PLUS] = ds::math::buildTexture(0.0f, 336.0f, 16.0f, 16.0f);
-		guiContext->textures[ICN_MINUS] = ds::math::buildTexture(0.0f, 320.0f, 16.0f, 16.0f);
-		guiContext->textures[ICN_CHECKBOX] = ds::math::buildTexture(0.0f, 352.0f, 16.0f, 16.0f);
-		guiContext->textures[ICN_CHECKBOX_SELECTED] = ds::math::buildTexture(0.0f, 368.0f, 16.0f, 16.0f);
-		guiContext->textures[ICN_DRAG_BOX] = ds::math::buildTexture(0.0f, 384.0f, 16.0f, 16.0f);
-		guiContext->textures[ICN_BUTTON] = ds::math::buildTexture(105.0f, 155.0f, 150.0f, 24.0f);
-		guiContext->textures[ICN_INPUT] = ds::math::buildTexture(160.0f, 0.0f, 150.0f, BOX_HEIGHT);
-		guiContext->textures[ICN_INPUT_ACTIVE] = ds::math::buildTexture(160.0f, 160.0f, 150.0f, BOX_HEIGHT);
-		guiContext->textures[ICN_HEADER_BOX] = ds::math::buildTexture(140.0, 0.0f, 150.0f, 18.0f);
-		guiContext->textures[ICN_PANEL_BACKGROUND] = ds::math::buildTexture(30.0, 370.0f, 100.0f, 100.0f);
-		guiContext->textures[ICN_BOX_BACKGROUND] = ds::math::buildTexture(30.0f, 500.0f, 100.0f, 100.0f);
-		guiContext->textures[ICN_SEPARATOR] = ds::math::buildTexture(140.0, 0.0f, 150.0f, 2.0f);
+		guiContext->textures[ICN_ARROW_RIGHT]       = ds::math::buildTexture(  0.0f, 256.0f,  16.0f, 16.0f);
+		guiContext->textures[ICN_ARROW_DOWN]        = ds::math::buildTexture(  0.0f, 272.0f,  16.0f, 16.0f);
+		guiContext->textures[ICN_ARROW_LEFT]        = ds::math::buildTexture(  0.0f, 288.0f,  16.0f, 16.0f);
+		guiContext->textures[ICN_ARROW_UP]          = ds::math::buildTexture(  0.0f, 304.0f,  16.0f, 16.0f);
+		guiContext->textures[ICN_PLUS]              = ds::math::buildTexture( 16.0f, 238.0f,  18.0f, 18.0f);
+		guiContext->textures[ICN_MINUS]             = ds::math::buildTexture( 16.0f, 220.0f,  18.0f, 18.0f);
+		guiContext->textures[ICN_CHECKBOX]          = ds::math::buildTexture(  0.0f, 352.0f,  16.0f, 16.0f);
+		guiContext->textures[ICN_CHECKBOX_SELECTED] = ds::math::buildTexture(  0.0f, 368.0f,  16.0f, 16.0f);
+		guiContext->textures[ICN_DRAG_BOX]          = ds::math::buildTexture(  0.0f, 384.0f,  16.0f, 16.0f);
+		guiContext->textures[ICN_BUTTON]            = ds::math::buildTexture(105.0f, 155.0f, 150.0f, 24.0f);
+		guiContext->textures[ICN_INPUT]             = ds::math::buildTexture(160.0f,   0.0f, 150.0f, BOX_HEIGHT);
+		guiContext->textures[ICN_STEP_INPUT]        = ds::math::buildTexture(160.0f,  10.0f, 100.0f, BOX_HEIGHT);
+		guiContext->textures[ICN_INPUT_ACTIVE]      = ds::math::buildTexture(160.0f, 160.0f, 150.0f, BOX_HEIGHT);
+		guiContext->textures[ICN_HEADER_BOX]        = ds::math::buildTexture(140.0f,   0.0f, 150.0f, 18.0f);
+		guiContext->textures[ICN_PANEL_BACKGROUND]  = ds::math::buildTexture( 30.0f, 370.0f, 100.0f, 100.0f);
+		guiContext->textures[ICN_BOX_BACKGROUND]    = ds::math::buildTexture( 30.0f, 500.0f, 100.0f, 100.0f);
+		guiContext->textures[ICN_SEPARATOR]         = ds::math::buildTexture(140.0f,   0.0f, 150.0f, 2.0f);
 		guiContext->colors[CLR_PANEL_BACKGROUND] = ds::Color(32, 32, 32, 255);
 		guiContext->colors[CLR_PANEL_HEADER]     = ds::Color(0, 111, 204, 255);
 		guiContext->colors[CLR_INPUT]            = ds::Color(41, 46, 52, 255);

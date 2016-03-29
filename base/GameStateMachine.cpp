@@ -145,7 +145,7 @@ namespace ds {
 		ZoneTracker z("GameStateMachine::showDialog");
 		gui::start(GAMESTATE_ID,&_dialogPos);
 		if (gui::begin("GameStates", &_dialogState)) {
-			gui::ComboBox(&_model, &_offset);
+			gui::DropDownBox(&_model, &_offset);
 			if (gui::Button("Activate")) {
 				if (_model.hasSelection()) {
 					GameState* state = _model.getSelectedValue();

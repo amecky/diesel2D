@@ -22,6 +22,7 @@ namespace ds {
 		for (size_t i = 0; i < dialogs.size(); ++i) {
 			_model.add(dialogs[i].name, dialogs[i].name);
 		}
+		_dropDownState = 0;
 	}
 
 	// --------------------------------------------
@@ -31,7 +32,7 @@ namespace ds {
 		gui::start(280, &_dialogPos);
 		//if (!_model.hasSelection()) {
 			if (gui::begin("Dialogs", &_dialogState)) {
-				gui::ComboBox(&_model, &_offset);
+				gui::DropDownBox(&_model, &_dropDownState);
 				gui::beginGroup();
 				if (gui::Button("Activate")) {
 					if (_model.hasSelection()) {
