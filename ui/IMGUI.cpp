@@ -5,6 +5,7 @@
 #include "..\utils\Profiler.h"
 #include "..\DialogResources.h"
 #include "..\utils\Log.h"
+#include <stdarg.h>
 
 namespace gui {
 
@@ -18,12 +19,15 @@ namespace gui {
 	const float BOX_HEIGHT = 18.0f;
 	const float WHITE_BOX_SIZE = 256.0f;
 	const float INPUT_BOX_WIDTH = 70.0f;
+	const float LABEL_SIZE = 80.0f;
+	const char* EMPTY_SELECTION = "Please select one";
 
 	enum TilingDef {
 		TD_NONE,
 		TD_TILE_X,
 		TD_TILE_BOTH,
-		TD_TILE_Y
+		TD_TILE_Y,
+		TD_STRETCH
 	};
 
 	typedef uint32 HashedId;
@@ -81,7 +85,7 @@ namespace gui {
 			textBuffer.size = 0;
 		}
 
-		void addBox(const v2& position,const v2& size, const ds::Color& color) {
+		void addBox(const v2& position,const v2& size, const ds::Color& color, bool stretch = false) {
 			DrawCall call;
 			call.type = DCT_BOX;
 			call.color = color;
@@ -89,6 +93,9 @@ namespace gui {
 			call.position = position;
 			call.padding = 2;
 			call.tilingDef = TD_NONE;
+			if (stretch) {
+				call.tilingDef = TD_STRETCH;
+			}
 			calls.push_back(call);
 		}
 
@@ -189,7 +196,8 @@ namespace gui {
 		ICN_INPUT_ACTIVE,
 		ICN_HEADER_BOX,
 		ICN_PANEL_BACKGROUND,
-		ICN_BOX_BACKGROUND
+		ICN_BOX_BACKGROUND,
+		ICN_SEPARATOR
 	};
 
 	enum GUIColor {
@@ -255,10 +263,10 @@ namespace gui {
 			useHeader = true;
 		}
 
-		void addBox(const v2& position, const v2& size, const ds::Color& color) {
+		void addBox(const v2& position, const v2& size, const ds::Color& color, bool stretch = false) {
 			v2 p = position;
 			p.x += size.x * 0.5f;
-			window.addBox(p, size, color);
+			window.addBox(p, size, color, stretch);
 
 		}
 
@@ -323,8 +331,8 @@ namespace gui {
 	// send key
 	// -------------------------------------------------------
 	void sendKey(unsigned char c) {
-		if (guiContext->ready && guiContext->active != -1) {
-			//LOG << "received key: " << c;
+		if (guiContext->ready && guiContext->active != -1) {			
+			LOG << "received key: " << c << " (" << (int)c << ")";
 			if (guiContext->keyInput.num < 256) {
 				guiContext->keyInput.keys[guiContext->keyInput.num++] = c;
 			}
@@ -551,6 +559,7 @@ namespace gui {
 	v2 getTextSize(const char* text) {
 		return ds::font::calculateSize(*guiContext->font, text,CHAR_PADDING);
 	}
+
 	// -------------------------------------------------------
 	// Label
 	// -------------------------------------------------------
@@ -560,6 +569,58 @@ namespace gui {
 		bool hot = isHot(id,p, getTextSize(text));
 		guiContext->addText(p, text);
 		guiContext->nextPosition();
+	}
+
+	void Label(const char* text, const char* fmt, ...) {
+		v2 p = guiContext->position;
+		HashedId id = HashId(text);
+		bool hot = isHot(id, p, getTextSize(text));
+		guiContext->addText(p, text);
+		p.x += LABEL_SIZE;
+		va_list args;
+		va_start(args, fmt);
+		vsprintf(guiContext->tempBuffer, fmt, args);
+		guiContext->addText(p, guiContext->tempBuffer);
+		va_end(args);
+		guiContext->nextPosition();
+	}
+
+	// -------------------------------------------------------
+	// Value
+	// -------------------------------------------------------
+	void Value(const char* label, int v) {
+		Label(label, "%d", v);
+	}
+
+	void Value(const char* label, float v) {
+		Label(label, "%g", v);
+	}
+
+	void Value(const char* label, const v2& v) {
+		Label(label, "%g, %g", v.x,v.y);
+	}
+
+	void Value(const char* label, const v3& v) {
+		Label(label, "%g, %g, %g", v.x, v.y, v.z);
+	}
+
+	void Value(const char* label, const ds::Color& v) {
+		Label(label, "%g, %g, %g, %g", v.r, v.g, v.b, v.a);
+	}
+
+	// -------------------------------------------------------
+	// Text
+	// -------------------------------------------------------
+	void Text(const char* fmt, ...) {
+		va_list args;
+		va_start(args, fmt);
+		vsprintf(guiContext->tempBuffer, fmt, args);
+		v2 p = guiContext->position;
+		HashedId id = HashId(guiContext->tempBuffer);
+		bool hot = isHot(id, p, getTextSize(guiContext->tempBuffer));
+		guiContext->addText(p, guiContext->tempBuffer);
+		guiContext->nextPosition();
+		va_end(args);
 	}
 
 	void Header(const char* text) {
@@ -646,7 +707,7 @@ namespace gui {
 		ZoneTracker z("IMGUI::InputScalar-I");
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
-		p.x += (width + 10.0f) * index + 80.0f;
+		p.x += (width + 10.0f) * index + LABEL_SIZE;
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT),width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
 		if (selected) {			
@@ -660,7 +721,7 @@ namespace gui {
 			*v = atoi(guiContext->inputText);
 			v2 cp = p;
 			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText,guiContext->caretPos,CHAR_PADDING);
-			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f)  * index + cursorPos.x;
+			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f)  * index + cursorPos.x + LABEL_SIZE;
 			guiContext->addBox(cp, v2(2, BOX_HEIGHT - 4.0f), ds::Color(192, 0, 0, 255));
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->inputText);
@@ -680,7 +741,7 @@ namespace gui {
 		ZoneTracker z("IMGUI::InputScalar-F");
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
-		p.x += (width + 10.0f) * index + 80.0f;
+		p.x += (width + 10.0f) * index + LABEL_SIZE;
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT), width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
 		if ( selected) {
@@ -694,7 +755,7 @@ namespace gui {
 			*v = atof(guiContext->inputText);
 			v2 cp = p;
 			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
-			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x;
+			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x + LABEL_SIZE;
 			guiContext->addBox(cp, v2(2, BOX_HEIGHT - 4.0f), ds::Color(192, 0, 0, 255));
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->inputText);
@@ -715,7 +776,7 @@ namespace gui {
 		int new_id = id + 1024 * index;
 		bool ret = false;
 		v2 p = guiContext->position;
-		p.x += (width + 10.0f) * index + 80.0f;
+		p.x += (width + 10.0f) * index + LABEL_SIZE;
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT), width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
 		if (selected) {
@@ -729,7 +790,7 @@ namespace gui {
 			strncpy(v, guiContext->inputText, maxLength);
 			v2 cp = p;
 			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
-			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x;
+			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x + LABEL_SIZE;
 			guiContext->addBox(cp, v2(2, BOX_HEIGHT - 4.0f), ds::Color(192, 0, 0, 255));
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->inputText);
@@ -1044,14 +1105,12 @@ namespace gui {
 	}
 
 	// -------------------------------------------------------
-	// combo box
+	// prepare drop down box
 	// -------------------------------------------------------	
-	void DropDownBox(const ds::Array<const char*>& entries, int* selected, int* state) {
-		HashedId id = HashPointer(&entries);
-		int max = entries.size();
+	void prepareDropDownBox(HashedId id,int max,int* selected,int* state,const char* selection) {
 		float width = 200.0f;
 		v2 p = guiContext->position;
-		bool hot = isHot(id, p, v2(width, BOX_HEIGHT),width * 0.5f);
+		bool hot = isHot(id, p, v2(width, BOX_HEIGHT), width * 0.5f);
 		if (isBoxSelected(id, p, v2(width, BOX_HEIGHT))) {
 			if (*state == 0) {
 				*state = 1;
@@ -1060,42 +1119,93 @@ namespace gui {
 				guiContext->active = -1;
 				*state = 0;
 			}
-		}				
+		}
 		guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_INPUT]);
-		if (*state == 0) {					
-			guiContext->addImage(p, guiContext->textures[ICN_ARROW_LEFT],width - 10.0f);
+		if (*state == 0) {
+			guiContext->addImage(p, guiContext->textures[ICN_ARROW_RIGHT], 8.0f);
 		}
 		else {
-			guiContext->addImage(p, guiContext->textures[ICN_ARROW_DOWN],width - 10.0f);
+			guiContext->addImage(p, guiContext->textures[ICN_ARROW_DOWN], 8.0f);
 		}
 		int idx = *selected;
-		if (*selected < 0 || *selected >= entries.size()) {
-			guiContext->addText(p, "Please select one");
+		v2 tp = p;
+		tp.x += 16.0f;
+		guiContext->addText(tp, selection);
+
+		if (*state == 1) {
+			float height = max * BOX_HEIGHT;
+			p.y -= BOX_HEIGHT / 2.0f;
+			guiContext->addTiledXYBox(p, v2(width, height), guiContext->textures[ICN_BOX_BACKGROUND], 10.0f);
+		}
+	}
+
+	// -------------------------------------------------------
+	// drop down box
+	// -------------------------------------------------------	
+	void DropDownBox(const char** entries, int num, int* selected, int* state) {
+		HashedId id = HashPointer(&entries);
+		if (*selected < 0 || *selected >= num) {
+			prepareDropDownBox(id, num, selected, state, EMPTY_SELECTION);
 		}
 		else {
-			guiContext->addText(p, entries[idx]);
+			prepareDropDownBox(id, num, selected, state, entries[*selected]);
 		}
-		
-		if (*state == 1) {		
-			float height = max * BOX_HEIGHT;
-			p.y -= height / 2.0f + BOX_HEIGHT * 0.5f;
-			guiContext->addBox(p, v2(width, height), guiContext->colors[CLR_INPUT_EDIT]);
-			p = guiContext->position;
+		if (*state == 1) {
+			float height = num * BOX_HEIGHT;
+			v2 p = guiContext->position;
 			p.y -= BOX_HEIGHT;
-			for (size_t i = 0; i < max; ++i) {
-				if (isBoxSelected(id, p, v2(width, BOX_HEIGHT),false)) {
+			for (size_t i = 0; i < num; ++i) {
+				if (isBoxSelected(id, p, v2(200.0f, BOX_HEIGHT), false)) {
 					*selected = i;
-				}
-				if (*selected == i) {
-					guiContext->addBox(p, v2(width, BOX_HEIGHT), guiContext->colors[CLR_SELECTED_LINE]);
+					*state = 0;
 				}
 				guiContext->addText(p, entries[i]);
 				p.y -= BOX_HEIGHT;
 			}
 			guiContext->position.y -= height;
-			guiContext->position.y -= BOX_HEIGHT * 0.5f;			
+			guiContext->position.y -= BOX_HEIGHT * 0.5f;
 		}
 		guiContext->nextPosition();
+	}
+
+	// -------------------------------------------------------
+	// drop down box
+	// -------------------------------------------------------	
+	void DropDownBox(const ds::Array<const char*>& entries, int* selected, int* state) {
+		HashedId id = HashPointer(&entries);
+		int num = entries.size();
+		if (*selected < 0 || *selected >= num) {
+			prepareDropDownBox(id, num, selected, state, EMPTY_SELECTION);
+		}
+		else {
+			prepareDropDownBox(id, num, selected, state, entries[*selected]);
+		}
+		if (*state == 1) {
+			float height = num * BOX_HEIGHT;
+			v2 p = guiContext->position;
+			p.y -= BOX_HEIGHT;
+			for (size_t i = 0; i < num; ++i) {
+				if (isBoxSelected(id, p, v2(200.0f, BOX_HEIGHT), false)) {
+					*selected = i;
+					*state = 0;
+				}
+				guiContext->addText(p, entries[i]);
+				p.y -= BOX_HEIGHT;
+			}
+			guiContext->position.y -= height;
+			guiContext->position.y -= BOX_HEIGHT * 0.5f;
+		}
+		guiContext->nextPosition();
+	}
+
+	// -------------------------------------------------------
+	// Separator
+	// -------------------------------------------------------	
+	void Separator() {
+		v2 p = guiContext->position;
+		p.y += 8.0f;
+		guiContext->addBox(p, v2(100, 2), ds::Color(32, 32, 32, 255), true);
+		guiContext->position.y -= 6.0f;
 	}
 
 	// -------------------------------------------------------
@@ -1105,7 +1215,7 @@ namespace gui {
 		HashedId id = HashId(label);
 		v2 p = guiContext->position;
 		guiContext->addText(p, label);
-		p.x += 80.0f;
+		p.x += LABEL_SIZE;
 		if (*selected) {
 			guiContext->addImage(p, guiContext->textures[ICN_CHECKBOX_SELECTED], BOX_HEIGHT * 0.5f);			
 		}
@@ -1254,6 +1364,7 @@ namespace gui {
 		guiContext->textures[ICN_HEADER_BOX] = ds::math::buildTexture(140.0, 0.0f, 150.0f, 18.0f);
 		guiContext->textures[ICN_PANEL_BACKGROUND] = ds::math::buildTexture(30.0, 370.0f, 100.0f, 100.0f);
 		guiContext->textures[ICN_BOX_BACKGROUND] = ds::math::buildTexture(30.0f, 500.0f, 100.0f, 100.0f);
+		guiContext->textures[ICN_SEPARATOR] = ds::math::buildTexture(140.0, 0.0f, 150.0f, 2.0f);
 		guiContext->colors[CLR_PANEL_BACKGROUND] = ds::Color(32, 32, 32, 255);
 		guiContext->colors[CLR_PANEL_HEADER]     = ds::Color(0, 111, 204, 255);
 		guiContext->colors[CLR_INPUT]            = ds::Color(41, 46, 52, 255);
@@ -1375,7 +1486,15 @@ namespace gui {
 				for (int i = 0; i < win.calls.size(); ++i) {
 					const DrawCall& call = win.calls[i];
 					if (call.type == DCT_BOX) {
-						ds::sprites::draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, 1.0f, 1.0f, call.color);
+						if (call.tilingDef == TD_NONE) {
+							ds::sprites::draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, 1.0f, 1.0f, call.color);
+						}
+						else {
+							v2 cp = call.position;
+							float sx = dim.x - 20.0f;
+							cp.x += dim.x * 0.5f - 60.0f;
+							ds::sprites::draw(cp, buildBoxTexture(sx, call.size.y), 0.0f, 1.0f, 1.0f, call.color);
+						}
 					}
 					else if (call.type == DCT_TEXT) {
 						const char* text = win.textBuffer.data + call.textIndex;

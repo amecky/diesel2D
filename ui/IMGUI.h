@@ -97,15 +97,19 @@ namespace gui {
 
 	bool begin(const char* header, int* state);
 
-	void beginModal(const char* header);
-
-	void Label(const char* text);
+	void beginModal(const char* header);	
 
 	void Header(const char* text);
 
 	void beginGroup();
 
 	void endGroup();
+
+	void Text(const char* fmt, ...);
+
+	void Label(const char* text);
+
+	void Label(const char* text, const char* fmt, ...);
 
 	bool Button(const char* label);
 
@@ -141,7 +145,23 @@ namespace gui {
 
 	void DropDownBox(const ds::Array<const char*>& entries, int* selected, int* state);
 
+	void DropDownBox(const char** entries,int num, int* selected, int* state);
+
 	void Histogram(float* values, int num, float minValue, float maxValue, float step);
+
+	void Separator();
+
+	// simple value helper methods
+	// will be converted to Label(label,...)
+	void Value(const char* label, int v);
+
+	void Value(const char* label, float v);
+
+	void Value(const char* label, const v2& v);
+
+	void Value(const char* label, const v3& v);
+
+	void Value(const char* label, const ds::Color& v);
 
 	void sendKey(unsigned char c);
 

@@ -600,9 +600,9 @@ void BaseApp::sendButton(int button,int x,int y,bool down) {
 void BaseApp::sendOnChar(char ascii,unsigned int state) {
 	m_KeyStates.ascii = ascii;
 	m_KeyStates.onChar = true;
-	if (editor::isActive()) {
-		gui::sendKey(ascii);
-	}
+	//if (editor::isActive()) {
+	gui::sendKey(ascii);
+	//}
 }
 
 // -------------------------------------------------------
@@ -658,9 +658,9 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 void BaseApp::sendKeyUp(WPARAM virtualKey) {
 	m_KeyStates.keyUp = true;
 	m_KeyStates.keyReleased = virtualKey;
-	if (editor::isActive()) {
-		gui::sendSpecialKey(virtualKey);
-	}
+	//if (editor::isActive()) {
+	gui::sendSpecialKey(virtualKey);
+	//}
 }
 
 // -------------------------------------------------------

@@ -121,8 +121,7 @@ namespace sprites {
 		for (int cnt = 0; cnt < len; ++cnt) {
 			char c = text[cnt];
 			if (font->contains(c)) {
-				CharDef cd = font->getCharDef(c);
-				//padding = (cd.width + 2)  * scaleX;
+				CharDef cd = font->getCharDef(c);				
 				float dimX = cd.width * scaleX;
 				float dimY = font->charHeight * scaleY;
 				draw(v2(x + dimX * 0.5f, y + dimY * 0.5f),cd.texture, 0.0f, scaleX, scaleY, color);

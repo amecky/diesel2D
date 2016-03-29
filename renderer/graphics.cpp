@@ -224,8 +224,8 @@ namespace ds {
 			for (int i = 0; i < 4; ++i) {
 				p.x = VP_ARRAY[i * 2] * hw;
 				p.y = VP_ARRAY[i * 2 + 1] * hh;
-				renderContext->renderTargetQuad.vertices[i].x = p.x;
-				renderContext->renderTargetQuad.vertices[i].y = p.y;
+				renderContext->renderTargetQuad.vertices[i].x = p.x - 0.5f;
+				renderContext->renderTargetQuad.vertices[i].y = p.y + 0.5f;
 				renderContext->renderTargetQuad.vertices[i].z = 0.0f;
 				renderContext->renderTargetQuad.vertices[i].color = Color::WHITE;
 			}
