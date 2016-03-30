@@ -5,6 +5,12 @@
 #include "..\lib\collection_types.h"
 
 namespace gui {
+
+	enum GUISetting {
+		GS_LABELSIZE,
+		GS_LINE_HEIGHT,
+		GS_EOL
+	};
 	
 	class AbstractComponentModel {
 
@@ -153,6 +159,8 @@ namespace gui {
 
 	void Separator();
 
+	void ProgressBar(const char* label,float fraction);
+
 	// simple value helper methods
 	// will be converted to Label(label,...)
 	void Value(const char* label, int v);
@@ -164,6 +172,8 @@ namespace gui {
 	void Value(const char* label, const v3& v);
 
 	void Value(const char* label, const ds::Color& v);
+
+	void Image(const char* label, const ds::Rect& r, int textureID, const ds::Color& clr = ds::Color::WHITE);
 
 	// Slider
 	void Slider(const char* label, float* v, float minValue, float maxValue, float step);
@@ -179,6 +189,11 @@ namespace gui {
 	void shutdown();
 
 	void endFrame();
+
+	// gui settings
+	void PushSetting(GUISetting setting, float value);
+
+	void PopSetting(GUISetting setting);
 
 	class InputDialog {
 

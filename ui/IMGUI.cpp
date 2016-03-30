@@ -13,14 +13,19 @@ namespace gui {
 	const float TEXTFIELD_HEIGHT = 16.0f;
 	const float TEXT_PADDING = 4.0f;
 	const float BUTTON_PADDING = 20.0f;
-	const float LINE_HEIGHT = 26.0f;
+	//const float LINE_HEIGHT = 26.0f;
 	const float TEXT_OFFSET = 7.0f;
 	const int CHAR_PADDING = 0;
 	const float BOX_HEIGHT = 18.0f;
 	const float WHITE_BOX_SIZE = 256.0f;
 	const float INPUT_BOX_WIDTH = 70.0f;
-	const float LABEL_SIZE = 80.0f;
+	//const float LABEL_SIZE = 80.0f;
 	const char* EMPTY_SELECTION = "Please select one";
+
+	struct SettingBackup {
+		GUISetting setting;
+		float value;
+	};
 
 	enum TilingDef {
 		TD_NONE,
@@ -48,11 +53,41 @@ namespace gui {
 		return hash;
 	}
 
+	bool getClipboardText(char* buffer,int max) {
+		// Try opening the clipboard
+		if (!OpenClipboard(nullptr)) {
+			return false;
+		}
+			
+
+		// Get handle of clipboard object for ANSI text
+		HANDLE hData = GetClipboardData(CF_TEXT);
+		if (hData == nullptr) {
+			return false;
+		}
+		// Lock the handle to get the actual text pointer
+		char * pszText = static_cast<char*>(GlobalLock(hData));
+		if (pszText == nullptr) {
+			return false;
+		}
+		// Save text in a string class instance
+		sprintf_s(buffer, max, pszText);
+
+		// Release the lock
+		GlobalUnlock(hData);
+
+		// Release the clipboard
+		CloseClipboard();
+
+		return true;
+	}
+
 	enum DrawCallType {
 		DCT_BOX,
 		DCT_IMAGE,
 		DCT_TEXT,
 		DCT_HEADER,
+		DCT_EXTERNAL_IMAGE,
 		DCT_EOL
 	};
 	// -------------------------------------------------------
@@ -137,6 +172,19 @@ namespace gui {
 			calls.push_back(call);
 		}
 
+		void addExternalImage(const v2& position, const ds::Texture& texture, int textureID,const ds::Color& clr = ds::Color::WHITE) {
+			DrawCall call;
+			call.type = DCT_EXTERNAL_IMAGE;
+			call.color = clr;
+			call.size = v2(1,1);
+			call.position = position;
+			call.texture = texture;
+			call.padding = 1;
+			call.additional = textureID;
+			call.tilingDef = TD_NONE;
+			calls.push_back(call);
+		}
+
 		void addText(const v2& position,const char* text, const v2& size) {
 			DrawCall call;
 			call.type = DCT_TEXT;
@@ -209,7 +257,8 @@ namespace gui {
 		CLR_BUTTON,
 		CLR_BUTTON_HOVER,
 		CLR_SELECTED_LINE,
-		CLR_SLIDER
+		CLR_SLIDER,
+		CLR_PROGRESS
 	};
 
 	// -------------------------------------------------------
@@ -243,6 +292,8 @@ namespace gui {
 		char tempBuffer[64];
 		bool editorMode;
 		bool modal;
+		float settings[32];
+		float backup[32];
 
 		GUIContext() {
 			textureID = -1;
@@ -251,6 +302,8 @@ namespace gui {
 			keyInput.num = 0;
 			modal = false;
 			useHeader = true;
+			settings[GS_LABELSIZE] = 80.0f;
+			settings[GS_LINE_HEIGHT] = 26.0f;
 		}
 
 		void reset() {
@@ -292,6 +345,11 @@ namespace gui {
 			window.addImage(p, texture);
 		}
 
+		void addExternalImage(const v2& position, const ds::Texture& texture, int textureID, const ds::Color& clr) {
+			v2 p = position;
+			window.addExternalImage(p, texture, textureID, clr);
+		}
+
 		void addText(const v2& position, const char* text) {
 			v2 size = ds::font::calculateSize(*font, text, CHAR_PADDING);
 			v2 p = position;
@@ -310,7 +368,11 @@ namespace gui {
 			window.addText(position, text, size);
 		}
 
-		void nextPosition(float height = LINE_HEIGHT) {
+		void nextPosition() {
+			nextPosition(settings[GS_LINE_HEIGHT]);			
+		}
+
+		void nextPosition(float height) {
 			if (!grouped) {
 				position.y -= height;
 				position.x = startPosition.x;				
@@ -397,7 +459,7 @@ namespace gui {
 	// -------------------------------------------------------
 	void endGroup() {
 		guiContext->grouped = false;
-		guiContext->nextPosition(LINE_HEIGHT + 4.0f);
+		guiContext->nextPosition(guiContext->settings[GS_LINE_HEIGHT] + 4.0f);
 	}
 
 	// -------------------------------------------------------
@@ -589,7 +651,7 @@ namespace gui {
 		HashedId id = HashId(text);
 		bool hot = isHot(id, p, getTextSize(text));
 		guiContext->addText(p, text);
-		p.x += LABEL_SIZE;
+		p.x += guiContext->settings[GS_LABELSIZE];
 		va_list args;
 		va_start(args, fmt);
 		vsprintf(guiContext->tempBuffer, fmt, args);
@@ -684,6 +746,14 @@ namespace gui {
 					guiContext->active = -1;
 					ret = true;
 				}
+				else if (guiContext->keyInput.keys[i] == 22) {
+					char buffer[128];
+					if (getClipboardText(buffer, 128)) {
+						strcpy(guiContext->inputText, buffer);
+						len = strlen(guiContext->inputText);
+						guiContext->caretPos = len;
+					}
+				}
 				else if (guiContext->keyInput.keys[i] == 134) {
 					if (len > 0) {
 						if (guiContext->caretPos < len) {							
@@ -720,7 +790,7 @@ namespace gui {
 		ZoneTracker z("IMGUI::InputScalar-I");
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
-		p.x += (width + 10.0f) * index + LABEL_SIZE;
+		p.x += (width + 10.0f) * index + guiContext->settings[GS_LABELSIZE];
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT),width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
 		if (selected) {			
@@ -734,7 +804,7 @@ namespace gui {
 			*v = atoi(guiContext->inputText);
 			v2 cp = p;
 			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText,guiContext->caretPos,CHAR_PADDING);
-			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f)  * index + cursorPos.x + LABEL_SIZE;
+			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f)  * index + cursorPos.x + guiContext->settings[GS_LABELSIZE];
 			guiContext->addBox(cp, v2(2, BOX_HEIGHT - 4.0f), ds::Color(192, 0, 0, 255));
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->inputText);
@@ -754,7 +824,7 @@ namespace gui {
 		ZoneTracker z("IMGUI::InputScalar-F");
 		int new_id = id + 1024 * index;
 		v2 p = guiContext->position;
-		p.x += (width + 10.0f) * index + LABEL_SIZE;
+		p.x += (width + 10.0f) * index + guiContext->settings[GS_LABELSIZE];
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT), width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
 		if ( selected) {
@@ -768,7 +838,7 @@ namespace gui {
 			*v = atof(guiContext->inputText);
 			v2 cp = p;
 			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
-			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x + LABEL_SIZE;
+			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x + guiContext->settings[GS_LABELSIZE];
 			guiContext->addBox(cp, v2(2, BOX_HEIGHT - 4.0f), ds::Color(192, 0, 0, 255));
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->inputText);
@@ -789,7 +859,7 @@ namespace gui {
 		int new_id = id + 1024 * index;
 		bool ret = false;
 		v2 p = guiContext->position;
-		p.x += (width + 10.0f) * index + LABEL_SIZE;
+		p.x += (width + 10.0f) * index + guiContext->settings[GS_LABELSIZE];
 		bool hot = isHot(new_id, p, v2(width, BOX_HEIGHT), width * 0.5f);
 		bool selected = isBoxSelected(new_id, p, v2(width, BOX_HEIGHT));
 		if (selected) {
@@ -803,7 +873,7 @@ namespace gui {
 			strncpy(v, guiContext->inputText, maxLength);
 			v2 cp = p;
 			v2 cursorPos = ds::font::calculateLimitedSize(*guiContext->font, guiContext->inputText, guiContext->caretPos, CHAR_PADDING);
-			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x + LABEL_SIZE;
+			cp.x = guiContext->position.x + TEXT_PADDING + (width + 10.0f) * index + cursorPos.x + guiContext->settings[GS_LABELSIZE];
 			guiContext->addBox(cp, v2(2, BOX_HEIGHT - 4.0f), ds::Color(192, 0, 0, 255));
 			p.y -= 1.0f;
 			guiContext->addText(p, guiContext->inputText);
@@ -883,7 +953,7 @@ namespace gui {
 		HashedId id = HashPointer(v);
 		v2 p = guiContext->position;
 		guiContext->addText(p, label);
-		p.x += LABEL_SIZE;
+		p.x += guiContext->settings[GS_LABELSIZE];
 
 		guiContext->addImage(p, guiContext->textures[ICN_MINUS], BOX_HEIGHT*0.5f);
 		if (isBoxSelected(id, p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
@@ -916,7 +986,7 @@ namespace gui {
 		sprintf_s(guiContext->tempBuffer, 64, "%g", *v);
 		v2 dim = getTextSize(guiContext->tempBuffer);
 		p = guiContext->position;
-		p.x += BOX_HEIGHT + (100.0f - dim.x) * 0.5f + LABEL_SIZE;
+		p.x += BOX_HEIGHT + (100.0f - dim.x) * 0.5f + guiContext->settings[GS_LABELSIZE];
 		guiContext->addText(p, guiContext->tempBuffer);
 		guiContext->nextPosition();
 	}
@@ -984,7 +1054,7 @@ namespace gui {
 		InputScalar(hash, 2, &b, 40.0f);
 		InputScalar(hash, 3, &a, 40.0f);
 		*v = ds::Color(r, g, b, a);
-		p.x += 290.0f;
+		p.x += guiContext->settings[GS_LABELSIZE] + 200.0f;
 		guiContext->addBox(p, v2(BOX_HEIGHT, BOX_HEIGHT), *v);
 		guiContext->nextPosition();
 	}
@@ -1248,13 +1318,42 @@ namespace gui {
 	}
 
 	// -------------------------------------------------------
+	// Progress bar
+	// -------------------------------------------------------
+	void ProgressBar(const char* label, float fraction) {
+		HashedId id = HashPointer(label);
+		// cut off 2px at each side for the border
+		float sx = fraction - 4.0f;
+		if (sx < 0.0f) {
+			sx = 0.0f;
+		}
+		if (sx > 100.0f) {
+			sx = 100.0f;
+		}
+		v2 p = guiContext->position;
+		guiContext->addText(p, label);
+		p.x += guiContext->settings[GS_LABELSIZE];
+		float width = 100.0f;
+		p.x += 50.0f;
+		guiContext->addImage(p, guiContext->textures[ICN_STEP_INPUT]);
+		p.x -= 48.0f;
+		guiContext->addBox(p, v2(sx, 14.0f), guiContext->colors[CLR_PROGRESS]);
+		sprintf_s(guiContext->tempBuffer, 64, "%g%%", fraction);
+		v2 dim = getTextSize(guiContext->tempBuffer);
+		p = guiContext->position;
+		p.x += (100.0f - dim.x) * 0.5f + guiContext->settings[GS_LABELSIZE];
+		guiContext->addText(p, guiContext->tempBuffer);
+		guiContext->nextPosition();
+	}
+
+	// -------------------------------------------------------
 	// Slider using steps
 	// -------------------------------------------------------
 	void Slider(const char* label, float* v, float minValue, float maxValue, float step) {
 		HashedId id = HashPointer(v);
 		v2 p = guiContext->position;
 		guiContext->addText(p, label);
-		p.x += LABEL_SIZE;
+		p.x += guiContext->settings[GS_LABELSIZE];
 		float width = 100.0f;
 		p.x += 50.0f;
 		guiContext->addImage(p, guiContext->textures[ICN_STEP_INPUT]);
@@ -1271,7 +1370,7 @@ namespace gui {
 		sprintf_s(guiContext->tempBuffer, 64, "%g", *v);
 		v2 dim = getTextSize(guiContext->tempBuffer);
 		p = guiContext->position;
-		p.x += BOX_HEIGHT + (100.0f - dim.x) * 0.5f + LABEL_SIZE;
+		p.x += (100.0f - dim.x) * 0.5f + guiContext->settings[GS_LABELSIZE];
 		guiContext->addText(p, guiContext->tempBuffer);
 		guiContext->nextPosition();
 	}
@@ -1293,7 +1392,7 @@ namespace gui {
 		HashedId id = HashId(label);
 		v2 p = guiContext->position;
 		guiContext->addText(p, label);
-		p.x += LABEL_SIZE;
+		p.x += guiContext->settings[GS_LABELSIZE];
 		if (*selected) {
 			guiContext->addImage(p, guiContext->textures[ICN_CHECKBOX_SELECTED], BOX_HEIGHT * 0.5f);			
 		}
@@ -1310,6 +1409,18 @@ namespace gui {
 	}
 	
 	// -------------------------------------------------------
+	// Image
+	// -------------------------------------------------------	
+	void Image(const char* label, const ds::Rect& r, int textureID, const ds::Color& clr) {
+		v2 p = guiContext->position;
+		guiContext->addText(p, label);
+		p.x += guiContext->settings[GS_LABELSIZE] + r.width() * 0.5f;
+		p.y -= r.height() * 0.5f;
+		guiContext->addExternalImage(p, ds::math::buildTexture(r), textureID, clr);
+		guiContext->nextPosition(r.height() + guiContext->settings[GS_LINE_HEIGHT]);
+	}
+
+	// -------------------------------------------------------
 	// button
 	// -------------------------------------------------------	
 	bool Button(const char* label) {
@@ -1321,7 +1432,7 @@ namespace gui {
 		guiContext->addTiledXBox(p, width, guiContext->textures[ICN_BUTTON], BUTTON_HEIGHT);
 		p.x = guiContext->position.x + (width - textDim.x) / 2.0f;
 		guiContext->addText(p,label, textDim);
-		guiContext->nextPosition(LINE_HEIGHT + 4.0f);
+		guiContext->nextPosition(guiContext->settings[GS_LINE_HEIGHT] + 4.0f);
 		return isBoxSelected(id, p, v2(width, BUTTON_HEIGHT));
 	}
 
@@ -1385,6 +1496,15 @@ namespace gui {
 		guiContext->nextPosition();
 	}
 
+	void PushSetting(GUISetting setting, float value) {
+		guiContext->backup[setting] = guiContext->settings[setting];
+		guiContext->settings[setting] = value;
+	}
+
+	void PopSetting(GUISetting setting) {
+		guiContext->settings[setting] = guiContext->backup[setting];
+	}
+
 	// -------------------------------------------------------
 	// intialize gui
 	// -------------------------------------------------------	
@@ -1395,18 +1515,6 @@ namespace gui {
 		assert(guiContext->textureID != -1);
 		guiContext->font = ds::renderer::createBitmapFont("gui_font", guiContext->textureID);
 		ds::FontDefinition fdf;
-		/*
-		fdf.startChar = 32;
-		fdf.endChar = 128;
-		fdf.width = 222;
-		fdf.height = 104;
-		fdf.padding = 1;
-		fdf.textureSize = 512.0f;
-		fdf.charHeight = 14;
-		fdf.startX = 0;
-		fdf.startY = 0;
-		fdf.gridHeight = 16;
-		*/
 		fdf.startChar = 32;
 		fdf.endChar = 128;
 		fdf.width = 209;
@@ -1438,20 +1546,21 @@ namespace gui {
 		guiContext->textures[ICN_DRAG_BOX]          = ds::math::buildTexture(  0.0f, 384.0f,  16.0f, 16.0f);
 		guiContext->textures[ICN_BUTTON]            = ds::math::buildTexture(105.0f, 155.0f, 150.0f, 24.0f);
 		guiContext->textures[ICN_INPUT]             = ds::math::buildTexture(160.0f,   0.0f, 150.0f, BOX_HEIGHT);
-		guiContext->textures[ICN_STEP_INPUT]        = ds::math::buildTexture(160.0f,  10.0f, 100.0f, BOX_HEIGHT);
+		guiContext->textures[ICN_STEP_INPUT]        = ds::math::buildTexture( 40.0f, 220.0f, 100.0f, BOX_HEIGHT);
 		guiContext->textures[ICN_INPUT_ACTIVE]      = ds::math::buildTexture(160.0f, 160.0f, 150.0f, BOX_HEIGHT);
 		guiContext->textures[ICN_HEADER_BOX]        = ds::math::buildTexture(140.0f,   0.0f, 150.0f, 18.0f);
 		guiContext->textures[ICN_PANEL_BACKGROUND]  = ds::math::buildTexture( 30.0f, 370.0f, 100.0f, 100.0f);
 		guiContext->textures[ICN_BOX_BACKGROUND]    = ds::math::buildTexture( 30.0f, 500.0f, 100.0f, 100.0f);
 		guiContext->textures[ICN_SEPARATOR]         = ds::math::buildTexture(140.0f,   0.0f, 150.0f, 2.0f);
-		guiContext->colors[CLR_PANEL_BACKGROUND] = ds::Color(32, 32, 32, 255);
-		guiContext->colors[CLR_PANEL_HEADER]     = ds::Color(0, 111, 204, 255);
-		guiContext->colors[CLR_INPUT]            = ds::Color(41, 46, 52, 255);
+		guiContext->colors[CLR_PANEL_BACKGROUND] = ds::Color( 32,  32,  32, 255);
+		guiContext->colors[CLR_PANEL_HEADER]     = ds::Color(  0, 111, 204, 255);
+		guiContext->colors[CLR_INPUT]            = ds::Color( 41,  46,  52, 255);
 		guiContext->colors[CLR_INPUT_EDIT]       = ds::Color(128, 128, 128, 255);
-		guiContext->colors[CLR_BUTTON]           = ds::Color(89, 101, 117, 255);
-		guiContext->colors[CLR_BUTTON_HOVER]     = ds::Color(66, 76, 88, 255);
-		guiContext->colors[CLR_SELECTED_LINE]    = ds::Color(128, 0, 128, 255);
-		guiContext->colors[CLR_SLIDER]           = ds::Color(48, 48, 48, 255);
+		guiContext->colors[CLR_BUTTON]           = ds::Color( 89, 101, 117, 255);
+		guiContext->colors[CLR_BUTTON_HOVER]     = ds::Color( 66,  76,  88, 255);
+		guiContext->colors[CLR_SELECTED_LINE]    = ds::Color(128,   0, 128, 255);
+		guiContext->colors[CLR_SLIDER]           = ds::Color( 48,  48,  48, 255);
+		guiContext->colors[CLR_PROGRESS]         = ds::Color(140,   7,   7, 255);
 
 		guiContext->editorMode = editorMode;
 		guiContext->ready = true;
@@ -1599,6 +1708,12 @@ namespace gui {
 						p.x += 20.0f;
 						const char* text = win.textBuffer.data + call.textIndex;
 						ds::sprites::drawText(guiContext->font, p.x, p.y, text, call.padding);
+					}
+					else if (call.type == DCT_EXTERNAL_IMAGE) {
+						int current = ds::sprites::getCurrentTextureID();
+						ds::sprites::setTexture((int)call.additional);
+						ds::sprites::draw(call.position, call.texture, 0.0f, 1.0f, 1.0f, call.color);
+						ds::sprites::setTexture(current);
 					}
 				}
 				
