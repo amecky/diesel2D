@@ -176,7 +176,7 @@ namespace gui {
 			DrawCall call;
 			call.type = DCT_EXTERNAL_IMAGE;
 			call.color = clr;
-			call.size = v2(1,1);
+			call.size = texture.dim;
 			call.position = position;
 			call.texture = texture;
 			call.padding = 1;
@@ -258,7 +258,8 @@ namespace gui {
 		CLR_BUTTON_HOVER,
 		CLR_SELECTED_LINE,
 		CLR_SLIDER,
-		CLR_PROGRESS
+		CLR_PROGRESS,
+		CLR_IMAGE_BACKGROUND
 	};
 
 	// -------------------------------------------------------
@@ -1414,10 +1415,16 @@ namespace gui {
 	void Image(const char* label, const ds::Rect& r, int textureID, const ds::Color& clr) {
 		v2 p = guiContext->position;
 		guiContext->addText(p, label);
-		p.x += guiContext->settings[GS_LABELSIZE] + r.width() * 0.5f;
+		v2 size = v2(r.width(), r.height());
+		size += v2(4, 4);
+		p.x += guiContext->settings[GS_LABELSIZE];		
 		p.y -= r.height() * 0.5f;
+		p += v2(-2, 0);
+		guiContext->addBox(p, size, guiContext->colors[CLR_IMAGE_BACKGROUND]);		
+		p.x += r.width() * 0.5f;
+		p += v2(2, 0);
 		guiContext->addExternalImage(p, ds::math::buildTexture(r), textureID, clr);
-		guiContext->nextPosition(r.height() + guiContext->settings[GS_LINE_HEIGHT]);
+		guiContext->nextPosition(size.y + guiContext->settings[GS_LINE_HEIGHT]);
 	}
 
 	// -------------------------------------------------------
@@ -1561,6 +1568,7 @@ namespace gui {
 		guiContext->colors[CLR_SELECTED_LINE]    = ds::Color(128,   0, 128, 255);
 		guiContext->colors[CLR_SLIDER]           = ds::Color( 48,  48,  48, 255);
 		guiContext->colors[CLR_PROGRESS]         = ds::Color(140,   7,   7, 255);
+		guiContext->colors[CLR_IMAGE_BACKGROUND] = ds::Color(  8,   8,   8, 255);
 
 		guiContext->editorMode = editorMode;
 		guiContext->ready = true;

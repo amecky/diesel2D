@@ -13,7 +13,6 @@
 #include "..\particles\ParticleManager.h"
 #include "..\editor\DialogEditorState.h"
 #include "..\editor\SpriteTemplatesEditor.h"
-#include "..\editor\SpriteTemplatesState.h"
 #include "..\editor\ParticlesEditState.h"
 #include "..\io\FileRepository.h"
 #include "..\memory\DefaultAllocator.h"
