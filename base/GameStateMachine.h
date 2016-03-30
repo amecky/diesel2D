@@ -31,6 +31,7 @@ public:
 	void add(GameState* gameState);
 	void initializeStates();
 	void activate(const char* name);
+	void deactivate(const char* name);
 	bool contains(const char* name) const;
 	void update(float dt);
 	void render();

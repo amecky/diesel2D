@@ -22,6 +22,7 @@ namespace ds {
 		int _state;
 		gui::ComponentModel<int> _model;
 		int _offset;
+		int _colorState;
 		gui::InputDialog _dialog;
 		v2 _position;
 	};

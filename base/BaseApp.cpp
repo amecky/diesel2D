@@ -742,6 +742,14 @@ void BaseApp::activate(const char* name) {
 }
 
 // -------------------------------------------------------
+// deactivate game state
+// -------------------------------------------------------
+void BaseApp::deactivate(const char* name) {
+	_stateMachine->deactivate(name);
+}
+
+
+// -------------------------------------------------------
 // connect game states
 // -------------------------------------------------------
 void BaseApp::connectGameStates(const char* firstStateName, int outcome, const char* secondStateName) {

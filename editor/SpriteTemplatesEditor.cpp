@@ -9,6 +9,7 @@ namespace ds {
 		_offset = 0;
 		_state = 1;
 		_position = v2(20, 710);
+		_colorState = 0;
 	}
 
 
@@ -40,15 +41,17 @@ namespace ds {
 				int entry = _model.getSelectedValue();
 				Sprite& sprite = _templates->get(entry);
 				ds::Rect r = sprite.texture.rect;
+				gui::PushSetting(gui::GS_LABELSIZE, 100.0f);
 				gui::InputInt("Texture_id", &sprite.texture.textureID);
 				gui::InputVec2("Position", &sprite.position);
-				gui::InputRect("TextureRect", &r);
+				gui::InputRect("Texture", &r);
 				gui::InputVec2("Scale", &sprite.scale);
 				gui::InputFloat("Rotation", &sprite.rotation);
-				gui::InputColor("Color", &sprite.color);
+				gui::ColorSlider("Color", &sprite.color, &_colorState);
 				gui::InputInt("Type", &sprite.type);
 				gui::Image("Sprite", r, sprite.texture.textureID, sprite.color);
 				sprite.texture = math::buildTexture(r);
+				gui::PopSetting(gui::GS_LABELSIZE);
 			}
 			gui::end();
 		}
@@ -60,5 +63,6 @@ namespace ds {
 		for (size_t i = 0; i < map.size(); ++i) {
 			_model.add(map[i].name, map[i].sprite.id);
 		}
+		_colorState = 0;
 	}
 }

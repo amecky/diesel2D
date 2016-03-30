@@ -36,6 +36,15 @@ namespace ds {
 		}
 	}
 
+	void GameStateMachine::deactivate(const char* name) {
+		int idx = find(name);
+		XASSERT(idx != -1, "Cannot find matching gamestate for %s", name);
+		if (idx != -1) {
+			_gameStates[idx]->deactivate();
+			_activeState = 0;
+		}
+	}
+
 	bool GameStateMachine::contains(const char* name) const {
 		return find(name) != -1;
 	}

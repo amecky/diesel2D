@@ -145,6 +145,8 @@ namespace gui {
 
 	void InputColor(const char* label, ds::Color* v);
 
+	void ColorSlider(const char* label, ds::Color* v,int* state);
+
 	void ComboBox(const ds::Array<const char*>& entries, int* selected, int *offset, int max = 5);
 
 	void ComboBox(AbstractComponentModel* model,int *offset,int max = 5);

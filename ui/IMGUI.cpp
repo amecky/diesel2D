@@ -246,7 +246,9 @@ namespace gui {
 		ICN_PANEL_BACKGROUND,
 		ICN_BOX_BACKGROUND,
 		ICN_SEPARATOR,
-		ICN_STEP_INPUT
+		ICN_STEP_INPUT,
+		ICN_STEP_INPUT_SMALL,
+		ICN_COLOR_SLIDER
 	};
 
 	enum GUIColor {
@@ -487,6 +489,16 @@ namespace gui {
 			}
 			return true;
 		}		
+		return false;
+	}
+
+	// -------------------------------------------------------
+	// handle mouse interaction
+	// -------------------------------------------------------
+	bool isClicked(const v2& pos, const v2& size) {
+		if (guiContext->clicked && isCursorInside(pos, size)) {
+			return true;
+		}
 		return false;
 	}
 
@@ -1350,6 +1362,82 @@ namespace gui {
 	// -------------------------------------------------------
 	// Slider using steps
 	// -------------------------------------------------------
+	void Slider(const v2& pos,int* v, int minValue, int maxValue, int step = 1,const char* prefix = NULL) {
+		float width = 255.0f;
+		v2 p = pos;
+		p.x += width * 0.5f;
+		guiContext->addImage(p, guiContext->textures[ICN_COLOR_SLIDER]);
+		p.x -= width * 0.5f;
+		if (isDragging(p, v2(width, BOX_HEIGHT))) {
+			int dx = (guiContext->cursorPosition.x - p.x);
+			if (dx > 0) {
+				*v = minValue + (maxValue - minValue) / 255 * dx;
+			}
+			else {
+				*v = minValue;
+			}
+		}
+		if (*v < minValue) {
+			*v = minValue;
+		}
+		if (*v > maxValue) {
+			*v = maxValue;
+		}
+		if (prefix != NULL) {
+			sprintf_s(guiContext->tempBuffer, 64, "%s %d", prefix, *v);
+		}
+		else {
+			sprintf_s(guiContext->tempBuffer, 64, "%d", *v);
+		}
+		v2 dim = getTextSize(guiContext->tempBuffer);
+		p = pos;
+		p.x += (width - dim.x) * 0.5f;
+		guiContext->addText(p, guiContext->tempBuffer);
+	}
+
+	// -------------------------------------------------------
+	// input color
+	// -------------------------------------------------------
+	void ColorSlider(const char* label, ds::Color* v,int* state) {
+		static char* PREFIXES[] = { "r:", "g:", "b:", "a:" };
+		int colors[4];
+		colors[0] = v->r * 255.0f;
+		colors[1] = v->g * 255.0f;
+		colors[2] = v->b * 255.0f;
+		colors[3] = v->a * 255.0f;
+		v2 p = guiContext->position;
+		guiContext->addText(p, label);
+		p.x += guiContext->settings[GS_LABELSIZE];
+		guiContext->addBox(p, v2(BOX_HEIGHT, BOX_HEIGHT), *v);
+		p.x += BOX_HEIGHT * 1.5f;
+		if (isClicked(p, v2(BOX_HEIGHT, BOX_HEIGHT))) {
+			if (*state == 0) {
+				*state = 1;
+			}
+			else {
+				*state = 0;
+			}
+		}
+		if (*state == 0) {
+			guiContext->addImage(p, guiContext->textures[ICN_ARROW_LEFT], 8.0f);
+			guiContext->nextPosition();
+		}
+		else {
+			guiContext->addImage(p, guiContext->textures[ICN_ARROW_DOWN], 8.0f);
+			p.y -= 20.0f;
+			p.x = guiContext->position.x;
+			for (int i = 0; i < 4; ++i) {
+				Slider(p, &colors[i], 0, 255, 1, PREFIXES[i]);
+				p.y -= 20.0f;
+			}
+			p.x += 80.0f;
+			guiContext->nextPosition(80.0f + guiContext->settings[GS_LINE_HEIGHT]);
+		}
+		*v = ds::Color(colors[0], colors[1], colors[2], colors[3]);
+		
+	}
+
+
 	void Slider(const char* label, float* v, float minValue, float maxValue, float step) {
 		HashedId id = HashPointer(v);
 		v2 p = guiContext->position;
@@ -1358,7 +1446,7 @@ namespace gui {
 		float width = 100.0f;
 		p.x += 50.0f;
 		guiContext->addImage(p, guiContext->textures[ICN_STEP_INPUT]);
-		p.x -= 50.0f;
+		p.x -= 55.0f;
 		if (isDragging(p, v2(100.0f, BOX_HEIGHT))) {
 			int dx = (guiContext->cursorPosition.x - p.x) / 10;
 			if (dx > 0) {
@@ -1559,6 +1647,9 @@ namespace gui {
 		guiContext->textures[ICN_PANEL_BACKGROUND]  = ds::math::buildTexture( 30.0f, 370.0f, 100.0f, 100.0f);
 		guiContext->textures[ICN_BOX_BACKGROUND]    = ds::math::buildTexture( 30.0f, 500.0f, 100.0f, 100.0f);
 		guiContext->textures[ICN_SEPARATOR]         = ds::math::buildTexture(140.0f,   0.0f, 150.0f, 2.0f);
+		guiContext->textures[ICN_STEP_INPUT_SMALL]  = ds::math::buildTexture( 60.0f, 220.0f,  50.0f, BOX_HEIGHT);
+		guiContext->textures[ICN_COLOR_SLIDER]      = ds::math::buildTexture(140.0f, 160.0f, 255.0f, BOX_HEIGHT);
+		
 		guiContext->colors[CLR_PANEL_BACKGROUND] = ds::Color( 32,  32,  32, 255);
 		guiContext->colors[CLR_PANEL_HEADER]     = ds::Color(  0, 111, 204, 255);
 		guiContext->colors[CLR_INPUT]            = ds::Color( 41,  46,  52, 255);

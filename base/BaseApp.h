@@ -112,6 +112,7 @@ public:
 
 	void addGameState(GameState* gameState);
 	void activate(const char* name);
+	void deactivate(const char* name);
 	void connectGameStates(const char* firstStateName, int outcome, const char* secondStateName);
 	void get(const HTTPRequest& request, HTTPResponse* response);
 	void saveReport();
