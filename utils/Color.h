@@ -14,6 +14,18 @@ public:
 	Color(float rc,float gc,float bc);
 	Color(float rc,float gc,float bc,float ac);
 	Color(const D3DCOLORVALUE& v);
+	Color(float* values) {
+		r = values[0];
+		g = values[1];
+		b = values[2];
+		a = values[3];
+	}
+	Color(int* values) {
+		r = (float)values[0] / 255.0f;
+		g = (float)values[1] / 255.0f;
+		b = (float)values[2] / 255.0f;
+		a = (float)values[3] / 255.0f;
+	}
 	// static constants
 	static const Color WHITE;
 	static const Color BLACK;

@@ -1419,11 +1419,11 @@ namespace gui {
 			}
 		}
 		if (*state == 0) {
-			guiContext->addImage(p, guiContext->textures[ICN_ARROW_LEFT], 8.0f);
+			guiContext->addImage(p, guiContext->textures[ICN_ARROW_LEFT]);
 			guiContext->nextPosition();
 		}
 		else {
-			guiContext->addImage(p, guiContext->textures[ICN_ARROW_DOWN], 8.0f);
+			guiContext->addImage(p, guiContext->textures[ICN_ARROW_DOWN]);
 			p.y -= 20.0f;
 			p.x = guiContext->position.x;
 			for (int i = 0; i < 4; ++i) {
@@ -1433,7 +1433,7 @@ namespace gui {
 			p.x += 80.0f;
 			guiContext->nextPosition(80.0f + guiContext->settings[GS_LINE_HEIGHT]);
 		}
-		*v = ds::Color(colors[0], colors[1], colors[2], colors[3]);
+		*v = ds::Color(colors);
 		
 	}
 
