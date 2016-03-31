@@ -209,47 +209,47 @@ namespace sprites {
 		ds::Texture tex = math::buildTexture(texture.rect.top, texture.rect.left, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x - cw * 0.5f - hcz;
 		p.y = center.y + ch * 0.5f + hcz;
-		draw(p, tex);
+		draw(p, tex, 0.0f, 1.0f, 1.0f, color);
 		// right top corner
 		tex = math::buildTexture(texture.rect.top, texture.rect.right - cornersize, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x + cw * 0.5f + hcz;
 		p.y = center.y + ch * 0.5f + hcz;
-		draw(p, tex);
+		draw(p, tex, 0.0f, 1.0f, 1.0f, color);
 		// left bottom corner
 		tex = math::buildTexture(texture.rect.bottom - cornersize, texture.rect.left, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x - cw * 0.5f - hcz;
 		p.y = center.y - ch * 0.5f - hcz;
-		draw(p, tex);
+		draw(p, tex, 0.0f, 1.0f, 1.0f, color);
 		// right bottom corner
 		tex = math::buildTexture(texture.rect.bottom - cornersize, texture.rect.right - cornersize, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x + cw * 0.5f + hcz;
 		p.y = center.y - ch * 0.5f - hcz;
-		draw(p, tex);
+		draw(p, tex, 0.0f, 1.0f, 1.0f, color);
 		// top
 		tex = math::buildTexture(texture.rect.top, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x;
 		p.y = center.y + ch * 0.5f + hcz;
-		draw(p, tex, 0.0f, sx, 1.0f);
+		draw(p, tex, 0.0f, sx, 1.0f, color);
 		// bottom
 		tex = math::buildTexture(texture.rect.bottom - cornersize, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x;
 		p.y = center.y - ch * 0.5f - hcz;
-		draw(p, tex, 0.0f, sx, 1.0f);
+		draw(p, tex, 0.0f, sx, 1.0f, color);
 		// left
 		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.left, cornersize, texture.rect.height() - 2.0f *cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x - cw * 0.5f - hcz;
 		p.y = center.y;
-		draw(p, tex, 0.0f, 1.0f, sy);
+		draw(p, tex, 0.0f, 1.0f, sy, color);
 		// right
 		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.right - cornersize, cornersize, texture.rect.height() - 2.0f *cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x + cw * 0.5f + hcz;
 		p.y = center.y;
-		draw(p, tex, 0.0f, 1.0f, sy);
+		draw(p, tex, 0.0f, 1.0f, sy, color);
 		// center
 		tex = math::buildTexture(texture.rect.top + cornersize, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, texture.rect.height() - 2.0f * cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x;
 		p.y = center.y;
-		draw(p, tex, 0.0f, sx, sy);
+		draw(p, tex, 0.0f, sx, sy, color);
 
 	}
 
@@ -263,16 +263,16 @@ namespace sprites {
 		v2 p = center;
 		ds::Texture tex = ds::math::buildTexture(texture.rect.top, texture.rect.left, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x - cw * 0.5f - hcz;
-		draw(p, tex);
+		draw(p, tex, 0.0f, 1.0f, 1.0f, color);
 		// right
 		tex = ds::math::buildTexture(texture.rect.top, texture.rect.right - cornersize, cornersize, cornersize, texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x + cw * 0.5f + hcz;
-		draw(p, tex);
+		draw(p, tex, 0.0f, 1.0f, 1.0f, color);
 		// center
 		tex = ds::math::buildTexture(texture.rect.top, texture.rect.left + cornersize, texture.rect.width() - 2.0f * cornersize, texture.rect.height(), texture.textureSize.x, texture.textureSize.y);
 		p.x = center.x;
 		p.y = center.y;
-		draw(p, tex, 0.0f, sx, 1.0f);
+		draw(p, tex, 0.0f, sx, 1.0f, color);
 
 	}
 

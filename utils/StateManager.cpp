@@ -1,5 +1,6 @@
 #include "StateManager.h"
 #include "Log.h"
+#include "..\ui\IMGUI.h"
 
 namespace ds {
 
@@ -160,6 +161,33 @@ namespace ds {
 			_states[_current]->deactivate();
 		}
 		_current = -1;
+	}
+
+	const char* translateBehavior(StateBehavior behavior) {
+		switch (behavior) {
+			case SB_TRANSIENT: return "Transient"; break;
+			case SB_PERMANENT: return "Permanent"; break;
+			case SB_ONETIME: return "OneTime"; break;
+			default: return "Unknown"; break;
+		}
+	}
+
+	// -------------------------------------------------------
+	// showDialog
+	// -------------------------------------------------------
+	void StateManager::showDialog() {
+		gui::start(1, &_dialogPos);
+		gui::begin("State", &_dialogState);
+		if (_current != -1) {
+			gui::Label("Active", _states[_current]->getName());
+			gui::Value("TTL", _ttl);
+			gui::Value("Timer", _states[_current]->getTimer());
+			gui::Label("Behavior", translateBehavior(_states[_current]->getBehavior()));
+		}
+		else {
+			gui::Label("No active state");
+		}		
+		gui::end();
 	}
 
 }

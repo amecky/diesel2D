@@ -84,9 +84,7 @@ namespace ds {
 	class StateManager {
 
 	public:
-		StateManager(StateContext* ctx) : _current(-1) , _next(-1) {
-			_context = ctx;
-		}
+		StateManager(StateContext* ctx) : _current(-1), _next(-1), _context(ctx), _dialogState(1), _dialogPos(10, 720) {}
 		~StateManager();
 		template<class T>
 		State* add() {
@@ -109,6 +107,7 @@ namespace ds {
 		const EventStream& getEventStream() const {
 			return _events;
 		}
+		void showDialog();
 	private:
 		bool switchState();
 		int deactivateState(int index, bool checkOutcome = true);
@@ -120,5 +119,7 @@ namespace ds {
 		int _current;
 		int _next;
 		float _ttl;
+		int _dialogState;
+		v2 _dialogPos;
 	};
 }

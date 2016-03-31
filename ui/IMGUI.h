@@ -9,6 +9,7 @@ namespace gui {
 	enum GUISetting {
 		GS_LABELSIZE,
 		GS_LINE_HEIGHT,
+		GS_ALPHA,
 		GS_EOL
 	};
 	
@@ -174,6 +175,8 @@ namespace gui {
 	void Value(const char* label, const v3& v);
 
 	void Value(const char* label, const ds::Color& v);
+
+	void Value(const char* label, const char* text);
 
 	void Image(const char* label, const ds::Rect& r, int textureID, const ds::Color& clr = ds::Color::WHITE);
 
