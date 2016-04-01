@@ -696,6 +696,10 @@ namespace gui {
 		Label(label, "%g, %g, %g, %g", v.r, v.g, v.b, v.a);
 	}
 
+	void Value(const char* label, const char* text) {
+		Label(label, "%s", text);
+	}
+
 	// -------------------------------------------------------
 	// Text
 	// -------------------------------------------------------
@@ -1735,10 +1739,12 @@ namespace gui {
 		GUIWindow& win = guiContext->window;
 		// draw header box
 		v2 p = guiContext->startPosition;
+		ds::Color mainColor = ds::Color::WHITE;
+		mainColor.a = guiContext->settings[GS_ALPHA];
 		v2 startPos = guiContext->startPosition;
 		if (guiContext->useHeader) {			
 			p.x -= 10.0f;
-			ds::sprites::drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 18.0f);
+			ds::sprites::drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 18.0f, mainColor);
 			// draw text
 			p.y -= 8.0f;
 			p.x = startPos.x + 10.0f;
@@ -1766,42 +1772,45 @@ namespace gui {
 			if (guiContext->useHeader) {
 				p.y = startPos.y - BOX_HEIGHT * 0.5f;
 			}
-			ds::sprites::drawTiledXY(p, dim, guiContext->textures[ICN_PANEL_BACKGROUND], 10.0f);
+			ds::sprites::drawTiledXY(p, dim, guiContext->textures[ICN_PANEL_BACKGROUND], 10.0f, mainColor);
 
 
 			if (win.calls.size() > 0) {
 				for (int i = 0; i < win.calls.size(); ++i) {
 					const DrawCall& call = win.calls[i];
+					ds::Color clr = call.color;
+					clr.a = guiContext->settings[GS_ALPHA];
 					if (call.type == DCT_BOX) {
 						if (call.tilingDef == TD_NONE) {
-							ds::sprites::draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, 1.0f, 1.0f, call.color);
+							ds::sprites::draw(call.position, buildBoxTexture(call.size.x, call.size.y), 0.0f, 1.0f, 1.0f, clr);
 						}
 						else {
 							v2 cp = call.position;
 							float sx = dim.x - 20.0f;
 							cp.x += dim.x * 0.5f - 60.0f;
-							ds::sprites::draw(cp, buildBoxTexture(sx, call.size.y), 0.0f, 1.0f, 1.0f, call.color);
+							ds::sprites::draw(cp, buildBoxTexture(sx, call.size.y), 0.0f, 1.0f, 1.0f, clr);
 						}
 					}
 					else if (call.type == DCT_TEXT) {
+						clr.a = 1.0f;
 						const char* text = win.textBuffer.data + call.textIndex;
 						ds::sprites::drawText(guiContext->font, call.position.x, call.position.y, text, call.padding);
 					}
 					else if (call.type == DCT_IMAGE) {
 						if (call.tilingDef == TD_NONE) {
-							ds::sprites::draw(call.position, call.texture, 0.0f, call.size.x, call.size.y, call.color);
+							ds::sprites::draw(call.position, call.texture, 0.0f, call.size.x, call.size.y, clr);
 						}
 						else  if (call.tilingDef == TD_TILE_X) {
-							ds::sprites::drawTiledX(call.position, call.size.x,call.texture, call.additional, call.color);
+							ds::sprites::drawTiledX(call.position, call.size.x,call.texture, call.additional, clr);
 						}
 						else  if (call.tilingDef == TD_TILE_BOTH) {
-							ds::sprites::drawTiledXY(call.position, call.size, call.texture, call.additional, call.color);
+							ds::sprites::drawTiledXY(call.position, call.size, call.texture, call.additional, clr);
 						}
 					}
 					else if (call.type == DCT_HEADER) {
 						v2 p = call.position;
 						p.x -= 10.0f;
-						ds::sprites::drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 16.0f);
+						ds::sprites::drawTiledX(p, dim.x, guiContext->textures[ICN_HEADER_BOX], 16.0f,clr);
 						// draw text
 						p.y -= 8.0f;
 						p.x += 20.0f;
@@ -1811,7 +1820,7 @@ namespace gui {
 					else if (call.type == DCT_EXTERNAL_IMAGE) {
 						int current = ds::sprites::getCurrentTextureID();
 						ds::sprites::setTexture((int)call.additional);
-						ds::sprites::draw(call.position, call.texture, 0.0f, 1.0f, 1.0f, call.color);
+						ds::sprites::draw(call.position, call.texture, 0.0f, 1.0f, 1.0f, clr);
 						ds::sprites::setTexture(current);
 					}
 				}
@@ -1819,10 +1828,7 @@ namespace gui {
 			}
 		}
 		ds::sprites::setTexture(current);
-		guiContext->position.y -= 2.0f;
-		//if (!guiContext->editorMode) {
-			//guiContext->position.y -= 6.0f;
-		//}
+		guiContext->position.y -= 8.0f;
 	}
 
 	// -------------------------------------------
