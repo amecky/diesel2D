@@ -1595,11 +1595,82 @@ namespace gui {
 		guiContext->nextPosition();
 	}
 
+	// -------------------------------------------------------
+	// Diagram
+	// -------------------------------------------------------	
+	void DiagramInternal(const v2& pos, float* values, int num, float minValue, float maxValue, float step) {
+		v2 p = pos;
+		HashedId id = HashPointer(values);
+		float width = 200.0f;
+		float height = 100.0f;
+		p.y -= height / 2.0f;
+		float delta = (maxValue - minValue);
+		if (delta == 0.0f) {
+			delta = 1.0f;
+		}
+		float st = width / static_cast<float>(num - 1);
+		guiContext->addBox(p, v2(width, height), guiContext->colors[CLR_INPUT]);
+		p.x += width + BOX_HEIGHT;
+		p.y += height / 2.0f;
+		char buffer[16];
+		sprintf_s(buffer, 16, "%g", maxValue);
+		guiContext->addText(p, buffer);
+		p.y -= height;
+		sprintf_s(buffer, 16, "%g", minValue);
+		guiContext->addText(p, buffer);
+
+		for (int i = 0; i < num; ++i) {
+			float v = values[i];
+			if (v > maxValue) {
+				v = maxValue;
+			}
+			if (v < minValue) {
+				v = minValue;
+			}
+			float norm = (v - minValue) / delta;
+			float yp = norm * height;
+			p = pos;
+			p.y -= yp;
+			p.x += static_cast<float>(i)* st - 2.0f;
+			guiContext->addBox(p, v2(4, 4), guiContext->colors[CLR_SELECTED_LINE]);
+		}
+
+		step = delta / 10.0f;
+		int d = delta / step + 1;
+		for (int i = 0; i < d; ++i) {
+			p = pos;
+			float current = 1.0f - (step*i) / delta;
+			float yp = current * height;
+			p.y -= yp;
+			guiContext->addBox(p, v2(width, 1.0f), guiContext->colors[CLR_INPUT_EDIT]);
+		}
+		guiContext->nextPosition(height + guiContext->settings[GS_LINE_HEIGHT]);
+	}
+
+	void Diagram(float* values, int num, float minValue, float maxValue, float step) {
+		DiagramInternal(guiContext->position, values, num, minValue, maxValue, step);
+	}
+
+	void Diagram(const char* label, float* values, int num, float minValue, float maxValue, float step) {
+		v2 p = guiContext->position;
+		guiContext->addText(p, label);
+		p.x += guiContext->settings[GS_LABELSIZE];
+		DiagramInternal(p, values, num, minValue, maxValue, step);
+	}
+
+
+
+	// -------------------------------------------------------
+	// push settings
+	// -------------------------------------------------------	
 	void PushSetting(GUISetting setting, float value) {
 		guiContext->backup[setting] = guiContext->settings[setting];
 		guiContext->settings[setting] = value;
 	}
 
+	// -------------------------------------------------------
+	// pop settings
+	// -------------------------------------------------------	
 	void PopSetting(GUISetting setting) {
 		guiContext->settings[setting] = guiContext->backup[setting];
 	}
@@ -1665,6 +1736,9 @@ namespace gui {
 		guiContext->colors[CLR_PROGRESS]         = ds::Color(140,   7,   7, 255);
 		guiContext->colors[CLR_IMAGE_BACKGROUND] = ds::Color(  8,   8,   8, 255);
 
+		guiContext->settings[GS_LINE_HEIGHT] = 24.0f;
+		guiContext->settings[GS_ALPHA] = 1.0f;
+		guiContext->settings[GS_LABELSIZE] = 80.0f;
 		guiContext->editorMode = editorMode;
 		guiContext->ready = true;
 	}

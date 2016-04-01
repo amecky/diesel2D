@@ -160,6 +160,10 @@ namespace gui {
 
 	void Histogram(float* values, int num, float minValue, float maxValue, float step);
 
+	void Diagram(const char* label, float* values, int num, float minValue, float maxValue, float step);
+
+	void Diagram(float* values, int num, float minValue, float maxValue, float step);
+
 	void Separator();
 
 	void ProgressBar(const char* label,float fraction);
