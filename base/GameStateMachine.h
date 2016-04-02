@@ -43,6 +43,7 @@ public:
 	void onGUIButton(ds::DialogID dlgID, int button);
 	void connect(const char* firstStateName, int outcome, const char* secondStateName);
 	void showDialog();
+	void processEvents(const EventStream& events);
 	void init() {}
 	const char* getShortcut() const {
 		return "GSM";

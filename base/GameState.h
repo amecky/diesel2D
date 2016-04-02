@@ -40,6 +40,9 @@ public:
 	virtual int onKeyUp(WPARAM virtualKey) {
 		return 0;
 	}
+	virtual int processEvents(const EventStream& events) {
+		return 0;
+	}
 	IdString getHash() const {
 		return _hash;
 	}

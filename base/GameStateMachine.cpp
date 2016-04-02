@@ -49,6 +49,14 @@ namespace ds {
 		return find(name) != -1;
 	}
 
+	void GameStateMachine::processEvents(const EventStream& events) {
+		ZoneTracker z("GameStateMachine:processEvents");
+		if (_activeState != 0) {
+			int transition = _activeState->processEvents(events);
+			handleStateTransition(transition);
+		}
+	}
+
 	void GameStateMachine::update(float dt) {
 		ZoneTracker z("GameStateMachine:update");
 		if (_activeState != 0) {

@@ -32,6 +32,7 @@ namespace ds {
 // Constructing new BaseApp
 // -------------------------------------------------------	
 BaseApp::BaseApp() {
+	_numShortcuts = 0;
 	_bitmapFontEditor = 0;
 	_spriteTemplatesEditor = 0;
 	_particlesEditor = 0;
@@ -45,9 +46,6 @@ BaseApp::BaseApp() {
 	
 	//gFileWatcher = new FileWatcher();
 	m_Active = true;
-	m_GameTime.elapsed = 0.0f;
-	m_GameTime.elapsedMillis = 0;
-	m_GameTime.totalTime = 0;
 	m_CurTime = 0;
 	m_LastTime = 0;
 	m_Loading = true;
@@ -91,6 +89,7 @@ BaseApp::BaseApp() {
 		sprintf_s(_settings.reportingDirectory, "");
 	}
 	_reload_counter = 0;
+	_events = new EventStream();
 }
 
 // -------------------------------------------------------
@@ -98,6 +97,7 @@ BaseApp::BaseApp() {
 // -------------------------------------------------------
 BaseApp::~BaseApp() {
 	LOG << "Destructing all elements";
+	delete _events;
 	if (_gameServer != 0 ) {
 		_gameServer->close();
 		delete _gameServer;
@@ -310,6 +310,10 @@ void BaseApp::logKeyBindings() {
 	LOG << "F8  -> particle editor";
 	LOG << "F9  -> sprite template editor";
 	LOG << "F10 -> dialog editor";
+	LOG << "-----------> Shortcuts   <-----------";
+	for (int i = 0; i < _numShortcuts; ++i) {
+		LOG << "key: " << _shortcuts[i].key << " -> " << _shortcuts[i].label << " = " << _shortcuts[i].eventType;
+	}
 }
 
 void BaseApp::activateMonitoring(float threshold) {
@@ -387,11 +391,8 @@ void BaseApp::initTimer() {
 void BaseApp::updateTime() {
 	m_CurTime = GetTickCount();
 	//g_fElapsedTime = (float)((m_CurTime - m_LastTime) * 0.001);
-	g_fElapsedTime = 0.016f;
+	_elapsedTime = 0.016f;
 	m_LastTime = m_CurTime;
-	m_GameTime.elapsed = g_fElapsedTime;
-	m_GameTime.elapsedMillis = static_cast<uint32>(g_fElapsedTime * 1000.0f);
-	m_GameTime.totalTime += m_GameTime.elapsed;
 }
 
 void BaseApp::get(const HTTPRequest& request, HTTPResponse* response) {
@@ -405,6 +406,7 @@ void BaseApp::buildFrame() {
 	//gProfiler->reset();	
 	profiler::reset();
 	perf::reset();
+	_events->reset();
 	//PR_START("MAIN")
 	renderer::drawCounter().reset();
 #ifdef DEBUG
@@ -441,6 +443,7 @@ void BaseApp::buildFrame() {
 				if (m_KeyStates.ascii >= 0 && m_KeyStates.ascii < 256) {
 					_stateMachine->onChar(m_KeyStates.ascii);
 					OnChar(m_KeyStates.ascii, 0);
+					handleShortcuts(m_KeyStates.ascii);
 				}
 			}
 		}
@@ -468,21 +471,25 @@ void BaseApp::buildFrame() {
 	}
 	sprites::begin();
 	if ( m_Running ) {
-		_totalTime += m_GameTime.elapsed;
+		_totalTime += _elapsedTime;
 		ZoneTracker u1("UPDATE");
 		{
 			{
 				ZoneTracker u2("UPDATE:gui");
 				gui->updateMousePos(getMousePos());
-				gui->tick(m_GameTime.elapsed);
+				gui->tick(_elapsedTime);
 			}
 			{
 				ZoneTracker u3("Game::update");
-				update(m_GameTime.elapsed);
-				_stateMachine->update(m_GameTime.elapsed);
+				update(_elapsedTime);
+				_stateMachine->update(_elapsedTime);
 			}
-			world->tick(m_GameTime.elapsed);
-		}
+			world->tick(_elapsedTime);
+			if (_events->num() > 0) {
+				processEvents(*_events);
+				_stateMachine->processEvents(*_events);
+			}
+		}		
 	}
 	{
 		ZoneTracker r1("RENDER");
@@ -601,7 +608,15 @@ void BaseApp::sendOnChar(char ascii,unsigned int state) {
 	m_KeyStates.onChar = true;
 	//if (editor::isActive()) {
 	gui::sendKey(ascii);
-	//}
+	//}	
+}
+
+void BaseApp::handleShortcuts(char ascii) {
+	for (int i = 0; i < _numShortcuts; ++i) {
+		if (_shortcuts[i].key == ascii) {
+			_events->add(_shortcuts[i].eventType);
+		}
+	}
 }
 
 // -------------------------------------------------------
@@ -851,6 +866,15 @@ void BaseApp::saveReport() {
 	ReportWriter rw(filename);
 	world->save(rw);
 	gDefaultMemory->save(rw);
+}
+
+void BaseApp::addShortcut(const char* label, char key, uint32_t eventType) {
+	if (_numShortcuts < 64) {
+		Shortcut& s = _shortcuts[_numShortcuts++];
+		s.label = label;
+		s.key = key;
+		s.eventType = eventType;
+	}
 }
 
 }

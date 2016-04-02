@@ -8,6 +8,7 @@
 #include "..\editor\BitmapFontsDialog.h"
 #include "..\utils\Profiler.h"
 #include "..\net\GameServer.h"
+#include "EventStream.h"
 
 namespace ds {
 
@@ -22,46 +23,44 @@ class BitmapFontsDialog;
 class ParticlesEditState;
 class DialogEditorState;
 
-
-
-struct GameTime {
-	float elapsed;
-	uint32 elapsedMillis;
-	float totalTime;
-};
-
 class BaseApp : public HTTPCallback , public CrashReporter {
 
-struct DebugInfo {
-	bool showProfiler;
-	bool showDrawCounter;
-	bool printProfiler;
-	bool debugRenderer;
-	bool performanceOverlay;
-	bool showEditor;
-	int profilerTicks;
-	int snapshotCount;
-	bool monitoring;
-	float treshold;
-	bool showConsole;
-};
-	
-struct KeyStates {
-	int ascii;
-	bool onChar;
-	WPARAM keyPressed;
-	bool keyDown;
-	WPARAM keyReleased;
-	bool keyUp;
-};
+	struct Shortcut {
+		const char* label;
+		char key;
+		uint32_t eventType;
+	};
 
-struct ButtonState {
-	int button;
-	int x;
-	int y;
-	bool down;
-	bool processed;
-};
+	struct DebugInfo {
+		bool showProfiler;
+		bool showDrawCounter;
+		bool printProfiler;
+		bool debugRenderer;
+		bool performanceOverlay;
+		bool showEditor;
+		int profilerTicks;
+		int snapshotCount;
+		bool monitoring;
+		float treshold;
+		bool showConsole;
+	};
+	
+	struct KeyStates {
+		int ascii;
+		bool onChar;
+		WPARAM keyPressed;
+		bool keyDown;
+		WPARAM keyReleased;
+		bool keyUp;
+	};
+
+	struct ButtonState {
+		int button;
+		int x;
+		int y;
+		bool down;
+		bool processed;
+	};
 
 public:
 	BaseApp();
@@ -74,6 +73,7 @@ public:
 	virtual void update(float dt) {}
 	virtual void draw() {}
 	virtual void handleCollisions() {}
+	virtual void processEvents(const EventStream& events) {}
 	void setInstance(const HINSTANCE hInst){ 
 		hInstance = hInst; 
 	}
@@ -116,6 +116,9 @@ public:
 	void connectGameStates(const char* firstStateName, int outcome, const char* secondStateName);
 	void get(const HTTPRequest& request, HTTPResponse* response);
 	void saveReport();
+
+	void addShortcut(const char* label, char key, uint32_t eventType);
+
 protected:
 	void activateMonitoring(float threshold);
 	void loadSprites();
@@ -136,6 +139,7 @@ protected:
 	GameConsole* console;
 	//AssetEditorManager* assetEditors;
 private:
+	void handleShortcuts(char ascii);
 	void saveHTMLProfilingReport();
 	void loadSettings();
 	void showProfilerSnapshot(v2* position);
@@ -147,13 +151,12 @@ private:
 	HWND m_hWnd;
 	bool m_Active;
 	WINDOWPLACEMENT m_wp;
-	GameTime m_GameTime;
 	float _totalTime;
 	Settings _settings;
 	Vector2f m_MousePos;
 	Vector2f m_TwistedMousePos;
 	DWORD m_CurTime;
-	float g_fElapsedTime;
+	float _elapsedTime;
 	DWORD m_LastTime;
 	bool m_Loading;
 	KeyStates m_KeyStates;
@@ -165,12 +168,13 @@ private:
 	v2 _perfHUDPos;
 	ProfileSnapshot _snapshots[64];
 	bool _prepared;
-
+	EventStream* _events;
 	BitmapFontsDialog* _bitmapFontEditor;
 	SpriteTemplatesEditor* _spriteTemplatesEditor;
 	ParticlesEditState* _particlesEditor;
 	DialogEditorState* _dialogEditor;
-
+	Shortcut _shortcuts[64];
+	int _numShortcuts;
 	int _reload_counter;
 
 	GameServer* _gameServer;
