@@ -1334,6 +1334,22 @@ namespace gui {
 		guiContext->nextPosition();
 	}
 
+	void ActionBar(const ds::Array<const char*>& entries, int* selected) {
+		HashedId id = HashPointer(&entries);
+		*selected = -1;
+		int num = entries.size();
+		v2 p = guiContext->position;
+		for (int i = 0; i < num; ++i) {
+			guiContext->addText(p, entries[i]);
+			v2 textSize = getTextSize(entries[i]) + v2(10, 6);
+			if (isBoxSelected(id, p, v2(textSize.x, BOX_HEIGHT), false)) {
+				*selected = i;
+			}
+			p.x += getTextSize(entries[i]).x + 20.0f;
+		}
+		guiContext->nextPosition();
+	}
+
 	// -------------------------------------------------------
 	// Progress bar
 	// -------------------------------------------------------

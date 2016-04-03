@@ -164,6 +164,8 @@ namespace gui {
 
 	void Diagram(float* values, int num, float minValue, float maxValue, float step);
 
+	void ActionBar(const ds::Array<const char*>& entries, int* selected);
+
 	void Separator();
 
 	void ProgressBar(const char* label,float fraction);
