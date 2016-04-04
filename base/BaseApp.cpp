@@ -58,7 +58,7 @@ BaseApp::BaseApp() {
 	m_DebugInfo.profilerTicks = 0;
 	m_DebugInfo.monitoring = false;
 	m_DebugInfo.showConsole = false;
-	m_DebugInfo.showActionBar = true;
+	m_DebugInfo.showActionBar = false;
 	m_ButtonState.processed = true;
 	m_MousePos = Vector2f(0,0);
 	rand.seed(GetTickCount());
@@ -309,9 +309,8 @@ void BaseApp::logKeyBindings() {
 	LOG << "F5  -> toggle performance overlay";
 	LOG << "F6  -> toggle editor";
 	LOG << "F7  -> debug renderer";
-	LOG << "F8  -> particle editor";
-	LOG << "F9  -> sprite template editor";
-	LOG << "F10 -> dialog editor";
+	LOG << "F8  -> toggle shortcuts action bar";
+	LOG << "F9  -> toggle console";
 	LOG << "-----------> Shortcuts   <-----------";
 	_shortcuts->debug();
 }
@@ -650,15 +649,9 @@ void BaseApp::sendKeyDown(WPARAM virtualKey) {
 		m_DebugInfo.debugRenderer = true;
 	}
 	else if (virtualKey == VK_F8) {
-		_stateMachine->activate("ParticlesEditState");
+		m_DebugInfo.showActionBar = !m_DebugInfo.showActionBar;
 	}
 	else if (virtualKey == VK_F9) {
-		_stateMachine->activate("SpriteTemplatesState");
-	}	
-	else if (virtualKey == VK_F11) {
-		_stateMachine->activate("DialogEditorState");
-	}
-	else if (virtualKey == VK_F12) {
 		m_DebugInfo.showConsole = !m_DebugInfo.showConsole;
 	}
 #endif

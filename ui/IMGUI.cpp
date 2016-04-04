@@ -185,7 +185,7 @@ namespace gui {
 			calls.push_back(call);
 		}
 
-		void addText(const v2& position,const char* text, const v2& size) {
+		void addText(const v2& position,const char* text, const v2& size, float textOffset = TEXT_OFFSET) {
 			DrawCall call;
 			call.type = DCT_TEXT;
 			call.color = ds::Color::WHITE;
@@ -193,7 +193,7 @@ namespace gui {
 			call.textIndex = textBuffer.size;
 			textBuffer.append(text);
 			call.position = position;
-			call.position.y -= TEXT_OFFSET;
+			call.position.y -= textOffset;
 			call.padding = CHAR_PADDING;
 			call.tilingDef = TD_NONE;
 			calls.push_back(call);
@@ -367,8 +367,8 @@ namespace gui {
 			window.addHeader(position, text, size);
 		}
 
-		void addText(const v2& position, const char* text, const v2& size) {
-			window.addText(position, text, size);
+		void addText(const v2& position, const char* text, const v2& size, float textOffset = TEXT_OFFSET) {
+			window.addText(position, text, size, textOffset);
 		}
 
 		void nextPosition() {
@@ -574,12 +574,8 @@ namespace gui {
 				guiContext->startPosition = *startPos;
 				guiContext->position = *startPos;
 			}
-		}
-		if (forcePosition) {
-			guiContext->startPosition = *startPos;
-			guiContext->position = *startPos;
-		}
-		if (!guiContext->editorMode) {
+		}		
+		if (!forcePosition) {
 			v2 dragBoxPos = *startPos;
 			dragBoxPos.x += 100.0f;
 			if (guiContext->dragging == -1 && guiContext->buttonPressed && isCursorInside(dragBoxPos, v2(200.0f, BOX_HEIGHT))) {
@@ -592,6 +588,10 @@ namespace gui {
 				*startPos = correctPos;
 			}
 		}
+		if (forcePosition) {
+			guiContext->startPosition = *startPos;
+			guiContext->position = *startPos;
+		}
 	}
 
 	// -------------------------------------------------------
@@ -601,6 +601,7 @@ namespace gui {
 		guiContext->reset();
 		guiContext->useHeader = false;
 		guiContext->visible = true;
+		guiContext->dragging = -1;
 		guiContext->nextPosition();
 	}
 
@@ -1343,15 +1344,21 @@ namespace gui {
 		int selected = -1;
 		int num = entries.size();
 		v2 p = guiContext->position;
+		p.x += 10.0f;
 		for (int i = 0; i < num; ++i) {
-			guiContext->addText(p, entries[i]);
+			v2 size = getTextSize(entries[i]);
+			guiContext->addText(p, entries[i], size, -2.0f);
 			v2 textSize = getTextSize(entries[i]) + v2(10, 6);
+			p.y += 8.0f;
 			if (isBoxSelected(id, p, v2(textSize.x, BOX_HEIGHT), false)) {
 				selected = i;
 			}
-			p.x += getTextSize(entries[i]).x + 20.0f;
+			p.x += getTextSize(entries[i]).x + 6.0f;
+			guiContext->addBox(p, v2(2, 26.0f), guiContext->colors[CLR_INPUT]);
+			p.x += 6.0f;
+			p.y -= 8.0f;
 		}
-		guiContext->nextPosition();
+		guiContext->nextPosition(BOX_HEIGHT);
 		return selected;
 	}
 
