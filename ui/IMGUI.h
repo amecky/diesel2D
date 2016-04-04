@@ -98,7 +98,7 @@ namespace gui {
 
 	void switchEditorMode(bool editorMode);
 
-	void start(int id,v2* startPos);
+	void start(int id,v2* startPos,bool forcePosition = false);
 
 	void begin();
 
@@ -164,7 +164,7 @@ namespace gui {
 
 	void Diagram(float* values, int num, float minValue, float maxValue, float step);
 
-	void ActionBar(const ds::Array<const char*>& entries, int* selected);
+	int ActionBar(const ds::Array<const char*>& entries);
 
 	void Separator();
 

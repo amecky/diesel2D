@@ -23,7 +23,7 @@
 #include "..\editor\AssetEditor.h"
 #include "..\utils\GlobalStringBuffer.h"
 #include "..\net\GameServer.h"
-
+#include "ShortcutsHandler.h"
 
 namespace ds {
 
@@ -32,7 +32,6 @@ namespace ds {
 // Constructing new BaseApp
 // -------------------------------------------------------	
 BaseApp::BaseApp() {
-	_numShortcuts = 0;
 	_bitmapFontEditor = 0;
 	_spriteTemplatesEditor = 0;
 	_particlesEditor = 0;
@@ -59,6 +58,7 @@ BaseApp::BaseApp() {
 	m_DebugInfo.profilerTicks = 0;
 	m_DebugInfo.monitoring = false;
 	m_DebugInfo.showConsole = false;
+	m_DebugInfo.showActionBar = true;
 	m_ButtonState.processed = true;
 	m_MousePos = Vector2f(0,0);
 	rand.seed(GetTickCount());
@@ -90,6 +90,7 @@ BaseApp::BaseApp() {
 	}
 	_reload_counter = 0;
 	_events = new EventStream();
+	_shortcuts = new ShortcutsHandler(_events);
 }
 
 // -------------------------------------------------------
@@ -117,6 +118,7 @@ BaseApp::~BaseApp() {
 	if (_dialogEditor != 0) {
 		delete _dialogEditor;
 	}
+	delete _shortcuts;
 	delete console;
 	delete world;
 	delete gui;
@@ -311,9 +313,7 @@ void BaseApp::logKeyBindings() {
 	LOG << "F9  -> sprite template editor";
 	LOG << "F10 -> dialog editor";
 	LOG << "-----------> Shortcuts   <-----------";
-	for (int i = 0; i < _numShortcuts; ++i) {
-		LOG << "key: " << _shortcuts[i].key << " -> " << _shortcuts[i].label << " = " << _shortcuts[i].eventType;
-	}
+	_shortcuts->debug();
 }
 
 void BaseApp::activateMonitoring(float threshold) {
@@ -443,7 +443,7 @@ void BaseApp::buildFrame() {
 				if (m_KeyStates.ascii >= 0 && m_KeyStates.ascii < 256) {
 					_stateMachine->onChar(m_KeyStates.ascii);
 					OnChar(m_KeyStates.ascii, 0);
-					handleShortcuts(m_KeyStates.ascii);
+					_shortcuts->handleInput(m_KeyStates.ascii);
 				}
 			}
 		}
@@ -484,11 +484,7 @@ void BaseApp::buildFrame() {
 				update(_elapsedTime);
 				_stateMachine->update(_elapsedTime);
 			}
-			world->tick(_elapsedTime);
-			if (_events->num() > 0) {
-				processEvents(*_events);
-				_stateMachine->processEvents(*_events);
-			}
+			world->tick(_elapsedTime);			
 		}		
 	}
 	{
@@ -512,6 +508,9 @@ void BaseApp::buildFrame() {
 		}
 		if (m_DebugInfo.performanceOverlay) {
 			showPerformceOverlay(&_perfHUDPos);
+		}
+		if (m_DebugInfo.showActionBar) {
+			_shortcuts->showDialog();
 		}
 		if (m_DebugInfo.showConsole) {
 			console->show();
@@ -541,6 +540,13 @@ void BaseApp::buildFrame() {
 			}
 #endif
 
+		}
+		{
+			ZoneTracker r("EVENT_PROCESSING");
+			if (_events->num() > 0) {
+				processEvents(*_events);
+				_stateMachine->processEvents(*_events);
+			}
 		}
 		gui::endFrame();
 	}	
@@ -609,14 +615,6 @@ void BaseApp::sendOnChar(char ascii,unsigned int state) {
 	//if (editor::isActive()) {
 	gui::sendKey(ascii);
 	//}	
-}
-
-void BaseApp::handleShortcuts(char ascii) {
-	for (int i = 0; i < _numShortcuts; ++i) {
-		if (_shortcuts[i].key == ascii) {
-			_events->add(_shortcuts[i].eventType);
-		}
-	}
 }
 
 // -------------------------------------------------------
@@ -868,13 +866,8 @@ void BaseApp::saveReport() {
 	gDefaultMemory->save(rw);
 }
 
-void BaseApp::addShortcut(const char* label, char key, uint32_t eventType) {
-	if (_numShortcuts < 64) {
-		Shortcut& s = _shortcuts[_numShortcuts++];
-		s.label = label;
-		s.key = key;
-		s.eventType = eventType;
-	}
+void BaseApp::addShortcut(const char* label, char key, uint32_t eventType) {	
+	_shortcuts->add(label, key, eventType);
 }
 
 }

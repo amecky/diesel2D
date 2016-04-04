@@ -22,14 +22,9 @@ class GameConsole;
 class BitmapFontsDialog;
 class ParticlesEditState;
 class DialogEditorState;
+class ShortcutsHandler;
 
 class BaseApp : public HTTPCallback , public CrashReporter {
-
-	struct Shortcut {
-		const char* label;
-		char key;
-		uint32_t eventType;
-	};
 
 	struct DebugInfo {
 		bool showProfiler;
@@ -43,6 +38,7 @@ class BaseApp : public HTTPCallback , public CrashReporter {
 		bool monitoring;
 		float treshold;
 		bool showConsole;
+		bool showActionBar;
 	};
 	
 	struct KeyStates {
@@ -139,7 +135,6 @@ protected:
 	GameConsole* console;
 	//AssetEditorManager* assetEditors;
 private:
-	void handleShortcuts(char ascii);
 	void saveHTMLProfilingReport();
 	void loadSettings();
 	void showProfilerSnapshot(v2* position);
@@ -173,8 +168,7 @@ private:
 	SpriteTemplatesEditor* _spriteTemplatesEditor;
 	ParticlesEditState* _particlesEditor;
 	DialogEditorState* _dialogEditor;
-	Shortcut _shortcuts[64];
-	int _numShortcuts;
+	ShortcutsHandler* _shortcuts;
 	int _reload_counter;
 
 	GameServer* _gameServer;

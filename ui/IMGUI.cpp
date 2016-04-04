@@ -540,7 +540,7 @@ namespace gui {
 	// -------------------------------------------------------
 	// start
 	// -------------------------------------------------------
-	void start(int id,v2* startPos) {
+	void start(int id,v2* startPos,bool forcePosition) {
 		assert(guiContext->ready);		
 		if (!guiContext->started) {
 			guiContext->started = true;
@@ -574,6 +574,10 @@ namespace gui {
 				guiContext->startPosition = *startPos;
 				guiContext->position = *startPos;
 			}
+		}
+		if (forcePosition) {
+			guiContext->startPosition = *startPos;
+			guiContext->position = *startPos;
 		}
 		if (!guiContext->editorMode) {
 			v2 dragBoxPos = *startPos;
@@ -1334,20 +1338,21 @@ namespace gui {
 		guiContext->nextPosition();
 	}
 
-	void ActionBar(const ds::Array<const char*>& entries, int* selected) {
+	int ActionBar(const ds::Array<const char*>& entries) {
 		HashedId id = HashPointer(&entries);
-		*selected = -1;
+		int selected = -1;
 		int num = entries.size();
 		v2 p = guiContext->position;
 		for (int i = 0; i < num; ++i) {
 			guiContext->addText(p, entries[i]);
 			v2 textSize = getTextSize(entries[i]) + v2(10, 6);
 			if (isBoxSelected(id, p, v2(textSize.x, BOX_HEIGHT), false)) {
-				*selected = i;
+				selected = i;
 			}
 			p.x += getTextSize(entries[i]).x + 20.0f;
 		}
 		guiContext->nextPosition();
+		return selected;
 	}
 
 	// -------------------------------------------------------
