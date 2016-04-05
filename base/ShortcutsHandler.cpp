@@ -1,6 +1,7 @@
 #include "ShortcutsHandler.h"
 #include "..\utils\Log.h"
 #include "..\ui\IMGUI.h"
+#include "..\renderer\graphics.h"
 
 namespace ds {
 
@@ -36,6 +37,7 @@ namespace ds {
 	}
 
 	void ShortcutsHandler::showDialog() {
+		_position.y = renderer::getScreenHeight();
 		gui::start(1, &_position, true);
 		gui::begin();
 		int selection = gui::ActionBar(_model);
