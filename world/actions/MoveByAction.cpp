@@ -80,7 +80,7 @@ namespace ds {
 						if (p.y < m_BoundingRect.bottom || p.y > m_BoundingRect.top) {
 							_velocities[i].y *= -1.0f;
 						}
-						if (p.x < 0.0f || p.x > m_BoundingRect.right ) {
+						if (p.x < m_BoundingRect.left || p.x > m_BoundingRect.right ) {
 							_velocities[i].x *= -1.0f;
 						}
 						rotateTo(array, i);
