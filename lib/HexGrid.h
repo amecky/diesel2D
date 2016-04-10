@@ -1,5 +1,7 @@
 #pragma once
 #include "..\math\hex.h"
+#include "..\memory\DefaultAllocator.h"
+#include "..\utils\Log.h"
 
 namespace ds {
 
@@ -16,24 +18,24 @@ namespace ds {
 	public:
 		HexGrid() : _qMax(0), _rMax(0), _items(0), _layout(layout_pointy, v2(24.0f, 24.0f), v2(100, 130)) {}
 
-		~HexGrid() {
+		virtual ~HexGrid() {
 			if (_items != 0) {
-				delete[] _items;
+				DEALLOC(_items);
 			}
 		}
 
 		void resize(int qMax, int rMax, const T& fillValue) {
 			if (_items != 0) {
-				delete[] _items;
+				DEALLOC(_items);
 			}
 			_qMax = qMax;
 			_rMax = rMax;
-			_items = new HexGridNode[qMax * rMax];
+			_items = (HexGridNode*)ALLOC(sizeof(HexGridNode) * qMax * rMax);
 			fill(fillValue);
 		}
 
 		void fill(const T& fillValue) {
-			assert(_items != 0);
+			XASSERT(_items != 0, "%s","There are no items");
 			for (int r = 0; r < _rMax; r++) {
 				int q_offset = r >> 1;
 				for (int q = -q_offset; q < _qMax - q_offset; q++) {
@@ -66,9 +68,15 @@ namespace ds {
 			return _items[index].data;
 		}
 		
-		const T& get(const Hex& hex) const;
+		const T& get(const Hex& hex) const {
+			int idx = getIndex(hex);
+			return _items[idx].data;
+		}
 		
-		T& get(const Hex& hex);
+		T& get(const Hex& hex) {
+			int idx = getIndex(hex);
+			return _items[idx].data;
+		}
 
 		void set(const Hex& hex,const T& t) {
 			int q_offset = hex.r >> 1;
@@ -99,9 +107,21 @@ namespace ds {
 			return isValid(hex.q, hex.r);
 		}
 
-		int neighbors(const Hex& hex, Hex* ret);
+		int neighbors(const Hex& hex, Hex* ret) {
+			int cnt = 0;
+			for (int i = 0; i < 6; ++i) {
+				Hex n = hex_math::neighbor(hex, i);
+				if (isValid(n)) {
+					ret[cnt++] = n;
+				}
+			}
+			return cnt;
+		}
 		
-		Hex convertFromMousePos();
+		Hex convertFromMousePos() {
+			v2 mp = ds::renderer::getMousePosition();
+			return hex_math::hex_round(hex_math::pixel_to_hex(_layout, mp));
+		}
 
 		Hex convert(const v2& position) {
 			return hex_math::hex_round(hex_math::pixel_to_hex(_layout, position));

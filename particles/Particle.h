@@ -2,6 +2,7 @@
 #include "..\utils\Color.h"
 #include "..\math\math_types.h"
 #include "..\renderer\vertex_types.h"
+#include "..\memory\DefaultAllocator.h"
 
 namespace ds {
 
@@ -30,13 +31,14 @@ namespace ds {
 
 		~ParticleArray() {		
 			if ( buffer != 0 ) {
-				delete[] buffer;
+				//delete[] buffer;
+				DEALLOC(buffer);
 			}
 		}
 
 		void initialize(unsigned int maxParticles) {
 			int size = maxParticles * ( sizeof(v3) * 2 + sizeof(v3) + sizeof(v3) + sizeof(v2) * 2 + sizeof(float) * 2 + sizeof(v3) + sizeof(Color) + 4 * sizeof(PTCVertex));
-			buffer = new char[size];
+			buffer = (char*)ALLOC(size);//new char[size];
 			position = (v3*)(buffer);
 			velocity = (v3*)(position + maxParticles);
 			forces = (v3*)(velocity + maxParticles);
