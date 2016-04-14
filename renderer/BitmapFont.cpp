@@ -30,6 +30,7 @@ namespace ds {
 		cd.texureRect = Rect(static_cast<float>(startY), static_cast<float>(startX), static_cast<float>(width), static_cast<float>(charHeight));
 		*/
 		cd.texture = math::buildTexture(startY, startX, width, charHeight, textureSize, textureSize);
+		LOG << "C" << ascii << " : " << startY << "," << startX << "," << width << "," << charHeight;
 		definitions.append(cd);
 	}
 
